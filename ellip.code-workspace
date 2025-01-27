@@ -1,0 +1,26 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+        "psi-header.variables": [
+            [
+                "project",
+                "Ellip"
+            ],
+            [
+                "license",
+                "The 3-Clause BSD"
+            ],
+            [
+                "yearpublished",
+                "2025"
+            ]
+        ],
+        "files.associations": {
+            "limits": "cpp"
+        }
+    },
+}
