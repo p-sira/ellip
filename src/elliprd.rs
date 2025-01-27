@@ -28,9 +28,9 @@
 /// ```
 ///
 pub fn elliprd(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
-    let tiny = 2.0 * f64::MAX.powf(-2.0 / 3.0);
-    let big = 0.1 * RD_ERR_TOL * f64::MIN_POSITIVE.powf(-2.0 / 3.0);
-    if x.min(y) < 0.0 || (x + y).min(z) < tiny || x.max(y).max(z) > big {
+    let lolim = 2.0 * f64::MAX.powf(-2.0 / 3.0);
+    let uplim = (0.1 * RD_ERR_TOL / f64::MIN_POSITIVE).powf(2.0 / 3.0);
+    if x.min(y) < 0.0 || (x + y).min(z) < lolim || x.max(y).max(z) > uplim {
         return Err("elliprf: x and y must be non-negative, and at most one can be zero. z must be positive");
     }
     let mut xt = x;
@@ -79,7 +79,7 @@ pub fn elliprd(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
     Ok(ans)
 }
 
-const N_MAX_ITERATIONS: usize = 500; // Modified from Russell's 11
+const N_MAX_ITERATIONS: usize = 50; // Modified from Russell's 11
 const RD_ERR_TOL: f64 = 0.0015;
 const RD_C1: f64 = 3.0 / 14.0;
 const RD_C2: f64 = 1.0 / 6.0;

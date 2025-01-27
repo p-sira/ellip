@@ -16,6 +16,8 @@
 // * Carlson BC (1977) Elliptic Integrals of the First Kind, SIAM Journal on Mathematical
 //   Analysis, vol. 8, pp. 231-242.
 
+use crate::constants::{BIG, TINY};
+
 /// Compute symmetric elliptic integral of the first kind.
 /// ```text
 ///                     ∞                              
@@ -28,9 +30,7 @@
 /// ```
 ///
 pub fn elliprf(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
-    let tiny = 5.0 * f64::MIN_POSITIVE;
-    let big = 0.2 * f64::MAX;
-    if x.min(y).min(z) < 0.0 || (y + z).min(x + y).min(x + z) < tiny || x.max(y).max(z) > big {
+    if x.min(y).min(z) < 0.0 || (y + z).min(x + y).min(x + z) < TINY || x.max(y).max(z) > BIG {
         return Err("elliprf: x, y, and z must be non-negative, and at most one can be zero.");
     }
     let mut xt = x;

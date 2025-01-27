@@ -3,6 +3,5 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-// Ellip constants
-#[cfg(test)]
-pub const RTOL: f64 = 5.0 * f64::EPSILON;
+pub const TINY: f64 = 5.0 * f64::MIN_POSITIVE;
+pub const BIG: f64 = 0.2 * f64::MAX;

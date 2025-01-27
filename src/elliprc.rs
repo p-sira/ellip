@@ -15,6 +15,8 @@
 // * Press WH, Teukolsky SA, Vetterling WT, Flannery BP (2007) Numerical Recipes: The Art of
 //   Scientific Computing. Third Edition. Cambridge University Press. 1235p.
 
+use crate::constants::{BIG, TINY};
+
 /// Compute degenerate symmetric elliptic integral of RF.
 /// ```text
 ///                  ∞                  
@@ -27,14 +29,12 @@
 /// ```
 ///
 pub fn elliprc(x: f64, y: f64) -> Result<f64, &'static str> {
-    let tiny = 5.0 * f64::MIN_POSITIVE;
-    let big = 0.2 * f64::MAX;
-    let comp1 = 2.236 / tiny.sqrt();
-    let comp2 = (tiny * big).powi(2) / 25.0;
+    let comp1 = 2.236 / TINY.sqrt();
+    let comp2 = (TINY * BIG).powi(2) / 25.0;
     if x < 0.0
         || y == 0.0
-        || (x + y.abs()) < tiny
-        || (x + y.abs()) > big
+        || (x + y.abs()) < TINY
+        || (x + y.abs()) > BIG
         || (y < -comp1 && x > 0.0 && x < comp2)
     {
         return Err("elliprc: input must satisfy: x ≥ 0, y ≠ 0.");
