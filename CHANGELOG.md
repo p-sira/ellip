@@ -1,5 +1,9 @@
 # Changelog
 ## 0.1
+### 0.1.2
+**Bug Fixes**
+- Fix `ellipe` logic in negative m cases.
+
 ### 0.1.1
 **Others**
 - Update README to reflect the crate's functionalities.
