@@ -26,7 +26,7 @@
 ///                   0                                        
 /// where x ≥ 0, y ≥ 0, and at most one can be zero. z > 0.
 /// ```
-/// 
+///
 pub fn elliprd(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
     let tiny = 2.0 * f64::MAX.powf(-2.0 / 3.0);
     let big = 0.1 * RD_ERR_TOL * f64::MIN_POSITIVE.powf(-2.0 / 3.0);
