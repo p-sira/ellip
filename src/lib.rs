@@ -3,7 +3,7 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-//! # Ellip
+//! # ELLIP
 //! **Ellip** is a standalone elliptic integral functions for Rust.
 //!
 //! # Features
