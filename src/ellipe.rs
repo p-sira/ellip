@@ -92,17 +92,18 @@ pub fn ellipe(m: f64) -> Result<f64, &'static str> {
         return Err("ellipe: m must satisfy: m ≤ 1.");
     }
 
-    let mut x = 1.0 - m;
-
-    if x == 0.0 {
+    if m == 1.0 {
         return Ok(1.0);
     }
 
+    let mut m = m;
     let mut k = 1.0;
-    while x > 1.0 {
-        k *= x.sqrt();
-        x = 1.0 - 1.0 / x;
+    while m < 0.0 {
+        k *= (1.0 - m).sqrt();
+        m /= m - 1.0;
     }
+
+    let x: f64 = 1.0 - m;
 
     let p_val = polyeval(x, &ELLPE_P, 10);
     let log_x = x.ln();
