@@ -1,7 +1,66 @@
 /*
  * Ellip is licensed under The 3-Clause BSD, see LICENSE.
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
+ * This code is translated from SciPy C++ implementation to Rust.
  */
+
+/* Translated into C++ by SciPy developers in 2024.
+ * Original header with Copyright information appears below.
+ */
+
+/*                                                     ellik.c
+ *
+ *     Incomplete elliptic integral of the first kind
+ *
+ *
+ *
+ * SYNOPSIS:
+ *
+ * double phi, m, y, ellik();
+ *
+ * y = ellik( phi, m );
+ *
+ *
+ *
+ * DESCRIPTION:
+ *
+ * Approximates the integral
+ *
+ *
+ *
+ *                phi
+ *                 -
+ *                | |
+ *                |           dt
+ * F(phi | m) =   |    ------------------
+ *                |                   2
+ *              | |    sqrt( 1 - m sin t )
+ *               -
+ *                0
+ *
+ * of amplitude phi and modulus m, using the arithmetic -
+ * geometric mean algorithm.
+ *
+ *
+ *
+ *
+ * ACCURACY:
+ *
+ * Tested at random points with m in [0, 1] and phi as indicated.
+ *
+ *                      Relative error:
+ * arithmetic   domain     # trials      peak         rms
+ *    IEEE     -10,10       200000      7.4e-16     1.0e-16
+ *
+ *
+ */
+
+/*
+ * Cephes Math Library Release 2.0:  April, 1987
+ * Copyright 1984, 1987 by Stephen L. Moshier
+ * Direct inquiries to 30 Frost Street, Cambridge, MA 02140
+ */
+/* Copyright 2014, Eric W. Moore */
 
 use std::f64::consts::{FRAC_PI_2, PI};
 
