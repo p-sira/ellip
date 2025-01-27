@@ -4,7 +4,7 @@
  * This code is modified from Russell Lab to achieve precision on par with SciPy.
  */
 
-// Original copyright from Russell Lab
+// Original header from Russell Lab
 // Computes elliptic integral of the first kind using Carlson's formula
 //
 // Computes Rf(x,y,z) where x,y,z must be non-negative and at most one can be zero.
@@ -26,14 +26,12 @@
 ///                   0                              
 /// where x ≥ 0, y ≥ 0, z ≥ 0, and at most one can be zero.
 /// ```
-/// 
+///
 pub fn elliprf(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
     let tiny = 5.0 * f64::MIN_POSITIVE;
     let big = 0.2 * f64::MAX;
     if x.min(y).min(z) < 0.0 || (y + z).min(x + y).min(x + z) < tiny || x.max(y).max(z) > big {
-        return Err(
-            "elliprf: x, y, and z must be non-negative, and at most one can be zero.",
-        );
+        return Err("elliprf: x, y, and z must be non-negative, and at most one can be zero.");
     }
     let mut xt = x;
     let mut yt = y;
