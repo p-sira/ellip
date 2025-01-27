@@ -21,3 +21,19 @@ Elliptic integrals for Rust
 ```shell
 >> cargo add ellip
 ```
+
+## Features
+- Incomplete elliptic integrals
+    - `ellipf`: Incomplete elliptic integral of the first kind.
+    - `ellipeinc`: Incomplete elliptic integral of the second kind.
+- Complete elliptic integrals
+    - `ellipk`: Complete elliptic integral of the first kind.
+    - `ellipe`: Complete elliptic integral of the second kind.
+- Symmetric elliptic integrals
+    - `elliprf`: Symmetric elliptic integral of the first kind.
+    - `elliprd`: Degenerate elliptic integral of the third kind.
+    - `elliprc`: Degenerate elliptic integral of RF.
+
+---
+
+Learn more at [docs.rs](https://docs.rs/ellip).
