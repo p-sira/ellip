@@ -55,7 +55,7 @@ macro_rules! assert_close {
         let relative = ($actual - $expected).abs() / $expected;
         if  relative > $rtol {
             panic!(
-                "Assertion failed: expected = {}, got = {}, relative = {}, rtol = {}",
+                "Assertion failed: expected = {:?}, got = {:?}, relative = {:?}, rtol = {:?}",
                 $expected, $actual, relative, $rtol
             )
         }
