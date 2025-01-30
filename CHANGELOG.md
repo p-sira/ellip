@@ -1,5 +1,9 @@
 # Changelog
 ## 0.1
+### 0.2.0
+**New Features**
+- `cel`: Bulirsch's General complete elliptic integral
+
 ### 0.1.2
 **Bug Fixes**
 - Fix `ellipe` logic in negative m cases.
