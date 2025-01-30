@@ -49,6 +49,19 @@ macro_rules! compare_test_data {
     };
 }
 
+#[macro_export]
+macro_rules! assert_close {
+    ($expected: expr, $actual: expr, $rtol: expr) => {
+        let relative = ($actual - $expected).abs() / $expected;
+        if  relative > $rtol {
+            panic!(
+                "Assertion failed: expected = {}, got = {}, relative = {}, rtol = {}",
+                $expected, $actual, relative, $rtol
+            )
+        }
+    };
+}
+
 pub fn linspace(start: f64, end: f64, num: usize) -> Vec<f64> {
     if num < 2 {
         return vec![start];
