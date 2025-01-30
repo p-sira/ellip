@@ -7,13 +7,13 @@
 //! **Ellip** is a standalone elliptic integral functions for Rust.
 //!
 //! # Features
-//! ## Incomplete elliptic integrals
-//! - [fn@ellipf]: Incomplete elliptic integral of the first kind.
-//! - [fn@ellipeinc]: Incomplete elliptic integral of the second kind.
-//! ## Complete elliptic integrals
+//! ## Legendre's complete integrals
 //! - [fn@ellipk]: Complete elliptic integral of the first kind.
 //! - [fn@ellipe]: Complete elliptic integral of the second kind.
-//! ## Symmetric elliptic integrals
+//! ## Legendre's incomplete integrals
+//! - [fn@ellipf]: Incomplete elliptic integral of the first kind.
+//! - [fn@ellipeinc]: Incomplete elliptic integral of the second kind.
+//! ## Carlson's symmetric integrals
 //! - [fn@elliprf]: Symmetric elliptic integral of the first kind.
 //! - [fn@elliprd]: Degenerate elliptic integral of the third kind.
 //! - [fn@elliprc]: Degenerate elliptic integral of RF.
@@ -26,7 +26,10 @@
 //! - [Scipy](https://github.com/scipy/scipy/)
 //! - [Cephes Math Library](https://netlib.org/cephes/)
 //! - [Russell Lab](https://github.com/cpmech/russell)
-//!
+//! 
+//! Primary mathematical reference is [Chapter 19](https://dlmf.nist.gov/19) of the NIST Digital Library of Mathematical Functions,
+//! authored by [Carlson](https://dlmf.nist.gov/about/bio/BCCarlson), the legendary mathematician who
+//! discovered the symmetric integrals!
 
 mod polyeval;
 use polyeval::*;
