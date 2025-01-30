@@ -28,27 +28,28 @@
 //! - [Scipy](https://github.com/scipy/scipy/)
 //! - [Cephes Math Library](https://netlib.org/cephes/)
 //! - [Russell Lab](https://github.com/cpmech/russell)
-//! 
+//!
 //! Primary mathematical reference is [Chapter 19](https://dlmf.nist.gov/19) of the NIST Digital Library of Mathematical Functions,
 //! authored by [Carlson](https://dlmf.nist.gov/about/bio/BCCarlson), the legendary mathematician who
 //! discovered the symmetric integrals!
 
-mod polyeval;
-use polyeval::*;
+// Legendre's complete integrals
+mod ellipk;
+pub use ellipk::ellipk;
+mod ellipe;
+pub use ellipe::ellipe;
 
+// Legendre's incomplete integrals
 mod ellipf;
 pub use ellipf::ellipf;
 mod ellipeinc;
 pub use ellipeinc::ellipeinc;
 
-mod ellipe;
-pub use ellipe::ellipe;
-mod ellipk;
-pub use ellipk::ellipk;
-
+// Bulirsch's integrals
 mod cel;
 pub use cel::cel;
 
+// Carlson's symmetric integrals
 mod elliprf;
 pub use elliprf::elliprf;
 mod elliprd;
@@ -56,6 +57,9 @@ pub use elliprd::elliprd;
 mod elliprc;
 pub use elliprc::elliprc;
 
+// Utilities
+mod polyeval;
+use polyeval::*;
 mod constants;
 
 #[cfg(test)]
