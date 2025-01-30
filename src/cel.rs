@@ -12,7 +12,7 @@ use std::f64::consts::PI;
 ///                      ⌠                   2              2
 ///                      ⎮            a ⋅ cos  (ϑ) + b ⋅ sin  (ϑ)               
 /// cel(kc, p, a, b)  =  ⎮ ─────────────────────────────────────────────────────── ⋅ dϑ
-///                      ⎮                              _________________________ 
+///                      ⎮                              _________________________
 ///                      ⎮    2              2         ╱   2         2      2       
 ///                      ⌡ cos  (ϑ) + p ⋅ sin  (ϑ) ⋅ ╲╱ cos  (ϑ) + kc  ⋅ sin  (ϑ)    
 ///                     0                                                   
@@ -22,7 +22,7 @@ pub fn cel(kc: f64, p: f64, a: f64, b: f64) -> Result<f64, &'static str> {
     if kc == 0.0 {
         return Err("cel: kc cannot be zero.");
     }
-    
+
     if p == 0.0 {
         return Err("cel: p cannot be zero.");
     }

@@ -53,7 +53,7 @@ macro_rules! compare_test_data {
 macro_rules! assert_close {
     ($expected: expr, $actual: expr, $rtol: expr) => {
         let relative = ($actual - $expected).abs() / $expected;
-        if  relative > $rtol {
+        if relative > $rtol {
             panic!(
                 "Assertion failed: expected = {:?}, got = {:?}, relative = {:?}, rtol = {:?}",
                 $expected, $actual, relative, $rtol
