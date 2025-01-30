@@ -29,9 +29,12 @@
 //! - [Cephes Math Library](https://netlib.org/cephes/)
 //! - [Russell Lab](https://github.com/cpmech/russell)
 //!
-//! Primary mathematical reference is [Chapter 19](https://dlmf.nist.gov/19) of the NIST Digital Library of Mathematical Functions,
-//! authored by [Carlson](https://dlmf.nist.gov/about/bio/BCCarlson), the legendary mathematician who
-//! discovered the symmetric integrals!
+//! Primary mathematical reference is [Chapter 19](https://dlmf.nist.gov/19) of the NIST Digital Library 
+//! of Mathematical Functions, authored by [Carlson](https://dlmf.nist.gov/about/bio/BCCarlson), the legendary
+//! mathematician who discovered the symmetric integrals!
+//! 
+//! Unicode-style mathematical notation are created using an awesome tool called 
+//! [Diagon](https://github.com/ArthurSonzogni/Diagon).
 
 // Legendre's complete integrals
 mod ellipk;
