@@ -13,6 +13,8 @@
 //! ## Legendre's incomplete integrals
 //! - [fn@ellipf]: Incomplete elliptic integral of the first kind.
 //! - [fn@ellipeinc]: Incomplete elliptic integral of the second kind.
+//! ## Bulirsch's integrals
+//! - [fn@cel]: General complete elliptic integral
 //! ## Carlson's symmetric integrals
 //! - [fn@elliprf]: Symmetric elliptic integral of the first kind.
 //! - [fn@elliprd]: Degenerate elliptic integral of the third kind.
@@ -43,6 +45,9 @@ mod ellipe;
 pub use ellipe::ellipe;
 mod ellipk;
 pub use ellipk::ellipk;
+
+mod cel;
+pub use cel::cel;
 
 mod elliprf;
 pub use elliprf::elliprf;
