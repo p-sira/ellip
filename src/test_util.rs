@@ -48,3 +48,18 @@ macro_rules! compare_test_data {
         }
     };
 }
+
+pub fn linspace(start: f64, end: f64, num: usize) -> Vec<f64> {
+    if num < 2 {
+        return vec![start];
+    }
+
+    let step = (end - start) / (num - 1) as f64;
+    let mut result = Vec::with_capacity(num);
+
+    for i in 0..num {
+        result.push(start + step * i as f64);
+    }
+
+    result
+}
