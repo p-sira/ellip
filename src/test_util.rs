@@ -7,46 +7,52 @@ pub const RTOL: f64 = 5.0 * f64::EPSILON;
 
 #[macro_export]
 macro_rules! compare_test_data {
-    ($file_path: expr, $func: expr, $rtol: expr) => {
-        use std::fs::File;
-        use std::io::{self, BufRead};
-        use std::path::Path;
+    ($file_path:expr, $func:expr, $rtol:expr) => {
+        compare_test_data!($file_path, $func, $rtol, 0.0)
+    };
+    ($file_path:expr, $func:expr, $rtol:expr, $atol:expr) => {
+        {
+            use std::fs::File;
+            use std::io::{self, BufRead};
+            use std::path::Path;
 
-        // Check if the file exists
-        let path = Path::new($file_path);
-        if !path.exists() {
-            panic!("Test data not found: {}", $file_path);
-        }
+            let path = Path::new($file_path);
+            if !path.exists() {
+                panic!("Test data not found: {}", $file_path);
+            }
 
-        let file = File::open($file_path).expect("Cannot open file");
-        let reader = io::BufReader::new(file);
+            let file = File::open($file_path).expect("Cannot open file");
+            let reader = io::BufReader::new(file);
 
-        for (line_number, line) in reader.lines().enumerate() {
-            let line = line.expect("Cannot read line");
+            for (line_number, line) in reader.lines().enumerate() {
+                let line = line.expect("Cannot read line");
 
-            let parts: Vec<&str> = line.split_whitespace().collect();
-            let inputs: Vec<f64> = parts[..parts.len() - 1]
-                .iter()
-                .map(|&v| v.parse().expect("Cannot parse input(s) as a number"))
-                .collect();
+                let parts: Vec<&str> = line.split_whitespace().collect();
+                let inputs: Vec<f64> = parts[..parts.len() - 1]
+                    .iter()
+                    .map(|&v| v.parse().expect("Cannot parse input(s) as a number"))
+                    .collect();
 
-            let expected: f64 = parts[parts.len() - 1]
-                .parse()
-                .expect("Cannot parse expected value as a number");
+                let expected: f64 = parts[parts.len() - 1]
+                    .parse()
+                    .expect("Cannot parse expected value as a number");
 
-            let result = $func(&inputs);
-            // Formula for rtol
-            let relative = (result - expected).abs() / result;
-            if relative > $rtol {
-                panic!(
-                    "Test failed on line {}: input = {:?}, expected = {:?}, got = {:?}, relative = {:?}, rtol = {:?}",
-                    line_number + 1,
-                    inputs,
-                    expected,
-                    result,
-                    relative,
-                    $rtol,
-                );
+                let result = $func(&inputs);
+                let error = (result - expected).abs();
+                let tol = $atol + $rtol * expected.abs();
+                if error > tol {
+                    panic!(
+                        "Test failed on line {}: input = {:?}, expected = {:?}, got = {:?} \n error = {:?}, tol = {:?}, rtol = {:?}, atol = {:?}",
+                        line_number + 1,
+                        inputs,
+                        expected,
+                        result,
+                        error,
+                        tol,
+                        $rtol,
+                        $atol,
+                    );
+                }
             }
         }
     };
