@@ -70,7 +70,7 @@ use crate::{ellipe, ellipk};
 ///            0
 /// where m ≤ 1
 /// ```
-/// 
+///
 /// Note that some mathematical references use the parameter k for the function,
 /// where k² = m.
 pub fn ellipeinc(phi: f64, m: f64) -> Result<f64, &'static str> {

@@ -77,7 +77,7 @@ use crate::ellipk;
 ///            0
 /// where m ≤ 1
 /// ```
-/// 
+///
 /// Note that some mathematical references use the parameter k for the function,
 /// where k² = m.
 pub fn ellipf(phi: f64, m: f64) -> Result<f64, &'static str> {
