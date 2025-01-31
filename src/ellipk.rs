@@ -88,7 +88,7 @@ use crate::polyeval;
 /// where k² = m.
 pub fn ellipk(m: f64) -> Result<f64, &'static str> {
     if m > 1.0 {
-        return Err("ellipk: m must satisfy: m ≤ 1.");
+        return Err("ellipk: m must be less than 1.");
     }
 
     let mut x = 1.0 - m;

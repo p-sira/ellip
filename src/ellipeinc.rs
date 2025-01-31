@@ -75,7 +75,7 @@ use crate::{ellipe, ellipk};
 /// where k² = m.
 pub fn ellipeinc(phi: f64, m: f64) -> Result<f64, &'static str> {
     if m > 1.0 {
-        return Err("ellipeinc: m must satisfy: m ≤ 1.");
+        return Err("ellipeinc: m must be less than 1.");
     }
 
     if phi.is_infinite() {
