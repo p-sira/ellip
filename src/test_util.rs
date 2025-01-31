@@ -36,13 +36,16 @@ macro_rules! compare_test_data {
 
             let result = $func(&inputs);
             // Formula for rtol
-            if (result - expected).abs() > $rtol * expected {
+            let relative = (result - expected).abs() / result;
+            if relative > $rtol {
                 panic!(
-                    "Test failed on line {}: input = {:?}, expected = {}, got = {}",
+                    "Test failed on line {}: input = {:?}, expected = {:?}, got = {:?}, relative = {:?}, rtol = {:?}",
                     line_number + 1,
                     inputs,
                     expected,
-                    result
+                    result,
+                    relative,
+                    $rtol,
                 );
             }
         }
