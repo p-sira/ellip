@@ -244,7 +244,7 @@ mod test {
         compare_test_data!(
             "./tests/data/boost/ellint_rj_data.txt",
             elliprj_wrapper,
-            3e-8, // Relatively low precision
+            2.5e-8, // Relatively low precision
             5e-25
         );
     }
