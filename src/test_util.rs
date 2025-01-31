@@ -24,6 +24,10 @@ macro_rules! compare_test_data {
             let file = File::open($file_path).expect("Cannot open file");
             let reader = io::BufReader::new(file);
 
+            let mut test_fail = false;
+            let mut worst_line = 0;
+            let mut worst_params: Vec<f64> = Vec::new();
+            let mut worst_errors = [0.0; 5];
             for (line_number, line) in reader.lines().enumerate() {
                 let line = line.expect("Cannot read line");
 
@@ -42,8 +46,14 @@ macro_rules! compare_test_data {
                 let tol = $atol + $rtol * expected.abs();
                 if error > tol {
                     let rel = error / expected.abs();
-                    panic!(
-                        "Test failed on line {}: input = {:?}, expected = {:?}, got = {:?} \n error = {:?}, rel = {:?}, abs = {:?}, rtol = {:?}, atol = {:?}",
+                    test_fail = true;
+                    if rel > worst_errors[1] {
+                        worst_line = line_number + 1;
+                        worst_errors = [error, rel, tol, expected, result];
+                        worst_params = inputs.clone();
+                    }
+                    eprintln!(
+                        "Test failed on line {}: input = {:?}, expected = {:?}, got = {:?} \n error = {:?}, rel = {:?}, abs = {:?}, rtol = {:?}, atol = {:?}\n",
                         line_number + 1,
                         inputs,
                         expected,
@@ -55,6 +65,21 @@ macro_rules! compare_test_data {
                         $atol,
                     );
                 }
+            }
+
+            if test_fail {
+                panic!(
+                    "Worst on line {}: input = {:?}, expected = {:?}, got = {:?} \n error = {:?}, rel = {:?}, abs = {:?}, rtol = {:?}, atol = {:?}",
+                    worst_line,
+                    worst_params,
+                    worst_errors[3],
+                    worst_errors[4],
+                    worst_errors[0],
+                    worst_errors[1],
+                    worst_errors[2],
+                    $rtol,
+                    $atol,
+                );
             }
         }
     };
