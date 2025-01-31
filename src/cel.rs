@@ -6,15 +6,13 @@
 use std::f64::consts::PI;
 
 // Reference: Derby and Olbert, “Cylindrical Magnets and Ideal Solenoids.”
-/// Compute complete elliptic integral in Bulirsch form.
+/// Compute [complete elliptic integral](https://dlmf.nist.gov/19.2#iii) in Bulirsch form.
 /// ```text
 ///                       π/2                                                   
-///                      ⌠                   2              2
-///                      ⎮            a ⋅ cos  (ϑ) + b ⋅ sin  (ϑ)               
-/// cel(kc, p, a, b)  =  ⎮ ─────────────────────────────────────────────────────── ⋅ dϑ
-///                      ⎮                              _________________________
-///                      ⎮    2              2         ╱   2         2      2       
-///                      ⌡ cos  (ϑ) + p ⋅ sin  (ϑ) ⋅ ╲╱ cos  (ϑ) + kc  ⋅ sin  (ϑ)    
+///                      ⌠            a ⋅ cos²(ϑ) + b ⋅ sin²(ϑ)               
+/// cel(kc, p, a, b)  =  ⎮ ────────────────────────────────────────────────── ⋅ dϑ
+///                      ⎮                           _______________________
+///                      ⌡ cos²(ϑ) + p ⋅ sin²(ϑ) ⋅ ╲╱ cos²(ϑ) + kc²⋅ sin²(ϑ)    
 ///                     0                                                   
 /// where kc ≠ 0, p ≠ 0
 /// ```
