@@ -18,7 +18,7 @@
 
 use crate::constants::{BIG, TINY};
 
-/// Compute symmetric elliptic integral of the first kind.
+/// Compute [symmetric elliptic integral of the first kind](https://dlmf.nist.gov/19.16.E1).
 /// ```text
 ///                     ∞                              
 ///                 1  ⌠              dt              

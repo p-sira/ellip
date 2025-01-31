@@ -16,7 +16,7 @@
 // * Carlson BC (1977) Elliptic Integrals of the First Kind, SIAM Journal on Mathematical
 //   Analysis, vol. 8, pp. 231-242.
 
-/// Compute degenerate symmetric elliptic integral of the third kind.
+/// Compute [degenerate symmetric elliptic integral of the third kind](https://dlmf.nist.gov/19.16.E5).
 /// ```text
 ///                     ∞                                        
 ///                 3  ⌠                   dt                   
