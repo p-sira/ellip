@@ -21,10 +21,10 @@ use crate::constants::{BIG, TINY};
 /// Compute [symmetric elliptic integral of the first kind](https://dlmf.nist.gov/19.16.E1).
 /// ```text
 ///                     ∞                              
-///                 1  ⌠              dt              
-/// RF(x, y, z)  =  ─  ⎮ ─────────────────────────────
-///                 2  ⎮   ___________________________
-///                    ⌡ ╲╱(t + x) ⋅ (t + y) ⋅ (t + z)
+///                 1  ⌠             dt              
+/// RF(x, y, z)  =  ─  ⎮ ───────────────────────────
+///                 2  ⎮   ________________________
+///                    ⌡ ╲╱(t + x) (t + y) (t + z)
 ///                   0                              
 /// where x ≥ 0, y ≥ 0, z ≥ 0, and at most one can be zero.
 /// ```
