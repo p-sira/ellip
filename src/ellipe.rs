@@ -76,20 +76,22 @@
 
 use crate::polyeval;
 
-/// Compute complete elliptic integral of the second kind.
+/// Compute [complete elliptic integral of the second kind](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.ellipe.html).
 ///
 /// ```text
 ///           π/2
 ///          ⌠     _______________
-/// E(m)  =  │   \╱ 1 - m sin²(t)  dt
+/// E(m)  =  │ \╱ 1 - m sin²(t)  dt
 ///          ⌡
 ///         0
 /// where m ≤ 1
 /// ```
 ///
+/// Note that some mathematical references use the parameter k for the function,
+/// where k² = m.
 pub fn ellipe(m: f64) -> Result<f64, &'static str> {
     if m > 1.0 {
-        return Err("ellipe: m must satisfy: m ≤ 1.");
+        return Err("ellipe: m must be less than 1.");
     }
 
     if m == 1.0 {
