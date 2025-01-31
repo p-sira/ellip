@@ -91,7 +91,7 @@ use crate::polyeval;
 /// where k² = m.
 pub fn ellipe(m: f64) -> Result<f64, &'static str> {
     if m > 1.0 {
-        return Err("ellipe: m must be less than 1.");
+        return Err("ellipe: m must satisfy: m ≤ 1.");
     }
 
     if m == 1.0 {
