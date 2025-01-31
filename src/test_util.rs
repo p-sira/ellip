@@ -24,12 +24,14 @@ macro_rules! compare_test_data {
             let file = File::open($file_path).expect("Cannot open file");
             let reader = io::BufReader::new(file);
 
-            let mut test_fail = false;
+            let mut total_cases = 0;
+            let mut test_fail = 0;
             let mut worst_line = 0;
             let mut worst_params: Vec<f64> = Vec::new();
             let mut worst_errors = [0.0; 5];
             for (line_number, line) in reader.lines().enumerate() {
                 let line = line.expect("Cannot read line");
+                total_cases += 1;
 
                 let parts: Vec<&str> = line.split_whitespace().collect();
                 let inputs: Vec<f64> = parts[..parts.len() - 1]
@@ -46,7 +48,7 @@ macro_rules! compare_test_data {
                 let tol = $atol + $rtol * expected.abs();
                 if error > tol {
                     let rel = error / expected.abs();
-                    test_fail = true;
+                    test_fail += 1;
                     if rel > worst_errors[1] {
                         worst_line = line_number + 1;
                         worst_errors = [error, rel, tol, expected, result];
@@ -67,9 +69,11 @@ macro_rules! compare_test_data {
                 }
             }
 
-            if test_fail {
+            if test_fail > 0 {
                 panic!(
-                    "Worst on line {}: input = {:?}, expected = {:?}, got = {:?} \n error = {:?}, rel = {:?}, abs = {:?}, rtol = {:?}, atol = {:?}",
+                    "Failed {}/{} cases. Worst on line {}: input = {:?}, expected = {:?}, got = {:?} \n error = {:?}, rel = {:?}, abs = {:?}, rtol = {:?}, atol = {:?}",
+                    test_fail,
+                    total_cases,
                     worst_line,
                     worst_params,
                     worst_errors[3],
