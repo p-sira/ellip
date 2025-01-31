@@ -17,6 +17,7 @@
 //! - [fn@cel]: General complete elliptic integral
 //! ## Carlson's symmetric integrals
 //! - [fn@elliprf]: Symmetric elliptic integral of the first kind.
+//! - [fn@elliprg]: Symmetric elliptic integral of the second kind.
 //! - [fn@elliprj]: Symmetric elliptic integral of the third kind.
 //! - [fn@elliprc]: Degenerate elliptic integral of RF.
 //! - [fn@elliprd]: Degenerate elliptic integral of the third kind.
@@ -57,6 +58,8 @@ pub use cel::cel;
 // Carlson's symmetric integrals
 mod elliprf;
 pub use elliprf::elliprf;
+mod elliprg;
+pub use elliprg::elliprg;
 mod elliprj;
 pub use elliprj::elliprj;
 mod elliprc;

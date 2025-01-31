@@ -35,6 +35,7 @@ Elliptic integrals for Rust
     - `cel`: General complete elliptic integral
 - Carlson's symmetric integrals
     - `elliprf`: Symmetric elliptic integral of the first kind.
+    - `elliprg`: Symmetric elliptic integral of the second kind.
     - `elliprj`: Symmetric elliptic integral of the third kind.
     - `elliprc`: Degenerate elliptic integral of RF.
     - `elliprd`: Degenerate elliptic integral of the third kind.
