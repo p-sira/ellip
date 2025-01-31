@@ -55,9 +55,13 @@ use std::{f64::consts::PI, mem::swap};
 /// ```
 ///
 pub fn elliprd(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
-    if x.min(y) < 0.0 || x + y == 0.0 || z <= 0.0 {
-        return Err("elliprd: x and y must be non-negative, and at most one can be zero. z must be positive");
+    if x.min(y) < 0.0 || x + y == 0.0 {
+        return Err("elliprd: x and y must be non-negative, and at most one can be zero.");
     }
+    if z <= 0.0 {
+        return Err("elliprd: z must be positive");
+    }
+
     let mut x = x;
     let mut y = y;
 
