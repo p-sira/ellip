@@ -194,6 +194,7 @@ pub fn ellipeinc(phi: f64, m: f64) -> Result<f64, &'static str> {
 }
 
 /// Compute elliptic integral of the second kind for m<0.
+#[inline]
 fn ellipeinc_neg_m(phi: f64, m: f64) -> f64 {
     let mpp = m * phi * phi;
 

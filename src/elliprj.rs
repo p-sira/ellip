@@ -96,6 +96,7 @@ pub fn elliprj(x: f64, y: f64, z: f64, p: f64) -> Result<f64, &'static str> {
 }
 
 /// Calculate RC(1, 1 + x)
+#[inline]
 fn elliprc1p(y: f64) -> Result<f64, &'static str> {
     // We can skip this check since the call from _elliprj already did the check.
     // if y == -1.0 {
@@ -117,6 +118,7 @@ fn elliprc1p(y: f64) -> Result<f64, &'static str> {
     }
 }
 
+#[inline]
 fn _elliprj(mut x: f64, y: f64, mut z: f64, p: f64) -> Result<f64, &'static str> {
     // Special cases
     // https://dlmf.nist.gov/19.20#iii
