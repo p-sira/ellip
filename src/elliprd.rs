@@ -31,7 +31,7 @@ pub fn elliprd(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
     let lolim = 2.0 * f64::MAX.powf(-2.0 / 3.0);
     let uplim = (0.1 * RD_ERR_TOL / f64::MIN_POSITIVE).powf(2.0 / 3.0);
     if x.min(y) < 0.0 || (x + y).min(z) < lolim || x.max(y).max(z) > uplim {
-        return Err("elliprf: x and y must be non-negative, and at most one can be zero. z must be positive");
+        return Err("elliprd: x and y must be non-negative, and at most one can be zero. z must be positive");
     }
     let mut xt = x;
     let mut yt = y;
