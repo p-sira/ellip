@@ -41,13 +41,15 @@ macro_rules! compare_test_data {
                 let error = (result - expected).abs();
                 let tol = $atol + $rtol * expected.abs();
                 if error > tol {
+                    let rel = error / expected.abs();
                     panic!(
-                        "Test failed on line {}: input = {:?}, expected = {:?}, got = {:?} \n error = {:?}, tol = {:?}, rtol = {:?}, atol = {:?}",
+                        "Test failed on line {}: input = {:?}, expected = {:?}, got = {:?} \n error = {:?}, rel = {:?}, abs = {:?}, rtol = {:?}, atol = {:?}",
                         line_number + 1,
                         inputs,
                         expected,
                         result,
                         error,
+                        rel,
                         tol,
                         $rtol,
                         $atol,
