@@ -17,8 +17,9 @@
 //! - [fn@cel]: General complete elliptic integral
 //! ## Carlson's symmetric integrals
 //! - [fn@elliprf]: Symmetric elliptic integral of the first kind.
-//! - [fn@elliprd]: Degenerate elliptic integral of the third kind.
+//! - [fn@elliprj]: Symmetric elliptic integral of the third kind.
 //! - [fn@elliprc]: Degenerate elliptic integral of RF.
+//! - [fn@elliprd]: Degenerate elliptic integral of the third kind.
 //!
 //! # Acknowledgment
 //! Ellip is derived from multiple mathematic libraries. We thank
@@ -27,6 +28,7 @@
 //! Detailed credits are available in the source code.
 //! - [Scipy](https://github.com/scipy/scipy/)
 //! - [Cephes Math Library](https://netlib.org/cephes/)
+//! - [Boost Math Library](https://www.boost.org/doc/libs/release/libs/math/)
 //! - [Russell Lab](https://github.com/cpmech/russell)
 //!
 //! Primary mathematical reference is [Chapter 19](https://dlmf.nist.gov/19) of the NIST Digital Library
@@ -55,10 +57,12 @@ pub use cel::cel;
 // Carlson's symmetric integrals
 mod elliprf;
 pub use elliprf::elliprf;
-mod elliprd;
-pub use elliprd::elliprd;
+mod elliprj;
+pub use elliprj::elliprj;
 mod elliprc;
 pub use elliprc::elliprc;
+mod elliprd;
+pub use elliprd::elliprd;
 
 // Utilities
 mod polyeval;
