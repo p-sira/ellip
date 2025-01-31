@@ -113,15 +113,15 @@ pub fn elliprf(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
     }
 
     if zn == 0.0 {
+        let mut xn = xn.sqrt();
         let mut yn = yn.sqrt();
-        let mut zn = zn.sqrt();
 
-        while (yn - zn).abs() >= 2.7 * f64::EPSILON * yn.abs() {
-            let t = (yn * zn).sqrt();
-            yn = (yn + zn) / 2.0;
-            zn = t;
+        while (xn - yn).abs() >= 2.7 * f64::EPSILON * xn.abs() {
+            let t = (xn * yn).sqrt();
+            xn = (xn + yn) / 2.0;
+            yn = t;
         }
-        return Ok(PI / (yn + zn));
+        return Ok(PI / (xn + yn));
     }
 
     let mut an = (xn + yn + zn) / 3.0;
@@ -185,5 +185,20 @@ mod test {
     #[test]
     fn test_elliprf() {
         compare_test_data!("./tests/data/boost/ellint_rf_data.txt", _elliprf, 4.5e-16);
+    }
+
+    #[test]
+    fn test_elliprf_xxx() {
+        compare_test_data!("./tests/data/boost/ellint_rf_xxx.txt", _elliprf, 2.3e-16);
+    }
+
+    #[test]
+    fn test_elliprf_xy0() {
+        compare_test_data!("./tests/data/boost/ellint_rf_xy0.txt", _elliprf, 4.2e-16);
+    }
+
+    #[test]
+    fn test_elliprf_xyy() {
+        compare_test_data!("./tests/data/boost/ellint_rf_xyy.txt", _elliprf, 5.3e-16);
     }
 }
