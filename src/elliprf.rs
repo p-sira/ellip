@@ -1,12 +1,8 @@
 /*
  * Ellip is licensed under The 3-Clause BSD, see LICENSE.
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
- * This code is modified from Boost Math.
+ * This code is translated from Boost Math.
  */
-
-// Ellipe modified how the function handles special cases by swapping
-// the variables to arrange them first, then check against the special
-// case conditions. 
 
 // Original header from Boost Math
 //  Copyright (c) 2006 Xiaogang Zhang, 2015 John Maddock
@@ -65,45 +61,58 @@ pub fn elliprf(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
     if x.min(y).min(z) < 0.0 || (y + z).min(x + y).min(x + z) < 0.0 {
         return Err("elliprf: x, y, and z must be non-negative, and at most one can be zero.");
     }
-    let mut xn = x;
-    let mut yn = y;
-    let mut zn = z;
-    // Arrange x < y < z before evaluating special cases
-    // We can swap since RF is completely-symmetric
-    if xn > yn {
-        swap(&mut xn, &mut yn);
-    }
-    if yn > zn {
-        swap(&mut yn, &mut zn);
-    }
-    if xn > yn {
-        swap(&mut xn, &mut yn);
-    }
 
     // Special cases from http://dlmf.nist.gov/19.20#i
-    if xn == yn {
-        if xn == zn {
+    if x == y {
+        if x == z {
             // RF(x,x,x)
-            return Ok(1.0 / xn.sqrt());
+            return Ok(1.0 / x.sqrt());
         }
 
-        if xn == 0.0 {
-            // RF(0,0,z)
-            return Ok(f64::INFINITY);
+        if z == 0.0 {
+            // RF(x,x,0)
+            // RF(0,y,y)
+            return Ok(PI / (2.0 * x.sqrt()));
         }
+
+        // RF(x,x,z)
+        // RF(x,y,y)
+        return elliprc(z, x);
     }
 
-    if yn == zn {
-        if xn == 0.0 {
+    if x == z {
+        if y == 0.0 {
+            // RF(x,0,x)
             // RF(0,y,y)
-            return Ok(PI / (2.0 * yn.sqrt()));
+            return Ok(PI / (2.0 * x.sqrt()));
+        }
+
+        // RF(x,y,x)
+        // RF(x,y,y)
+        return elliprc(y, x);
+    }
+
+    if y == z {
+        if x == 0.0 {
+            // RF(0,y,y)
+            return Ok(PI / (2.0 * y.sqrt()));
         }
 
         // RF(x,y,y)
-        return elliprc(xn, yn);
+        return elliprc(x, y);
     }
 
+    let mut xn = x;
+    let mut yn = y;
+    let mut zn = z;
+
     if xn == 0.0 {
+        swap(&mut xn, &mut zn);
+    } else if yn == 0.0 {
+        swap(&mut yn, &mut zn);
+    }
+
+    if zn == 0.0 {
         let mut yn = yn.sqrt();
         let mut zn = zn.sqrt();
 
@@ -175,9 +184,6 @@ mod test {
 
     #[test]
     fn test_elliprf() {
-        // The precision is at 5e-16 except for one test case, which relative error is 5.4e-16.
-        // This seems to be due to Ellip swaps the variables first before evaluating, unlike in
-        // Boost.
-        compare_test_data!("./tests/data/boost/ellint_rf_data.txt", _elliprf, 5.4e-16);
+        compare_test_data!("./tests/data/boost/ellint_rf_data.txt", _elliprf, 4.5e-16);
     }
 }
