@@ -9,10 +9,10 @@ use std::f64::consts::PI;
 /// Compute [complete elliptic integral](https://dlmf.nist.gov/19.2#iii) in Bulirsch form.
 /// ```text
 ///                       π/2                                                   
-///                      ⌠            a ⋅ cos²(ϑ) + b ⋅ sin²(ϑ)               
-/// cel(kc, p, a, b)  =  ⎮ ────────────────────────────────────────────────── ⋅ dϑ
-///                      ⎮                           _______________________
-///                      ⌡ cos²(ϑ) + p ⋅ sin²(ϑ) ⋅ ╲╱ cos²(ϑ) + kc²⋅ sin²(ϑ)    
+///                      ⌠            a cos²(ϑ) + b sin²(ϑ)               
+/// cel(kc, p, a, b)  =  ⎮ ─────────────────────────────────────────────── ⋅ dϑ
+///                      ⎮                         ______________________
+///                      ⌡ (cos²(ϑ) + p sin²(ϑ)) ╲╱ cos²(ϑ) + kc² sin²(ϑ)    
 ///                     0                                                   
 /// where kc ≠ 0, p ≠ 0
 /// ```
