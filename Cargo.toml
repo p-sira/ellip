@@ -16,6 +16,7 @@ edition = "2021"
 exclude = ["/logo", "/tests/data"]
 
 [dependencies]
+num-traits = "0.2.19"
 
 [dev-dependencies]
 itertools = "0.14.0"
