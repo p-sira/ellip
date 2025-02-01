@@ -18,7 +18,8 @@ macro_rules! compare_test_data {
 
             let path = Path::new($file_path);
             if !path.exists() {
-                panic!("Test data not found: {}", $file_path);
+                eprintln!("Skipping test due to test data not found: {}\nDownload test data from: https://github.com/p-sira/ellip/tree/main/tests/data", $file_path);
+                return;
             }
 
             let file = File::open($file_path).expect("Cannot open file");
