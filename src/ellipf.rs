@@ -66,7 +66,7 @@ use std::f64::consts::{FRAC_PI_2, PI};
 
 use crate::ellipk;
 
-/// Compute incomplete elliptic integral of the first kind.
+/// Compute [incomplete elliptic integral of the first kind](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.ellipkinc.html).
 ///
 /// ```text
 ///              φ
@@ -78,9 +78,11 @@ use crate::ellipk;
 /// where m ≤ 1
 /// ```
 ///
+/// Note that some mathematical references use the parameter k for the function,
+/// where k² = m.
 pub fn ellipf(phi: f64, m: f64) -> Result<f64, &'static str> {
     if m > 1.0 {
-        return Err("ellipf: m must satisfy: m ≤ 1.");
+        return Err("ellipf: m must be less than 1.");
     }
 
     if phi.is_infinite() && m.is_infinite() {

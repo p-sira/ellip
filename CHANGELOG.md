@@ -1,5 +1,27 @@
 # Changelog
 ## 0.1
+### 0.2.0
+**New Features**
+- `cel`: Bulirsch's General complete elliptic integral
+- `elliprg`: Symmetric elliptic integral of the second kind.
+- `elliprj`: Symmetric elliptic integral of the third kind.
+
+**Improvements**
+- `elliprf`: Add special cases handling to improve performance and accuracy.
+- `elliprd`: Use Boost Math implementation to improve accuracy.
+- `ellipe`: Explicitly make internal functions inline.
+
+**Changes**
+- Change error messages in `ellipk`, `ellipf`, `ellipe`, and `ellipeinc`, to describe without mathematical notations.
+- Split error message in `elliprd`.
+
+**Bug Fixes**
+- Fix domain error message in `elliprd`
+
+**Others**
+- Add Ellip logo
+- Add links to references in the documentations. 
+
 ### 0.1.2
 **Bug Fixes**
 - Fix `ellipe` logic in negative m cases.

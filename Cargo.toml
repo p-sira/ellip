@@ -1,6 +1,6 @@
 [package]
 name = "ellip"
-version = "0.1.2"
+version = "0.2.0"
 authors = ["Sira Pornsiriprasert <code@psira.me>"]
 
 description = "Elliptic integrals for Rust"
@@ -14,3 +14,6 @@ license = "BSD-3-Clause"
 edition = "2021"
 
 [dependencies]
+
+[dev-dependencies]
+itertools = "0.14.0"

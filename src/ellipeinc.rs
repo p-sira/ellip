@@ -61,18 +61,21 @@ use std::f64::consts::{FRAC_PI_2, PI};
 
 use crate::{ellipe, ellipk};
 
-/// Compute incomplete elliptic integral of the second kind.
+/// Compute [incomplete elliptic integral of the second kind](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.ellipeinc.html).
 /// ```text
 ///              φ
-///             ⌠     _______________
-/// E(φ, m)  =  │   \╱ 1 - m sin²(t)  dt
+///             ⌠   _______________
+/// E(φ, m)  =  │ \╱ 1 - m sin²(t)  dt
 ///             ⌡
 ///            0
 /// where m ≤ 1
 /// ```
+///
+/// Note that some mathematical references use the parameter k for the function,
+/// where k² = m.
 pub fn ellipeinc(phi: f64, m: f64) -> Result<f64, &'static str> {
     if m > 1.0 {
-        return Err("ellipeinc: m must satisfy: m ≤ 1.");
+        return Err("ellipeinc: m must be less than 1.");
     }
 
     if phi.is_infinite() {
@@ -191,6 +194,7 @@ pub fn ellipeinc(phi: f64, m: f64) -> Result<f64, &'static str> {
 }
 
 /// Compute elliptic integral of the second kind for m<0.
+#[inline]
 fn ellipeinc_neg_m(phi: f64, m: f64) -> f64 {
     let mpp = m * phi * phi;
 

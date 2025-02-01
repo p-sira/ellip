@@ -72,7 +72,7 @@
 
 use crate::polyeval;
 
-/// Compute complete elliptic integral of the first kind.
+/// Compute [complete elliptic integral of the first kind](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.ellipk.html).
 ///
 /// ```text
 ///           π/2
@@ -84,9 +84,11 @@ use crate::polyeval;
 /// where m ≤ 1
 /// ```
 ///
+/// Note that some mathematical references use the parameter k for the function,
+/// where k² = m.
 pub fn ellipk(m: f64) -> Result<f64, &'static str> {
     if m > 1.0 {
-        return Err("ellipk: m must satisfy: m ≤ 1.");
+        return Err("ellipk: m must be less than 1.");
     }
 
     let mut x = 1.0 - m;

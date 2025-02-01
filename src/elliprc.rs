@@ -17,7 +17,7 @@
 
 use crate::constants::{BIG, TINY};
 
-/// Compute degenerate symmetric elliptic integral of RF.
+/// Compute [degenerate symmetric elliptic integral of RF](https://dlmf.nist.gov/19.16.E6).
 /// ```text
 ///                  ∞                  
 ///              1  ⌠        dt        

@@ -1,5 +1,7 @@
 <h1 align="center">
-ELLIP
+    <a href="https://github.com/p-sira/ellip/">
+        <img src="https://github.com/p-sira/ellip/blob/main/logo/ellip-logo.svg?raw=true" alt="ELLIP" width="600">
+    </a>
 </h1>
 
 <p align="center">
@@ -23,16 +25,20 @@ Elliptic integrals for Rust
 ```
 
 ## Features
-- Incomplete elliptic integrals
-    - `ellipf`: Incomplete elliptic integral of the first kind.
-    - `ellipeinc`: Incomplete elliptic integral of the second kind.
-- Complete elliptic integrals
+- Legendre's complete integrals
     - `ellipk`: Complete elliptic integral of the first kind.
     - `ellipe`: Complete elliptic integral of the second kind.
-- Symmetric elliptic integrals
+- Legendre's incomplete integrals
+    - `ellipf`: Incomplete elliptic integral of the first kind.
+    - `ellipeinc`: Incomplete elliptic integral of the second kind.
+- Bulirsch's integrals
+    - `cel`: General complete elliptic integral
+- Carlson's symmetric integrals
     - `elliprf`: Symmetric elliptic integral of the first kind.
-    - `elliprd`: Degenerate elliptic integral of the third kind.
+    - `elliprg`: Symmetric elliptic integral of the second kind.
+    - `elliprj`: Symmetric elliptic integral of the third kind.
     - `elliprc`: Degenerate elliptic integral of RF.
+    - `elliprd`: Degenerate elliptic integral of the third kind.
 
 ---
 
