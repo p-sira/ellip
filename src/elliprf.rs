@@ -175,11 +175,21 @@ const N_MAX_ITERATIONS: usize = 11;
 
 #[cfg(test)]
 mod test {
+    use itertools::Itertools;
+
     use super::*;
-    use crate::compare_test_data;
+    use crate::{assert_close, compare_test_data};
+
+    fn __elliprf(inp: &Vec<&f64>) -> f64 {
+        elliprf(*inp[0], *inp[1], *inp[2]).unwrap()
+    }
 
     fn _elliprf(inp: &[f64]) -> f64 {
-        elliprf(inp[0], inp[1], inp[2]).unwrap()
+        let res = elliprf(inp[0], inp[1], inp[2]).unwrap();
+        inp.iter().permutations(inp.len()).skip(1).for_each(|perm| {
+            assert_close!(res, __elliprf(&perm), 6.5e-16);
+        });
+        res
     }
 
     #[test]
