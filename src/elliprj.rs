@@ -234,11 +234,27 @@ fn _elliprj(mut x: f64, y: f64, mut z: f64, p: f64) -> Result<f64, &'static str>
 
 #[cfg(test)]
 mod test {
+    use itertools::Itertools;
+
     use super::*;
-    use crate::compare_test_data;
+    use crate::{assert_close, compare_test_data};
+
+    fn __elliprj(inp: &Vec<&f64>) -> f64 {
+        elliprj(*inp[0], *inp[1], *inp[2], *inp[3]).unwrap()
+    }
 
     fn elliprj_wrapper(inp: &[f64]) -> f64 {
-        elliprj(inp[0], inp[1], inp[2], inp[3]).unwrap()
+        let res = elliprj(inp[0], inp[1], inp[2], inp[3]).unwrap();
+        let (p, sym_params) = inp.split_last().unwrap();
+        sym_params
+            .iter()
+            .permutations(sym_params.len())
+            .skip(1)
+            .for_each(|mut perm| {
+                perm.push(p);
+                assert_close!(res, __elliprj(&perm), 1e-15);
+            });
+        res
     }
 
     #[test]
