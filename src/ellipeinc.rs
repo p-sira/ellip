@@ -57,7 +57,12 @@
  * Direct inquiries to 30 Frost Street, Cambridge, MA 02140
  */
 /* Copyright 2014, Eric W. Moore */
-use std::f64::consts::{FRAC_PI_2, PI};
+use std::{
+    f64::consts::{FRAC_PI_2, PI},
+    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
+};
+
+use num_traits::Float;
 
 use crate::{ellipe, ellipk};
 
@@ -73,8 +78,11 @@ use crate::{ellipe, ellipk};
 ///
 /// Note that some mathematical references use the parameter k for the function,
 /// where k² = m.
-pub fn ellipeinc(phi: f64, m: f64) -> Result<f64, &'static str> {
-    if m > 1.0 {
+pub fn ellipeinc<T: Float + AddAssign + SubAssign + MulAssign + DivAssign>(
+    phi: T,
+    m: T,
+) -> Result<T, &'static str> {
+    if m > T::one() {
         return Err("ellipeinc: m must be less than 1.");
     }
 
@@ -83,55 +91,68 @@ pub fn ellipeinc(phi: f64, m: f64) -> Result<f64, &'static str> {
     }
 
     if m.is_infinite() {
-        return Ok(f64::NEG_INFINITY);
+        return Ok(T::neg_infinity());
     }
 
-    if m == 0.0 {
+    if m == T::zero() {
         return Ok(phi);
     }
 
     let mut lphi = phi;
-    let mut npio2 = (lphi / FRAC_PI_2).floor();
+    let mut npio2 = (lphi / T::from(FRAC_PI_2).unwrap()).floor();
 
-    if (npio2.abs() % 2.0) == 1.0 {
-        npio2 += 1.0;
+    if (npio2.abs() % T::from(2.0).unwrap()) == T::one() {
+        npio2 += T::one();
     }
 
-    lphi -= npio2 * FRAC_PI_2;
+    lphi -= npio2 * T::from(FRAC_PI_2).unwrap();
 
-    let sign = if lphi < 0.0 {
+    let sign = if lphi < T::zero() {
         lphi = -lphi;
-        -1.0
+        -T::one()
     } else {
-        1.0
+        T::one()
     };
 
-    let a = 1.0 - m;
+    let a = T::one() - m;
     let e = ellipe(m)?;
 
-    fn done(val: f64, sign: f64, npio2: f64, e: f64) -> Result<f64, &'static str> {
+    fn done<T: Float>(val: T, sign: T, npio2: T, e: T) -> Result<T, &'static str> {
         Ok(sign * val + npio2 * e)
     }
 
-    if a == 0.0 {
+    if a == T::zero() {
         return done(lphi.sin(), sign, npio2, e);
     }
 
-    if a > 1.0 {
+    if a > T::one() {
         return done(ellipeinc_neg_m(lphi, m), sign, npio2, e);
     }
 
-    if lphi < 0.135 {
-        let m11 = (((((-7.0 / 2816.0) * m + (5.0 / 1056.0)) * m - (7.0 / 2640.0)) * m
-            + (17.0 / 41580.0))
+    if lphi < T::from(0.135).unwrap() {
+        let m11 = (((((-T::from(7.0).unwrap() / T::from(2816.0).unwrap()) * m
+            + (T::from(5.0).unwrap() / T::from(1056.0).unwrap()))
             * m
-            - (1.0 / 155925.0))
+            - (T::from(7.0).unwrap() / T::from(2640.0).unwrap()))
+            * m
+            + (T::from(17.0).unwrap() / T::from(41580.0).unwrap()))
+            * m
+            - (T::from(1.0).unwrap() / T::from(155925.0).unwrap()))
             * m;
-        let m9 =
-            ((((-5.0 / 1152.0) * m + (1.0 / 144.0)) * m - (1.0 / 360.0)) * m + (1.0 / 5670.0)) * m;
-        let m7 = ((-m / 112.0 + (1.0 / 84.0)) * m - (1.0 / 315.0)) * m;
-        let m5 = (-m / 40.0 + (1.0 / 30.0)) * m;
-        let m3 = -m / 6.0;
+        let m9 = ((((-T::from(5.0).unwrap() / T::from(1152.0).unwrap()) * m
+            + (T::from(1.0).unwrap() / T::from(144.0).unwrap()))
+            * m
+            - (T::from(1.0).unwrap() / T::from(360.0).unwrap()))
+            * m
+            + (T::from(1.0).unwrap() / T::from(5670.0).unwrap()))
+            * m;
+        let m7 =
+            ((-m / T::from(112.0).unwrap() + (T::from(1.0).unwrap() / T::from(84.0).unwrap())) * m
+                - (T::from(1.0).unwrap() / T::from(315.0).unwrap()))
+                * m;
+        let m5 =
+            (-m / T::from(40.0).unwrap() + (T::from(1.0).unwrap() / T::from(30.0).unwrap())) * m;
+        let m3 = -m / T::from(6.0).unwrap();
         let p2 = lphi * lphi;
 
         return done(
@@ -145,9 +166,9 @@ pub fn ellipeinc(phi: f64, m: f64) -> Result<f64, &'static str> {
     let mut t = lphi.tan();
     let mut b = a.sqrt();
 
-    if t.abs() > 10.0 {
-        let e = 1.0 / (b * t);
-        if e.abs() < 10.0 {
+    if t.abs() > T::from(10.0).unwrap() {
+        let e = T::one() / (b * t);
+        if e.abs() < T::from(10.0).unwrap() {
             let e = e.atan();
             return done(
                 e + m * lphi.sin() * e.sin() - ellipeinc(e, m)?,
@@ -159,34 +180,39 @@ pub fn ellipeinc(phi: f64, m: f64) -> Result<f64, &'static str> {
     }
 
     let mut c = m.sqrt();
-    let mut a = 1.0;
-    let mut d = 1.0;
-    let mut ee = 0.0;
-    let mut mod_phi = 0.0;
+    let mut a = T::one();
+    let mut d = T::one();
+    let mut ee = T::zero();
+    let mut mod_phi = 0;
 
-    while (c / a).abs() > f64::EPSILON {
+    while (c / a).abs() > T::epsilon() {
         let temp = b / a;
-        lphi += (t * temp).atan() + mod_phi * PI;
-        let denom = 1.0 - temp * t * t;
+        lphi += (t * temp).atan() + T::from(mod_phi).unwrap() * T::from(PI).unwrap();
+        let denom = T::one() - temp * t * t;
 
-        if denom.abs() > 10.0 * f64::EPSILON {
-            t *= (1.0 + temp) / denom;
-            mod_phi = ((lphi + FRAC_PI_2) / PI) as i32 as f64;
+        if denom.abs() > T::from(10.0).unwrap() * T::epsilon() {
+            t *= (T::one() + temp) / denom;
+            mod_phi = ((lphi + T::from(FRAC_PI_2).unwrap()) / T::from(PI).unwrap())
+                .to_i32()
+                .unwrap();
         } else {
             t = lphi.tan();
-            mod_phi = ((lphi - t.atan()) / PI).floor() as i32 as f64;
+            mod_phi = ((lphi - t.atan()) / T::from(PI).unwrap())
+                .floor()
+                .to_i32()
+                .unwrap();
         }
 
-        c = (a - b) / 2.0;
+        c = (a - b) / T::from(2.0).unwrap();
         let temp = (a * b).sqrt();
-        a = (a + b) / 2.0;
+        a = (a + b) / T::from(2.0).unwrap();
         b = temp;
         d += d;
         ee += c * lphi.sin();
     }
 
     done(
-        e / ellipk(m)? * (t.atan() + mod_phi * PI) / (d * a) + ee,
+        e / ellipk(m)? * (t.atan() + T::from(mod_phi).unwrap() * T::from(PI).unwrap()) / (d * a) + ee,
         sign,
         npio2,
         e,
@@ -195,60 +221,64 @@ pub fn ellipeinc(phi: f64, m: f64) -> Result<f64, &'static str> {
 
 /// Compute elliptic integral of the second kind for m<0.
 #[inline]
-fn ellipeinc_neg_m(phi: f64, m: f64) -> f64 {
+fn ellipeinc_neg_m<T: Float + AddAssign + SubAssign + DivAssign>(phi: T, m: T) -> T {
     let mpp = m * phi * phi;
 
-    if -mpp < 1e-6 && phi < -m {
-        return phi + (mpp * phi * phi / 30.0 - mpp * mpp / 40.0 - mpp / 6.0) * phi;
+    if -mpp < T::from(1e-6).unwrap() && phi < -m {
+        return phi
+            + (mpp * phi * phi / T::from(30.0).unwrap()
+                - mpp * mpp / T::from(40.0).unwrap()
+                - mpp / T::from(6.0).unwrap())
+                * phi;
     }
 
-    if -mpp > 1e6 {
+    if -mpp > T::from(1e6).unwrap() {
         let sm = (-m).sqrt();
         let sp = phi.sin();
         let cp = phi.cos();
 
-        let a = 1.0 - cp;
-        let b1 = (4.0 * sp * sm / (1.0 + cp)).ln();
-        let b = -(0.5 + b1) / 2.0 / m;
-        let c = (0.75 + cp / sp / sp - b1) / 16.0 / m / m;
+        let a = T::one() - cp;
+        let b1 = (T::from(4.0).unwrap() * sp * sm / (T::one() + cp)).ln();
+        let b = -(T::from(0.5).unwrap() + b1) / T::from(2.0).unwrap() / m;
+        let c = (T::from(0.75).unwrap() + cp / sp / sp - b1) / T::from(16.0).unwrap() / m / m;
         return (a + b + c) * sm;
     }
 
-    let scalef: f64;
-    let scaled: f64;
-    let x: f64;
-    let y: f64;
-    let z: f64;
-    if phi > 1e-153 && m > -1e200 {
+    let scalef: T;
+    let scaled: T;
+    let x: T;
+    let y: T;
+    let z: T;
+    if phi > T::from(1e-153).unwrap() && m > T::from(-1e200).unwrap() {
         let s = phi.sin();
-        let csc2 = 1.0 / (s * s);
-        scalef = 1.0;
-        scaled = m / 3.0;
+        let csc2 = T::one() / (s * s);
+        scalef = T::one();
+        scaled = m / T::from(3.0).unwrap();
         let phi_tan = phi.tan();
-        x = 1.0 / (phi_tan * phi_tan);
+        x = T::one() / (phi_tan * phi_tan);
         y = csc2 - m;
         z = csc2;
     } else {
         scalef = phi;
-        scaled = mpp * phi / 3.0;
-        x = 1.0;
-        y = 1.0 - mpp;
-        z = 1.0;
+        scaled = mpp * phi / T::from(3.0).unwrap();
+        x = T::one();
+        y = T::one() - mpp;
+        z = T::one();
     }
 
     if x == y && x == z {
         return (scalef + scaled / x) / x.sqrt();
     }
 
-    let a0f: f64 = (x + y + z) / 3.0;
-    let a0d: f64 = (x + y + 3.0 * z) / 5.0;
+    let a0f = (x + y + z) / T::from(3.0).unwrap();
+    let a0d = (x + y + T::from(3.0).unwrap() * z) / T::from(5.0).unwrap();
     let mut af = a0f;
     let mut ad = a0d;
 
-    let mut seriesd = 0.0;
-    let mut seriesn = 1.0;
+    let mut seriesd = T::zero();
+    let mut seriesn = T::one();
 
-    let mut q = 400.0 * (a0f - x).abs().max((a0f - y).abs().max((a0f - z).abs()));
+    let mut q = T::from(400.0).unwrap() * (a0f - x).abs().max((a0f - y).abs().max((a0f - z).abs()));
 
     let mut x1 = x;
     let mut y1 = y;
@@ -260,47 +290,52 @@ fn ellipeinc_neg_m(phi: f64, m: f64) -> f64 {
         let sz = z1.sqrt();
         let lam = sx * sy + sx * sz + sy * sz;
         seriesd += seriesn / (sz * (z1 + lam));
-        x1 = (x1 + lam) / 4.0;
-        y1 = (y1 + lam) / 4.0;
-        z1 = (z1 + lam) / 4.0;
-        af = (x1 + y1 + z1) / 3.0;
-        ad = (ad + lam) / 4.0;
+        x1 = (x1 + lam) / T::from(4.0).unwrap();
+        y1 = (y1 + lam) / T::from(4.0).unwrap();
+        z1 = (z1 + lam) / T::from(4.0).unwrap();
+        af = (x1 + y1 + z1) / T::from(3.0).unwrap();
+        ad = (ad + lam) / T::from(4.0).unwrap();
         n += 1;
-        q /= 4.0;
-        seriesn /= 4.0;
+        q /= T::from(4.0).unwrap();
+        seriesn /= T::from(4.0).unwrap();
     }
 
-    let two_to_2n = (1 << (2 * n)) as f64;
-    let xf: f64 = (a0f - x) / af / two_to_2n;
-    let yf: f64 = (a0f - y) / af / two_to_2n;
-    let zf: f64 = -(xf + yf);
+    let two_to_2n = T::from(1 << (2 * n)).unwrap();
+    let xf = (a0f - x) / af / two_to_2n;
+    let yf = (a0f - y) / af / two_to_2n;
+    let zf = -(xf + yf);
 
-    let e2f: f64 = xf * yf - zf * zf;
-    let e3f: f64 = xf * yf * zf;
+    let e2f = xf * yf - zf * zf;
+    let e3f = xf * yf * zf;
 
     let mut ret = scalef
-        * (1.0 - e2f / 10.0 + e3f / 14.0 + e2f * e2f / 24.0 - 3.0 * e2f * e3f / 44.0)
+        * (T::one() - e2f / T::from(10.0).unwrap()
+            + e3f / T::from(14.0).unwrap()
+            + e2f * e2f / T::from(24.0).unwrap()
+            - T::from(3.0).unwrap() * e2f * e3f / T::from(44.0).unwrap())
         / af.sqrt();
 
-    let xd: f64 = (a0d - x) / ad / two_to_2n;
-    let yd: f64 = (a0d - y) / ad / two_to_2n;
-    let zd: f64 = -(xd + yd) / 3.0;
+    let xd = (a0d - x) / ad / two_to_2n;
+    let yd = (a0d - y) / ad / two_to_2n;
+    let zd = -(xd + yd) / T::from(3.0).unwrap();
 
-    let e2d: f64 = xd * yd - 6.0 * zd * zd;
-    let e3d: f64 = (3.0 * xd * yd - 8.0 * zd * zd) * zd;
-    let e4d: f64 = 3.0 * (xd * yd - zd * zd) * zd * zd;
-    let e5d: f64 = xd * yd * zd * zd * zd;
+    let e2d = xd * yd - T::from(6.0).unwrap() * zd * zd;
+    let e3d = (T::from(3.0).unwrap() * xd * yd - T::from(8.0).unwrap() * zd * zd) * zd;
+    let e4d = T::from(3.0).unwrap() * (xd * yd - zd * zd) * zd * zd;
+    let e5d = xd * yd * zd * zd * zd;
 
     ret -= scaled
-        * (1.0 - 3.0 * e2d / 14.0 + e3d / 6.0 + 9.0 * e2d * e2d / 88.0
-            - 3.0 * e4d / 22.0
-            - 9.0 * e2d * e3d / 52.0
-            + 3.0 * e5d / 26.0)
+        * (T::one() - T::from(3.0).unwrap() * e2d / T::from(14.0).unwrap()
+            + e3d / T::from(6.0).unwrap()
+            + T::from(9.0).unwrap() * e2d * e2d / T::from(88.0).unwrap()
+            - T::from(3.0).unwrap() * e4d / T::from(22.0).unwrap()
+            - T::from(9.0).unwrap() * e2d * e3d / T::from(52.0).unwrap()
+            + T::from(3.0).unwrap() * e5d / T::from(26.0).unwrap())
         / two_to_2n
         / ad
         / ad.sqrt();
 
-    ret -= 3.0 * scaled * seriesd;
+    ret -= T::from(3.0).unwrap() * scaled * seriesd;
     ret
 }
 
@@ -310,12 +345,12 @@ mod test {
 
     use super::*;
 
-    fn ellipeinc_k(inp: &[f64]) -> f64 {
+    fn ellipeinc_k<T: Float + AddAssign + SubAssign + MulAssign + DivAssign>(inp: &[T]) -> T {
         ellipeinc(inp[0], inp[1] * inp[1]).unwrap()
     }
 
     #[test]
     fn test_ellipeinc() {
-        compare_test_data!("./tests/data/boost/ellint_e2_data.txt", ellipeinc_k, 1e-14);
+        compare_test_data!("./tests/data/boost/ellint_e2_data.txt", ellipeinc_k::<f64>, 1.1e-15);
     }
 }
