@@ -11,7 +11,9 @@ homepage = "https://github.com/p-sira/ellip"
 repository = "https://github.com/p-sira/ellip"
 readme = "README.md"
 license = "BSD-3-Clause"
+
 edition = "2021"
+exclude = ["/logo", "/tests/data"]
 
 [dependencies]
 
