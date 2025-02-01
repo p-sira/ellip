@@ -15,7 +15,8 @@
 // * Press WH, Teukolsky SA, Vetterling WT, Flannery BP (2007) Numerical Recipes: The Art of
 //   Scientific Computing. Third Edition. Cambridge University Press. 1235p.
 
-use crate::constants::{BIG, TINY};
+use crate::{BIG, TINY};
+use num_traits::Float;
 
 /// Compute [degenerate symmetric elliptic integral of RF](https://dlmf.nist.gov/19.16.E6).
 /// ```text
@@ -28,49 +29,58 @@ use crate::constants::{BIG, TINY};
 /// where x ≥ 0, y ≠ 0
 /// ```
 ///
-pub fn elliprc(x: f64, y: f64) -> Result<f64, &'static str> {
-    let comp1 = 2.236 / TINY.sqrt();
-    let comp2 = (TINY * BIG).powi(2) / 25.0;
-    if x < 0.0
-        || y == 0.0
-        || (x + y.abs()) < TINY
-        || (x + y.abs()) > BIG
-        || (y < -comp1 && x > 0.0 && x < comp2)
+pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, &'static str> {
+    let tiny = T::from(TINY).unwrap();
+    let big = T::from(BIG).unwrap();
+    let comp1 = T::from(2.236).unwrap() / tiny.sqrt();
+    let comp2 = (tiny * big).powi(2) / T::from(25.0).unwrap();
+    
+    if x < T::zero()
+        || y == T::zero()
+        || (x + y.abs()) < tiny
+        || (x + y.abs()) > big
+        || (y < -comp1 && x > T::zero() && x < comp2)
     {
         return Err("elliprc: input must satisfy: x ≥ 0, y ≠ 0.");
     }
-    let (mut xt, mut yt, w) = if y > 0.0 {
-        (x, y, 1.0)
+    
+    let (mut xt, mut yt, w) = if y > T::zero() {
+        (x, y, T::one())
     } else {
         (x - y, -y, x.sqrt() / (x - y).sqrt())
     };
-    let mut ave: f64 = 0.0;
-    let mut s: f64 = 0.0;
+    
+    let n_max_iterations = 500;
+    let rc_err_tol = T::from(0.0006).unwrap();
+    let rc_c1 = T::from(0.3).unwrap();
+    let rc_c2 = T::from(1.0 / 7.0).unwrap();
+    let rc_c3 = T::from(0.375).unwrap();
+    let rc_c4 = T::from(9.0 / 22.0).unwrap();
+    
+    let mut ave: T = T::zero();
+    let mut s: T = T::zero();
     let mut it = 0;
-    for _ in 0..N_MAX_ITERATIONS {
-        let lam = 2.0 * xt.sqrt() * yt.sqrt() + yt;
-        xt = 0.25 * (xt + lam);
-        yt = 0.25 * (yt + lam);
-        ave = (xt + yt + yt) / 3.0;
+    
+    for _ in 0..n_max_iterations {
+        let lam = T::from(2.0).unwrap() * xt.sqrt() * yt.sqrt() + yt;
+        xt = T::from(0.25).unwrap() * (xt + lam);
+        yt = T::from(0.25).unwrap() * (yt + lam);
+        ave = (xt + yt + yt) / T::from(3.0).unwrap();
         s = (yt - ave) / ave;
-        if s.abs() < RC_ERR_TOL {
+        
+        if s.abs() < rc_err_tol {
             break;
         }
         it += 1;
     }
-    if it == N_MAX_ITERATIONS {
+    
+    if it == n_max_iterations {
         return Err("elliprc: Fail to converge.");
     }
-    let ans = w * (1.0 + s * s * (RC_C1 + s * (RC_C2 + s * (RC_C3 + s * RC_C4)))) / ave.sqrt();
+    
+    let ans = w * (T::one() + s * s * (rc_c1 + s * (rc_c2 + s * (rc_c3 + s * rc_c4)))) / ave.sqrt();
     Ok(ans)
 }
-
-const N_MAX_ITERATIONS: usize = 500; // Modified from Russell's 11
-const RC_ERR_TOL: f64 = 0.0006; // Modified from Russell's 0.0012
-const RC_C1: f64 = 0.3;
-const RC_C2: f64 = 1.0 / 7.0;
-const RC_C3: f64 = 0.375;
-const RC_C4: f64 = 9.0 / 22.0;
 
 #[cfg(test)]
 mod test {
