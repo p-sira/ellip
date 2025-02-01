@@ -44,6 +44,8 @@ mod ellipk;
 pub use ellipk::ellipk;
 mod ellipe;
 pub use ellipe::ellipe;
+mod ellippi;
+pub use ellippi::ellippi;
 
 // Legendre's incomplete integrals
 mod ellipf;
