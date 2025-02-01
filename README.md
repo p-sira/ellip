@@ -1,8 +1,8 @@
-<p align="center">
+<h1 align="center">
     <a href="https://github.com/p-sira/ellip/">
         <img src="https://github.com/p-sira/ellip/blob/main/logo/ellip-logo.svg?raw=true" alt="ELLIP" width="600">
     </a>
-</p>
+</h1>
 
 <p align="center">
     <a href="https://opensource.org/license/BSD-3-clause">
