@@ -3,7 +3,12 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-use std::f64::consts::PI;
+use std::{
+    f64::consts::FRAC_PI_2,
+    ops::{AddAssign, Mul, Sub},
+};
+
+use num_traits::Float;
 
 // Reference: Derby and Olbert, “Cylindrical Magnets and Ideal Solenoids.”
 /// Compute [complete elliptic integral in Bulirsch form](https://dlmf.nist.gov/19.2#iii).
@@ -16,12 +21,12 @@ use std::f64::consts::PI;
 ///                     0                                                   
 /// where kc ≠ 0, p ≠ 0
 /// ```
-pub fn cel(kc: f64, p: f64, a: f64, b: f64) -> Result<f64, &'static str> {
-    if kc == 0.0 {
+pub fn cel<T: Float + Sub + AddAssign + Mul>(kc: T, p: T, a: T, b: T) -> Result<T, &'static str> {
+    if kc == T::zero() {
         return Err("cel: kc cannot be zero.");
     }
 
-    if p == 0.0 {
+    if p == T::zero() {
         return Err("cel: p cannot be zero.");
     }
 
@@ -30,46 +35,44 @@ pub fn cel(kc: f64, p: f64, a: f64, b: f64) -> Result<f64, &'static str> {
     let mut pp;
     let mut bb;
 
-    if p > 0.0 {
+    if p > T::zero() {
         aa = a;
         pp = p.sqrt();
         bb = b / pp;
     } else {
         let f = kc * kc;
-        let q = (1.0 - f) * (b - a * p);
-        let g = 1.0 - p;
+        let q: T = (T::one() - f) * (b - a * p);
+        let g = T::one() - p;
         let h = f - p;
         pp = (h / g).sqrt();
         aa = (a - b) / g;
         bb = -q / (g * g * pp) + aa * pp;
     }
 
-    let mut em = 1.0;
+    let mut em = T::one();
     let mut f = aa;
     aa += bb / pp;
     let mut g = k / pp;
-    bb = 2.0 * (bb + f * g);
+    bb = T::from(2.0).unwrap() * (bb + f * g);
     pp += g;
     g = em;
     em += k;
     let mut kk = k;
 
-    while (g - k).abs() > (g * ERRTOL) {
-        k = 2.0 * kk.sqrt();
+    while (g - k).abs() > (g * T::from(1e-6).unwrap()) {
+        k = T::from(2.0).unwrap() * kk.sqrt();
         kk = k * em;
         f = aa;
         aa += bb / pp;
         g = kk / pp;
-        bb = 2.0 * (bb + f * g);
+        bb = T::from(2.0).unwrap() * (bb + f * g);
         pp += g;
         g = em;
         em += k;
     }
 
-    Ok((PI / 2.0) * (bb + aa * em) / (em * (em + pp)))
+    Ok(T::from(FRAC_PI_2).unwrap() * (bb + aa * em) / (em * (em + pp)))
 }
-
-const ERRTOL: f64 = 1e-6;
 
 #[cfg(test)]
 mod test {
