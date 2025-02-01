@@ -4,7 +4,7 @@
  */
 
 //! # ELLIP
-//! **Ellip** is a standalone elliptic integral functions for Rust.
+//! **Ellip** is an elliptic integral functions for Rust.
 //!
 //! # Features
 //! ## Legendre's complete integrals
