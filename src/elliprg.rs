@@ -136,11 +136,21 @@ pub fn elliprg(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
 
 #[cfg(test)]
 mod test {
+    use itertools::Itertools;
+
     use super::*;
-    use crate::compare_test_data;
+    use crate::{assert_close, compare_test_data};
+
+    fn __elliprg(inp: &Vec<&f64>) -> f64 {
+        elliprg(*inp[0], *inp[1], *inp[2]).unwrap()
+    }
 
     fn _elliprg(inp: &[f64]) -> f64 {
-        elliprg(inp[0], inp[1], inp[2]).unwrap()
+        let res = elliprg(inp[0], inp[1], inp[2]).unwrap();
+        inp.iter().permutations(inp.len()).skip(1).for_each(|perm| {
+            assert_close!(res, __elliprg(&perm), 6.5e-16);
+        });
+        res
     }
 
     #[test]
