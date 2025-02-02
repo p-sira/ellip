@@ -8,7 +8,7 @@
 //  Copyright (c) 2006 Xiaogang Zhang
 //  Copyright (c) 2006 John Maddock
 //  Use, modification and distribution are subject to the
-//  Boost Software License, Version 1.0. (See accompanying file
+//  Boost Software License, Version T::one(). (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 //  History:
@@ -17,7 +17,7 @@
 //  Boost.Math conceptual framework better, and to correctly
 //  handle the various corner cases.
 //
-// Boost Software License - Version 1.0 - August 17th, 2003
+// Boost Software License - Version T::one() - August 17th, 2003
 //
 // Permission is hereby granted, free of charge, to any person or organization
 // obtaining a copy of the software and accompanying documentation covered by
@@ -41,7 +41,9 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-use std::f64::consts::PI;
+use std::f64::consts::FRAC_PI_2;
+
+use num_traits::Float;
 
 use crate::{ellipk, elliprf, elliprj};
 
@@ -55,52 +57,52 @@ use crate::{ellipk, elliprf, elliprj};
 ///            0              
 /// where m < 1, n < 1               
 /// ```
-/// 
+///
 /// Note that some mathematical references use the parameter k and α for the function,
 /// where k² = m, α² = n.
-pub fn ellippi(n: f64, m: f64) -> Result<f64, &'static str> {
+pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, &'static str> {
     // Compute vc = 1-n without cancellation errors
-    let vc = 1.0 - n;
+    let vc = T::one() - n;
     _ellippi(n, m, vc)
 }
 
 #[inline]
-fn _ellippi(n: f64, m: f64, vc: f64) -> Result<f64, &'static str> {
-    if m >= 1.0 {
+fn _ellippi<T: Float>(n: T, m: T, vc: T) -> Result<T, &'static str> {
+    if m >= T::one() {
         return Err("ellippi: m must be less than 1.");
     }
-    if vc <= 0.0 {
+    if vc <= T::zero() {
         return Err("ellippi: n must be less than 1.");
     }
 
-    if n == 0.0 {
-        if m == 0.0 {
-            return Ok(PI / 2.0);
+    if n == T::zero() {
+        if m == T::zero() {
+            return Ok(T::from(FRAC_PI_2).unwrap());
         }
         return ellipk(m);
     }
 
-    if n < 0.0 {
+    if n < T::zero() {
         // Apply A&S 17.7.17
-        let nn = (m - n) / (1.0 - n);
-        let nm1 = (1.0 - m) / (1.0 - n);
+        let nn = (m - n) / (T::one() - n);
+        let nm1 = (T::one() - m) / (T::one() - n);
 
         let mut result = _ellippi(nn, m, nm1)?;
         // Split calculations to avoid overflow/underflow
-        result *= -n / (1.0 - n);
-        result *= (1.0 - m) / (m - n);
-        result += ellipk(m)? * m / (m - n);
+        result = result * -n / (T::one() - n);
+        result = result * (T::one() - m) / (m - n);
+        result = result + ellipk(m)? * m / (m - n);
         return Ok(result);
     }
 
-    let x = 0.0;
-    let y = 1.0 - m;
-    let z = 1.0;
+    let x = T::zero();
+    let y = T::one() - m;
+    let z = T::one();
     let p = vc;
 
     let f = elliprf(x, y, z)?;
     let rj = elliprj(x, y, z, p)?;
-    Ok(f + n * rj / 3.0)
+    Ok(f + n * rj / T::from(3.0).unwrap())
 }
 
 #[cfg(test)]
