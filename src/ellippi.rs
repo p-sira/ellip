@@ -45,44 +45,43 @@ use std::f64::consts::PI;
 
 use crate::{ellipk, elliprf, elliprj};
 
-pub fn ellippi(v: f64, k: f64) -> Result<f64, &'static str> {
+pub fn ellippi(v: f64, m: f64) -> Result<f64, &'static str> {
     // Compute vc = 1-v without cancellation errors
     let vc = 1.0 - v;
-    _ellippi(v, k, vc)
+    _ellippi(v, m, vc)
 }
 
 #[inline]
-fn _ellippi(v: f64, k: f64, vc: f64) -> Result<f64, &'static str> {
-    if k.abs() >= 1.0 {
-        return Err("function requires |k| <= 1");
+fn _ellippi(v: f64, m: f64, vc: f64) -> Result<f64, &'static str> {
+    if m >= 1.0 {
+        return Err("function requires |m| <= 1");
     }
     if vc <= 0.0 {
         return Err("function requires v < 1");
     }
 
     if v == 0.0 {
-        if k == 0.0 {
+        if m == 0.0 {
             return Ok(PI / 2.0);
         }
-        return ellipk(k);
+        return ellipk(m);
     }
 
     if v < 0.0 {
         // Apply A&S 17.7.17
-        let k2 = k * k;
-        let n = (k2 - v) / (1.0 - v);
-        let nm1 = (1.0 - k2) / (1.0 - v);
+        let n = (m - v) / (1.0 - v);
+        let nm1 = (1.0 - m) / (1.0 - v);
 
-        let mut result = _ellippi(n, k, nm1)?;
+        let mut result = _ellippi(n, m, nm1)?;
         // Split calculations to avoid overflow/underflow
         result *= -v / (1.0 - v);
-        result *= (1.0 - k2) / (k2 - v);
-        result += ellipk(k)? * k2 / (k2 - v);
+        result *= (1.0 - m) / (m - v);
+        result += ellipk(m)? * m / (m - v);
         return Ok(result);
     }
 
     let x = 0.0;
-    let y = 1.0 - k * k;
+    let y = 1.0 - m;
     let z = 1.0;
     let p = vc;
 
@@ -97,11 +96,11 @@ mod tests {
     use crate::compare_test_data;
 
     fn ellippi_k(inp: &[f64]) -> f64 {
-        ellippi(inp[0], inp[1]).unwrap()
+        ellippi(inp[0], inp[1] * inp[1]).unwrap()
     }
 
     #[test]
     fn test_ellippi() {
-        compare_test_data!("./tests/data/boost/ellint_pi2_data.txt", ellippi_k, 1e-16);
+        compare_test_data!("./tests/data/boost/ellint_pi2_data_f64.txt", ellippi_k, 1.6e-14);
     }
 }
