@@ -3,10 +3,7 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-use std::{
-    f64::consts::FRAC_PI_2,
-    ops::{AddAssign, Mul, Sub},
-};
+use std::f64::consts::FRAC_PI_2;
 
 use num_traits::Float;
 
@@ -21,7 +18,7 @@ use num_traits::Float;
 ///                     0                                                   
 /// where kc ≠ 0, p ≠ 0
 /// ```
-pub fn cel<T: Float + Sub + AddAssign + Mul>(kc: T, p: T, a: T, b: T) -> Result<T, &'static str> {
+pub fn cel<T: Float>(kc: T, p: T, a: T, b: T) -> Result<T, &'static str> {
     if kc == T::zero() {
         return Err("cel: kc cannot be zero.");
     }
@@ -51,24 +48,24 @@ pub fn cel<T: Float + Sub + AddAssign + Mul>(kc: T, p: T, a: T, b: T) -> Result<
 
     let mut em = T::one();
     let mut f = aa;
-    aa += bb / pp;
+    aa = aa + bb / pp;
     let mut g = k / pp;
     bb = T::from(2.0).unwrap() * (bb + f * g);
-    pp += g;
+    pp = pp + g;
     g = em;
-    em += k;
+    em = em + k;
     let mut kk = k;
 
     while (g - k).abs() > (g * T::from(1e-6).unwrap()) {
         k = T::from(2.0).unwrap() * kk.sqrt();
         kk = k * em;
         f = aa;
-        aa += bb / pp;
+        aa = aa + bb / pp;
         g = kk / pp;
         bb = T::from(2.0).unwrap() * (bb + f * g);
-        pp += g;
+        pp = pp + g;
         g = em;
-        em += k;
+        em = em + k;
     }
 
     Ok(T::from(FRAC_PI_2).unwrap() * (bb + aa * em) / (em * (em + pp)))
