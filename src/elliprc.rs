@@ -15,7 +15,6 @@
 // * Press WH, Teukolsky SA, Vetterling WT, Flannery BP (2007) Numerical Recipes: The Art of
 //   Scientific Computing. Third Edition. Cambridge University Press. 1235p.
 
-use crate::{BIG, TINY};
 use num_traits::Float;
 
 /// Compute [degenerate symmetric elliptic integral of RF](https://dlmf.nist.gov/19.16.E6).
@@ -30,8 +29,8 @@ use num_traits::Float;
 /// ```
 ///
 pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, &'static str> {
-    let tiny = T::from(TINY).unwrap();
-    let big = T::from(BIG).unwrap();
+    let tiny = T::from(5.0).unwrap() * T::min_positive_value();
+    let big = T::from(0.2).unwrap() * T::max_value();
     let comp1 = T::from(2.236).unwrap() / tiny.sqrt();
     let comp2 = (tiny * big).powi(2) / T::from(25.0).unwrap();
 

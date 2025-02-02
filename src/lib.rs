@@ -72,8 +72,6 @@ pub use elliprd::elliprd;
 // Utilities
 mod polyeval;
 use polyeval::*;
-const TINY: f64 = 5.0 * f64::MIN_POSITIVE;
-const BIG: f64 = 0.2 * f64::MAX;
 
 #[cfg(test)]
 mod test_util;
