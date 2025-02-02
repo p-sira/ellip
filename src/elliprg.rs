@@ -4,13 +4,10 @@
  * This code is modified from Boost Math.
  */
 
-use std::f64::consts::PI;
+use num_traits::Float;
+use std::{f64::consts::PI, mem::swap};
 
 use crate::{elliprc, elliprd, elliprf};
-
-// Ellipe modified how the function handles special cases by swapping
-// the variables to arrange them first, then check against the special
-// case conditions.
 
 // Original header from Boost Math
 //  Copyright (c) 2015 John Maddock
@@ -52,85 +49,73 @@ use crate::{elliprc, elliprd, elliprf};
 ///                  0                                                             
 /// where x ≥ 0, y ≥ 0, z ≥ 0
 /// ```
-pub fn elliprg(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
-    if x < 0.0 || y < 0.0 || z < 0.0 {
+pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
+    if x < T::zero() || y < T::zero() || z < T::zero() {
         return Err("elliprg: x, y, and z must be non-negative.");
     }
 
     let mut x = x;
     let mut y = y;
     let mut z = z;
-    // Function is symmetric in x, y and z, but we require
-    // (x - z)(y - z) >= 0 to avoid cancellation error in the result
-    // which implies (for example) x >= z >= y
     if x < y {
-        std::mem::swap(&mut x, &mut y);
+        swap(&mut x, &mut y);
     }
     if x < z {
-        std::mem::swap(&mut x, &mut z);
+        swap(&mut x, &mut z);
     }
     if y > z {
-        std::mem::swap(&mut y, &mut z);
+        swap(&mut y, &mut z);
     }
 
-    // Special cases from http://dlmf.nist.gov/19.20#ii
     if x == z {
         if y == z {
-            // RG(x,x,x)
             return Ok(x.sqrt());
         }
 
-        if y == 0.0 {
-            // RG(x,0,x)
-            // RG(0,y,y)
-            return Ok(PI * x.sqrt() / 4.0);
+        if y == T::zero() {
+            return Ok(T::from(PI).unwrap() * x.sqrt() / T::from(4.0).unwrap());
         }
 
-        if x == 0.0 {
-            // RG(0,y,0)
-            // RG(0,0,z)
-            return Ok(y.sqrt() / 2.0);
+        if x == T::zero() {
+            return Ok(y.sqrt() / T::from(2.0).unwrap());
         }
 
-        // RG(x,y,x)
-        // 2 * RG(x,y,y)
-        return Ok((x * elliprc(y, x)? + y.sqrt()) / 2.0);
+        return Ok((x * elliprc(y, x)? + y.sqrt()) / T::from(2.0).unwrap());
     }
 
     if y == z {
-        if y == 0.0 {
-            // RG(x,0,0)
-            // RG(0,0,z)
-            return Ok(x.sqrt() / 2.0);
+        if y == T::zero() {
+            return Ok(x.sqrt() / T::from(2.0).unwrap());
         }
 
-        // RG(x,y,y)
-        return Ok((y * elliprc(x, y)? + x.sqrt()) / 2.0);
+        return Ok((y * elliprc(x, y)? + x.sqrt()) / T::from(2.0).unwrap());
     }
 
-    if y == 0.0 {
-        // Special case for y = 0
+    if y == T::zero() {
         let mut xn = x.sqrt();
-        let mut yn = z.sqrt(); // Swap z with y
+        let mut yn = z.sqrt();
         let x0 = xn;
         let y0 = yn;
-        let mut sum = 0.0;
-        let mut sum_pow = 0.25;
+        let mut sum = T::zero();
+        let mut sum_pow = T::from(0.25).unwrap();
 
-        while (xn - yn).abs() >= 2.7 * f64::EPSILON * xn.abs() {
+        while (xn - yn).abs() >= T::from(2.7).unwrap() * T::epsilon() * xn.abs() {
             let t = (xn * yn).sqrt();
-            xn = (xn + yn) / 2.0;
+            xn = (xn + yn) / T::from(2.0).unwrap();
             yn = t;
-            sum_pow *= 2.0;
-            sum += sum_pow * (xn - yn).powi(2);
+            sum_pow = sum_pow * T::from(2.0).unwrap();
+            sum = sum + sum_pow * (xn - yn) * (xn - yn);
         }
-        let rf = PI / (xn + yn);
-        return Ok(((x0 + y0).powi(2) / 4.0 - sum) * rf / 2.0);
+        let rf = T::from(PI).unwrap() / (xn + yn);
+        return Ok(
+            ((x0 + y0) * (x0 + y0) / T::from(4.0).unwrap() - sum) * rf / T::from(2.0).unwrap()
+        );
     }
 
     Ok(
-        (z * elliprf(x, y, z)? - (x - z) * (y - z) * elliprd(x, y, z)? / 3.0 + (x * y / z).sqrt())
-            / 2.0,
+        (z * elliprf(x, y, z)? - (x - z) * (y - z) * elliprd(x, y, z)? / T::from(3.0).unwrap()
+            + (x * y / z).sqrt())
+            / T::from(2.0).unwrap(),
     )
 }
 
