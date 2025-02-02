@@ -164,7 +164,7 @@ fn elliprc1p<T: Float>(y: T) -> T {
 
 /// Unchecked version of [elliprj].
 ///
-/// Return NAN when it fails to converge.
+/// p must be positive. Return NAN when it fails to converge.
 pub fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> T {
     let two = T::from(2.0).unwrap();
     let three = T::from(3.0).unwrap();
