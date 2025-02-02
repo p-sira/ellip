@@ -74,8 +74,6 @@
  * (which gets immediately converted to m1 = 1-m)
  */
 
-use std::ops::{DivAssign, MulAssign};
-
 use num_traits::Float;
 
 use crate::polyeval;
@@ -93,7 +91,7 @@ use crate::polyeval;
 ///
 /// Note that some mathematical references use the parameter k for the function,
 /// where k² = m.
-pub fn ellipe<T: Float + DivAssign + MulAssign>(m: T) -> Result<T, &'static str> {
+pub fn ellipe<T: Float>(m: T) -> Result<T, &'static str> {
     if m > T::one() {
         return Err("ellipe: m must be less than 1.");
     }
@@ -105,8 +103,8 @@ pub fn ellipe<T: Float + DivAssign + MulAssign>(m: T) -> Result<T, &'static str>
     let mut m = m;
     let mut k = T::one();
     while m < T::zero() {
-        k *= (T::one() - m).sqrt();
-        m /= m - T::one();
+        k = k * (T::one() - m).sqrt();
+        m = m / (m - T::one());
     }
 
     let x = T::one() - m;
