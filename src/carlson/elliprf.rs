@@ -43,7 +43,7 @@
 // DEALINGS IN THE SOFTWARE.
 
 use std::{
-    f64::consts::{FRAC_PI_2, PI},
+    f64::consts::PI,
     mem::swap,
 };
 
@@ -77,7 +77,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
         if z == T::zero() {
             // RF(x,x,0)
             // RF(0,y,y)
-            return Ok(T::from(FRAC_PI_2).unwrap() * x.sqrt());
+            return Ok(T::from(PI).unwrap() / (T::from(2.0).unwrap() * x.sqrt()));
         }
 
         // RF(x,x,z)
