@@ -244,7 +244,7 @@ pub fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> T {
         pn = (pn + lambda) / four;
         delta = delta / T::from(64.0).unwrap();
     }
-    return T::nan();
+    T::nan()
 }
 
 const N_MAX_ITERATION: usize = 100;
@@ -256,7 +256,7 @@ mod test {
     use super::*;
     use crate::{assert_close, compare_test_data};
 
-    fn __elliprj(inp: &Vec<&f64>) -> f64 {
+    fn __elliprj(inp: &[&f64]) -> f64 {
         elliprj(*inp[0], *inp[1], *inp[2], *inp[3]).unwrap()
     }
 

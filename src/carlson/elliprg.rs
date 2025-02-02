@@ -131,7 +131,7 @@ mod test {
     use super::*;
     use crate::{assert_close, compare_test_data, test_util::RTOL};
 
-    fn __elliprg(inp: &Vec<&f64>) -> f64 {
+    fn __elliprg(inp: &[&f64]) -> f64 {
         elliprg(*inp[0], *inp[1], *inp[2]).unwrap()
     }
 

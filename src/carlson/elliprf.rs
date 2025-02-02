@@ -42,10 +42,7 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-use std::{
-    f64::consts::PI,
-    mem::swap,
-};
+use std::{f64::consts::PI, mem::swap};
 
 use num_traits::Float;
 
@@ -187,7 +184,7 @@ pub fn _elliprf<T: Float>(x: T, y: T, z: T) -> T {
                 / an.sqrt();
         }
     }
-    return T::nan();
+    T::nan()
 }
 
 const N_MAX_ITERATIONS: usize = 11;
@@ -199,7 +196,7 @@ mod test {
     use super::*;
     use crate::{assert_close, compare_test_data, test_util::RTOL};
 
-    fn __elliprf(inp: &Vec<&f64>) -> f64 {
+    fn __elliprf(inp: &[&f64]) -> f64 {
         elliprf(*inp[0], *inp[1], *inp[2]).unwrap()
     }
 
