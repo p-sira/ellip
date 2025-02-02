@@ -42,35 +42,27 @@
 //! Unicode-style mathematical notation are created using an awesome tool called
 //! [Diagon](https://github.com/ArthurSonzogni/Diagon).
 
+pub mod legendre;
 // Legendre's complete integrals
-mod ellipk;
-pub use ellipk::ellipk;
-mod ellipe;
-pub use ellipe::ellipe;
-mod ellippi;
-pub use ellippi::ellippi;
+pub use legendre::ellipk;
+pub use legendre::ellipe;
+pub use legendre::ellippi;
 
 // Legendre's incomplete integrals
-mod ellipf;
-pub use ellipf::ellipf;
-mod ellipeinc;
-pub use ellipeinc::ellipeinc;
+pub use legendre::ellipf;
+pub use legendre::ellipeinc;
 
 // Bulirsch's integrals
-mod cel;
-pub use cel::cel;
+pub mod bulirsch;
+pub use bulirsch::cel;
 
 // Carlson's symmetric integrals
-mod elliprf;
-pub use elliprf::elliprf;
-mod elliprg;
-pub use elliprg::elliprg;
-mod elliprj;
-pub use elliprj::elliprj;
-mod elliprc;
-pub use elliprc::elliprc;
-mod elliprd;
-pub use elliprd::elliprd;
+pub mod carlson;
+pub use carlson::elliprf;
+pub use carlson::elliprg;
+pub use carlson::elliprj;
+pub use carlson::elliprc;
+pub use carlson::elliprd;
 
 // Utilities
 mod polyeval;
