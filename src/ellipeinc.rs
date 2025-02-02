@@ -66,8 +66,8 @@ use crate::{ellipe, ellipk};
 /// Compute [incomplete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E5).
 /// ```text
 ///              φ
-///             ⌠   _______________
-/// E(φ, m)  =  │ \╱ 1 - m sin²(t)  dt
+///             ⌠   _____________
+/// E(φ, m)  =  │ \╱ 1 - m sin²θ  dθ
 ///             ⌡
 ///            0
 /// where m ≤ 1
