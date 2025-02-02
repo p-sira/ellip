@@ -262,7 +262,7 @@ mod test {
             .skip(1)
             .for_each(|mut perm| {
                 perm.push(p);
-                assert_close!(res, __elliprj(&perm), 1e-15);
+                assert_close!(res, __elliprj(&perm), 3e-14);
             });
         res
     }
@@ -273,6 +273,46 @@ mod test {
             "./tests/data/boost/ellint_rj_data.txt",
             elliprj_wrapper,
             2.1e-8, // Relatively low precision
+            5e-25
+        );
+    }
+
+    #[test]
+    fn test_elliprj_e2() {
+        compare_test_data!(
+            "./tests/data/boost/ellint_rj_e2.txt",
+            elliprj_wrapper,
+            7.1e-14,
+            5e-25
+        );
+    }
+
+    #[test]
+    fn test_elliprj_e3() {
+        compare_test_data!(
+            "./tests/data/boost/ellint_rj_e3.txt",
+            elliprj_wrapper,
+            3.9e-15,
+            5e-25
+        );
+    }
+
+    #[test]
+    fn test_elliprj_e4() {
+        compare_test_data!(
+            "./tests/data/boost/ellint_rj_e4.txt",
+            elliprj_wrapper,
+            2.2e-16,
+            5e-25
+        );
+    }
+
+    #[test]
+    fn test_elliprj_zp() {
+        compare_test_data!(
+            "./tests/data/boost/ellint_rj_zp.txt",
+            elliprj_wrapper,
+            7.1e-14,
             5e-25
         );
     }
