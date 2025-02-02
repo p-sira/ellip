@@ -12,6 +12,7 @@
 //! ## Legendre's complete integrals
 //! - [fn@ellipk]: Complete elliptic integral of the first kind.
 //! - [fn@ellipe]: Complete elliptic integral of the second kind.
+//! - [fn@ellippi]: Complete elliptic integral of the third kind.
 //! ## Legendre's incomplete integrals
 //! - [fn@ellipf]: Incomplete elliptic integral of the first kind.
 //! - [fn@ellipeinc]: Incomplete elliptic integral of the second kind.

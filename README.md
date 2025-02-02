@@ -28,6 +28,7 @@ Elliptic integrals for Rust
 - Legendre's complete integrals
     - `ellipk`: Complete elliptic integral of the first kind.
     - `ellipe`: Complete elliptic integral of the second kind.
+    - `ellippi`: Complete elliptic integral of the third kind.
 - Legendre's incomplete integrals
     - `ellipf`: Incomplete elliptic integral of the first kind.
     - `ellipeinc`: Incomplete elliptic integral of the second kind.
