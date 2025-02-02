@@ -3,6 +3,8 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
+#![allow(clippy::excessive_precision)]
+
 //! # ELLIP
 //! **Ellip** is an elliptic integral functions for Rust.
 //!
@@ -72,7 +74,6 @@ pub use elliprd::elliprd;
 // Utilities
 mod polyeval;
 use polyeval::*;
-mod constants;
 
 #[cfg(test)]
 mod test_util;

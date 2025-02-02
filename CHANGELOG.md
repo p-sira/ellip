@@ -1,5 +1,9 @@
 # Changelog
 ## 0.1
+### 0.2.1
+**Improvements**
+- Reduce crate size by removing the logo and test data from the source. To perform full test, download the test data from the [repository](https://github.com/p-sira/ellip/tree/main/tests/data).
+
 ### 0.2.0
 **New Features**
 - `cel`: Bulirsch's General complete elliptic integral

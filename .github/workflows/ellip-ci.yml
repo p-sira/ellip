@@ -19,6 +19,6 @@ jobs:
     - name: Run clippy
       run: cargo clippy 
     - name: Test
-      run: cargo test
+      run: cargo test -- --show-output
     - name: Make docs
       run: cargo doc

@@ -42,7 +42,12 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-use std::{f64::consts::PI, mem::swap};
+use std::{
+    f64::consts::{FRAC_PI_2, PI},
+    mem::swap,
+};
+
+use num_traits::Float;
 
 use crate::elliprc;
 
@@ -57,8 +62,8 @@ use crate::elliprc;
 /// where x ≥ 0, y ≥ 0, z ≥ 0, and at most one can be zero.
 /// ```
 ///
-pub fn elliprf(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
-    if x.min(y).min(z) < 0.0 || (y + z).min(x + y).min(x + z) < 0.0 {
+pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
+    if x.min(y).min(z) < T::zero() || (y + z).min(x + y).min(x + z) < T::zero() {
         return Err("elliprf: x, y, and z must be non-negative, and at most one can be zero.");
     }
 
@@ -66,13 +71,13 @@ pub fn elliprf(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
     if x == y {
         if x == z {
             // RF(x,x,x)
-            return Ok(1.0 / x.sqrt());
+            return Ok(T::one() / x.sqrt());
         }
 
-        if z == 0.0 {
+        if z == T::zero() {
             // RF(x,x,0)
             // RF(0,y,y)
-            return Ok(PI / (2.0 * x.sqrt()));
+            return Ok(T::from(FRAC_PI_2).unwrap() * x.sqrt());
         }
 
         // RF(x,x,z)
@@ -81,10 +86,10 @@ pub fn elliprf(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
     }
 
     if x == z {
-        if y == 0.0 {
+        if y == T::zero() {
             // RF(x,0,x)
             // RF(0,y,y)
-            return Ok(PI / (2.0 * x.sqrt()));
+            return Ok(T::from(PI).unwrap() / (T::from(2.0).unwrap() * x.sqrt()));
         }
 
         // RF(x,y,x)
@@ -93,9 +98,9 @@ pub fn elliprf(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
     }
 
     if y == z {
-        if x == 0.0 {
+        if x == T::zero() {
             // RF(0,y,y)
-            return Ok(PI / (2.0 * y.sqrt()));
+            return Ok(T::from(PI).unwrap() / (T::from(2.0).unwrap() * y.sqrt()));
         }
 
         // RF(x,y,y)
@@ -106,32 +111,32 @@ pub fn elliprf(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
     let mut yn = y;
     let mut zn = z;
 
-    if xn == 0.0 {
+    if xn == T::zero() {
         swap(&mut xn, &mut zn);
-    } else if yn == 0.0 {
+    } else if yn == T::zero() {
         swap(&mut yn, &mut zn);
     }
 
-    if zn == 0.0 {
+    if zn == T::zero() {
         let mut xn = xn.sqrt();
         let mut yn = yn.sqrt();
 
-        while (xn - yn).abs() >= 2.7 * f64::EPSILON * xn.abs() {
+        while (xn - yn).abs() >= T::from(2.7).unwrap() * T::epsilon() * xn.abs() {
             let t = (xn * yn).sqrt();
-            xn = (xn + yn) / 2.0;
+            xn = (xn + yn) / T::from(2.0).unwrap();
             yn = t;
         }
-        return Ok(PI / (xn + yn));
+        return Ok(T::from(PI).unwrap() / (xn + yn));
     }
 
-    let mut an = (xn + yn + zn) / 3.0;
+    let mut an = (xn + yn + zn) / T::from(3.0).unwrap();
     let a0 = an;
-    let mut q = (3.0 * f64::EPSILON).powf(-1.0 / 8.0)
+    let mut q = (T::from(3.0).unwrap() * T::epsilon()).powf(-T::one() / T::from(8.0).unwrap())
         * an.abs()
             .max((an - xn).abs())
             .max((an - yn).abs())
             .max((an - zn).abs());
-    let mut fn_val = 1.0;
+    let mut fn_val = T::one();
     let mut it = 0;
     for _ in 0..N_MAX_ITERATIONS {
         let root_x = xn.sqrt();
@@ -140,13 +145,13 @@ pub fn elliprf(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
 
         let lambda = root_x * root_y + root_x * root_z + root_y * root_z;
 
-        an = (an + lambda) / 4.0;
-        xn = (xn + lambda) / 4.0;
-        yn = (yn + lambda) / 4.0;
-        zn = (zn + lambda) / 4.0;
+        an = (an + lambda) / T::from(4.0).unwrap();
+        xn = (xn + lambda) / T::from(4.0).unwrap();
+        yn = (yn + lambda) / T::from(4.0).unwrap();
+        zn = (zn + lambda) / T::from(4.0).unwrap();
 
-        q /= 4.0;
-        fn_val *= 4.0;
+        q = q / T::from(4.0).unwrap();
+        fn_val = fn_val * T::from(4.0).unwrap();
 
         if q < an.abs() {
             break;
@@ -154,7 +159,7 @@ pub fn elliprf(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
         it += 1;
     }
     if it == N_MAX_ITERATIONS {
-        return Err("elliprf: Fail to converge.");
+        return Err("elliprf: Failed to converge.");
     }
 
     let x = (a0 - x) / (an * fn_val);
@@ -164,10 +169,13 @@ pub fn elliprf(x: f64, y: f64, z: f64) -> Result<f64, &'static str> {
     let e2 = x * y - z * z;
     let e3 = x * y * z;
 
-    Ok((1.0
-        + e3 * (1.0 / 14.0 + 3.0 * e3 / 104.0)
-        + e2 * (-1.0 / 10.0 + e2 / 24.0 - (3.0 * e3) / 44.0 - 5.0 * e2 * e2 / 208.0
-            + e2 * e3 / 16.0))
+    Ok((T::one()
+        + e3 * (T::from(1.0 / 14.0).unwrap()
+            + T::from(3.0).unwrap() * e3 / T::from(104.0).unwrap())
+        + e2 * (T::from(-0.1).unwrap() + e2 / T::from(24.0).unwrap()
+            - (T::from(3.0).unwrap() * e3) / T::from(44.0).unwrap()
+            - T::from(5.0).unwrap() * e2 * e2 / T::from(208.0).unwrap()
+            + e2 * e3 / T::from(16.0).unwrap()))
         / an.sqrt())
 }
 

@@ -44,6 +44,8 @@
 
 use std::mem::swap;
 
+use num_traits::Float;
+
 use crate::{elliprc, elliprd, elliprf};
 
 /// Compute [symmetric elliptic integral of the third kind](https://dlmf.nist.gov/19.16.E2).
@@ -57,16 +59,16 @@ use crate::{elliprc, elliprd, elliprf};
 /// where x ≥ 0, y ≥ 0, z ≥ 0, and at most one can be zero. p ≠ 0.
 /// ```
 ///
-pub fn elliprj(x: f64, y: f64, z: f64, p: f64) -> Result<f64, &'static str> {
-    if x.min(y).min(z) < 0.0 || (y + z).min(x + y).min(x + z) == 0.0 {
+pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
+    if x.min(y).min(z) < T::zero() || (y + z).min(x + y).min(x + z) == T::zero() {
         return Err("elliprj: x, y, and z must be non-negative, and at most one can be zero.");
     }
-    if p == 0.0 {
+    if p == T::zero() {
         return Err("elliprj: p must be non-zero");
     }
 
     // for p < 0, the integral is singular, return Cauchy principal value
-    if p < 0.0 {
+    if p < T::zero() {
         // We must ensure that x < y < z.
         // Since the integral is symmetrical in x, y and z
         // we can just permute the values:
@@ -87,49 +89,54 @@ pub fn elliprj(x: f64, y: f64, z: f64, p: f64) -> Result<f64, &'static str> {
         let q = -p;
         let p = (z * (x + y + q) - x * y) / (z + q);
 
-        let value = (p - z) * _elliprj(x, y, z, p)? - 3.0 * elliprf(x, y, z)?
-            + 3.0 * ((x * y * z) / (x * y + p * q)).sqrt() * elliprc(x * y + p * q, p * q)?;
+        let value = (p - z) * _elliprj(x, y, z, p)? - T::from(3.0).unwrap() * elliprf(x, y, z)?
+            + T::from(3.0).unwrap()
+                * ((x * y * z) / (x * y + p * q)).sqrt()
+                * elliprc(x * y + p * q, p * q)?;
         Ok(value / (z + q))
     } else {
         _elliprj(x, y, z, p)
     }
 }
-
 /// Calculate RC(1, 1 + x)
 #[inline]
-fn elliprc1p(y: f64) -> Result<f64, &'static str> {
+fn elliprc1p<T: Float>(y: T) -> Result<T, &'static str> {
     // We can skip this check since the call from _elliprj already did the check.
     // if y == -1.0 {
     //     return Err("elliprc1p: y cannot be -1.0.");
     // }
 
     // for 1 + y < 0, the integral is singular, return Cauchy principal value
-    if y < -1.0 {
-        Ok((1.0 / -y).sqrt() * elliprc(-y, -1.0 - y)?)
-    } else if y == 0.0 {
-        Ok(1.0)
-    } else if y > 0.0 {
+    if y < -T::one() {
+        Ok((T::one() / -y).sqrt() * elliprc(-y, -T::one() - y)?)
+    } else if y == T::zero() {
+        Ok(T::one())
+    } else if y > T::zero() {
         Ok(y.sqrt().atan() / y.sqrt())
-    } else if y > -0.5 {
+    } else if y > T::from(-0.5).unwrap() {
         let arg = (-y).sqrt();
-        Ok(((1.0 + arg).ln() - (1.0 - arg).ln()) / (2.0 * (-y).sqrt()))
+        Ok(((T::one() + arg).ln() - (T::one() - arg).ln()) / (T::from(2.0).unwrap() * (-y).sqrt()))
     } else {
-        Ok(((1.0 + (-y).sqrt()) / (1.0 + y).sqrt()).ln() / (-y).sqrt())
+        Ok(((T::one() + (-y).sqrt()) / (T::one() + y).sqrt()).ln() / (-y).sqrt())
     }
 }
 
 #[inline]
-fn _elliprj(mut x: f64, y: f64, mut z: f64, p: f64) -> Result<f64, &'static str> {
+fn _elliprj<T: Float>(mut x: T, y: T, mut z: T, p: T) -> Result<T, &'static str> {
+    let two = T::from(2.0).unwrap();
+    let three = T::from(3.0).unwrap();
+    let four = T::from(4.0).unwrap();
+
     // Special cases
     // https://dlmf.nist.gov/19.20#iii
     if x == y {
         if x == z {
             if x == p {
                 // RJ(x,x,x,x)
-                return Ok(1.0 / (x * x.sqrt()));
+                return Ok(T::one() / (x * x.sqrt()));
             } else {
                 // RJ(x,x,x,p)
-                return Ok((3.0 / (x - p)) * (elliprc(x, p)? - 1.0 / x.sqrt()));
+                return Ok((three / (x - p)) * (elliprc(x, p)? - T::one() / x.sqrt()));
             }
         } else {
             // RJ(x,x,z,p)
@@ -145,9 +152,9 @@ fn _elliprj(mut x: f64, y: f64, mut z: f64, p: f64) -> Result<f64, &'static str>
             return elliprd(x, y, y);
         }
         // This prevents division by zero.
-        if p.max(y) / p.min(y) > 1.2 {
+        if p.max(y) / p.min(y) > T::from(1.2).unwrap() {
             // RJ(x,y,y,p)
-            return Ok((3.0 / (p - y)) * (elliprc(x, y)? - elliprc(x, p)?));
+            return Ok((three / (p - y)) * (elliprc(x, y)? - elliprc(x, p)?));
         }
     }
 
@@ -160,21 +167,20 @@ fn _elliprj(mut x: f64, y: f64, mut z: f64, p: f64) -> Result<f64, &'static str>
     let mut yn = y;
     let mut zn = z;
     let mut pn = p;
-    let mut an = (x + y + z + 2.0 * p) / 5.0;
+    let mut an = (x + y + z + two * p) / T::from(5.0).unwrap();
     let a0 = an;
     let mut delta = (p - x) * (p - y) * (p - z);
-    let q = (f64::EPSILON / 5.0).powf(-1.0 / 8.0)
+    let q = (T::epsilon() / T::from(5.0).unwrap()).powf(-T::one() / T::from(8.0).unwrap())
         * (an - x)
             .abs()
             .max((an - y).abs())
             .max((an - z).abs())
             .max((an - p).abs());
 
-    let mut fmn = 1.0; // 4^-n
-    let mut rc_sum = 0.0;
+    let mut fmn = T::one();
+    let mut rc_sum = T::zero();
 
-    for _ in 0..100 {
-        // max iterations
+    for _ in 0..N_MAX_ITERATION {
         let rx = xn.sqrt();
         let ry = yn.sqrt();
         let rz = zn.sqrt();
@@ -182,55 +188,59 @@ fn _elliprj(mut x: f64, y: f64, mut z: f64, p: f64) -> Result<f64, &'static str>
         let dn = (rp + rx) * (rp + ry) * (rp + rz);
         let en = delta / (dn * dn);
 
-        if en < -0.5 && en > -1.5 {
-            let b = 2.0 * rp * (pn + rx * (ry + rz) + ry * rz) / dn;
-            rc_sum += fmn / dn * elliprc(1.0, b)?;
+        if en < T::from(-0.5).unwrap() && en > T::from(-1.5).unwrap() {
+            let b = two * rp * (pn + rx * (ry + rz) + ry * rz) / dn;
+            rc_sum = rc_sum + fmn / dn * elliprc(T::one(), b)?;
         } else {
-            rc_sum += fmn / dn * elliprc1p(en)?;
+            rc_sum = rc_sum + fmn / dn * elliprc1p(en)?;
         }
 
         let lambda = rx * ry + rx * rz + ry * rz;
-        an = (an + lambda) / 4.0;
-        fmn /= 4.0;
+        an = (an + lambda) / four;
+        fmn = fmn / four;
 
         if fmn * q < an {
             break;
         }
 
-        xn = (xn + lambda) / 4.0;
-        yn = (yn + lambda) / 4.0;
-        zn = (zn + lambda) / 4.0;
-        pn = (pn + lambda) / 4.0;
-        delta /= 64.0;
+        xn = (xn + lambda) / four;
+        yn = (yn + lambda) / four;
+        zn = (zn + lambda) / four;
+        pn = (pn + lambda) / four;
+        delta = delta / T::from(64.0).unwrap();
     }
 
     let x = fmn * (a0 - x) / an;
     let y = fmn * (a0 - y) / an;
     let z = fmn * (a0 - z) / an;
-    let p = (-x - y - z) / 2.0;
+    let p = (-x - y - z) / two;
     let xyz = x * y * z;
     let p2 = p * p;
     let p3 = p2 * p;
 
-    let e2 = x * y + x * z + y * z - 3.0 * p2;
-    let e3 = xyz + 2.0 * e2 * p + 4.0 * p3;
-    let e4 = (2.0 * xyz + e2 * p + 3.0 * p3) * p;
+    let e2 = x * y + x * z + y * z - three * p2;
+    let e3 = xyz + two * e2 * p + four * p3;
+    let e4 = (two * xyz + e2 * p + three * p3) * p;
     let e5 = xyz * p2;
 
     let result = fmn
-        * an.powf(-1.5)
-        * (1.0 - 3.0 * e2 / 14.0 + e3 / 6.0 + 9.0 * e2 * e2 / 88.0
-            - 3.0 * e4 / 22.0
-            - 9.0 * e2 * e3 / 52.0
-            + 3.0 * e5 / 26.0
-            - e2 * e2 * e2 / 16.0
-            + 3.0 * e3 * e3 / 40.0
-            + 3.0 * e2 * e4 / 20.0
-            + 45.0 * e2 * e2 * e3 / 272.0
-            - 9.0 * (e3 * e4 + e2 * e5) / 68.0);
+        * an.powf(-T::from(1.5).unwrap())
+        * (T::one() - three * e2 / T::from(14.0).unwrap()
+            + e3 / T::from(6.0).unwrap()
+            + T::from(9.0).unwrap() * e2 * e2 / T::from(88.0).unwrap()
+            - three * e4 / T::from(22.0).unwrap()
+            - T::from(9.0).unwrap() * e2 * e3 / T::from(52.0).unwrap()
+            + three * e5 / T::from(26.0).unwrap()
+            - e2 * e2 * e2 / T::from(16.0).unwrap()
+            + three * e3 * e3 / T::from(40.0).unwrap()
+            + three * e2 * e4 / T::from(20.0).unwrap()
+            + T::from(45.0).unwrap() * e2 * e2 * e3 / T::from(272.0).unwrap()
+            - T::from(9.0).unwrap() * (e3 * e4 + e2 * e5) / T::from(68.0).unwrap());
 
-    Ok(result + 6.0 * rc_sum)
+    Ok(result + T::from(6.0).unwrap() * rc_sum)
 }
+
+const N_MAX_ITERATION: usize = 100;
 
 #[cfg(test)]
 mod test {
