@@ -54,7 +54,7 @@ pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, &'static str> {
 }
 
 /// Unchecked version of [elliprc].
-/// 
+///
 /// Return NAN when it fails to converge.
 pub fn _elliprc<T: Float>(x: T, y: T) -> T {
     let (mut xt, mut yt, w) = if y > T::zero() {

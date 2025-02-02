@@ -1,7 +1,7 @@
 /*
  * Ellip is licensed under The 3-Clause BSD, see LICENSE.
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
- * This code is translated from Boost Math.
+ * This code is modified from Boost Math.
  */
 
 // Original header from Boost Math
@@ -129,6 +129,23 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
         return Ok(T::from(PI).unwrap() / (xn + yn));
     }
 
+    let res = _elliprf(xn, yn, zn);
+    if res.is_nan() {
+        return Err("elliprf: Failed to converge.");
+    }
+    Ok(res)
+}
+
+/// Unchecked version of [elliprf].
+///
+/// Return NAN when it fails to converge.
+pub fn _elliprf<T: Float>(x: T, y: T, z: T) -> T {
+    let four = T::from(4.0).unwrap();
+
+    let mut xn = x;
+    let mut yn = y;
+    let mut zn = z;
+
     let mut an = (xn + yn + zn) / T::from(3.0).unwrap();
     let a0 = an;
     let mut q = (T::from(3.0).unwrap() * T::epsilon()).powf(-T::one() / T::from(8.0).unwrap())
@@ -137,7 +154,6 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
             .max((an - yn).abs())
             .max((an - zn).abs());
     let mut fn_val = T::one();
-    let mut it = 0;
     for _ in 0..N_MAX_ITERATIONS {
         let root_x = xn.sqrt();
         let root_y = yn.sqrt();
@@ -145,38 +161,33 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
 
         let lambda = root_x * root_y + root_x * root_z + root_y * root_z;
 
-        an = (an + lambda) / T::from(4.0).unwrap();
-        xn = (xn + lambda) / T::from(4.0).unwrap();
-        yn = (yn + lambda) / T::from(4.0).unwrap();
-        zn = (zn + lambda) / T::from(4.0).unwrap();
+        an = (an + lambda) / four;
+        xn = (xn + lambda) / four;
+        yn = (yn + lambda) / four;
+        zn = (zn + lambda) / four;
 
-        q = q / T::from(4.0).unwrap();
-        fn_val = fn_val * T::from(4.0).unwrap();
+        q = q / four;
+        fn_val = fn_val * four;
 
         if q < an.abs() {
-            break;
+            let x = (a0 - x) / (an * fn_val);
+            let y = (a0 - y) / (an * fn_val);
+            let z = -x - y;
+
+            let e2 = x * y - z * z;
+            let e3 = x * y * z;
+
+            return (T::one()
+                + e3 * (T::from(1.0 / 14.0).unwrap()
+                    + T::from(3.0).unwrap() * e3 / T::from(104.0).unwrap())
+                + e2 * (T::from(-0.1).unwrap() + e2 / T::from(24.0).unwrap()
+                    - (T::from(3.0).unwrap() * e3) / T::from(44.0).unwrap()
+                    - T::from(5.0).unwrap() * e2 * e2 / T::from(208.0).unwrap()
+                    + e2 * e3 / T::from(16.0).unwrap()))
+                / an.sqrt();
         }
-        it += 1;
     }
-    if it == N_MAX_ITERATIONS {
-        return Err("elliprf: Failed to converge.");
-    }
-
-    let x = (a0 - x) / (an * fn_val);
-    let y = (a0 - y) / (an * fn_val);
-    let z = -x - y;
-
-    let e2 = x * y - z * z;
-    let e3 = x * y * z;
-
-    Ok((T::one()
-        + e3 * (T::from(1.0 / 14.0).unwrap()
-            + T::from(3.0).unwrap() * e3 / T::from(104.0).unwrap())
-        + e2 * (T::from(-0.1).unwrap() + e2 / T::from(24.0).unwrap()
-            - (T::from(3.0).unwrap() * e3) / T::from(44.0).unwrap()
-            - T::from(5.0).unwrap() * e2 * e2 / T::from(208.0).unwrap()
-            + e2 * e3 / T::from(16.0).unwrap()))
-        / an.sqrt())
+    return T::nan();
 }
 
 const N_MAX_ITERATIONS: usize = 11;
