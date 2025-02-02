@@ -1,7 +1,7 @@
 /*
  * Ellip is licensed under The 3-Clause BSD, see LICENSE.
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
- * This code is translated from Boost Math.
+ * This code is modified from Boost Math.
  */
 
 // Original header from Boost Math
