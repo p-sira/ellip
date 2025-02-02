@@ -1,8 +1,10 @@
 /*
  * Ellip is licensed under The 3-Clause BSD, see LICENSE.
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
- * This code is modified from Russell Lab to achieve precision on par with SciPy.
+ * This code is modified from Russell Lab.
  */
+
+// Max iteration logic is simplified
 
 // Original header from Russell Lab
 // Computes the degenerate elliptic integral using Carlson's formula
@@ -43,43 +45,46 @@ pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, &'static str> {
         return Err("elliprc: input must satisfy: x ≥ 0, y ≠ 0.");
     }
 
+    let res = _elliprc(x, y);
+    if res.is_nan() {
+        return Err("elliprc: Fail to converge.");
+    }
+
+    Ok(res)
+}
+
+/// Unchecked version of [elliprc].
+/// Return NAN when it fails to converge.
+pub fn _elliprc<T: Float>(x: T, y: T) -> T {
     let (mut xt, mut yt, w) = if y > T::zero() {
         (x, y, T::one())
     } else {
         (x - y, -y, x.sqrt() / (x - y).sqrt())
     };
 
-    let n_max_iterations = 500;
     let rc_err_tol = T::from(0.0006).unwrap();
     let rc_c1 = T::from(0.3).unwrap();
     let rc_c2 = T::from(1.0 / 7.0).unwrap();
     let rc_c3 = T::from(0.375).unwrap();
     let rc_c4 = T::from(9.0 / 22.0).unwrap();
 
-    let mut ave: T = T::zero();
-    let mut s: T = T::zero();
-    let mut it = 0;
-
-    for _ in 0..n_max_iterations {
+    for _ in 0..N_MAX_ITERATIONS {
         let lam = T::from(2.0).unwrap() * xt.sqrt() * yt.sqrt() + yt;
         xt = T::from(0.25).unwrap() * (xt + lam);
         yt = T::from(0.25).unwrap() * (yt + lam);
-        ave = (xt + yt + yt) / T::from(3.0).unwrap();
-        s = (yt - ave) / ave;
+        let ave = (xt + yt + yt) / T::from(3.0).unwrap();
+        let s = (yt - ave) / ave;
 
         if s.abs() < rc_err_tol {
-            break;
+            return w * (T::one() + s * s * (rc_c1 + s * (rc_c2 + s * (rc_c3 + s * rc_c4))))
+                / ave.sqrt();
         }
-        it += 1;
     }
 
-    if it == n_max_iterations {
-        return Err("elliprc: Fail to converge.");
-    }
-
-    let ans = w * (T::one() + s * s * (rc_c1 + s * (rc_c2 + s * (rc_c3 + s * rc_c4)))) / ave.sqrt();
-    Ok(ans)
+    T::nan()
 }
+
+const N_MAX_ITERATIONS: usize = 500;
 
 #[cfg(test)]
 mod test {

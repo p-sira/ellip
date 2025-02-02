@@ -44,13 +44,13 @@
 
 pub mod legendre;
 // Legendre's complete integrals
-pub use legendre::ellipk;
 pub use legendre::ellipe;
+pub use legendre::ellipk;
 pub use legendre::ellippi;
 
 // Legendre's incomplete integrals
-pub use legendre::ellipf;
 pub use legendre::ellipeinc;
+pub use legendre::ellipf;
 
 // Bulirsch's integrals
 pub mod bulirsch;
@@ -58,11 +58,22 @@ pub use bulirsch::cel;
 
 // Carlson's symmetric integrals
 pub mod carlson;
+pub use carlson::elliprc;
+pub use carlson::elliprd;
 pub use carlson::elliprf;
 pub use carlson::elliprg;
 pub use carlson::elliprj;
-pub use carlson::elliprc;
-pub use carlson::elliprd;
+
+// Unchecked function re-exports
+pub mod unchecked {
+    //! Access functions without argument checking and special case evaluation.
+    use crate::bulirsch;
+    pub use bulirsch::cel::_cel;
+
+    use crate::carlson;
+    pub use carlson::elliprc::_elliprc;
+    pub use carlson::elliprd::_elliprd;
+}
 
 // Utilities
 mod polyeval;

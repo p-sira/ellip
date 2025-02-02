@@ -27,6 +27,11 @@ pub fn cel<T: Float>(kc: T, p: T, a: T, b: T) -> Result<T, &'static str> {
         return Err("cel: p cannot be zero.");
     }
 
+    Ok(_cel(kc, p, a, b))
+}
+
+/// Unchecked version of [cel].
+pub fn _cel<T: Float>(kc: T, p: T, a: T, b: T) -> T {
     let mut k = kc.abs();
     let mut aa;
     let mut pp;
@@ -68,7 +73,7 @@ pub fn cel<T: Float>(kc: T, p: T, a: T, b: T) -> Result<T, &'static str> {
         em = em + k;
     }
 
-    Ok(T::from(FRAC_PI_2).unwrap() * (bb + aa * em) / (em * (em + pp)))
+    T::from(FRAC_PI_2).unwrap() * (bb + aa * em) / (em * (em + pp))
 }
 
 #[cfg(test)]

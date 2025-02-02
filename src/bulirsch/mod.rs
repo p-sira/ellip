@@ -5,5 +5,5 @@
 
 //! Elliptic integral functions in Bulirsch's form.
 
-mod cel;
+pub(crate) mod cel;
 pub use cel::cel;
