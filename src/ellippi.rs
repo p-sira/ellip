@@ -1,7 +1,7 @@
 /*
  * Ellip is licensed under The 3-Clause BSD, see LICENSE.
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
- * This code is translated from Boost Math.
+ * This code modified from Boost Math.
  */
 
 // Original header from Boost Math
@@ -45,8 +45,21 @@ use std::f64::consts::PI;
 
 use crate::{ellipk, elliprf, elliprj};
 
+/// Compute [complete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E8).
+/// ```text
+///              π/2                              
+///             ⌠                 dϑ              
+/// Π(n, m)  =  ⎮ ──────────────────────────────────
+///             ⎮   _____________                
+///             ⌡ ╲╱ 1 - m sin²ϑ  ⋅ ( 1 - n sin²ϑ )
+///            0              
+/// where m < 1, n < 1               
+/// ```
+/// 
+/// Note that some mathematical references use the parameter k and α for the function,
+/// where k² = m, α² = n.
 pub fn ellippi(n: f64, m: f64) -> Result<f64, &'static str> {
-    // Compute vc = 1-v without cancellation errors
+    // Compute vc = 1-n without cancellation errors
     let vc = 1.0 - n;
     _ellippi(n, m, vc)
 }
@@ -101,6 +114,10 @@ mod tests {
 
     #[test]
     fn test_ellippi() {
-        compare_test_data!("./tests/data/boost/ellint_pi2_data_f64.txt", ellippi_k, 1.6e-14);
+        compare_test_data!(
+            "./tests/data/boost/ellint_pi2_data_f64.txt",
+            ellippi_k,
+            1.6e-14
+        );
     }
 }
