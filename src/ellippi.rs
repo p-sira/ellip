@@ -45,38 +45,38 @@ use std::f64::consts::PI;
 
 use crate::{ellipk, elliprf, elliprj};
 
-pub fn ellippi(n: f64, m: f64) -> Result<f64, &'static str> {
+pub fn ellippi(v: f64, m: f64) -> Result<f64, &'static str> {
     // Compute vc = 1-v without cancellation errors
-    let vc = 1.0 - n;
-    _ellippi(n, m, vc)
+    let vc = 1.0 - v;
+    _ellippi(v, m, vc)
 }
 
 #[inline]
-fn _ellippi(n: f64, m: f64, vc: f64) -> Result<f64, &'static str> {
+fn _ellippi(v: f64, m: f64, vc: f64) -> Result<f64, &'static str> {
     if m >= 1.0 {
-        return Err("ellippi: m must be less than 1.");
+        return Err("function requires |m| <= 1");
     }
     if vc <= 0.0 {
-        return Err("ellippi: n must be less than 1.");
+        return Err("function requires v < 1");
     }
 
-    if n == 0.0 {
+    if v == 0.0 {
         if m == 0.0 {
             return Ok(PI / 2.0);
         }
         return ellipk(m);
     }
 
-    if n < 0.0 {
+    if v < 0.0 {
         // Apply A&S 17.7.17
-        let n = (m - n) / (1.0 - n);
-        let nm1 = (1.0 - m) / (1.0 - n);
+        let n = (m - v) / (1.0 - v);
+        let nm1 = (1.0 - m) / (1.0 - v);
 
         let mut result = _ellippi(n, m, nm1)?;
         // Split calculations to avoid overflow/underflow
-        result *= -n / (1.0 - n);
-        result *= (1.0 - m) / (m - n);
-        result += ellipk(m)? * m / (m - n);
+        result *= -v / (1.0 - v);
+        result *= (1.0 - m) / (m - v);
+        result += ellipk(m)? * m / (m - v);
         return Ok(result);
     }
 
@@ -87,7 +87,7 @@ fn _ellippi(n: f64, m: f64, vc: f64) -> Result<f64, &'static str> {
 
     let f = elliprf(x, y, z)?;
     let rj = elliprj(x, y, z, p)?;
-    Ok(f + n * rj / 3.0)
+    Ok(f + v * rj / 3.0)
 }
 
 #[cfg(test)]
