@@ -110,6 +110,7 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
 }
 
 /// Unchecked version of [elliprd].
+/// 
 /// Return NAN when it fails to converge.
 pub fn _elliprd<T: Float>(x: T, y: T, z: T) -> T {
     let mut xn = x;
