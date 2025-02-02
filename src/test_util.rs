@@ -52,6 +52,14 @@ macro_rules! compare_test_data {
                     .expect("Cannot parse expected value as a number");
 
                 let result = $func(&inputs);
+
+                if result.is_nan() {
+                    panic! ("Test failed on line {}: input = {:?}, expected = {:?}, got = NAN",
+                    line_number + 1,
+                    inputs,
+                    expected,)
+                }
+
                 let error = (result - expected).abs();
                 let tol = $t::from($atol) + $t::from($rtol) * expected.abs();
                 if error > tol {
