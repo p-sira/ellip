@@ -7,7 +7,9 @@
 use num_traits::Float;
 use std::{f64::consts::PI, mem::swap};
 
-use crate::{elliprc, elliprd, elliprf};
+use crate::elliprc;
+
+use super::{elliprd::_elliprd, elliprf::_elliprf};
 
 // Original header from Boost Math
 //  Copyright (c) 2015 John Maddock
@@ -112,11 +114,14 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
         );
     }
 
-    Ok(
-        (z * elliprf(x, y, z)? - (x - z) * (y - z) * elliprd(x, y, z)? / T::from(3.0).unwrap()
-            + (x * y / z).sqrt())
-            / T::from(2.0).unwrap(),
-    )
+    Ok(_elliprg(x, y, z))
+}
+
+/// Unchecked version of [elliprg].
+pub fn _elliprg<T: Float>(x: T, y: T, z: T) -> T {
+    (z * _elliprf(x, y, z) - (x - z) * (y - z) * _elliprd(x, y, z) / T::from(3.0).unwrap()
+        + (x * y / z).sqrt())
+        / T::from(2.0).unwrap()
 }
 
 #[cfg(test)]

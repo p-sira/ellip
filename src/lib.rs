@@ -64,7 +64,7 @@ pub use carlson::elliprf;
 pub use carlson::elliprg;
 pub use carlson::elliprj;
 
-// Unchecked function re-exports
+// Unchecked functions
 pub mod unchecked {
     //! Access functions without argument checking and special case evaluation.
     use crate::bulirsch;
@@ -73,6 +73,8 @@ pub mod unchecked {
     use crate::carlson;
     pub use carlson::elliprc::_elliprc;
     pub use carlson::elliprd::_elliprd;
+    pub use carlson::elliprg::_elliprg;
+    pub use carlson::elliprj::_elliprj;
 }
 
 // Utilities

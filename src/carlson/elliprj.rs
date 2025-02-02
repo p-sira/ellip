@@ -46,7 +46,9 @@ use std::mem::swap;
 
 use num_traits::Float;
 
-use crate::{elliprc, elliprd, elliprf};
+use crate::{elliprc, elliprd};
+
+use super::{elliprc::_elliprc, elliprf::_elliprf};
 
 /// Compute [symmetric elliptic integral of the third kind](https://dlmf.nist.gov/19.16.E2).
 /// ```text
@@ -67,65 +69,9 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
         return Err("elliprj: p must be non-zero");
     }
 
-    // for p < 0, the integral is singular, return Cauchy principal value
-    if p < T::zero() {
-        // We must ensure that x < y < z.
-        // Since the integral is symmetrical in x, y and z
-        // we can just permute the values:
-        let mut x = x;
-        let mut y = y;
-        let mut z = z;
-
-        if x > y {
-            swap(&mut x, &mut y);
-        }
-        if y > z {
-            swap(&mut y, &mut z);
-        }
-        if x > y {
-            swap(&mut x, &mut y);
-        }
-
-        let q = -p;
-        let p = (z * (x + y + q) - x * y) / (z + q);
-
-        let value = (p - z) * _elliprj(x, y, z, p)? - T::from(3.0).unwrap() * elliprf(x, y, z)?
-            + T::from(3.0).unwrap()
-                * ((x * y * z) / (x * y + p * q)).sqrt()
-                * elliprc(x * y + p * q, p * q)?;
-        Ok(value / (z + q))
-    } else {
-        _elliprj(x, y, z, p)
-    }
-}
-/// Calculate RC(1, 1 + x)
-#[inline]
-fn elliprc1p<T: Float>(y: T) -> Result<T, &'static str> {
-    // We can skip this check since the call from _elliprj already did the check.
-    // if y == -1.0 {
-    //     return Err("elliprc1p: y cannot be -1.0.");
-    // }
-
-    // for 1 + y < 0, the integral is singular, return Cauchy principal value
-    if y < -T::one() {
-        Ok((T::one() / -y).sqrt() * elliprc(-y, -T::one() - y)?)
-    } else if y == T::zero() {
-        Ok(T::one())
-    } else if y > T::zero() {
-        Ok(y.sqrt().atan() / y.sqrt())
-    } else if y > T::from(-0.5).unwrap() {
-        let arg = (-y).sqrt();
-        Ok(((T::one() + arg).ln() - (T::one() - arg).ln()) / (T::from(2.0).unwrap() * (-y).sqrt()))
-    } else {
-        Ok(((T::one() + (-y).sqrt()) / (T::one() + y).sqrt()).ln() / (-y).sqrt())
-    }
-}
-
-#[inline]
-fn _elliprj<T: Float>(mut x: T, y: T, mut z: T, p: T) -> Result<T, &'static str> {
-    let two = T::from(2.0).unwrap();
-    let three = T::from(3.0).unwrap();
-    let four = T::from(4.0).unwrap();
+    let mut x = x;
+    let mut y = y;
+    let mut z = z;
 
     // Special cases
     // https://dlmf.nist.gov/19.20#iii
@@ -136,7 +82,9 @@ fn _elliprj<T: Float>(mut x: T, y: T, mut z: T, p: T) -> Result<T, &'static str>
                 return Ok(T::one() / (x * x.sqrt()));
             } else {
                 // RJ(x,x,x,p)
-                return Ok((three / (x - p)) * (elliprc(x, p)? - T::one() / x.sqrt()));
+                return Ok(
+                    (T::from(3.0).unwrap() / (x - p)) * (elliprc(x, p)? - T::one() / x.sqrt())
+                );
             }
         } else {
             // RJ(x,x,z,p)
@@ -154,7 +102,7 @@ fn _elliprj<T: Float>(mut x: T, y: T, mut z: T, p: T) -> Result<T, &'static str>
         // This prevents division by zero.
         if p.max(y) / p.min(y) > T::from(1.2).unwrap() {
             // RJ(x,y,y,p)
-            return Ok((three / (p - y)) * (elliprc(x, y)? - elliprc(x, p)?));
+            return Ok((T::from(3.0).unwrap() / (p - y)) * (elliprc(x, y)? - elliprc(x, p)?));
         }
     }
 
@@ -162,6 +110,65 @@ fn _elliprj<T: Float>(mut x: T, y: T, mut z: T, p: T) -> Result<T, &'static str>
         // RJ(x,y,z,z)
         return elliprd(x, y, z);
     }
+
+    // for p < 0, the integral is singular, return Cauchy principal value
+    if p < T::zero() {
+        // We must ensure that x < y < z.
+        // Since the integral is symmetrical in x, y and z
+        // we can just permute the values:
+        if x > y {
+            swap(&mut x, &mut y);
+        }
+        if y > z {
+            swap(&mut y, &mut z);
+        }
+        if x > y {
+            swap(&mut x, &mut y);
+        }
+
+        let q = -p;
+        let p = (z * (x + y + q) - x * y) / (z + q);
+
+        let value = (p - z) * _elliprj(x, y, z, p) - T::from(3.0).unwrap() * _elliprf(x, y, z)
+            + T::from(3.0).unwrap()
+                * ((x * y * z) / (x * y + p * q)).sqrt()
+                * elliprc(x * y + p * q, p * q)?;
+        Ok(value / (z + q))
+    } else {
+        Ok(_elliprj(x, y, z, p))
+    }
+}
+
+/// Calculate RC(1, 1 + x)
+#[inline]
+fn elliprc1p<T: Float>(y: T) -> T {
+    // We can skip this check since the call from _elliprj already did the check.
+    // if y == -1.0 {
+    //     return Err("elliprc1p: y cannot be -1.0.");
+    // }
+
+    // for 1 + y < 0, the integral is singular, return Cauchy principal value
+    if y < -T::one() {
+        (T::one() / -y).sqrt() * _elliprc(-y, -T::one() - y)
+    } else if y == T::zero() {
+        T::one()
+    } else if y > T::zero() {
+        y.sqrt().atan() / y.sqrt()
+    } else if y > T::from(-0.5).unwrap() {
+        let arg = (-y).sqrt();
+        ((T::one() + arg).ln() - (T::one() - arg).ln()) / (T::from(2.0).unwrap() * (-y).sqrt())
+    } else {
+        ((T::one() + (-y).sqrt()) / (T::one() + y).sqrt()).ln() / (-y).sqrt()
+    }
+}
+
+/// Unchecked version of [elliprj].
+///
+/// Return NAN when it fails to converge.
+pub fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> T {
+    let two = T::from(2.0).unwrap();
+    let three = T::from(3.0).unwrap();
+    let four = T::from(4.0).unwrap();
 
     let mut xn = x;
     let mut yn = y;
@@ -190,9 +197,9 @@ fn _elliprj<T: Float>(mut x: T, y: T, mut z: T, p: T) -> Result<T, &'static str>
 
         if en < T::from(-0.5).unwrap() && en > T::from(-1.5).unwrap() {
             let b = two * rp * (pn + rx * (ry + rz) + ry * rz) / dn;
-            rc_sum = rc_sum + fmn / dn * elliprc(T::one(), b)?;
+            rc_sum = rc_sum + fmn / dn * _elliprc(T::one(), b);
         } else {
-            rc_sum = rc_sum + fmn / dn * elliprc1p(en)?;
+            rc_sum = rc_sum + fmn / dn * elliprc1p(en);
         }
 
         let lambda = rx * ry + rx * rz + ry * rz;
@@ -200,7 +207,35 @@ fn _elliprj<T: Float>(mut x: T, y: T, mut z: T, p: T) -> Result<T, &'static str>
         fmn = fmn / four;
 
         if fmn * q < an {
-            break;
+            // Calculate and return
+            let x = fmn * (a0 - x) / an;
+            let y = fmn * (a0 - y) / an;
+            let z = fmn * (a0 - z) / an;
+            let p = (-x - y - z) / two;
+            let xyz = x * y * z;
+            let p2 = p * p;
+            let p3 = p2 * p;
+
+            let e2 = x * y + x * z + y * z - three * p2;
+            let e3 = xyz + two * e2 * p + four * p3;
+            let e4 = (two * xyz + e2 * p + three * p3) * p;
+            let e5 = xyz * p2;
+
+            let result = fmn
+                * an.powf(-T::from(1.5).unwrap())
+                * (T::one() - three * e2 / T::from(14.0).unwrap()
+                    + e3 / T::from(6.0).unwrap()
+                    + T::from(9.0).unwrap() * e2 * e2 / T::from(88.0).unwrap()
+                    - three * e4 / T::from(22.0).unwrap()
+                    - T::from(9.0).unwrap() * e2 * e3 / T::from(52.0).unwrap()
+                    + three * e5 / T::from(26.0).unwrap()
+                    - e2 * e2 * e2 / T::from(16.0).unwrap()
+                    + three * e3 * e3 / T::from(40.0).unwrap()
+                    + three * e2 * e4 / T::from(20.0).unwrap()
+                    + T::from(45.0).unwrap() * e2 * e2 * e3 / T::from(272.0).unwrap()
+                    - T::from(9.0).unwrap() * (e3 * e4 + e2 * e5) / T::from(68.0).unwrap());
+
+            return result + T::from(6.0).unwrap() * rc_sum;
         }
 
         xn = (xn + lambda) / four;
@@ -209,35 +244,7 @@ fn _elliprj<T: Float>(mut x: T, y: T, mut z: T, p: T) -> Result<T, &'static str>
         pn = (pn + lambda) / four;
         delta = delta / T::from(64.0).unwrap();
     }
-
-    let x = fmn * (a0 - x) / an;
-    let y = fmn * (a0 - y) / an;
-    let z = fmn * (a0 - z) / an;
-    let p = (-x - y - z) / two;
-    let xyz = x * y * z;
-    let p2 = p * p;
-    let p3 = p2 * p;
-
-    let e2 = x * y + x * z + y * z - three * p2;
-    let e3 = xyz + two * e2 * p + four * p3;
-    let e4 = (two * xyz + e2 * p + three * p3) * p;
-    let e5 = xyz * p2;
-
-    let result = fmn
-        * an.powf(-T::from(1.5).unwrap())
-        * (T::one() - three * e2 / T::from(14.0).unwrap()
-            + e3 / T::from(6.0).unwrap()
-            + T::from(9.0).unwrap() * e2 * e2 / T::from(88.0).unwrap()
-            - three * e4 / T::from(22.0).unwrap()
-            - T::from(9.0).unwrap() * e2 * e3 / T::from(52.0).unwrap()
-            + three * e5 / T::from(26.0).unwrap()
-            - e2 * e2 * e2 / T::from(16.0).unwrap()
-            + three * e3 * e3 / T::from(40.0).unwrap()
-            + three * e2 * e4 / T::from(20.0).unwrap()
-            + T::from(45.0).unwrap() * e2 * e2 * e3 / T::from(272.0).unwrap()
-            - T::from(9.0).unwrap() * (e3 * e4 + e2 * e5) / T::from(68.0).unwrap());
-
-    Ok(result + T::from(6.0).unwrap() * rc_sum)
+    return T::nan();
 }
 
 const N_MAX_ITERATION: usize = 100;
@@ -253,7 +260,7 @@ mod test {
         elliprj(*inp[0], *inp[1], *inp[2], *inp[3]).unwrap()
     }
 
-    fn elliprj_wrapper(inp: &[f64]) -> f64 {
+    fn _elliprj(inp: &[f64]) -> f64 {
         let res = elliprj(inp[0], inp[1], inp[2], inp[3]).unwrap();
         let (p, sym_params) = inp.split_last().unwrap();
         sym_params
@@ -271,7 +278,7 @@ mod test {
     fn test_elliprj() {
         compare_test_data!(
             "./tests/data/boost/ellint_rj_data.txt",
-            elliprj_wrapper,
+            _elliprj,
             2.1e-8, // Relatively low precision
             5e-25
         );
@@ -281,7 +288,7 @@ mod test {
     fn test_elliprj_e2() {
         compare_test_data!(
             "./tests/data/boost/ellint_rj_e2.txt",
-            elliprj_wrapper,
+            _elliprj,
             7.1e-14,
             5e-25
         );
@@ -291,7 +298,7 @@ mod test {
     fn test_elliprj_e3() {
         compare_test_data!(
             "./tests/data/boost/ellint_rj_e3.txt",
-            elliprj_wrapper,
+            _elliprj,
             3.9e-15,
             5e-25
         );
@@ -301,7 +308,7 @@ mod test {
     fn test_elliprj_e4() {
         compare_test_data!(
             "./tests/data/boost/ellint_rj_e4.txt",
-            elliprj_wrapper,
+            _elliprj,
             2.2e-16,
             5e-25
         );
@@ -311,7 +318,7 @@ mod test {
     fn test_elliprj_zp() {
         compare_test_data!(
             "./tests/data/boost/ellint_rj_zp.txt",
-            elliprj_wrapper,
+            _elliprj,
             7.1e-14,
             5e-25
         );
