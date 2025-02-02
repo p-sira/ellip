@@ -197,7 +197,7 @@ mod test {
     use itertools::Itertools;
 
     use super::*;
-    use crate::{assert_close, compare_test_data};
+    use crate::{assert_close, compare_test_data, test_util::RTOL};
 
     fn __elliprf(inp: &Vec<&f64>) -> f64 {
         elliprf(*inp[0], *inp[1], *inp[2]).unwrap()
@@ -229,5 +229,10 @@ mod test {
     #[test]
     fn test_elliprf_xyy() {
         compare_test_data!("./tests/data/boost/ellint_rf_xyy.txt", _elliprf, 5.3e-16);
+    }
+
+    #[test]
+    fn test_elliprf_0yy() {
+        compare_test_data!("./tests/data/boost/ellint_rf_0yy.txt", _elliprf, RTOL);
     }
 }
