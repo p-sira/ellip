@@ -13,7 +13,7 @@ readme = "README.md"
 license = "BSD-3-Clause"
 
 edition = "2021"
-exclude = ["/logo", "/tests/data"]
+exclude = ["/logo", "/tests/data", "cpp"]
 
 [dependencies]
 num-traits = "0.2.19"
