@@ -63,7 +63,7 @@ use num_traits::Float;
 
 use crate::{ellipe, ellipk};
 
-/// Compute [incomplete elliptic integral of the second kind](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.ellipeinc.html).
+/// Compute [incomplete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E5).
 /// ```text
 ///              φ
 ///             ⌠   _______________

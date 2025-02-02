@@ -68,7 +68,7 @@ use num_traits::Float;
 
 use crate::ellipk;
 
-/// Compute [incomplete elliptic integral of the first kind](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.ellipkinc.html).
+/// Compute [incomplete elliptic integral of the first kind](https://dlmf.nist.gov/19.2.E4).
 ///
 /// ```text
 ///              φ

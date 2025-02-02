@@ -74,7 +74,7 @@ use num_traits::Float;
 
 use crate::polyeval;
 
-/// Compute [complete elliptic integral of the first kind](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.ellipk.html).
+/// Compute [complete elliptic integral of the first kind](https://dlmf.nist.gov/19.2.E8).
 ///
 /// ```text
 ///           π/2
