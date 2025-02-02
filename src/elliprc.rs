@@ -34,7 +34,7 @@ pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, &'static str> {
     let big = T::from(BIG).unwrap();
     let comp1 = T::from(2.236).unwrap() / tiny.sqrt();
     let comp2 = (tiny * big).powi(2) / T::from(25.0).unwrap();
-    
+
     if x < T::zero()
         || y == T::zero()
         || (x + y.abs()) < tiny
@@ -43,41 +43,41 @@ pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, &'static str> {
     {
         return Err("elliprc: input must satisfy: x ≥ 0, y ≠ 0.");
     }
-    
+
     let (mut xt, mut yt, w) = if y > T::zero() {
         (x, y, T::one())
     } else {
         (x - y, -y, x.sqrt() / (x - y).sqrt())
     };
-    
+
     let n_max_iterations = 500;
     let rc_err_tol = T::from(0.0006).unwrap();
     let rc_c1 = T::from(0.3).unwrap();
     let rc_c2 = T::from(1.0 / 7.0).unwrap();
     let rc_c3 = T::from(0.375).unwrap();
     let rc_c4 = T::from(9.0 / 22.0).unwrap();
-    
+
     let mut ave: T = T::zero();
     let mut s: T = T::zero();
     let mut it = 0;
-    
+
     for _ in 0..n_max_iterations {
         let lam = T::from(2.0).unwrap() * xt.sqrt() * yt.sqrt() + yt;
         xt = T::from(0.25).unwrap() * (xt + lam);
         yt = T::from(0.25).unwrap() * (yt + lam);
         ave = (xt + yt + yt) / T::from(3.0).unwrap();
         s = (yt - ave) / ave;
-        
+
         if s.abs() < rc_err_tol {
             break;
         }
         it += 1;
     }
-    
+
     if it == n_max_iterations {
         return Err("elliprc: Fail to converge.");
     }
-    
+
     let ans = w * (T::one() + s * s * (rc_c1 + s * (rc_c2 + s * (rc_c3 + s * rc_c4)))) / ave.sqrt();
     Ok(ans)
 }

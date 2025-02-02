@@ -42,7 +42,10 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-use std::{f64::consts::{FRAC_PI_2, PI}, mem::swap};
+use std::{
+    f64::consts::{FRAC_PI_2, PI},
+    mem::swap,
+};
 
 use num_traits::Float;
 
@@ -167,8 +170,9 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
     let e3 = x * y * z;
 
     Ok((T::one()
-        + e3 * (T::from(1.0/14.0).unwrap() + T::from(3.0).unwrap() * e3 / T::from(104.0).unwrap())
-        + e2 * (T::from(-0.1).unwrap() + e2 / T::from(24.0).unwrap() 
+        + e3 * (T::from(1.0 / 14.0).unwrap()
+            + T::from(3.0).unwrap() * e3 / T::from(104.0).unwrap())
+        + e2 * (T::from(-0.1).unwrap() + e2 / T::from(24.0).unwrap()
             - (T::from(3.0).unwrap() * e3) / T::from(44.0).unwrap()
             - T::from(5.0).unwrap() * e2 * e2 / T::from(208.0).unwrap()
             + e2 * e3 / T::from(16.0).unwrap()))
