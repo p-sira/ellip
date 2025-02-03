@@ -107,7 +107,7 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, &'static str> {
 
     if x > T::epsilon() {
         return Ok(
-            k * (polyeval(x, &ellpk_p::<T>(), 10) - x.ln() * polyeval(x, &ellpk_q::<T>(), 10))
+            k * (polyeval(x, &ellpk_p::<T>()) - x.ln() * polyeval(x, &ellpk_q::<T>()))
         );
     }
 

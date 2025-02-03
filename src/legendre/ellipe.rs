@@ -109,10 +109,10 @@ pub fn ellipe<T: Float>(m: T) -> Result<T, &'static str> {
 
     let x = T::one() - m;
 
-    let p_val = polyeval(x, &ellpe_p(), 10);
+    let p_val = polyeval(x, &ellpe_p());
     let log_x = x.ln();
 
-    Ok(k * (p_val - log_x * (x * polyeval(x, &ellpe_q(), 9))))
+    Ok(k * (p_val - log_x * (x * polyeval(x, &ellpe_q()))))
 }
 
 #[inline]

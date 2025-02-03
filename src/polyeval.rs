@@ -71,8 +71,8 @@ use num_traits::Float;
 
 /// Evaluate polynomial
 #[inline]
-pub fn polyeval<T: Float>(x: T, coeff: &[T], n: usize) -> T {
+pub fn polyeval<T: Float>(x: T, coeff: &[T]) -> T {
     let mut ans = T::zero();
-    coeff.iter().take(n + 1).for_each(|k| ans = ans * x + *k);
+    coeff.iter().for_each(|k| ans = ans * x + *k);
     ans
 }
