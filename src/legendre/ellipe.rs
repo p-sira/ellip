@@ -112,6 +112,8 @@ pub fn ellipe<T: Float>(m: T) -> Result<T, &'static str> {
 }
 
 /// Unchecked version of [ellipe].
+/// 
+/// Domain: 0 < m ≤ 1
 pub fn _ellipe<T: Float>(m: T) -> T {
     let x = T::one() - m;
 

@@ -115,6 +115,8 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, &'static str> {
 }
 
 /// Unchecked version of [ellipk].
+/// 
+/// Domain: m ≤ 1
 pub fn _ellipk<T: Float>(m: T) -> T {
     let x = T::one() - m;
     polyeval(x, &ellpk_p::<T>()) - x.ln() * polyeval(x, &ellpk_q::<T>())

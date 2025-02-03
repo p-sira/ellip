@@ -95,7 +95,7 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, &'static str> {
 
 /// Unchecked version of [ellippi].
 /// 
-/// n must be non-negative.
+/// Domain: m < 1, 0 ≤ n < 1.
 pub fn _ellippi<T: Float>(n: T, m: T) -> T {
     ellippi_vc(n, m, T::one() - n)
 }
