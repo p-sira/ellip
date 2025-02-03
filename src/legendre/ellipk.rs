@@ -89,7 +89,7 @@ use crate::polyeval;
 ///
 /// Note that some mathematical references use the parameter k for the function,
 /// where k² = m.
-/// 
+///
 pub fn ellipk<T: Float>(m: T) -> Result<T, &'static str> {
     if m > T::one() {
         return Err("ellipk: m must be less than 1.");
@@ -100,7 +100,7 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, &'static str> {
         return Ok(T::infinity());
     }
 
-    if m == T::zero(){
+    if m == T::zero() {
         return Ok(T::from(FRAC_PI_2).unwrap());
     }
 
