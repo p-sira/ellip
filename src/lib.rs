@@ -69,6 +69,8 @@ pub mod unchecked {
     //! Access functions without argument checking and special case evaluation.
     use crate::legendre;
     pub use legendre::ellipk::_ellipk;
+    pub use legendre::ellipe::_ellipe;
+    pub use legendre::ellippi::_ellippi;
 
     use crate::bulirsch;
     pub use bulirsch::cel::_cel;
