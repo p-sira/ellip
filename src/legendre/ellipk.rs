@@ -2,7 +2,7 @@
  * Ellip is licensed under The 3-Clause BSD, see LICENSE.
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  * This code is translated from SciPy C++ implementation to Rust.
- * Modified to use iteration instead of recursion.
+ * Modified to use iteration instead of recursion and some special case handling.
  */
 
 /* Translated into C++ by SciPy developers in 2024.
@@ -70,16 +70,17 @@
  * Direct inquiries to 30 Frost Street, Cambridge, MA 02140
  */
 
+use std::f64::consts::FRAC_PI_2;
+
 use num_traits::Float;
 
 use crate::polyeval;
 
 /// Compute [complete elliptic integral of the first kind](https://dlmf.nist.gov/19.2.E8).
-///
 /// ```text
 ///           π/2
 ///          ⌠          dθ
-/// F(m)  =  │  _________________
+/// K(m)  =  │  _________________
 ///          │     _____________
 ///          ⌡   \╱ 1 - m sin²θ
 ///         0
@@ -88,34 +89,35 @@ use crate::polyeval;
 ///
 /// Note that some mathematical references use the parameter k for the function,
 /// where k² = m.
+/// 
 pub fn ellipk<T: Float>(m: T) -> Result<T, &'static str> {
     if m > T::one() {
         return Err("ellipk: m must be less than 1.");
     }
 
-    let mut x = T::one() - m;
-
-    if x.is_infinite() {
-        return Ok(T::zero());
-    }
-
-    let mut c = T::one();
-    while x > T::one() {
-        c = c / x.sqrt();
-        x = T::one() / x;
-    }
-
-    if x > T::epsilon() {
-        return Ok(
-            c * (polyeval(x, &ellpk_p::<T>()) - x.ln() * polyeval(x, &ellpk_q::<T>()))
-        );
-    }
-
-    if x == T::zero() {
+    // Special cases: https://dlmf.nist.gov/19.6.E1
+    if m == T::one() {
         return Ok(T::infinity());
     }
 
-    Ok(c * (T::from(4.0).unwrap().ln() - T::from(0.5).unwrap() * x.ln()))
+    if m == T::zero(){
+        return Ok(T::from(FRAC_PI_2).unwrap());
+    }
+
+    let x: T = T::one() - m;
+
+    // Asymptotic approximation when m -> 1
+    if x < T::epsilon() {
+        return Ok(T::from(4.0).unwrap().ln() - T::from(0.5).unwrap() * x.ln());
+    }
+
+    Ok(_ellipk(m))
+}
+
+/// Unchecked version of [ellipk].
+pub fn _ellipk<T: Float>(m: T) -> T {
+    let x = T::one() - m;
+    polyeval(x, &ellpk_p::<T>()) - x.ln() * polyeval(x, &ellpk_q::<T>())
 }
 
 fn ellpk_p<T: Float>() -> [T; 11] {
