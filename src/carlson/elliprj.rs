@@ -44,9 +44,7 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
     }
 
     let mut x = x;
-    let mut y = y;
     let mut z = z;
-
     // Special cases
     // https://dlmf.nist.gov/19.20#iii
     if x == y {
@@ -85,32 +83,8 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
         return Ok(_elliprd(x, y, z));
     }
 
-    // for p < 0, the integral is singular, return Cauchy principal value
-    if p < T::zero() {
-        // We must ensure that x < y < z.
-        // Since the integral is symmetrical in x, y and z
-        // we can just permute the values:
-        if x > y {
-            swap(&mut x, &mut y);
-        }
-        if y > z {
-            swap(&mut y, &mut z);
-        }
-        if x > y {
-            swap(&mut x, &mut y);
-        }
-
-        let q = -p;
-        let p = (z * (x + y + q) - x * y) / (z + q);
-
-        let value = (p - z) * _elliprj(x, y, z, p) - T::from(3.0).unwrap() * _elliprf(x, y, z)
-            + T::from(3.0).unwrap()
-                * ((x * y * z) / (x * y + p * q)).sqrt()
-                * _elliprc(x * y + p * q, p * q);
-        Ok(value / (z + q))
-    } else {
-        Ok(_elliprj(x, y, z, p))
-    }
+    // Note: this function allows both negative p and non-zero positive p.
+    Ok(_elliprj_neg(x, y, z, p))
 }
 
 /// Calculate RC(1, 1 + x)
@@ -136,9 +110,48 @@ fn elliprc1p<T: Float>(y: T) -> T {
     }
 }
 
+/// [_elliprj] but allows p < 0. An unchecked version of [elliprj].
+///
+/// Domain: p ≠ 0
+///
+/// Return NAN when it fails to converge.
+pub fn _elliprj_neg<T: Float>(x: T, y: T, z: T, p: T) -> T {
+    // for p < 0, the integral is singular, return Cauchy principal value
+    if p < T::zero() {
+        let mut x = x;
+        let mut y = y;
+        let mut z = z;
+        // We must ensure that x < y < z.
+        // Since the integral is symmetrical in x, y and z
+        // we can just permute the values:
+        if x > y {
+            swap(&mut x, &mut y);
+        }
+        if y > z {
+            swap(&mut y, &mut z);
+        }
+        if x > y {
+            swap(&mut x, &mut y);
+        }
+
+        let q = -p;
+        let p = (z * (x + y + q) - x * y) / (z + q);
+
+        let value = (p - z) * _elliprj(x, y, z, p) - T::from(3.0).unwrap() * _elliprf(x, y, z)
+            + T::from(3.0).unwrap()
+                * ((x * y * z) / (x * y + p * q)).sqrt()
+                * _elliprc(x * y + p * q, p * q);
+        value / (z + q)
+    } else {
+        _elliprj(x, y, z, p)
+    }
+}
+
 /// Unchecked version of [elliprj].
 ///
-/// p must be positive. Return NAN when it fails to converge.
+/// Domain: p > 0
+///
+/// Return NAN when it fails to converge.
 pub fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> T {
     let two = T::from(2.0).unwrap();
     let three = T::from(3.0).unwrap();

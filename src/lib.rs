@@ -82,6 +82,7 @@ pub mod unchecked {
     pub use carlson::elliprf::_elliprf;
     pub use carlson::elliprg::_elliprg;
     pub use carlson::elliprj::_elliprj;
+    pub use carlson::elliprj::_elliprj_neg;
 }
 
 // Utilities
