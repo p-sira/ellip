@@ -107,6 +107,23 @@ pub fn ellipe<T: Float>(m: T) -> Result<T, &'static str> {
         return Ok(T::from(FRAC_PI_2).unwrap());
     }
 
+    // Note: this function allows both negative m and positive m less than 1.
+    Ok(_ellipe_neg(m))
+}
+
+/// Unchecked version of [ellipe].
+///
+/// Domain: 0 < m ≤ 1
+pub fn _ellipe<T: Float>(m: T) -> T {
+    let x = T::one() - m;
+
+    polyeval(x, &ellpe_p()) - x.ln() * (x * polyeval(x, &ellpe_q()))
+}
+
+/// [_ellipe] but allows m < 0. An unchecked version of [ellipe].
+///
+/// Domain: m ≤ 1
+pub fn _ellipe_neg<T: Float>(m: T) -> T {
     // Negative m: Abramowitz & Stegun, 1972
     let mut m = m;
     let mut c = T::one();
@@ -115,16 +132,9 @@ pub fn ellipe<T: Float>(m: T) -> Result<T, &'static str> {
         m = m / (m - T::one());
     }
 
-    Ok(c * _ellipe(m))
-}
-
-/// Unchecked version of [ellipe].
-/// 
-/// Domain: 0 < m ≤ 1
-pub fn _ellipe<T: Float>(m: T) -> T {
     let x = T::one() - m;
 
-    polyeval(x, &ellpe_p()) - x.ln() * (x * polyeval(x, &ellpe_q()))
+    c * polyeval(x, &ellpe_p()) - x.ln() * (x * polyeval(x, &ellpe_q()))
 }
 
 #[inline]
