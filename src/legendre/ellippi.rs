@@ -45,7 +45,7 @@ use std::f64::consts::FRAC_PI_2;
 
 use num_traits::Float;
 
-use crate::{ellipk, elliprf, elliprj};
+use crate::unchecked::{_ellipk, _elliprf, _elliprj};
 
 /// Compute [complete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E8).
 /// ```text
@@ -61,17 +61,10 @@ use crate::{ellipk, elliprf, elliprj};
 /// Note that some mathematical references use the parameter k and α for the function,
 /// where k² = m, α² = n.
 pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, &'static str> {
-    // Compute vc = 1-n without cancellation errors
-    let vc = T::one() - n;
-    _ellippi(n, m, vc)
-}
-
-#[inline]
-fn _ellippi<T: Float>(n: T, m: T, vc: T) -> Result<T, &'static str> {
     if m >= T::one() {
         return Err("ellippi: m must be less than 1.");
     }
-    if vc <= T::zero() {
+    if n > T::one() {
         return Err("ellippi: n must be less than 1.");
     }
 
@@ -79,7 +72,7 @@ fn _ellippi<T: Float>(n: T, m: T, vc: T) -> Result<T, &'static str> {
         if m == T::zero() {
             return Ok(T::from(FRAC_PI_2).unwrap());
         }
-        return ellipk(m);
+        return Ok(_ellipk(m));
     }
 
     if n < T::zero() {
@@ -87,22 +80,34 @@ fn _ellippi<T: Float>(n: T, m: T, vc: T) -> Result<T, &'static str> {
         let nn = (m - n) / (T::one() - n);
         let nm1 = (T::one() - m) / (T::one() - n);
 
-        let mut result = _ellippi(nn, m, nm1)?;
+        let mut result = ellippi_vc(nn, m, nm1);
         // Split calculations to avoid overflow/underflow
         result = result * -n / (T::one() - n);
         result = result * (T::one() - m) / (m - n);
-        result = result + ellipk(m)? * m / (m - n);
+        result = result + _ellipk(m) * m / (m - n);
         return Ok(result);
     }
 
+    // Compute vc = 1-n without cancellation errors
+    let vc = T::one() - n;
+    Ok(ellippi_vc(n, m, vc))
+}
+
+/// Unchecked version of [ellippi].
+/// 
+/// n > 0.
+pub fn _ellippi<T: Float>(n: T, m: T) -> T {
+    ellippi_vc(n, m, T::one() - n)
+}
+
+#[inline]
+fn ellippi_vc<T: Float>(n: T, m: T, vc: T) -> T {
     let x = T::zero();
     let y = T::one() - m;
     let z = T::one();
     let p = vc;
 
-    let f = elliprf(x, y, z)?;
-    let rj = elliprj(x, y, z, p)?;
-    Ok(f + n * rj / T::from(3.0).unwrap())
+    _elliprf(x, y, z) + n * _elliprj(x, y, z, p) / T::from(3.0).unwrap()
 }
 
 #[cfg(test)]
