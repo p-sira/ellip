@@ -46,7 +46,7 @@ use std::{f64::consts::PI, mem::swap};
 
 use num_traits::Float;
 
-use crate::elliprc;
+use super::elliprc::_elliprc;
 
 /// Compute [symmetric elliptic integral of the first kind](https://dlmf.nist.gov/19.16.E1).
 /// ```text
@@ -79,7 +79,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
 
         // RF(x,x,z)
         // RF(x,y,y)
-        return elliprc(z, x);
+        return Ok(_elliprc(z, x));
     }
 
     if x == z {
@@ -91,7 +91,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
 
         // RF(x,y,x)
         // RF(x,y,y)
-        return elliprc(y, x);
+        return Ok(_elliprc(y, x));
     }
 
     if y == z {
@@ -101,7 +101,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
         }
 
         // RF(x,y,y)
-        return elliprc(x, y);
+        return Ok(_elliprc(x, y));
     }
 
     let mut xn = x;

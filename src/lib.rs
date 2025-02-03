@@ -67,12 +67,16 @@ pub use carlson::elliprj;
 // Unchecked functions
 pub mod unchecked {
     //! Access functions without argument checking and special case evaluation.
+    use crate::legendre;
+    pub use legendre::ellipk::_ellipk;
+
     use crate::bulirsch;
     pub use bulirsch::cel::_cel;
 
     use crate::carlson;
     pub use carlson::elliprc::_elliprc;
     pub use carlson::elliprd::_elliprd;
+    pub use carlson::elliprf::_elliprf;
     pub use carlson::elliprg::_elliprg;
     pub use carlson::elliprj::_elliprj;
 }
