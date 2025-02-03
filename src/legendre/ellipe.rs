@@ -74,6 +74,8 @@
  * (which gets immediately converted to m1 = 1-m)
  */
 
+use std::f64::consts::FRAC_PI_2;
+
 use num_traits::Float;
 
 use crate::polyeval;
@@ -96,11 +98,16 @@ pub fn ellipe<T: Float>(m: T) -> Result<T, &'static str> {
         return Err("ellipe: m must be less than 1.");
     }
 
+    // Special cases: https://dlmf.nist.gov/19.6.E1
     if m == T::one() {
         return Ok(T::one());
     }
 
-    // Negative m
+    if m == T::zero() {
+        return Ok(T::from(FRAC_PI_2).unwrap());
+    }
+
+    // Negative m: Abramowitz & Stegun, 1972
     let mut m = m;
     let mut c = T::one();
     while m < T::zero() {
