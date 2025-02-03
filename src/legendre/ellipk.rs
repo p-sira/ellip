@@ -99,15 +99,15 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, &'static str> {
         return Ok(T::zero());
     }
 
-    let mut k = T::one();
+    let mut c = T::one();
     while x > T::one() {
-        k = k / x.sqrt();
+        c = c / x.sqrt();
         x = T::one() / x;
     }
 
     if x > T::epsilon() {
         return Ok(
-            k * (polyeval(x, &ellpk_p::<T>()) - x.ln() * polyeval(x, &ellpk_q::<T>()))
+            c * (polyeval(x, &ellpk_p::<T>()) - x.ln() * polyeval(x, &ellpk_q::<T>()))
         );
     }
 
@@ -115,7 +115,7 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, &'static str> {
         return Ok(T::infinity());
     }
 
-    Ok(k * (T::from(4.0).unwrap().ln() - T::from(0.5).unwrap() * x.ln()))
+    Ok(c * (T::from(4.0).unwrap().ln() - T::from(0.5).unwrap() * x.ln()))
 }
 
 fn ellpk_p<T: Float>() -> [T; 11] {
