@@ -100,19 +100,22 @@ pub fn ellipe<T: Float>(m: T) -> Result<T, &'static str> {
         return Ok(T::one());
     }
 
+    // Negative m
     let mut m = m;
-    let mut k = T::one();
+    let mut c = T::one();
     while m < T::zero() {
-        k = k * (T::one() - m).sqrt();
+        c = c * (T::one() - m).sqrt();
         m = m / (m - T::one());
     }
 
+    Ok(c * _ellipe(m))
+}
+
+/// Unchecked version of [ellipe].
+pub fn _ellipe<T: Float>(m: T) -> T {
     let x = T::one() - m;
 
-    let p_val = polyeval(x, &ellpe_p());
-    let log_x = x.ln();
-
-    Ok(k * (p_val - log_x * (x * polyeval(x, &ellpe_q()))))
+    polyeval(x, &ellpe_p()) - x.ln() * (x * polyeval(x, &ellpe_q()))
 }
 
 #[inline]

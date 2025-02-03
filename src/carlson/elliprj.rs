@@ -22,9 +22,7 @@ use std::mem::swap;
 
 use num_traits::Float;
 
-use crate::{elliprc, elliprd};
-
-use super::{elliprc::_elliprc, elliprf::_elliprf};
+use crate::unchecked::{_elliprc, _elliprd, _elliprf};
 
 /// Compute [symmetric elliptic integral of the third kind](https://dlmf.nist.gov/19.16.E2).
 /// ```text
@@ -59,7 +57,7 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
             } else {
                 // RJ(x,x,x,p)
                 return Ok(
-                    (T::from(3.0).unwrap() / (x - p)) * (elliprc(x, p)? - T::one() / x.sqrt())
+                    (T::from(3.0).unwrap() / (x - p)) * (_elliprc(x, p) - T::one() / x.sqrt())
                 );
             }
         } else {
@@ -73,18 +71,18 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
     if y == z {
         if y == p {
             // RJ(x,y,y,y)
-            return elliprd(x, y, y);
+            return Ok(_elliprd(x, y, y));
         }
         // This prevents division by zero.
         if p.max(y) / p.min(y) > T::from(1.2).unwrap() {
             // RJ(x,y,y,p)
-            return Ok((T::from(3.0).unwrap() / (p - y)) * (elliprc(x, y)? - elliprc(x, p)?));
+            return Ok((T::from(3.0).unwrap() / (p - y)) * (_elliprc(x, y) - _elliprc(x, p)));
         }
     }
 
     if z == p {
         // RJ(x,y,z,z)
-        return elliprd(x, y, z);
+        return Ok(_elliprd(x, y, z));
     }
 
     // for p < 0, the integral is singular, return Cauchy principal value
@@ -108,7 +106,7 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
         let value = (p - z) * _elliprj(x, y, z, p) - T::from(3.0).unwrap() * _elliprf(x, y, z)
             + T::from(3.0).unwrap()
                 * ((x * y * z) / (x * y + p * q)).sqrt()
-                * elliprc(x * y + p * q, p * q)?;
+                * _elliprc(x * y + p * q, p * q);
         Ok(value / (z + q))
     } else {
         Ok(_elliprj(x, y, z, p))
