@@ -87,16 +87,16 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
         return Err("ellipf: m must be less than 1.");
     }
 
-    if phi.is_infinite() && m.is_infinite() {
+    if phi.is_infinite() || m.is_infinite() {
+        if phi.is_infinite() {
+            return Ok(T::infinity());
+        }
+
+        if m.is_infinite() {
+            return Ok(T::zero());
+        }
+
         return Err("ellipf: m or φ must be finite");
-    }
-
-    if phi.is_infinite() {
-        return Ok(T::infinity());
-    }
-
-    if m.is_infinite() {
-        return Ok(T::zero());
     }
 
     if m == T::zero() {
