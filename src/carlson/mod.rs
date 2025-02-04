@@ -5,11 +5,11 @@
 
 //! Elliptic integral functions in Carlson's form.
 
-pub(crate) mod elliprc;
-pub(crate) mod elliprd;
-pub(crate) mod elliprf;
-pub(crate) mod elliprg;
-pub(crate) mod elliprj;
+mod elliprc;
+mod elliprd;
+mod elliprf;
+mod elliprg;
+mod elliprj;
 
 pub use elliprc::elliprc;
 pub use elliprd::elliprd;

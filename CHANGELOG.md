@@ -3,7 +3,6 @@
 ### 0.3.0
 **New Features**
 - All functions now support generic Float.
-- `unchecked`: module for direct access to functions without argument checking and special case evaluation
 - `ellippi`: Complete elliptic integral of the third kind.
 
 **Bug Fixes**

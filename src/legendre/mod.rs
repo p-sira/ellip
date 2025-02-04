@@ -5,11 +5,11 @@
 
 //! Elliptic integral functions in Legendre's form.
 
-pub(crate) mod ellipe;
-pub(crate) mod ellipeinc;
-pub(crate) mod ellipf;
-pub(crate) mod ellipk;
-pub(crate) mod ellippi;
+mod ellipe;
+mod ellipeinc;
+mod ellipf;
+mod ellipk;
+mod ellippi;
 
 pub use ellipe::ellipe;
 pub use ellipeinc::ellipeinc;

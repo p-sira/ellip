@@ -66,7 +66,7 @@ use std::f64::consts::{FRAC_PI_2, PI};
 
 use num_traits::Float;
 
-use crate::unchecked::_ellipk;
+use crate::ellipk;
 
 /// Compute [incomplete elliptic integral of the first kind](https://dlmf.nist.gov/19.2.E4).
 ///
@@ -118,7 +118,7 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
     let mut phi = phi;
     let mut k;
     if npio2 != T::zero() {
-        k = _ellipk(m);
+        k = ellipk(m)?;
         phi = phi - npio2 * T::from(FRAC_PI_2).unwrap();
     } else {
         k = T::zero();
@@ -147,7 +147,7 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
         if e.abs() < T::from(10.0).unwrap() {
             e = e.atan();
             if npio2 == T::zero() {
-                k = _ellipk(m);
+                k = ellipk(m)?;
             }
             return done(k - ellipf(e, m)?, sign, npio2, k);
         }

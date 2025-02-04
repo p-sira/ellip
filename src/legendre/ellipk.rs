@@ -111,17 +111,10 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, &'static str> {
         return Ok(T::from(4.0).unwrap().ln() - T::from(0.5).unwrap() * x.ln());
     }
 
-    Ok(_ellipk(m))
+    Ok(polyeval(x, &ellpk_p::<T>()) - x.ln() * polyeval(x, &ellpk_q::<T>()))
 }
 
-/// Unchecked version of [ellipk].
-///
-/// Domain: m ≤ 1
-pub fn _ellipk<T: Float>(m: T) -> T {
-    let x = T::one() - m;
-    polyeval(x, &ellpk_p::<T>()) - x.ln() * polyeval(x, &ellpk_q::<T>())
-}
-
+#[inline]
 fn ellpk_p<T: Float>() -> [T; 11] {
     [
         T::from(1.37982864606273237150E-4).unwrap(),
@@ -138,6 +131,7 @@ fn ellpk_p<T: Float>() -> [T; 11] {
     ]
 }
 
+#[inline]
 fn ellpk_q<T: Float>() -> [T; 11] {
     [
         T::from(2.94078955048598507511E-5).unwrap(),

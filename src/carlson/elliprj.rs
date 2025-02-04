@@ -22,7 +22,7 @@ use std::mem::swap;
 
 use num_traits::Float;
 
-use crate::unchecked::{_elliprc, _elliprd, _elliprf};
+use crate::{elliprc, elliprd, elliprf};
 
 /// Compute [symmetric elliptic integral of the third kind](https://dlmf.nist.gov/19.16.E2).
 /// ```text
@@ -55,7 +55,7 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
             } else {
                 // RJ(x,x,x,p)
                 return Ok(
-                    (T::from(3.0).unwrap() / (x - p)) * (_elliprc(x, p) - T::one() / x.sqrt())
+                    (T::from(3.0).unwrap() / (x - p)) * (elliprc(x, p)? - T::one() / x.sqrt())
                 );
             }
         } else {
@@ -69,53 +69,20 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
     if y == z {
         if y == p {
             // RJ(x,y,y,y)
-            return Ok(_elliprd(x, y, y));
+            return elliprd(x, y, y);
         }
         // This prevents division by zero.
         if p.max(y) / p.min(y) > T::from(1.2).unwrap() {
             // RJ(x,y,y,p)
-            return Ok((T::from(3.0).unwrap() / (p - y)) * (_elliprc(x, y) - _elliprc(x, p)));
+            return Ok((T::from(3.0).unwrap() / (p - y)) * (elliprc(x, y)? - elliprc(x, p)?));
         }
     }
 
     if z == p {
         // RJ(x,y,z,z)
-        return Ok(_elliprd(x, y, z));
+        return elliprd(x, y, z);
     }
 
-    // Note: this function allows both negative p and non-zero positive p.
-    Ok(_elliprj_neg(x, y, z, p))
-}
-
-/// Calculate RC(1, 1 + x)
-#[inline]
-fn elliprc1p<T: Float>(y: T) -> T {
-    // We can skip this check since the call from _elliprj already did the check.
-    // if y == -1.0 {
-    //     return Err("elliprc1p: y cannot be -1.0.");
-    // }
-
-    // for 1 + y < 0, the integral is singular, return Cauchy principal value
-    if y < -T::one() {
-        (T::one() / -y).sqrt() * _elliprc(-y, -T::one() - y)
-    } else if y == T::zero() {
-        T::one()
-    } else if y > T::zero() {
-        y.sqrt().atan() / y.sqrt()
-    } else if y > T::from(-0.5).unwrap() {
-        let arg = (-y).sqrt();
-        ((arg).ln_1p() - (-arg).ln_1p()) / (T::from(2.0).unwrap() * (-y).sqrt())
-    } else {
-        ((T::one() + (-y).sqrt()) / (T::one() + y).sqrt()).ln() / (-y).sqrt()
-    }
-}
-
-/// [_elliprj] but allows p < 0. An unchecked version of [elliprj].
-///
-/// Domain: p ≠ 0
-///
-/// Return NAN when it fails to converge.
-pub fn _elliprj_neg<T: Float>(x: T, y: T, z: T, p: T) -> T {
     // for p < 0, the integral is singular, return Cauchy principal value
     if p < T::zero() {
         let mut x = x;
@@ -137,13 +104,36 @@ pub fn _elliprj_neg<T: Float>(x: T, y: T, z: T, p: T) -> T {
         let q = -p;
         let p = (z * (x + y + q) - x * y) / (z + q);
 
-        let value = (p - z) * _elliprj(x, y, z, p) - T::from(3.0).unwrap() * _elliprf(x, y, z)
+        let value = (p - z) * elliprj(x, y, z, p)? - T::from(3.0).unwrap() * elliprf(x, y, z)?
             + T::from(3.0).unwrap()
                 * ((x * y * z) / (x * y + p * q)).sqrt()
-                * _elliprc(x * y + p * q, p * q);
-        value / (z + q)
+                * elliprc(x * y + p * q, p * q)?;
+        return Ok(value / (z + q));
+    }
+
+    _elliprj(x, y, z, p)
+}
+
+/// Calculate RC(1, 1 + x)
+#[inline]
+fn elliprc1p<T: Float>(y: T) -> Result<T, &'static str> {
+    // We can skip this check since the call from elliprj already did the check.
+    // if y == -1.0 {
+    //     return Err("elliprc1p: y cannot be -1.0.");
+    // }
+
+    // for 1 + y < 0, the integral is singular, return Cauchy principal value
+    if y < -T::one() {
+        Ok((T::one() / -y).sqrt() * elliprc(-y, -T::one() - y)?)
+    } else if y == T::zero() {
+        Ok(T::one())
+    } else if y > T::zero() {
+        Ok(y.sqrt().atan() / y.sqrt())
+    } else if y > T::from(-0.5).unwrap() {
+        let arg = (-y).sqrt();
+        Ok(((arg).ln_1p() - (-arg).ln_1p()) / (T::from(2.0).unwrap() * (-y).sqrt()))
     } else {
-        _elliprj(x, y, z, p)
+        Ok(((T::one() + (-y).sqrt()) / (T::one() + y).sqrt()).ln() / (-y).sqrt())
     }
 }
 
@@ -152,7 +142,7 @@ pub fn _elliprj_neg<T: Float>(x: T, y: T, z: T, p: T) -> T {
 /// Domain: p > 0
 ///
 /// Return NAN when it fails to converge.
-pub fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> T {
+pub fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
     let two = T::from(2.0).unwrap();
     let three = T::from(3.0).unwrap();
     let four = T::from(4.0).unwrap();
@@ -184,9 +174,9 @@ pub fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> T {
 
         if en < T::from(-0.5).unwrap() && en > T::from(-1.5).unwrap() {
             let b = two * rp * (pn + rx * (ry + rz) + ry * rz) / dn;
-            rc_sum = rc_sum + fmn / dn * _elliprc(T::one(), b);
+            rc_sum = rc_sum + fmn / dn * elliprc(T::one(), b)?;
         } else {
-            rc_sum = rc_sum + fmn / dn * elliprc1p(en);
+            rc_sum = rc_sum + fmn / dn * elliprc1p(en)?;
         }
 
         let lambda = rx * ry + rx * rz + ry * rz;
@@ -222,7 +212,7 @@ pub fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> T {
                     + T::from(45.0).unwrap() * e2 * e2 * e3 / T::from(272.0).unwrap()
                     - T::from(9.0).unwrap() * (e3 * e4 + e2 * e5) / T::from(68.0).unwrap());
 
-            return result + T::from(6.0).unwrap() * rc_sum;
+            return Ok(result + T::from(6.0).unwrap() * rc_sum);
         }
 
         xn = (xn + lambda) / four;
@@ -231,7 +221,7 @@ pub fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> T {
         pn = (pn + lambda) / four;
         delta = delta / T::from(64.0).unwrap();
     }
-    T::nan()
+    Err("elliprj: Fail to converge")
 }
 
 const N_MAX_ITERATION: usize = 100;

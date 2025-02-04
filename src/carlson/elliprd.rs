@@ -47,6 +47,7 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
     if x == z {
         swap(&mut x, &mut y);
     }
+
     if y == z {
         if x == y {
             return Ok(T::one() / (x * x.sqrt()));
@@ -56,6 +57,7 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
                 / (T::from(4.0).unwrap() * y * y.sqrt()));
         }
     }
+
     if x == T::zero() {
         let x0 = y.sqrt();
         let y0 = z.sqrt();
@@ -78,20 +80,15 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
         return Ok(pt * rf * T::from(3.0).unwrap());
     }
 
-    let res = _elliprd(x, y, z);
-    if res.is_nan() {
-        return Err("elliprd: Failed to converge.");
-    }
-    Ok(res)
+    _elliprd(x, y, z)
 }
 
-/// Unchecked version of [elliprd].
-///
-/// Return NAN when it fails to converge.
-pub fn _elliprd<T: Float>(x: T, y: T, z: T) -> T {
+#[inline]
+fn _elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
     let mut xn = x;
     let mut yn = y;
     let mut zn = z;
+
     let mut an = (x + y + T::from(3.0).unwrap() * z) / T::from(5.0).unwrap();
     let a0 = an;
     let mut q = (T::epsilon() / T::from(4.0).unwrap()).powf(-T::one() / T::from(8.0).unwrap())
@@ -141,10 +138,11 @@ pub fn _elliprd<T: Float>(x: T, y: T, z: T) -> T {
                     - T::from(9.0).unwrap() * (e3 * e4 + e2 * e5) / T::from(68.0).unwrap())
                 + T::from(3.0).unwrap() * rd_sum;
 
-            return result;
+            return Ok(result);
         }
     }
-    T::nan()
+
+    Err("elliprd: Failed to converge.")
 }
 
 const N_MAX_ITERATIONS: usize = 50;

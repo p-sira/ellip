@@ -22,7 +22,7 @@ use std::{f64::consts::PI, mem::swap};
 
 use num_traits::Float;
 
-use super::elliprc::_elliprc;
+use crate::elliprc;
 
 /// Compute [symmetric elliptic integral of the first kind](https://dlmf.nist.gov/19.16.E1).
 /// ```text
@@ -55,7 +55,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
 
         // RF(x,x,z)
         // RF(x,y,y)
-        return Ok(_elliprc(z, x));
+        return elliprc(z, x);
     }
 
     if x == z {
@@ -67,7 +67,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
 
         // RF(x,y,x)
         // RF(x,y,y)
-        return Ok(_elliprc(y, x));
+        return elliprc(y, x);
     }
 
     if y == z {
@@ -77,7 +77,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
         }
 
         // RF(x,y,y)
-        return Ok(_elliprc(x, y));
+        return elliprc(x, y);
     }
 
     let mut xn = x;
@@ -102,22 +102,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
         return Ok(T::from(PI).unwrap() / (xn + yn));
     }
 
-    let res = _elliprf(xn, yn, zn);
-    if res.is_nan() {
-        return Err("elliprf: Failed to converge.");
-    }
-    Ok(res)
-}
-
-/// Unchecked version of [elliprf].
-///
-/// Return NAN when it fails to converge.
-pub fn _elliprf<T: Float>(x: T, y: T, z: T) -> T {
     let four = T::from(4.0).unwrap();
-
-    let mut xn = x;
-    let mut yn = y;
-    let mut zn = z;
 
     let mut an = (xn + yn + zn) / T::from(3.0).unwrap();
     let a0 = an;
@@ -150,17 +135,17 @@ pub fn _elliprf<T: Float>(x: T, y: T, z: T) -> T {
             let e2 = x * y - z * z;
             let e3 = x * y * z;
 
-            return (T::one()
+            return Ok((T::one()
                 + e3 * (T::from(1.0 / 14.0).unwrap()
                     + T::from(3.0).unwrap() * e3 / T::from(104.0).unwrap())
                 + e2 * (T::from(-0.1).unwrap() + e2 / T::from(24.0).unwrap()
                     - (T::from(3.0).unwrap() * e3) / T::from(44.0).unwrap()
                     - T::from(5.0).unwrap() * e2 * e2 / T::from(208.0).unwrap()
                     + e2 * e3 / T::from(16.0).unwrap()))
-                / an.sqrt();
+                / an.sqrt());
         }
     }
-    T::nan()
+    Err("elliprf: Failed to converge.")
 }
 
 const N_MAX_ITERATIONS: usize = 11;

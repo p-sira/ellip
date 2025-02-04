@@ -31,7 +31,8 @@ pub fn cel<T: Float>(kc: T, p: T, a: T, b: T) -> Result<T, &'static str> {
 }
 
 /// Unchecked version of [cel].
-pub fn _cel<T: Float>(kc: T, p: T, a: T, b: T) -> T {
+#[inline]
+fn _cel<T: Float>(kc: T, p: T, a: T, b: T) -> T {
     let mut k = kc.abs();
     let mut aa;
     let mut pp;

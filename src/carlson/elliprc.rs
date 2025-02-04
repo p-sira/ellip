@@ -48,7 +48,8 @@ pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, &'static str> {
 /// Unchecked version of [elliprc].
 ///
 /// Domain: x ≥ 0, y ≠ 0
-pub fn _elliprc<T: Float>(x: T, y: T) -> T {
+#[inline]
+fn _elliprc<T: Float>(x: T, y: T) -> T {
     let mut x = x;
     let mut y = y;
     let mut prefix = T::one();

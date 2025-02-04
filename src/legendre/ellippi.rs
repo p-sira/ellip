@@ -21,7 +21,7 @@ use std::f64::consts::FRAC_PI_2;
 
 use num_traits::Float;
 
-use crate::unchecked::{_ellipk, _elliprf, _elliprj};
+use crate::{ellipk, elliprf, elliprj};
 
 /// Compute [complete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E8).
 /// ```text
@@ -48,7 +48,7 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, &'static str> {
         if m == T::zero() {
             return Ok(T::from(FRAC_PI_2).unwrap());
         }
-        return Ok(_ellipk(m));
+        return ellipk(m);
     }
 
     if n < T::zero() {
@@ -56,34 +56,27 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, &'static str> {
         let nn = (m - n) / (T::one() - n);
         let nm1 = (T::one() - m) / (T::one() - n);
 
-        let mut result = ellippi_vc(nn, m, nm1);
+        let mut result = ellippi_vc(nn, m, nm1)?;
         // Split calculations to avoid overflow/underflow
         result = result * -n / (T::one() - n);
         result = result * (T::one() - m) / (m - n);
-        result = result + _ellipk(m) * m / (m - n);
+        result = result + ellipk(m)? * m / (m - n);
         return Ok(result);
     }
 
     // Compute vc = 1-n without cancellation errors
     let vc = T::one() - n;
-    Ok(ellippi_vc(n, m, vc))
-}
-
-/// Unchecked version of [ellippi].
-///
-/// Domain: m < 1, 0 ≤ n < 1.
-pub fn _ellippi<T: Float>(n: T, m: T) -> T {
-    ellippi_vc(n, m, T::one() - n)
+    ellippi_vc(n, m, vc)
 }
 
 #[inline]
-fn ellippi_vc<T: Float>(n: T, m: T, vc: T) -> T {
+fn ellippi_vc<T: Float>(n: T, m: T, vc: T) -> Result<T, &'static str> {
     let x = T::zero();
     let y = T::one() - m;
     let z = T::one();
     let p = vc;
 
-    _elliprf(x, y, z) + n * _elliprj(x, y, z, p) / T::from(3.0).unwrap()
+    Ok(elliprf(x, y, z)? + n * elliprj(x, y, z, p)? / T::from(3.0).unwrap())
 }
 
 #[cfg(test)]
