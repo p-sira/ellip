@@ -1,21 +1,24 @@
 /*
  * Ellip is licensed under The 3-Clause BSD, see LICENSE.
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
- * This code is modified from Russell Lab.
+ * This code is modified from Boost Math, see LICENSE in this directory.
  */
 
-// Max iteration logic is simplified
+// Original header from Boost Math
+//  Copyright (c) 2006 Xiaogang Zhang, 2015 John Maddock
+//  Copyright (c) 2024 Matt Borland
+//  Use, modification and distribution are subject to the
+//  Boost Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+//  History:
+//  XZ wrote the original of this file as part of the Google
+//  Summer of Code 2006.  JM modified it to fit into the
+//  Boost.Math conceptual framework better, and to correctly
+//  handle the y < 0 case.
+//  Updated 2015 to use Carlson's latest methods.
 
-// Original header from Russell Lab
-// Computes the degenerate elliptic integral using Carlson's formula
-//
-// Computes Rc(x,y) where x must be non-negative and y must be nonzero.
-// If y < 0, the Cauchy principal value is returned.
-//
-// # References:
-//
-// * Press WH, Teukolsky SA, Vetterling WT, Flannery BP (2007) Numerical Recipes: The Art of
-//   Scientific Computing. Third Edition. Cambridge University Press. 1235p.
+use std::f64::consts::FRAC_PI_2;
 
 use num_traits::Float;
 
@@ -31,61 +34,50 @@ use num_traits::Float;
 /// ```
 ///
 pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, &'static str> {
-    let tiny = T::from(5.0).unwrap() * T::min_positive_value();
-    let big = T::from(0.2).unwrap() * T::max_value();
-    let comp1 = T::from(2.236).unwrap() / tiny.sqrt();
-    let comp2 = (tiny * big).powi(2) / T::from(25.0).unwrap();
-
-    if x < T::zero()
-        || y == T::zero()
-        || (x + y.abs()) < tiny
-        || (x + y.abs()) > big
-        || (y < -comp1 && x > T::zero() && x < comp2)
-    {
-        return Err("elliprc: input must satisfy: x ≥ 0, y ≠ 0.");
+    if x < T::zero() {
+        return Err("elliprc: x must be non-negative.");
     }
 
-    let res = _elliprc(x, y);
-    if res.is_nan() {
-        return Err("elliprc: Fail to converge.");
+    if y == T::zero() {
+        return Err("elliprc: y must be non-zero.");
     }
 
-    Ok(res)
+    Ok(_elliprc(x, y))
 }
 
 /// Unchecked version of [elliprc].
 ///
-/// Return NAN when it fails to converge.
+/// Domain: x ≥ 0, y ≠ 0
 pub fn _elliprc<T: Float>(x: T, y: T) -> T {
-    let (mut xt, mut yt, w) = if y > T::zero() {
-        (x, y, T::one())
-    } else {
-        (x - y, -y, x.sqrt() / (x - y).sqrt())
-    };
-
-    let rc_err_tol = T::from(0.0006).unwrap();
-    let rc_c1 = T::from(0.3).unwrap();
-    let rc_c2 = T::from(1.0 / 7.0).unwrap();
-    let rc_c3 = T::from(0.375).unwrap();
-    let rc_c4 = T::from(9.0 / 22.0).unwrap();
-
-    for _ in 0..N_MAX_ITERATIONS {
-        let lam = T::from(2.0).unwrap() * xt.sqrt() * yt.sqrt() + yt;
-        xt = T::from(0.25).unwrap() * (xt + lam);
-        yt = T::from(0.25).unwrap() * (yt + lam);
-        let ave = (xt + yt + yt) / T::from(3.0).unwrap();
-        let s = (yt - ave) / ave;
-
-        if s.abs() < rc_err_tol {
-            return w * (T::one() + s * s * (rc_c1 + s * (rc_c2 + s * (rc_c3 + s * rc_c4))))
-                / ave.sqrt();
-        }
+    let mut x = x;
+    let mut y = y;
+    let mut prefix = T::one();
+    // for y < 0, the integral is singular, return Cauchy principal value
+    if y < T::zero() {
+        prefix = (x / (x - y)).sqrt();
+        x = x - y;
+        y = -y;
     }
 
-    T::nan()
-}
+    if x == T::zero() {
+        return prefix * T::from(FRAC_PI_2).unwrap() / y.sqrt();
+    }
 
-const N_MAX_ITERATIONS: usize = 500;
+    if x == y {
+        return prefix / x.sqrt();
+    }
+
+    if y > x {
+        return prefix * ((y - x) / x).sqrt().atan() / (y - x).sqrt();
+    }
+
+    if y / x > T::from(0.5).unwrap() {
+        let arg = ((x - y) / x).sqrt();
+        prefix * ((arg).ln_1p() - (-arg).ln_1p()) / (T::from(2.0).unwrap() * (x - y).sqrt())
+    } else {
+        prefix * ((x.sqrt() + (x - y).sqrt()) / y.sqrt()).ln() / (x - y).sqrt()
+    }
+}
 
 #[cfg(test)]
 mod test {
@@ -98,6 +90,6 @@ mod test {
 
     #[test]
     fn test_elliprc() {
-        compare_test_data!("./tests/data/boost/ellint_rc_data.txt", _elliprc, 5e-16);
+        compare_test_data!("./tests/data/boost/ellint_rc_data.txt", _elliprc, 2.2e-16);
     }
 }
