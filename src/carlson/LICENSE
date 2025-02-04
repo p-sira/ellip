@@ -3,6 +3,7 @@ Copyright 2025 Sira Pornsiriprasert <code@psira.me>
 
 The carlson module of Ellip is a derivative work of Boost Math Library.
 Submodules that use Boost Math Library code are:
+- elliprc
 - elliprd
 - elliprf
 - elliprg
