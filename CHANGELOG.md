@@ -6,7 +6,8 @@
 - `ellippi`: Complete elliptic integral of the third kind.
 
 **Bug Fixes**
-- `elliprf`: incorrect result for RF(x,x,0)
+- `elliprf`: Fix incorrect result for RF(x,x,0).
+- `elliprj` and `elliprc`: Fix losing precision due to ln(1+x).
 
 **Changes**
 - Add dependency `num-traits`.
