@@ -165,6 +165,6 @@ mod tests {
 
     #[test]
     fn test_ellipk() {
-        compare_test_data!("./tests/data/boost/ellint_k_data.txt", ellipk_k, RTOL);
+        compare_test_data!("./tests/data/boost/ellipk_data.txt", ellipk_k, RTOL);
     }
 }

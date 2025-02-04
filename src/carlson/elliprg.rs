@@ -121,26 +121,26 @@ mod tests {
 
     #[test]
     fn test_elliprg() {
-        compare_test_data!("./tests/data/boost/ellint_rg.txt", _elliprg, 8.1e-16);
+        compare_test_data!("./tests/data/boost/elliprg.txt", _elliprg, 8.1e-16);
     }
 
     #[test]
     fn test_elliprg_xxx() {
-        compare_test_data!("./tests/data/boost/ellint_rg_xxx.txt", _elliprg, 2.4e-16);
+        compare_test_data!("./tests/data/boost/elliprg_xxx.txt", _elliprg, 2.4e-16);
     }
 
     #[test]
     fn test_elliprg_xy0() {
-        compare_test_data!("./tests/data/boost/ellint_rg_xy0.txt", _elliprg, 4.4e-16);
+        compare_test_data!("./tests/data/boost/elliprg_xy0.txt", _elliprg, 4.4e-16);
     }
 
     #[test]
     fn test_elliprg_xyy() {
-        compare_test_data!("./tests/data/boost/ellint_rg_xyy.txt", _elliprg, 5.4e-16);
+        compare_test_data!("./tests/data/boost/elliprg_xyy.txt", _elliprg, 5.4e-16);
     }
 
     #[test]
     fn test_elliprg_00x() {
-        compare_test_data!("./tests/data/boost/ellint_rg_00x.txt", _elliprg, RTOL);
+        compare_test_data!("./tests/data/boost/elliprg_00x.txt", _elliprg, RTOL);
     }
 }

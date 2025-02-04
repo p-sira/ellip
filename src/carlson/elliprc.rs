@@ -90,6 +90,6 @@ mod tests {
 
     #[test]
     fn test_elliprc() {
-        compare_test_data!("./tests/data/boost/ellint_rc_data.txt", _elliprc, 2.2e-16);
+        compare_test_data!("./tests/data/boost/elliprc_data.txt", _elliprc, 2.2e-16);
     }
 }

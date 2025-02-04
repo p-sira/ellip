@@ -181,6 +181,6 @@ mod tests {
 
     #[test]
     fn test_ellipe() {
-        compare_test_data!("./tests/data/boost/ellint_e_data.txt", ellipe_k, RTOL);
+        compare_test_data!("./tests/data/boost/ellipe_data.txt", ellipe_k, RTOL);
     }
 }

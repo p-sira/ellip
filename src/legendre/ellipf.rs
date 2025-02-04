@@ -279,6 +279,6 @@ mod tests {
 
     #[test]
     fn test_ellipf() {
-        compare_test_data!("./tests/data/boost/ellint_f_data.txt", ellipf_k, 4.9e-16);
+        compare_test_data!("./tests/data/boost/ellipf_data.txt", ellipf_k, 4.9e-16);
     }
 }
