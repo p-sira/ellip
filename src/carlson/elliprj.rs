@@ -276,7 +276,7 @@ mod tests {
         compare_test_data!(
             "./tests/data/boost/ellint_rj_e2.txt",
             _elliprj,
-            7.1e-14,
+            4.8e-14,
             5e-25
         );
     }
@@ -286,7 +286,7 @@ mod tests {
         compare_test_data!(
             "./tests/data/boost/ellint_rj_e3.txt",
             _elliprj,
-            3.9e-15,
+            3.1e-15,
             5e-25
         );
     }
@@ -306,7 +306,7 @@ mod tests {
         compare_test_data!(
             "./tests/data/boost/ellint_rj_zp.txt",
             _elliprj,
-            7.1e-14,
+            3.5e-15,
             5e-25
         );
     }

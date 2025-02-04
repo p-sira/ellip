@@ -179,7 +179,7 @@ mod tests {
 
     #[test]
     fn test_elliprd_xxz() {
-        compare_test_data!("./tests/data/boost/ellint_rd_xxz.txt", _elliprd, 8e-16);
+        compare_test_data!("./tests/data/boost/ellint_rd_xxz.txt", _elliprd, 7.9e-16);
     }
 
     #[test]

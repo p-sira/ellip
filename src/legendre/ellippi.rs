@@ -124,7 +124,7 @@ mod tests {
         compare_test_data!(
             "./tests/data/boost/ellint_pi2_data_f64.txt",
             ellippi_k,
-            1.6e-14
+            4.4e-16
         );
     }
 }
