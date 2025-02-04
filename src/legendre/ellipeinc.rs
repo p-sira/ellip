@@ -335,7 +335,7 @@ fn ellipeinc_neg_m<T: Float>(phi: T, m: T) -> T {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use crate::compare_test_data;
 
     use super::*;

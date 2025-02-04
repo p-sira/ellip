@@ -150,7 +150,7 @@ pub fn _elliprd<T: Float>(x: T, y: T, z: T) -> T {
 const N_MAX_ITERATIONS: usize = 50;
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
     use crate::compare_test_data;
 

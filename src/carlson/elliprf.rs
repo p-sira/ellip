@@ -166,7 +166,7 @@ pub fn _elliprf<T: Float>(x: T, y: T, z: T) -> T {
 const N_MAX_ITERATIONS: usize = 11;
 
 #[cfg(test)]
-mod test {
+mod tests {
     use itertools::Itertools;
 
     use super::*;

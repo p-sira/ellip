@@ -269,7 +269,7 @@ fn ellipf_neg_m<T: Float>(phi: T, m: T) -> T {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
     use crate::compare_test_data;
 

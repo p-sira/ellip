@@ -101,7 +101,7 @@ pub fn _elliprg<T: Float>(x: T, y: T, z: T) -> T {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use itertools::Itertools;
 
     use super::*;

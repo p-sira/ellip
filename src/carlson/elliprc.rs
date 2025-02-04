@@ -80,7 +80,7 @@ pub fn _elliprc<T: Float>(x: T, y: T) -> T {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
     use crate::compare_test_data;
 

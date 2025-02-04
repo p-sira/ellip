@@ -77,7 +77,7 @@ pub fn _cel<T: Float>(kc: T, p: T, a: T, b: T) -> T {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
     use crate::{assert_close, ellipe, ellipk, test_util::linspace};
 
