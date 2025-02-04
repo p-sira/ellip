@@ -104,7 +104,7 @@ fn elliprc1p<T: Float>(y: T) -> T {
         y.sqrt().atan() / y.sqrt()
     } else if y > T::from(-0.5).unwrap() {
         let arg = (-y).sqrt();
-        ((T::one() + arg).ln() - (T::one() - arg).ln()) / (T::from(2.0).unwrap() * (-y).sqrt())
+        ((arg).ln_1p() - (-arg).ln_1p()) / (T::from(2.0).unwrap() * (-y).sqrt())
     } else {
         ((T::one() + (-y).sqrt()) / (T::one() + y).sqrt()).ln() / (-y).sqrt()
     }
@@ -266,7 +266,7 @@ mod tests {
         compare_test_data!(
             "./tests/data/boost/ellint_rj_data.txt",
             _elliprj,
-            2.1e-8, // Relatively low precision
+            2.7e-14,
             5e-25
         );
     }
