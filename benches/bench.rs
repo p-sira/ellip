@@ -44,14 +44,10 @@ macro_rules! generate_benchmarks {
     ($name:ident, $category:expr, $($func:ident),*) => {
         pub fn $name(c: &mut Criterion) {
             $(
-                let mut group = c.benchmark_group(concat!($category, "/", stringify!($func)));
+                let mut group = c.benchmark_group($category);
                 let cases = params_from_file(concat!("tests/data/boost/", stringify!($func), "_data.txt"));
 
                 bench_cases(&mut group, stringify!($func), &|inp| {
-                    $func(inp)
-                }, &cases);
-                
-                bench_cases(&mut group, concat!("_", stringify!($func)), &|inp| {
                     $func(inp)
                 }, &cases);
 
@@ -65,28 +61,61 @@ fn ellipk(inp: &[f64]) -> f64 {
     ellip::ellipk(inp[0]).unwrap()
 }
 
-fn _ellipk(inp: &[f64]) -> f64 {
-    ellip::unchecked::_ellipk(inp[0])
-}
-
 fn ellipe(inp: &[f64]) -> f64 {
     ellip::ellipe(inp[0]).unwrap()
 }
 
-fn _ellipe(inp: &[f64]) -> f64 {
-    ellip::unchecked::_ellipe(inp[0])
+fn ellipf(inp: &[f64]) -> f64 {
+    ellip::ellipf(inp[0], inp[1]).unwrap()
+}
+
+fn ellipeinc(inp: &[f64]) -> f64 {
+    ellip::ellipeinc(inp[0], inp[1]).unwrap()
+}
+
+fn ellippi(inp: &[f64]) -> f64 {
+    ellip::ellippi(inp[0], inp[1]).unwrap()
 }
 
 fn elliprf(inp: &[f64]) -> f64 {
     ellip::elliprf(inp[0], inp[1], inp[2]).unwrap()
 }
 
-fn _elliprf(inp: &[f64]) -> f64 {
-    ellip::unchecked::_elliprf(inp[0], inp[1], inp[2])
+fn elliprg(inp: &[f64]) -> f64 {
+    ellip::elliprg(inp[0], inp[1], inp[2]).unwrap()
 }
 
-generate_benchmarks!(bench_legendre, "legendre", ellipk, ellipe);
-generate_benchmarks!(bench_carlson, "carlson", elliprf);
+fn elliprj(inp: &[f64]) -> f64 {
+    ellip::elliprj(inp[0], inp[1], inp[2], inp[3]).unwrap()
+}
+
+fn elliprc(inp: &[f64]) -> f64 {
+    ellip::elliprc(inp[0], inp[1]).unwrap()
+}
+
+fn elliprd(inp: &[f64]) -> f64 {
+    ellip::elliprd(inp[0], inp[1], inp[2]).unwrap()
+}
+
+generate_benchmarks!(
+    bench_legendre,
+    "legendre",
+    ellipk,
+    ellipe,
+    ellipf,
+    ellipeinc,
+    ellippi
+);
+
+generate_benchmarks!(
+    bench_carlson,
+    "carlson",
+    elliprf,
+    elliprg,
+    elliprj,
+    elliprc,
+    elliprd
+);
 
 criterion_group!(benches, bench_legendre, bench_carlson);
 criterion_main!(benches);
