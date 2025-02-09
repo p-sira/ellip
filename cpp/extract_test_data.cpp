@@ -54,6 +54,6 @@ void extract_ipp_data(const std::string &input_file, const std::string &output_f
 
 int main()
 {
-    extract_ipp_data("ellint_rj_zp.ipp", "../tests/data/boost/ellint_rj_zp.txt");
+    extract_ipp_data("elliprj_zp.ipp", "../tests/data/boost/elliprj_zp.txt");
     return 0;
 }

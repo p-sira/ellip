@@ -326,7 +326,7 @@ mod tests {
     #[test]
     fn test_ellipeinc() {
         compare_test_data!(
-            "./tests/data/boost/ellint_e2_data.txt",
+            "./tests/data/boost/ellipeinc_data.txt",
             ellipeinc_k::<f64>,
             1.1e-15
         );

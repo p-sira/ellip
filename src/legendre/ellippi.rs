@@ -89,7 +89,7 @@ mod tests {
     #[test]
     fn test_ellippi() {
         compare_test_data!(
-            "./tests/data/boost/ellint_pi2_data_f64.txt",
+            "./tests/data/boost/ellippi2_data_f64.txt",
             ellippi_k,
             4.4e-16
         );

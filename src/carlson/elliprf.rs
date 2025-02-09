@@ -170,26 +170,26 @@ mod tests {
 
     #[test]
     fn test_elliprf() {
-        compare_test_data!("./tests/data/boost/ellint_rf_data.txt", _elliprf, 4.5e-16);
+        compare_test_data!("./tests/data/boost/elliprf_data.txt", _elliprf, 4.5e-16);
     }
 
     #[test]
     fn test_elliprf_xxx() {
-        compare_test_data!("./tests/data/boost/ellint_rf_xxx.txt", _elliprf, 2.3e-16);
+        compare_test_data!("./tests/data/boost/elliprf_xxx.txt", _elliprf, 2.3e-16);
     }
 
     #[test]
     fn test_elliprf_xy0() {
-        compare_test_data!("./tests/data/boost/ellint_rf_xy0.txt", _elliprf, 4.2e-16);
+        compare_test_data!("./tests/data/boost/elliprf_xy0.txt", _elliprf, 4.2e-16);
     }
 
     #[test]
     fn test_elliprf_xyy() {
-        compare_test_data!("./tests/data/boost/ellint_rf_xyy.txt", _elliprf, 5.3e-16);
+        compare_test_data!("./tests/data/boost/elliprf_xyy.txt", _elliprf, 5.3e-16);
     }
 
     #[test]
     fn test_elliprf_0yy() {
-        compare_test_data!("./tests/data/boost/ellint_rf_0yy.txt", _elliprf, RTOL);
+        compare_test_data!("./tests/data/boost/elliprf_0yy.txt", _elliprf, RTOL);
     }
 }

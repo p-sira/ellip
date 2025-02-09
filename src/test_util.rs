@@ -19,7 +19,7 @@ macro_rules! compare_test_data {
     ($file_path:expr, $func:expr, $t: ident, $rtol:expr, $atol:expr) => {
         {
             use std::fs::File;
-            use std::io::{self, BufRead};
+            use std::io::{BufRead, BufReader};
             use std::path::Path;
             use std::str::FromStr;
 
@@ -30,7 +30,7 @@ macro_rules! compare_test_data {
             }
 
             let file = File::open($file_path).expect("Cannot open file");
-            let reader = io::BufReader::new(file);
+            let reader = BufReader::new(file);
 
             let mut total_cases = 0;
             let mut test_fail = 0;
