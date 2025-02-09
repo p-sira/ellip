@@ -83,9 +83,7 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
             sum = sum + sum_pow * (xn - yn) * (xn - yn);
         }
         let rf = pi!() / (xn + yn);
-        return Ok(
-            ((x0 + y0) * (x0 + y0) / four!() - sum) * rf / two!()
-        );
+        return Ok(((x0 + y0) * (x0 + y0) / four!() - sum) * rf / two!());
     }
 
     Ok(

@@ -46,7 +46,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
             // RF(x,x,x)
             return Ok(one!() / x.sqrt());
         }
-        
+
         if z == zero!() {
             // RF(x,x,0)
             // RF(0,y,y)
@@ -57,7 +57,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
         // RF(x,y,y)
         return elliprc(z, x);
     }
-    
+
     if x == z {
         if y == zero!() {
             // RF(x,0,x)
@@ -136,8 +136,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
             let e3 = x * y * z;
 
             return Ok((one!()
-                + e3 * (num!(1.0 / 14.0)
-                    + three!() * e3 / num!(104.0))
+                + e3 * (num!(1.0 / 14.0) + three!() * e3 / num!(104.0))
                 + e2 * (num!(-0.1) + e2 / num!(24.0)
                     - (three!() * e3) / num!(44.0)
                     - five!() * e2 * e2 / num!(208.0)

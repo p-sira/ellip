@@ -122,28 +122,21 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
     }
 
     if lphi < num!(0.135) {
-        let m11 = (((((-num!(7.0) / num!(2816.0)) * m
-            + (five!() / num!(1056.0)))
-            * m
+        let m11 = (((((-num!(7.0) / num!(2816.0)) * m + (five!() / num!(1056.0))) * m
             - (num!(7.0) / num!(2640.0)))
             * m
             + (num!(17.0) / num!(41580.0)))
             * m
             - (num!(1.0) / num!(155925.0)))
             * m;
-        let m9 = ((((-five!() / num!(1152.0)) * m
-            + (num!(1.0) / num!(144.0)))
-            * m
+        let m9 = ((((-five!() / num!(1152.0)) * m + (num!(1.0) / num!(144.0))) * m
             - (num!(1.0) / num!(360.0)))
             * m
             + (num!(1.0) / num!(5670.0)))
             * m;
         let m7 =
-            ((-m / num!(112.0) + (num!(1.0) / num!(84.0))) * m
-                - (num!(1.0) / num!(315.0)))
-                * m;
-        let m5 =
-            (-m / num!(40.0) + (num!(1.0) / num!(30.0))) * m;
+            ((-m / num!(112.0) + (num!(1.0) / num!(84.0))) * m - (num!(1.0) / num!(315.0))) * m;
+        let m5 = (-m / num!(40.0) + (num!(1.0) / num!(30.0))) * m;
         let m3 = -m / six!();
         let p2 = lphi * lphi;
 
@@ -184,15 +177,10 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
 
         if denom.abs() > num!(10.0) * epsilon!() {
             t = t * (one!() + temp) / denom;
-            mod_phi = ((lphi + pi_2!()) / pi!())
-                .to_i32()
-                .unwrap();
+            mod_phi = ((lphi + pi_2!()) / pi!()).to_i32().unwrap();
         } else {
             t = lphi.tan();
-            mod_phi = ((lphi - t.atan()) / pi!())
-                .floor()
-                .to_i32()
-                .unwrap();
+            mod_phi = ((lphi - t.atan()) / pi!()).floor().to_i32().unwrap();
         }
 
         c = (a - b) / two!();
@@ -204,8 +192,7 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
     }
 
     done(
-        e / ellipk(m)? * (t.atan() + num!(mod_phi) * pi!()) / (d * a)
-            + ee,
+        e / ellipk(m)? * (t.atan() + num!(mod_phi) * pi!()) / (d * a) + ee,
         sign,
         npio2,
         e,
@@ -218,11 +205,7 @@ fn ellipeinc_neg_m<T: Float>(phi: T, m: T) -> T {
     let mpp = m * phi * phi;
 
     if -mpp < num!(1e-6) && phi < -m {
-        return phi
-            + (mpp * phi * phi / num!(30.0)
-                - mpp * mpp / num!(40.0)
-                - mpp / six!())
-                * phi;
+        return phi + (mpp * phi * phi / num!(30.0) - mpp * mpp / num!(40.0) - mpp / six!()) * phi;
     }
 
     if -mpp > num!(1e6) {
@@ -302,9 +285,7 @@ fn ellipeinc_neg_m<T: Float>(phi: T, m: T) -> T {
     let e3f = xf * yf * zf;
 
     let mut ret = scalef
-        * (one!() - e2f / num!(10.0)
-            + e3f / num!(14.0)
-            + e2f * e2f / num!(24.0)
+        * (one!() - e2f / num!(10.0) + e3f / num!(14.0) + e2f * e2f / num!(24.0)
             - three!() * e2f * e3f / num!(44.0))
         / af.sqrt();
 

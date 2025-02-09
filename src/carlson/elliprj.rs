@@ -20,8 +20,8 @@
 
 use std::mem::swap;
 
-use num_traits::Float;
 use crate::{elliprc, elliprd, elliprf};
+use num_traits::Float;
 
 /// Compute [symmetric elliptic integral of the third kind](https://dlmf.nist.gov/19.16.E2).
 /// ```text
@@ -53,9 +53,7 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
                 return Ok(one!() / (x * x.sqrt()));
             } else {
                 // RJ(x,x,x,p)
-                return Ok(
-                    (three!() / (x - p)) * (elliprc(x, p)? - one!() / x.sqrt())
-                );
+                return Ok((three!() / (x - p)) * (elliprc(x, p)? - one!() / x.sqrt()));
             }
         } else {
             // RJ(x,x,z,p)
@@ -104,9 +102,7 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
         let p = (z * (x + y + q) - x * y) / (z + q);
 
         let value = (p - z) * elliprj(x, y, z, p)? - three!() * elliprf(x, y, z)?
-            + three!()
-                * ((x * y * z) / (x * y + p * q)).sqrt()
-                * elliprc(x * y + p * q, p * q)?;
+            + three!() * ((x * y * z) / (x * y + p * q)).sqrt() * elliprc(x * y + p * q, p * q)?;
         return Ok(value / (z + q));
     }
 
