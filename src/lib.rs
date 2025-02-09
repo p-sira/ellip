@@ -42,6 +42,9 @@
 //! Unicode-style mathematical notation are created using an awesome tool called
 //! [Diagon](https://github.com/ArthurSonzogni/Diagon).
 
+use num_lazy::declare_nums;
+declare_nums!{T}
+
 pub mod legendre;
 // Legendre's complete integrals
 pub use legendre::ellipe;

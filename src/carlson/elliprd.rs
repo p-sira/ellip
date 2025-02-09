@@ -17,7 +17,7 @@
 //  Boost.Math conceptual framework better.
 //  Updated 2015 to use Carlson's latest methods.
 
-use std::{f64::consts::PI, mem::swap};
+use std::mem::swap;
 
 use num_traits::Float;
 
@@ -33,10 +33,10 @@ use num_traits::Float;
 /// ```
 ///
 pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
-    if x.min(y) < T::zero() || x + y == T::zero() {
+    if x.min(y) < zero!() || x + y == zero!() {
         return Err("elliprd: x and y must be non-negative, and at most one can be zero.");
     }
-    if z <= T::zero() {
+    if z <= zero!() {
         return Err("elliprd: z must be positive");
     }
 
@@ -50,53 +50,46 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
 
     if y == z {
         if x == y {
-            return Ok(T::one() / (x * x.sqrt()));
+            return Ok(one!() / (x * x.sqrt()));
         }
-        if x == T::zero() {
-            return Ok(T::from(3.0).unwrap() * T::from(PI).unwrap()
-                / (T::from(4.0).unwrap() * y * y.sqrt()));
+        if x == zero!() {
+            return Ok(three!() * pi!() / (four!() * y * y.sqrt()));
         }
     }
 
-    if x == T::zero() {
+    if x == zero!() {
         let x0 = y.sqrt();
         let y0 = z.sqrt();
         let mut xn = x0;
         let mut yn = y0;
-        let mut sum = T::zero();
-        let mut sum_pow = T::from(0.25).unwrap();
+        let mut sum = zero!();
+        let mut sum_pow = num!(0.25);
 
-        while (xn - yn).abs() >= T::from(2.7).unwrap() * T::epsilon() * xn.abs() {
+        while (xn - yn).abs() >= num!(2.7) * epsilon!() * xn.abs() {
             let t = (xn * yn).sqrt();
-            xn = (xn + yn) / T::from(2.0).unwrap();
+            xn = (xn + yn) / two!();
             yn = t;
-            sum_pow = sum_pow * T::from(2.0).unwrap();
+            sum_pow = sum_pow * two!();
             let temp = xn - yn;
             sum = sum + sum_pow * temp * temp;
         }
-        let rf = T::from(PI).unwrap() / (xn + yn);
-        let pt = (x0 + T::from(3.0).unwrap() * y0) / (T::from(4.0).unwrap() * z * (x0 + y0))
-            - sum / (z * (y - z));
-        return Ok(pt * rf * T::from(3.0).unwrap());
+        let rf = pi!() / (xn + yn);
+        let pt = (x0 + three!() * y0) / (four!() * z * (x0 + y0)) - sum / (z * (y - z));
+        return Ok(pt * rf * three!());
     }
 
-    _elliprd(x, y, z)
-}
-
-#[inline]
-fn _elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
     let mut xn = x;
     let mut yn = y;
     let mut zn = z;
 
-    let mut an = (x + y + T::from(3.0).unwrap() * z) / T::from(5.0).unwrap();
+    let mut an = (x + y + three!() * z) / five!();
     let a0 = an;
-    let mut q = (T::epsilon() / T::from(4.0).unwrap()).powf(-T::one() / T::from(8.0).unwrap())
+    let mut q = (epsilon!() / four!()).powf(-one!() / eight!())
         * (an - x).max(an - y).max(an - z)
-        * T::from(1.2).unwrap();
+        * num!(1.2);
 
-    let mut fn_val = T::one();
-    let mut rd_sum = T::zero();
+    let mut fn_val = one!();
+    let mut rd_sum = zero!();
 
     for _ in 0..N_MAX_ITERATIONS {
         let rx = xn.sqrt();
@@ -104,39 +97,39 @@ fn _elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
         let rz = zn.sqrt();
         let lambda = rx * ry + rx * rz + ry * rz;
         rd_sum = rd_sum + fn_val / (rz * (zn + lambda));
-        an = (an + lambda) / T::from(4.0).unwrap();
-        xn = (xn + lambda) / T::from(4.0).unwrap();
-        yn = (yn + lambda) / T::from(4.0).unwrap();
-        zn = (zn + lambda) / T::from(4.0).unwrap();
-        fn_val = fn_val / T::from(4.0).unwrap();
-        q = q / T::from(4.0).unwrap();
+        an = (an + lambda) / four!();
+        xn = (xn + lambda) / four!();
+        yn = (yn + lambda) / four!();
+        zn = (zn + lambda) / four!();
+        fn_val = fn_val / four!();
+        q = q / four!();
         if q < an {
             let x = fn_val * (a0 - x) / an;
             let y = fn_val * (a0 - y) / an;
-            let z = -(x + y) / T::from(3.0).unwrap();
+            let z = -(x + y) / three!();
             let xyz = x * y * z;
             let z2 = z * z;
             let z3 = z2 * z;
 
-            let e2 = x * y - T::from(6.0).unwrap() * z2;
-            let e3 = T::from(3.0).unwrap() * xyz - T::from(8.0).unwrap() * z3;
-            let e4 = T::from(3.0).unwrap() * (xyz - z3) * z;
+            let e2 = x * y - six!() * z2;
+            let e3 = three!() * xyz - eight!() * z3;
+            let e4 = three!() * (xyz - z3) * z;
             let e5 = xyz * z2;
 
             let result = fn_val
-                * an.powf(-T::from(1.5).unwrap())
-                * (T::one() - T::from(3.0).unwrap() * e2 / T::from(14.0).unwrap()
-                    + e3 / T::from(6.0).unwrap()
-                    + T::from(9.0).unwrap() * e2 * e2 / T::from(88.0).unwrap()
-                    - T::from(3.0).unwrap() * e4 / T::from(22.0).unwrap()
-                    - T::from(9.0).unwrap() * e2 * e3 / T::from(52.0).unwrap()
-                    + T::from(3.0).unwrap() * e5 / T::from(26.0).unwrap()
-                    - e2 * e2 * e2 / T::from(16.0).unwrap()
-                    + T::from(3.0).unwrap() * e3 * e3 / T::from(40.0).unwrap()
-                    + T::from(3.0).unwrap() * e2 * e4 / T::from(20.0).unwrap()
-                    + T::from(45.0).unwrap() * e2 * e2 * e3 / T::from(272.0).unwrap()
-                    - T::from(9.0).unwrap() * (e3 * e4 + e2 * e5) / T::from(68.0).unwrap())
-                + T::from(3.0).unwrap() * rd_sum;
+                * an.powf(-num!(1.5))
+                * (one!() - three!() * e2 / num!(14.0)
+                    + e3 / six!()
+                    + nine!() * e2 * e2 / num!(88.0)
+                    - three!() * e4 / num!(22.0)
+                    - nine!() * e2 * e3 / num!(52.0)
+                    + three!() * e5 / num!(26.0)
+                    - e2 * e2 * e2 / num!(16.0)
+                    + three!() * e3 * e3 / num!(40.0)
+                    + three!() * e2 * e4 / num!(20.0)
+                    + num!(45.0) * e2 * e2 * e3 / num!(272.0)
+                    - nine!() * (e3 * e4 + e2 * e5) / num!(68.0))
+                + three!() * rd_sum;
 
             return Ok(result);
         }

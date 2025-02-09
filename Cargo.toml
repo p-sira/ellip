@@ -16,6 +16,7 @@ edition = "2021"
 exclude = ["/logo", "/tests/data", "cpp"]
 
 [dependencies]
+num-lazy = "0.1.0"
 num-traits = "0.2.19"
 
 [dev-dependencies]

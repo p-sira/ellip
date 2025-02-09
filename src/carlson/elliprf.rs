@@ -18,7 +18,7 @@
 //  types longer than 80-bit reals.
 //  Updated 2015 to use Carlson's latest methods.
 
-use std::{f64::consts::PI, mem::swap};
+use std::mem::swap;
 
 use num_traits::Float;
 
@@ -36,7 +36,7 @@ use crate::elliprc;
 /// ```
 ///
 pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
-    if x.min(y).min(z) < T::zero() || (y + z).min(x + y).min(x + z) < T::zero() {
+    if x.min(y).min(z) < zero!() || (y + z).min(x + y).min(x + z) < zero!() {
         return Err("elliprf: x, y, and z must be non-negative, and at most one can be zero.");
     }
 
@@ -44,25 +44,25 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
     if x == y {
         if x == z {
             // RF(x,x,x)
-            return Ok(T::one() / x.sqrt());
+            return Ok(one!() / x.sqrt());
         }
-
-        if z == T::zero() {
+        
+        if z == zero!() {
             // RF(x,x,0)
             // RF(0,y,y)
-            return Ok(T::from(PI).unwrap() / (T::from(2.0).unwrap() * x.sqrt()));
+            return Ok(pi!() / (two!() * x.sqrt()));
         }
 
         // RF(x,x,z)
         // RF(x,y,y)
         return elliprc(z, x);
     }
-
+    
     if x == z {
-        if y == T::zero() {
+        if y == zero!() {
             // RF(x,0,x)
             // RF(0,y,y)
-            return Ok(T::from(PI).unwrap() / (T::from(2.0).unwrap() * x.sqrt()));
+            return Ok(pi!() / (two!() * x.sqrt()));
         }
 
         // RF(x,y,x)
@@ -71,9 +71,9 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
     }
 
     if y == z {
-        if x == T::zero() {
+        if x == zero!() {
             // RF(0,y,y)
-            return Ok(T::from(PI).unwrap() / (T::from(2.0).unwrap() * y.sqrt()));
+            return Ok(pi!() / (two!() * y.sqrt()));
         }
 
         // RF(x,y,y)
@@ -84,34 +84,34 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
     let mut yn = y;
     let mut zn = z;
 
-    if xn == T::zero() {
+    if xn == zero!() {
         swap(&mut xn, &mut zn);
-    } else if yn == T::zero() {
+    } else if yn == zero!() {
         swap(&mut yn, &mut zn);
     }
 
-    if zn == T::zero() {
+    if zn == zero!() {
         let mut xn = xn.sqrt();
         let mut yn = yn.sqrt();
 
-        while (xn - yn).abs() >= T::from(2.7).unwrap() * T::epsilon() * xn.abs() {
+        while (xn - yn).abs() >= num!(2.7) * epsilon!() * xn.abs() {
             let t = (xn * yn).sqrt();
-            xn = (xn + yn) / T::from(2.0).unwrap();
+            xn = (xn + yn) / two!();
             yn = t;
         }
-        return Ok(T::from(PI).unwrap() / (xn + yn));
+        return Ok(pi!() / (xn + yn));
     }
 
-    let four = T::from(4.0).unwrap();
+    let four = four!();
 
-    let mut an = (xn + yn + zn) / T::from(3.0).unwrap();
+    let mut an = (xn + yn + zn) / three!();
     let a0 = an;
-    let mut q = (T::from(3.0).unwrap() * T::epsilon()).powf(-T::one() / T::from(8.0).unwrap())
+    let mut q = (three!() * epsilon!()).powf(-one!() / eight!())
         * an.abs()
             .max((an - xn).abs())
             .max((an - yn).abs())
             .max((an - zn).abs());
-    let mut fn_val = T::one();
+    let mut fn_val = one!();
     for _ in 0..N_MAX_ITERATIONS {
         let root_x = xn.sqrt();
         let root_y = yn.sqrt();
@@ -135,13 +135,13 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
             let e2 = x * y - z * z;
             let e3 = x * y * z;
 
-            return Ok((T::one()
-                + e3 * (T::from(1.0 / 14.0).unwrap()
-                    + T::from(3.0).unwrap() * e3 / T::from(104.0).unwrap())
-                + e2 * (T::from(-0.1).unwrap() + e2 / T::from(24.0).unwrap()
-                    - (T::from(3.0).unwrap() * e3) / T::from(44.0).unwrap()
-                    - T::from(5.0).unwrap() * e2 * e2 / T::from(208.0).unwrap()
-                    + e2 * e3 / T::from(16.0).unwrap()))
+            return Ok((one!()
+                + e3 * (num!(1.0 / 14.0)
+                    + three!() * e3 / num!(104.0))
+                + e2 * (num!(-0.1) + e2 / num!(24.0)
+                    - (three!() * e3) / num!(44.0)
+                    - five!() * e2 * e2 / num!(208.0)
+                    + e2 * e3 / num!(16.0)))
                 / an.sqrt());
         }
     }

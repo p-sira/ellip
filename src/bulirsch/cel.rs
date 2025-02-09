@@ -3,8 +3,6 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-use std::f64::consts::FRAC_PI_2;
-
 use num_traits::Float;
 
 // Reference: Derby and Olbert, “Cylindrical Magnets and Ideal Solenoids.”
@@ -19,62 +17,61 @@ use num_traits::Float;
 /// where kc ≠ 0, p ≠ 0
 /// ```
 pub fn cel<T: Float>(kc: T, p: T, a: T, b: T) -> Result<T, &'static str> {
-    if kc == T::zero() {
+    if kc == zero!() {
         return Err("cel: kc cannot be zero.");
     }
 
-    if p == T::zero() {
+    if p == zero!() {
         return Err("cel: p cannot be zero.");
     }
 
     Ok(_cel(kc, p, a, b))
 }
 
-/// Unchecked version of [cel].
 #[inline]
 fn _cel<T: Float>(kc: T, p: T, a: T, b: T) -> T {
     let mut k = kc.abs();
     let mut aa;
     let mut pp;
-    let mut bb;
+    let mut bb: T;
 
-    if p > T::zero() {
+    if p > zero!() {
         aa = a;
         pp = p.sqrt();
         bb = b / pp;
     } else {
         let f = kc * kc;
-        let q: T = (T::one() - f) * (b - a * p);
-        let g = T::one() - p;
+        let q = (one!() - f) * (b - a * p);
+        let g = one!() - p;
         let h = f - p;
         pp = (h / g).sqrt();
         aa = (a - b) / g;
         bb = -q / (g * g * pp) + aa * pp;
     }
 
-    let mut em = T::one();
+    let mut em = one!();
     let mut f = aa;
     aa = aa + bb / pp;
     let mut g = k / pp;
-    bb = T::from(2.0).unwrap() * (bb + f * g);
+    bb = two!() * (bb + f * g);
     pp = pp + g;
     g = em;
     em = em + k;
     let mut kk = k;
 
-    while (g - k).abs() > (g * T::from(1e-6).unwrap()) {
-        k = T::from(2.0).unwrap() * kk.sqrt();
+    while (g - k).abs() > (g * num!(1e-6)) {
+        k = two!() * kk.sqrt();
         kk = k * em;
         f = aa;
         aa = aa + bb / pp;
         g = kk / pp;
-        bb = T::from(2.0).unwrap() * (bb + f * g);
+        bb = two!() * (bb + f * g);
         pp = pp + g;
         g = em;
         em = em + k;
     }
 
-    T::from(FRAC_PI_2).unwrap() * (bb + aa * em) / (em * (em + pp))
+    pi_2!() * (bb + aa * em) / (em * (em + pp))
 }
 
 #[cfg(test)]

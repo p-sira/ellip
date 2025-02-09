@@ -70,8 +70,6 @@
  * Direct inquiries to 30 Frost Street, Cambridge, MA 02140
  */
 
-use std::f64::consts::FRAC_PI_2;
-
 use num_traits::Float;
 
 use crate::polyeval;
@@ -91,24 +89,24 @@ use crate::polyeval;
 /// where k² = m.
 ///
 pub fn ellipk<T: Float>(m: T) -> Result<T, &'static str> {
-    if m > T::one() {
+    if m > one!() {
         return Err("ellipk: m must be less than 1.");
     }
 
     // Special cases: https://dlmf.nist.gov/19.6.E1
-    if m == T::one() {
-        return Ok(T::infinity());
+    if m == one!() {
+        return Ok(inf!());
     }
 
-    if m == T::zero() {
-        return Ok(T::from(FRAC_PI_2).unwrap());
+    if m == zero!() {
+        return Ok(pi_2!());
     }
 
-    let x: T = T::one() - m;
+    let x: T = one!() - m;
 
     // Asymptotic approximation when m -> 1
-    if x < T::epsilon() {
-        return Ok(T::from(4.0).unwrap().ln() - T::from(0.5).unwrap() * x.ln());
+    if x < epsilon!() {
+        return Ok(four!().ln() - half!() * x.ln());
     }
 
     Ok(polyeval(x, &ellpk_p::<T>()) - x.ln() * polyeval(x, &ellpk_q::<T>()))
@@ -117,34 +115,34 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, &'static str> {
 #[inline]
 fn ellpk_p<T: Float>() -> [T; 11] {
     [
-        T::from(1.37982864606273237150E-4).unwrap(),
-        T::from(2.28025724005875567385E-3).unwrap(),
-        T::from(7.97404013220415179367E-3).unwrap(),
-        T::from(9.85821379021226008714E-3).unwrap(),
-        T::from(6.87489687449949877925E-3).unwrap(),
-        T::from(6.18901033637687613229E-3).unwrap(),
-        T::from(8.79078273952743772254E-3).unwrap(),
-        T::from(1.49380448916805252718E-2).unwrap(),
-        T::from(3.08851465246711995998E-2).unwrap(),
-        T::from(9.65735902811690126535E-2).unwrap(),
-        T::from(1.38629436111989062502E0).unwrap(),
+        num!(1.37982864606273237150E-4),
+        num!(2.28025724005875567385E-3),
+        num!(7.97404013220415179367E-3),
+        num!(9.85821379021226008714E-3),
+        num!(6.87489687449949877925E-3),
+        num!(6.18901033637687613229E-3),
+        num!(8.79078273952743772254E-3),
+        num!(1.49380448916805252718E-2),
+        num!(3.08851465246711995998E-2),
+        num!(9.65735902811690126535E-2),
+        num!(1.38629436111989062502E0),
     ]
 }
 
 #[inline]
 fn ellpk_q<T: Float>() -> [T; 11] {
     [
-        T::from(2.94078955048598507511E-5).unwrap(),
-        T::from(9.14184723865917226571E-4).unwrap(),
-        T::from(5.94058303753167793257E-3).unwrap(),
-        T::from(1.54850516649762399335E-2).unwrap(),
-        T::from(2.39089602715924892727E-2).unwrap(),
-        T::from(3.01204715227604046988E-2).unwrap(),
-        T::from(3.73774314173823228969E-2).unwrap(),
-        T::from(4.88280347570998239232E-2).unwrap(),
-        T::from(7.03124996963957469739E-2).unwrap(),
-        T::from(1.24999999999870820058E-1).unwrap(),
-        T::from(4.99999999999999999821E-1).unwrap(),
+        num!(2.94078955048598507511E-5),
+        num!(9.14184723865917226571E-4),
+        num!(5.94058303753167793257E-3),
+        num!(1.54850516649762399335E-2),
+        num!(2.39089602715924892727E-2),
+        num!(3.01204715227604046988E-2),
+        num!(3.73774314173823228969E-2),
+        num!(4.88280347570998239232E-2),
+        num!(7.03124996963957469739E-2),
+        num!(1.24999999999870820058E-1),
+        num!(4.99999999999999999821E-1),
     ]
 }
 

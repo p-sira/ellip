@@ -62,8 +62,6 @@
  */
 /* Copyright 2014, Eric W. Moore */
 
-use std::f64::consts::{FRAC_PI_2, PI};
-
 use num_traits::Float;
 
 use crate::ellipk;
@@ -83,116 +81,100 @@ use crate::ellipk;
 /// Note that some mathematical references use the parameter k for the function,
 /// where k² = m.
 pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
-    if m > T::one() {
+    if m > one!() {
         return Err("ellipf: m must be less than 1.");
     }
 
     if phi.is_infinite() || m.is_infinite() {
         if phi.is_infinite() {
-            return Ok(T::infinity());
+            return Ok(inf!());
         }
 
         if m.is_infinite() {
-            return Ok(T::zero());
+            return Ok(zero!());
         }
 
         return Err("ellipf: m or φ must be finite");
     }
 
-    if m == T::zero() {
+    if m == zero!() {
         return Ok(phi);
     }
 
-    if m == T::one() {
-        if phi.abs() >= T::from(FRAC_PI_2).unwrap() {
-            return Ok(T::infinity());
+    if m == one!() {
+        if phi.abs() >= pi_2!() {
+            return Ok(inf!());
         }
         return Ok(phi.tan().sinh().atanh());
     }
 
-    let mut npio2 = (phi / T::from(FRAC_PI_2).unwrap()).floor();
-    if (npio2.abs() % T::from(2.0).unwrap()) == T::one() {
-        npio2 = npio2 + T::one();
+    let mut npio2 = (phi / pi_2!()).floor();
+    if (npio2.abs() % two!()) == one!() {
+        npio2 = npio2 + one!();
     }
 
     let mut phi = phi;
     let mut k;
-    if npio2 != T::zero() {
+    if npio2 != zero!() {
         k = ellipk(m)?;
-        phi = phi - npio2 * T::from(FRAC_PI_2).unwrap();
+        phi = phi - npio2 * pi_2!();
     } else {
-        k = T::zero();
+        k = zero!();
     }
 
-    let sign = if phi < T::zero() {
+    let sign = if phi < zero!() {
         phi = -phi;
-        -T::one()
+        -one!()
     } else {
-        T::one()
+        one!()
     };
 
     fn done<T: Float>(val: T, sign: T, npio2: T, k: T) -> Result<T, &'static str> {
         Ok(sign * val + npio2 * k)
     }
 
-    let a = T::one() - m;
-    if a > T::one() {
+    let a = one!() - m;
+    if a > one!() {
         return done(ellipf_neg_m(phi, m), sign, npio2, k);
     }
 
     let mut b = a.sqrt();
     let mut t = phi.tan();
-    if t.abs() > T::from(10.0).unwrap() {
-        let mut e = T::one() / (b * t);
-        if e.abs() < T::from(10.0).unwrap() {
+    if t.abs() > num!(10.0) {
+        let mut e = one!() / (b * t);
+        if e.abs() < num!(10.0) {
             e = e.atan();
-            if npio2 == T::zero() {
+            if npio2 == zero!() {
                 k = ellipk(m)?;
             }
             return done(k - ellipf(e, m)?, sign, npio2, k);
         }
     }
 
-    let mut a = T::one();
+    let mut a = one!();
     let mut c = m.sqrt();
-    let mut d = T::one();
-    let mut mod_phi = T::zero();
+    let mut d = one!();
+    let mut mod_phi = zero!();
 
-    while (c / a).abs() > T::epsilon() {
+    while (c / a).abs() > epsilon!() {
         let temp = b / a;
-        phi = phi + (t * temp).atan() + mod_phi * T::from(PI).unwrap();
-        let denom = T::one() - temp * t * t;
-        if denom.abs() > T::from(10.0).unwrap() * T::epsilon() {
-            t = t * (T::one() + temp) / denom;
-            mod_phi = T::from(
-                ((phi + T::from(FRAC_PI_2).unwrap()) / T::from(PI).unwrap())
-                    .to_i32()
-                    .unwrap(),
-            )
-            .unwrap();
+        phi = phi + (t * temp).atan() + mod_phi * pi!();
+        let denom = one!() - temp * t * t;
+        if denom.abs() > num!(10.0) * epsilon!() {
+            t = t * (one!() + temp) / denom;
+            mod_phi = num!(((phi + pi_2!()) / pi!()).to_i32().unwrap());
         } else {
             t = phi.tan();
-            mod_phi = T::from(
-                ((phi - t.atan()) / T::from(PI).unwrap())
-                    .floor()
-                    .to_i32()
-                    .unwrap(),
-            )
-            .unwrap();
+            mod_phi = num!(((phi - t.atan()) / pi!()).floor().to_i32().unwrap());
         }
-        c = (a - b) / T::from(2.0).unwrap();
+        c = (a - b) / two!();
         let temp = (a * b).sqrt();
-        a = (a + b) / T::from(2.0).unwrap();
+        a = (a + b) / two!();
         b = temp;
-        d = d * T::from(2.0).unwrap();
+        d = d * two!();
     }
 
-    done(
-        (t.atan() + mod_phi * T::from(PI).unwrap()) / (d * a),
-        sign,
-        npio2,
-        k,
-    )
+    done((t.atan() + mod_phi * pi!()) / (d * a), sign, npio2, k)
 }
 
 /// Compute elliptic integral of the first kind for m<0.
@@ -200,43 +182,41 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
 fn ellipf_neg_m<T: Float>(phi: T, m: T) -> T {
     let mpp = m * phi * phi;
 
-    if -mpp < T::from(1e-6).unwrap() && phi < -m {
+    if -mpp < num!(1e-6) && phi < -m {
         return phi
-            + (-mpp * phi * phi / T::from(30.0).unwrap()
-                + T::from(3.0).unwrap() * mpp * mpp / T::from(40.0).unwrap()
-                + mpp / T::from(6.0).unwrap())
+            + (-mpp * phi * phi / num!(30.0) + three!() * mpp * mpp / num!(40.0) + mpp / six!())
                 * phi;
     }
 
-    if -mpp > T::from(4e7).unwrap() {
+    if -mpp > num!(4e7) {
         let sm = (-m).sqrt();
         let sp = phi.sin();
         let cp = phi.cos();
 
-        let a = (T::from(4.0).unwrap() * sp * sm / (T::one() + cp)).ln();
-        let b = -(T::one() + cp / (sp * sp) - a) / (T::from(4.0).unwrap() * m);
+        let a = (four!() * sp * sm / (one!() + cp)).ln();
+        let b = -(one!() + cp / (sp * sp) - a) / (four!() * m);
         return (a + b) / sm;
     }
 
-    let (scale, x, y, z) = if phi > T::from(1e-153).unwrap() && m > T::from(-1e305).unwrap() {
+    let (scale, x, y, z) = if phi > num!(1e-153) && m > num!(-1e305) {
         let s = phi.sin();
         let phi_tan = phi.tan();
-        let csc2 = T::one() / (s * s);
-        (T::one(), T::one() / (phi_tan * phi_tan), csc2 - m, csc2)
+        let csc2 = one!() / (s * s);
+        (one!(), one!() / (phi_tan * phi_tan), csc2 - m, csc2)
     } else {
-        (phi, T::one(), T::one() - m * phi * phi, T::one())
+        (phi, one!(), one!() - m * phi * phi, one!())
     };
 
     if x == y && x == z {
         return scale / x.sqrt();
     }
 
-    let a0 = (x + y + z) / T::from(3.0).unwrap();
+    let a0 = (x + y + z) / three!();
     let mut a = a0;
     let mut x1 = x;
     let mut y1 = y;
     let mut z1 = z;
-    let mut q = T::from(400.0).unwrap() * (a0 - x).abs().max((a0 - y).abs()).max((a0 - z).abs());
+    let mut q = num!(400.0) * (a0 - x).abs().max((a0 - y).abs()).max((a0 - z).abs());
     let mut n = 0;
 
     while q > a.abs() && n <= 100 {
@@ -244,15 +224,15 @@ fn ellipf_neg_m<T: Float>(phi: T, m: T) -> T {
         let sy = y1.sqrt();
         let sz = z1.sqrt();
         let lam = sx * sy + sx * sz + sy * sz;
-        x1 = (x1 + lam) / T::from(4.0).unwrap();
-        y1 = (y1 + lam) / T::from(4.0).unwrap();
-        z1 = (z1 + lam) / T::from(4.0).unwrap();
-        a = (x1 + y1 + z1) / T::from(3.0).unwrap();
+        x1 = (x1 + lam) / four!();
+        y1 = (y1 + lam) / four!();
+        z1 = (z1 + lam) / four!();
+        a = (x1 + y1 + z1) / three!();
         n += 1;
-        q = q / T::from(4.0).unwrap();
+        q = q / four!();
     }
 
-    let two_to_2n = T::from(1u32 << (2 * n)).unwrap();
+    let two_to_2n = num!(1u32 << (2 * n));
     let x = (a0 - x) / a / two_to_2n;
     let y = (a0 - y) / a / two_to_2n;
     let z = -(x + y);
@@ -261,10 +241,8 @@ fn ellipf_neg_m<T: Float>(phi: T, m: T) -> T {
     let e3 = x * y * z;
 
     scale
-        * (T::one() - e2 / T::from(10.0).unwrap()
-            + e3 / T::from(14.0).unwrap()
-            + e2 * e2 / T::from(24.0).unwrap()
-            - T::from(3.0).unwrap() * e2 * e3 / T::from(44.0).unwrap())
+        * (one!() - e2 / num!(10.0) + e3 / num!(14.0) + e2 * e2 / num!(24.0)
+            - three!() * e2 * e3 / num!(44.0))
         / a.sqrt()
 }
 

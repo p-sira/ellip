@@ -8,7 +8,7 @@
 //  Copyright (c) 2006 Xiaogang Zhang
 //  Copyright (c) 2006 John Maddock
 //  Use, modification and distribution are subject to the
-//  Boost Software License, Version T::one(). (See accompanying file
+//  Boost Software License, Version one!(). (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 //  History:
@@ -16,8 +16,6 @@
 //  Summer of Code 2006.  JM modified it to fit into the
 //  Boost.Math conceptual framework better, and to correctly
 //  handle the various corner cases.
-
-use std::f64::consts::FRAC_PI_2;
 
 use num_traits::Float;
 
@@ -37,46 +35,46 @@ use crate::{ellipk, elliprf, elliprj};
 /// Note that some mathematical references use the parameter k and α for the function,
 /// where k² = m, α² = n.
 pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, &'static str> {
-    if m >= T::one() {
+    if m >= one!() {
         return Err("ellippi: m must be less than 1.");
     }
-    if n > T::one() {
+    if n > one!() {
         return Err("ellippi: n must be less than 1.");
     }
 
-    if n == T::zero() {
-        if m == T::zero() {
-            return Ok(T::from(FRAC_PI_2).unwrap());
+    if n == zero!() {
+        if m == zero!() {
+            return Ok(pi_2!());
         }
         return ellipk(m);
     }
 
-    if n < T::zero() {
+    if n < zero!() {
         // Apply A&S 17.7.17
-        let nn = (m - n) / (T::one() - n);
-        let nm1 = (T::one() - m) / (T::one() - n);
+        let nn = (m - n) / (one!() - n);
+        let nm1 = (one!() - m) / (one!() - n);
 
         let mut result = ellippi_vc(nn, m, nm1)?;
         // Split calculations to avoid overflow/underflow
-        result = result * -n / (T::one() - n);
-        result = result * (T::one() - m) / (m - n);
+        result = result * -n / (one!() - n);
+        result = result * (one!() - m) / (m - n);
         result = result + ellipk(m)? * m / (m - n);
         return Ok(result);
     }
 
     // Compute vc = 1-n without cancellation errors
-    let vc = T::one() - n;
+    let vc = one!() - n;
     ellippi_vc(n, m, vc)
 }
 
 #[inline]
 fn ellippi_vc<T: Float>(n: T, m: T, vc: T) -> Result<T, &'static str> {
-    let x = T::zero();
-    let y = T::one() - m;
-    let z = T::one();
+    let x = zero!();
+    let y = one!() - m;
+    let z = one!();
     let p = vc;
 
-    Ok(elliprf(x, y, z)? + n * elliprj(x, y, z, p)? / T::from(3.0).unwrap())
+    Ok(elliprf(x, y, z)? + n * elliprj(x, y, z, p)? / three!())
 }
 
 #[cfg(test)]

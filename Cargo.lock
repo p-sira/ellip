@@ -19,6 +19,7 @@ name = "ellip"
 version = "0.2.1"
 dependencies = [
  "itertools",
+ "num-lazy",
  "num-traits",
 ]
 
@@ -30,6 +31,12 @@ checksum = "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285"
 dependencies = [
  "either",
 ]
+
+[[package]]
+name = "num-lazy"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f913bd75a5297b9209cb5980dd19d52ed5c2c390bc4ddb448338738bca9381cf"
 
 [[package]]
 name = "num-traits"

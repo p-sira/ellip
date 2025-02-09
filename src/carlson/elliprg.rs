@@ -5,7 +5,7 @@
  */
 
 use num_traits::Float;
-use std::{f64::consts::PI, mem::swap};
+use std::mem::swap;
 
 use crate::{elliprc, elliprd, elliprf};
 
@@ -26,7 +26,7 @@ use crate::{elliprc, elliprd, elliprf};
 /// where x ≥ 0, y ≥ 0, z ≥ 0
 /// ```
 pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
-    if x < T::zero() || y < T::zero() || z < T::zero() {
+    if x < zero!() || y < zero!() || z < zero!() {
         return Err("elliprg: x, y, and z must be non-negative.");
     }
 
@@ -48,50 +48,50 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
             return Ok(x.sqrt());
         }
 
-        if y == T::zero() {
-            return Ok(T::from(PI).unwrap() * x.sqrt() / T::from(4.0).unwrap());
+        if y == zero!() {
+            return Ok(pi!() * x.sqrt() / four!());
         }
 
-        if x == T::zero() {
-            return Ok(y.sqrt() / T::from(2.0).unwrap());
+        if x == zero!() {
+            return Ok(y.sqrt() / two!());
         }
 
-        return Ok((x * elliprc(y, x)? + y.sqrt()) / T::from(2.0).unwrap());
+        return Ok((x * elliprc(y, x)? + y.sqrt()) / two!());
     }
 
     if y == z {
-        if y == T::zero() {
-            return Ok(x.sqrt() / T::from(2.0).unwrap());
+        if y == zero!() {
+            return Ok(x.sqrt() / two!());
         }
 
-        return Ok((y * elliprc(x, y)? + x.sqrt()) / T::from(2.0).unwrap());
+        return Ok((y * elliprc(x, y)? + x.sqrt()) / two!());
     }
 
-    if y == T::zero() {
+    if y == zero!() {
         let mut xn = x.sqrt();
         let mut yn = z.sqrt();
         let x0 = xn;
         let y0 = yn;
-        let mut sum = T::zero();
-        let mut sum_pow = T::from(0.25).unwrap();
+        let mut sum = zero!();
+        let mut sum_pow = num!(0.25);
 
-        while (xn - yn).abs() >= T::from(2.7).unwrap() * T::epsilon() * xn.abs() {
+        while (xn - yn).abs() >= num!(2.7) * epsilon!() * xn.abs() {
             let t = (xn * yn).sqrt();
-            xn = (xn + yn) / T::from(2.0).unwrap();
+            xn = (xn + yn) / two!();
             yn = t;
-            sum_pow = sum_pow * T::from(2.0).unwrap();
+            sum_pow = sum_pow * two!();
             sum = sum + sum_pow * (xn - yn) * (xn - yn);
         }
-        let rf = T::from(PI).unwrap() / (xn + yn);
+        let rf = pi!() / (xn + yn);
         return Ok(
-            ((x0 + y0) * (x0 + y0) / T::from(4.0).unwrap() - sum) * rf / T::from(2.0).unwrap()
+            ((x0 + y0) * (x0 + y0) / four!() - sum) * rf / two!()
         );
     }
 
     Ok(
-        (z * elliprf(x, y, z)? - (x - z) * (y - z) * elliprd(x, y, z)? / T::from(3.0).unwrap()
+        (z * elliprf(x, y, z)? - (x - z) * (y - z) * elliprd(x, y, z)? / three!()
             + (x * y / z).sqrt())
-            / T::from(2.0).unwrap(),
+            / two!(),
     )
 }
 

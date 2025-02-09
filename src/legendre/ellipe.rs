@@ -74,8 +74,6 @@
  * (which gets immediately converted to m1 = 1-m)
  */
 
-use std::f64::consts::FRAC_PI_2;
-
 use num_traits::Float;
 
 use crate::polyeval;
@@ -94,29 +92,29 @@ use crate::polyeval;
 /// Note that some mathematical references use the parameter k for the function,
 /// where k² = m.
 pub fn ellipe<T: Float>(m: T) -> Result<T, &'static str> {
-    if m > T::one() {
+    if m > one!() {
         return Err("ellipe: m must be less than 1.");
     }
 
     // Special cases: https://dlmf.nist.gov/19.6.E1
-    if m == T::one() {
-        return Ok(T::one());
+    if m == one!() {
+        return Ok(one!());
     }
 
-    if m == T::zero() {
-        return Ok(T::from(FRAC_PI_2).unwrap());
+    if m == zero!() {
+        return Ok(pi_2!());
     }
 
     // Note: this function allows both negative m and positive m less than 1.
     // Negative m: Abramowitz & Stegun, 1972
     let mut m = m;
-    let mut c = T::one();
-    while m < T::zero() {
-        c = c * (T::one() - m).sqrt();
-        m = m / (m - T::one());
+    let mut c = one!();
+    while m < zero!() {
+        c = c * (one!() - m).sqrt();
+        m = m / (m - one!());
     }
 
-    let x = T::one() - m;
+    let x = one!() - m;
 
     Ok(c * polyeval(x, &ellpe_p()) - x.ln() * (x * polyeval(x, &ellpe_q())))
 }
@@ -124,33 +122,33 @@ pub fn ellipe<T: Float>(m: T) -> Result<T, &'static str> {
 #[inline]
 fn ellpe_p<T: Float>() -> [T; 11] {
     [
-        T::from(1.53552577301013293365E-4).unwrap(),
-        T::from(2.50888492163602060990E-3).unwrap(),
-        T::from(8.68786816565889628429E-3).unwrap(),
-        T::from(1.07350949056076193403E-2).unwrap(),
-        T::from(7.77395492516787092951E-3).unwrap(),
-        T::from(7.58395289413514708519E-3).unwrap(),
-        T::from(1.15688436810574127319E-2).unwrap(),
-        T::from(2.18317996015557253103E-2).unwrap(),
-        T::from(5.68051945617860553470E-2).unwrap(),
-        T::from(4.43147180560990850618E-1).unwrap(),
-        T::from(1.00000000000000000299E0).unwrap(),
+        num!(1.53552577301013293365E-4),
+        num!(2.50888492163602060990E-3),
+        num!(8.68786816565889628429E-3),
+        num!(1.07350949056076193403E-2),
+        num!(7.77395492516787092951E-3),
+        num!(7.58395289413514708519E-3),
+        num!(1.15688436810574127319E-2),
+        num!(2.18317996015557253103E-2),
+        num!(5.68051945617860553470E-2),
+        num!(4.43147180560990850618E-1),
+        num!(1.00000000000000000299E0),
     ]
 }
 
 #[inline]
 fn ellpe_q<T: Float>() -> [T; 10] {
     [
-        T::from(3.27954898576485872656E-5).unwrap(),
-        T::from(1.00962792679356715133E-3).unwrap(),
-        T::from(6.50609489976927491433E-3).unwrap(),
-        T::from(1.68862163993311317300E-2).unwrap(),
-        T::from(2.61769742454493659583E-2).unwrap(),
-        T::from(3.34833904888224918614E-2).unwrap(),
-        T::from(4.27180926518931511717E-2).unwrap(),
-        T::from(5.85936634471101055642E-2).unwrap(),
-        T::from(9.37499997197644278445E-2).unwrap(),
-        T::from(2.49999999999888314361E-1).unwrap(),
+        num!(3.27954898576485872656E-5),
+        num!(1.00962792679356715133E-3),
+        num!(6.50609489976927491433E-3),
+        num!(1.68862163993311317300E-2),
+        num!(2.61769742454493659583E-2),
+        num!(3.34833904888224918614E-2),
+        num!(4.27180926518931511717E-2),
+        num!(5.85936634471101055642E-2),
+        num!(9.37499997197644278445E-2),
+        num!(2.49999999999888314361E-1),
     ]
 }
 

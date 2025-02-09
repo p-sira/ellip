@@ -18,8 +18,6 @@
 //  handle the y < 0 case.
 //  Updated 2015 to use Carlson's latest methods.
 
-use std::f64::consts::FRAC_PI_2;
-
 use num_traits::Float;
 
 /// Compute [degenerate symmetric elliptic integral of RF](https://dlmf.nist.gov/19.16.E6).
@@ -34,34 +32,31 @@ use num_traits::Float;
 /// ```
 ///
 pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, &'static str> {
-    if x < T::zero() {
+    if x < zero!() {
         return Err("elliprc: x must be non-negative.");
     }
 
-    if y == T::zero() {
+    if y == zero!() {
         return Err("elliprc: y must be non-zero.");
     }
 
     Ok(_elliprc(x, y))
 }
 
-/// Unchecked version of [elliprc].
-///
-/// Domain: x ≥ 0, y ≠ 0
 #[inline]
 fn _elliprc<T: Float>(x: T, y: T) -> T {
     let mut x = x;
     let mut y = y;
-    let mut prefix = T::one();
+    let mut prefix = one!();
     // for y < 0, the integral is singular, return Cauchy principal value
-    if y < T::zero() {
+    if y < zero!() {
         prefix = (x / (x - y)).sqrt();
         x = x - y;
         y = -y;
     }
 
-    if x == T::zero() {
-        return prefix * T::from(FRAC_PI_2).unwrap() / y.sqrt();
+    if x == zero!() {
+        return prefix * pi_2!() / y.sqrt();
     }
 
     if x == y {
@@ -72,9 +67,9 @@ fn _elliprc<T: Float>(x: T, y: T) -> T {
         return prefix * ((y - x) / x).sqrt().atan() / (y - x).sqrt();
     }
 
-    if y / x > T::from(0.5).unwrap() {
+    if y / x > half!() {
         let arg = ((x - y) / x).sqrt();
-        prefix * ((arg).ln_1p() - (-arg).ln_1p()) / (T::from(2.0).unwrap() * (x - y).sqrt())
+        prefix * ((arg).ln_1p() - (-arg).ln_1p()) / (two!() * (x - y).sqrt())
     } else {
         prefix * ((x.sqrt() + (x - y).sqrt()) / y.sqrt()).ln() / (x - y).sqrt()
     }
