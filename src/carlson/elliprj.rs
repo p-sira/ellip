@@ -136,12 +136,8 @@ fn elliprc1p<T: Float>(y: T) -> Result<T, &'static str> {
     }
 }
 
-/// Unchecked version of [elliprj].
-///
-/// Domain: p > 0
-///
-/// Return NAN when it fails to converge.
-pub fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
+#[inline]
+fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
     let mut xn = x;
     let mut yn = y;
     let mut zn = z;
