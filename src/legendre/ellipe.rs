@@ -74,14 +74,16 @@
  * (which gets immediately converted to m1 = 1-m)
  */
 
+use num_traits::Float;
+
 use crate::polyeval;
 
-/// Compute [complete elliptic integral of the second kind](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.ellipe.html).
+/// Compute [complete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E8).
 ///
 /// ```text
 ///           π/2
-///          ⌠     _____________
-/// E(m)  =  │ \╱ 1 - m sin²(t)  dt
+///          ⌠     ___________
+/// E(m)  =  │ \╱ 1 - m sin²θ  dθ
 ///          ⌡
 ///         0
 /// where m ≤ 1
@@ -89,56 +91,66 @@ use crate::polyeval;
 ///
 /// Note that some mathematical references use the parameter k for the function,
 /// where k² = m.
-pub fn ellipe(m: f64) -> Result<f64, &'static str> {
-    if m > 1.0 {
+pub fn ellipe<T: Float>(m: T) -> Result<T, &'static str> {
+    if m > one!() {
         return Err("ellipe: m must be less than 1.");
     }
 
-    if m == 1.0 {
-        return Ok(1.0);
+    // Special cases: https://dlmf.nist.gov/19.6.E1
+    if m == one!() {
+        return Ok(one!());
     }
 
+    if m == zero!() {
+        return Ok(pi_2!());
+    }
+
+    // Note: this function allows both negative m and positive m less than 1.
+    // Negative m: Abramowitz & Stegun, 1972
     let mut m = m;
-    let mut k = 1.0;
-    while m < 0.0 {
-        k *= (1.0 - m).sqrt();
-        m /= m - 1.0;
+    let mut c = one!();
+    while m < zero!() {
+        c = c * (one!() - m).sqrt();
+        m = m / (m - one!());
     }
 
-    let x: f64 = 1.0 - m;
+    let x = one!() - m;
 
-    let p_val = polyeval(x, &ELLPE_P, 10);
-    let log_x = x.ln();
-
-    Ok(k * (p_val - log_x * (x * polyeval(x, &ELLPE_Q, 9))))
+    Ok(c * polyeval(x, &ellpe_p()) - x.ln() * (x * polyeval(x, &ellpe_q())))
 }
 
-const ELLPE_P: [f64; 11] = [
-    1.535_525_773_010_133E-4,
-    2.508_884_921_636_020_4E-3,
-    8.687_868_165_658_896E-3,
-    1.073_509_490_560_761_9E-2,
-    7.773_954_925_167_871E-3,
-    7.583_952_894_135_147E-3,
-    1.156_884_368_105_741_2E-2,
-    2.183_179_960_155_572_4E-2,
-    5.680_519_456_178_606E-2,
-    4.431_471_805_609_908_4E-1,
-    1.0,
-];
+#[inline]
+fn ellpe_p<T: Float>() -> [T; 11] {
+    [
+        num!(1.53552577301013293365E-4),
+        num!(2.50888492163602060990E-3),
+        num!(8.68786816565889628429E-3),
+        num!(1.07350949056076193403E-2),
+        num!(7.77395492516787092951E-3),
+        num!(7.58395289413514708519E-3),
+        num!(1.15688436810574127319E-2),
+        num!(2.18317996015557253103E-2),
+        num!(5.68051945617860553470E-2),
+        num!(4.43147180560990850618E-1),
+        num!(1.00000000000000000299E0),
+    ]
+}
 
-const ELLPE_Q: [f64; 10] = [
-    3.279_548_985_764_858_5E-5,
-    1.009_627_926_793_567_2E-3,
-    6.506_094_899_769_275E-3,
-    1.688_621_639_933_113_3E-2,
-    2.617_697_424_544_936_4E-2,
-    3.348_339_048_882_249E-2,
-    4.271_809_265_189_315E-2,
-    5.859_366_344_711_01E-2,
-    9.374_999_971_976_443E-2,
-    2.499_999_999_998_883E-1,
-];
+#[inline]
+fn ellpe_q<T: Float>() -> [T; 10] {
+    [
+        num!(3.27954898576485872656E-5),
+        num!(1.00962792679356715133E-3),
+        num!(6.50609489976927491433E-3),
+        num!(1.68862163993311317300E-2),
+        num!(2.61769742454493659583E-2),
+        num!(3.34833904888224918614E-2),
+        num!(4.27180926518931511717E-2),
+        num!(5.85936634471101055642E-2),
+        num!(9.37499997197644278445E-2),
+        num!(2.49999999999888314361E-1),
+    ]
+}
 
 #[cfg(test)]
 mod tests {

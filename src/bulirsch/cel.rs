@@ -3,7 +3,7 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-use std::f64::consts::PI;
+use num_traits::Float;
 
 // Reference: Derby and Olbert, “Cylindrical Magnets and Ideal Solenoids.”
 /// Compute [complete elliptic integral in Bulirsch form](https://dlmf.nist.gov/19.2#iii).
@@ -16,63 +16,66 @@ use std::f64::consts::PI;
 ///                     0                                                   
 /// where kc ≠ 0, p ≠ 0
 /// ```
-pub fn cel(kc: f64, p: f64, a: f64, b: f64) -> Result<f64, &'static str> {
-    if kc == 0.0 {
+pub fn cel<T: Float>(kc: T, p: T, a: T, b: T) -> Result<T, &'static str> {
+    if kc == zero!() {
         return Err("cel: kc cannot be zero.");
     }
 
-    if p == 0.0 {
+    if p == zero!() {
         return Err("cel: p cannot be zero.");
     }
 
+    Ok(_cel(kc, p, a, b))
+}
+
+#[inline]
+fn _cel<T: Float>(kc: T, p: T, a: T, b: T) -> T {
     let mut k = kc.abs();
     let mut aa;
     let mut pp;
-    let mut bb;
+    let mut bb: T;
 
-    if p > 0.0 {
+    if p > zero!() {
         aa = a;
         pp = p.sqrt();
         bb = b / pp;
     } else {
         let f = kc * kc;
-        let q = (1.0 - f) * (b - a * p);
-        let g = 1.0 - p;
+        let q = (one!() - f) * (b - a * p);
+        let g = one!() - p;
         let h = f - p;
         pp = (h / g).sqrt();
         aa = (a - b) / g;
         bb = -q / (g * g * pp) + aa * pp;
     }
 
-    let mut em = 1.0;
+    let mut em = one!();
     let mut f = aa;
-    aa += bb / pp;
+    aa = aa + bb / pp;
     let mut g = k / pp;
-    bb = 2.0 * (bb + f * g);
-    pp += g;
+    bb = two!() * (bb + f * g);
+    pp = pp + g;
     g = em;
-    em += k;
+    em = em + k;
     let mut kk = k;
 
-    while (g - k).abs() > (g * ERRTOL) {
-        k = 2.0 * kk.sqrt();
+    while (g - k).abs() > (g * num!(1e-6)) {
+        k = two!() * kk.sqrt();
         kk = k * em;
         f = aa;
-        aa += bb / pp;
+        aa = aa + bb / pp;
         g = kk / pp;
-        bb = 2.0 * (bb + f * g);
-        pp += g;
+        bb = two!() * (bb + f * g);
+        pp = pp + g;
         g = em;
-        em += k;
+        em = em + k;
     }
 
-    Ok((PI / 2.0) * (bb + aa * em) / (em * (em + pp)))
+    pi_2!() * (bb + aa * em) / (em * (em + pp))
 }
 
-const ERRTOL: f64 = 1e-6;
-
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
     use crate::{assert_close, ellipe, ellipk, test_util::linspace};
 

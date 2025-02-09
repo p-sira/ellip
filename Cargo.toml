@@ -13,9 +13,11 @@ readme = "README.md"
 license = "BSD-3-Clause"
 
 edition = "2021"
-exclude = ["/logo", "/tests/data"]
+exclude = ["/logo", "/tests/data", "cpp"]
 
 [dependencies]
+num-lazy = "0.1.0"
+num-traits = "0.2.19"
 
 [dev-dependencies]
 itertools = "0.14.0"

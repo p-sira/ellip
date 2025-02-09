@@ -1,5 +1,18 @@
 # Changelog
-## 0.1
+## 0.3
+### 0.3.0
+**New Features**
+- All functions now support generic Float.
+- `ellippi`: Complete elliptic integral of the third kind.
+
+**Bug Fixes**
+- `elliprf`: Fix incorrect result for RF(x,x,0).
+- `elliprj` and `elliprc`: Fix losing precision due to ln(1+x).
+
+**Changes**
+- Add dependency `num-traits`.
+
+## 0.2
 ### 0.2.1
 **Improvements**
 - Reduce crate size by removing the logo and test data from the source. To perform full test, download the test data from the [repository](https://github.com/p-sira/ellip/tree/main/tests/data).
@@ -26,6 +39,8 @@
 - Add Ellip logo
 - Add links to references in the documentations. 
 
+
+## 0.1
 ### 0.1.2
 **Bug Fixes**
 - Fix `ellipe` logic in negative m cases.

@@ -2,7 +2,7 @@
  * Ellip is licensed under The 3-Clause BSD, see LICENSE.
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  * This code is translated from SciPy C++ implementation to Rust.
- * Modified to use iteration instead of recursion.
+ * Modified to use iteration instead of recursion and some special case handling.
  */
 
 /* Translated into C++ by SciPy developers in 2024.
@@ -70,77 +70,81 @@
  * Direct inquiries to 30 Frost Street, Cambridge, MA 02140
  */
 
+use num_traits::Float;
+
 use crate::polyeval;
 
-/// Compute [complete elliptic integral of the first kind](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.ellipk.html).
-///
+/// Compute [complete elliptic integral of the first kind](https://dlmf.nist.gov/19.2.E8).
 /// ```text
 ///           π/2
-///          ⌠          dt
-/// F(m)  =  │  ___________________
-///          │     _______________
-///          ⌡   \╱ 1 - m sin²(t)
+///          ⌠          dθ
+/// K(m)  =  │  _________________
+///          │     _____________
+///          ⌡   \╱ 1 - m sin²θ
 ///         0
 /// where m ≤ 1
 /// ```
 ///
 /// Note that some mathematical references use the parameter k for the function,
 /// where k² = m.
-pub fn ellipk(m: f64) -> Result<f64, &'static str> {
-    if m > 1.0 {
+///
+pub fn ellipk<T: Float>(m: T) -> Result<T, &'static str> {
+    if m > one!() {
         return Err("ellipk: m must be less than 1.");
     }
 
-    let mut x = 1.0 - m;
-
-    if x.is_infinite() {
-        return Ok(0.0);
+    // Special cases: https://dlmf.nist.gov/19.6.E1
+    if m == one!() {
+        return Ok(inf!());
     }
 
-    let mut k = 1.0;
-    while x > 1.0 {
-        k /= x.sqrt();
-        x = 1.0 / x;
+    if m == zero!() {
+        return Ok(pi_2!());
     }
 
-    if x > f64::EPSILON {
-        return Ok(k * (polyeval(x, &ELLPK_P, 10) - x.ln() * polyeval(x, &ELLPK_Q, 10)));
+    let x: T = one!() - m;
+
+    // Asymptotic approximation when m -> 1
+    if x < epsilon!() {
+        return Ok(four!().ln() - half!() * x.ln());
     }
 
-    if x == 0.0 {
-        return Ok(f64::INFINITY);
-    }
-
-    Ok(k * (4.0_f64.ln() - 0.5 * x.ln()))
+    Ok(polyeval(x, &ellpk_p::<T>()) - x.ln() * polyeval(x, &ellpk_q::<T>()))
 }
 
-const ELLPK_P: [f64; 11] = [
-    1.379_828_646_062_732_5E-4,
-    2.280_257_240_058_756E-3,
-    7.974_040_132_204_152E-3,
-    9.858_213_790_212_26E-3,
-    6.874_896_874_499_499E-3,
-    6.189_010_336_376_876E-3,
-    8.790_782_739_527_438E-3,
-    1.493_804_489_168_052_6E-2,
-    3.088_514_652_467_12E-2,
-    9.657_359_028_116_902E-2,
-    1.386_294_361_119_890_6,
-];
+#[inline]
+fn ellpk_p<T: Float>() -> [T; 11] {
+    [
+        num!(1.37982864606273237150E-4),
+        num!(2.28025724005875567385E-3),
+        num!(7.97404013220415179367E-3),
+        num!(9.85821379021226008714E-3),
+        num!(6.87489687449949877925E-3),
+        num!(6.18901033637687613229E-3),
+        num!(8.79078273952743772254E-3),
+        num!(1.49380448916805252718E-2),
+        num!(3.08851465246711995998E-2),
+        num!(9.65735902811690126535E-2),
+        num!(1.38629436111989062502E0),
+    ]
+}
 
-const ELLPK_Q: [f64; 11] = [
-    2.940_789_550_485_985E-5,
-    9.141_847_238_659_173E-4,
-    5.940_583_037_531_678E-3,
-    1.548_505_166_497_624E-2,
-    2.390_896_027_159_248_8E-2,
-    3.012_047_152_276_040_4E-2,
-    3.737_743_141_738_232_6E-2,
-    4.882_803_475_709_983E-2,
-    7.031_249_969_639_575E-2,
-    1.249_999_999_998_708_3E-1,
-    5E-1,
-];
+#[inline]
+fn ellpk_q<T: Float>() -> [T; 11] {
+    [
+        num!(2.94078955048598507511E-5),
+        num!(9.14184723865917226571E-4),
+        num!(5.94058303753167793257E-3),
+        num!(1.54850516649762399335E-2),
+        num!(2.39089602715924892727E-2),
+        num!(3.01204715227604046988E-2),
+        num!(3.73774314173823228969E-2),
+        num!(4.88280347570998239232E-2),
+        num!(7.03124996963957469739E-2),
+        num!(1.24999999999870820058E-1),
+        num!(4.99999999999999999821E-1),
+    ]
+}
 
 #[cfg(test)]
 mod tests {

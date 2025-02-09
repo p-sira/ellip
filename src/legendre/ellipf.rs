@@ -62,159 +62,161 @@
  */
 /* Copyright 2014, Eric W. Moore */
 
-use std::f64::consts::{FRAC_PI_2, PI};
+use num_traits::Float;
 
 use crate::ellipk;
 
-/// Compute [incomplete elliptic integral of the first kind](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.ellipkinc.html).
+/// Compute [incomplete elliptic integral of the first kind](https://dlmf.nist.gov/19.2.E4).
 ///
 /// ```text
 ///              φ
-///             ⌠          dt
-/// F(φ, m)  =  │  ___________________
-///             │     _______________
-///             ⌡   \╱ 1 - m sin²(t)
+///             ⌠          dθ
+/// F(φ, m)  =  │  _________________
+///             │     _____________
+///             ⌡   \╱ 1 - m sin²θ
 ///            0
 /// where m ≤ 1
 /// ```
 ///
 /// Note that some mathematical references use the parameter k for the function,
 /// where k² = m.
-pub fn ellipf(phi: f64, m: f64) -> Result<f64, &'static str> {
-    if m > 1.0 {
+pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
+    if m > one!() {
         return Err("ellipf: m must be less than 1.");
     }
 
-    if phi.is_infinite() && m.is_infinite() {
+    if phi.is_infinite() || m.is_infinite() {
+        if phi.is_infinite() {
+            return Ok(inf!());
+        }
+
+        if m.is_infinite() {
+            return Ok(zero!());
+        }
+
         return Err("ellipf: m or φ must be finite");
     }
 
-    if phi.is_infinite() {
-        return Ok(f64::INFINITY);
-    }
-
-    if m.is_infinite() {
-        return Ok(0.0);
-    }
-
-    if m == 0.0 {
+    if m == zero!() {
         return Ok(phi);
     }
 
-    if m == 1.0 {
-        if phi.abs() >= FRAC_PI_2 {
-            return Ok(f64::INFINITY);
+    if m == one!() {
+        if phi.abs() >= pi_2!() {
+            return Ok(inf!());
         }
-        return Ok(phi.tan().asinh());
+        return Ok(phi.tan().sinh().atanh());
     }
 
-    let mut npio2 = (phi / FRAC_PI_2).floor();
-    if (npio2.abs() % 2.0) == 1.0 {
-        npio2 += 1.0;
+    let mut npio2 = (phi / pi_2!()).floor();
+    if (npio2.abs() % two!()) == one!() {
+        npio2 = npio2 + one!();
     }
 
     let mut phi = phi;
     let mut k;
-    if npio2 != 0.0 {
+    if npio2 != zero!() {
         k = ellipk(m)?;
-        phi -= npio2 * FRAC_PI_2;
+        phi = phi - npio2 * pi_2!();
     } else {
-        k = 0.0;
+        k = zero!();
     }
 
-    let sign = if phi < 0.0 {
+    let sign = if phi < zero!() {
         phi = -phi;
-        -1.0
+        -one!()
     } else {
-        1.0
+        one!()
     };
 
-    fn done(val: f64, sign: f64, npio2: f64, k: f64) -> Result<f64, &'static str> {
+    fn done<T: Float>(val: T, sign: T, npio2: T, k: T) -> Result<T, &'static str> {
         Ok(sign * val + npio2 * k)
     }
 
-    let a = 1.0 - m;
-    if a > 1.0 {
+    let a = one!() - m;
+    if a > one!() {
         return done(ellipf_neg_m(phi, m), sign, npio2, k);
     }
 
     let mut b = a.sqrt();
     let mut t = phi.tan();
-    if t.abs() > 10.0 {
-        let mut e = 1.0 / (b * t);
-        if e.abs() < 10.0 {
+    if t.abs() > num!(10.0) {
+        let mut e = one!() / (b * t);
+        if e.abs() < num!(10.0) {
             e = e.atan();
-            if npio2 == 0.0 {
+            if npio2 == zero!() {
                 k = ellipk(m)?;
             }
             return done(k - ellipf(e, m)?, sign, npio2, k);
         }
     }
 
-    let mut a = 1.0;
+    let mut a = one!();
     let mut c = m.sqrt();
-    let mut d = 1.0;
-    let mut mod_phi = 0.0;
+    let mut d = one!();
+    let mut mod_phi = zero!();
 
-    while (c / a).abs() > f64::EPSILON {
+    while (c / a).abs() > epsilon!() {
         let temp = b / a;
-        phi += (t * temp).atan() + mod_phi * PI;
-        let denom = 1.0 - temp * t * t;
-        if denom.abs() > 10.0 * f64::EPSILON {
-            t *= (1.0 + temp) / denom;
-            mod_phi = ((phi + FRAC_PI_2) / PI) as i32 as f64;
+        phi = phi + (t * temp).atan() + mod_phi * pi!();
+        let denom = one!() - temp * t * t;
+        if denom.abs() > num!(10.0) * epsilon!() {
+            t = t * (one!() + temp) / denom;
+            mod_phi = num!(((phi + pi_2!()) / pi!()).to_i32().unwrap());
         } else {
             t = phi.tan();
-            mod_phi = (((phi - t.atan()) / PI).floor()) as i32 as f64;
+            mod_phi = num!(((phi - t.atan()) / pi!()).floor().to_i32().unwrap());
         }
-        c = (a - b) / 2.0;
+        c = (a - b) / two!();
         let temp = (a * b).sqrt();
-        a = (a + b) / 2.0;
+        a = (a + b) / two!();
         b = temp;
-        d *= 2.0;
+        d = d * two!();
     }
 
-    done((t.atan() + mod_phi * PI) / (d * a), sign, npio2, k)
+    done((t.atan() + mod_phi * pi!()) / (d * a), sign, npio2, k)
 }
 
 /// Compute elliptic integral of the first kind for m<0.
 #[inline]
-fn ellipf_neg_m(phi: f64, m: f64) -> f64 {
+fn ellipf_neg_m<T: Float>(phi: T, m: T) -> T {
     let mpp = m * phi * phi;
 
-    if -mpp < 1e-6 && phi < -m {
-        return phi + (-mpp * phi * phi / 30.0 + 3.0 * mpp * mpp / 40.0 + mpp / 6.0) * phi;
+    if -mpp < num!(1e-6) && phi < -m {
+        return phi
+            + (-mpp * phi * phi / num!(30.0) + three!() * mpp * mpp / num!(40.0) + mpp / six!())
+                * phi;
     }
 
-    if -mpp > 4e7 {
+    if -mpp > num!(4e7) {
         let sm = (-m).sqrt();
         let sp = phi.sin();
         let cp = phi.cos();
 
-        let a = (4.0 * sp * sm / (1.0 + cp)).ln();
-        let b = -(1.0 + cp / (sp * sp) - a) / (4.0 * m);
+        let a = (four!() * sp * sm / (one!() + cp)).ln();
+        let b = -(one!() + cp / (sp * sp) - a) / (four!() * m);
         return (a + b) / sm;
     }
 
-    let (scale, x, y, z) = if phi > 1e-153 && m > -1e305 {
+    let (scale, x, y, z) = if phi > num!(1e-153) && m > num!(-1e305) {
         let s = phi.sin();
         let phi_tan = phi.tan();
-        let csc2 = 1.0 / (s * s);
-        (1.0, 1.0 / (phi_tan * phi_tan), csc2 - m, csc2)
+        let csc2 = one!() / (s * s);
+        (one!(), one!() / (phi_tan * phi_tan), csc2 - m, csc2)
     } else {
-        (phi, 1.0, 1.0 - m * phi * phi, 1.0)
+        (phi, one!(), one!() - m * phi * phi, one!())
     };
 
     if x == y && x == z {
         return scale / x.sqrt();
     }
 
-    let a0 = (x + y + z) / 3.0;
+    let a0 = (x + y + z) / three!();
     let mut a = a0;
     let mut x1 = x;
     let mut y1 = y;
     let mut z1 = z;
-    let mut q = 400.0 * f64::max((a0 - x).abs(), f64::max((a0 - y).abs(), (a0 - z).abs()));
+    let mut q = num!(400.0) * (a0 - x).abs().max((a0 - y).abs()).max((a0 - z).abs());
     let mut n = 0;
 
     while q > a.abs() && n <= 100 {
@@ -222,15 +224,15 @@ fn ellipf_neg_m(phi: f64, m: f64) -> f64 {
         let sy = y1.sqrt();
         let sz = z1.sqrt();
         let lam = sx * sy + sx * sz + sy * sz;
-        x1 = (x1 + lam) / 4.0;
-        y1 = (y1 + lam) / 4.0;
-        z1 = (z1 + lam) / 4.0;
-        a = (x1 + y1 + z1) / 3.0;
+        x1 = (x1 + lam) / four!();
+        y1 = (y1 + lam) / four!();
+        z1 = (z1 + lam) / four!();
+        a = (x1 + y1 + z1) / three!();
         n += 1;
-        q /= 4.0;
+        q = q / four!();
     }
 
-    let two_to_2n = (1 << (2 * n)) as f64;
+    let two_to_2n = num!(1u32 << (2 * n));
     let x = (a0 - x) / a / two_to_2n;
     let y = (a0 - y) / a / two_to_2n;
     let z = -(x + y);
@@ -238,11 +240,14 @@ fn ellipf_neg_m(phi: f64, m: f64) -> f64 {
     let e2 = x * y - z * z;
     let e3 = x * y * z;
 
-    scale * (1.0 - e2 / 10.0 + e3 / 14.0 + e2 * e2 / 24.0 - 3.0 * e2 * e3 / 44.0) / a.sqrt()
+    scale
+        * (one!() - e2 / num!(10.0) + e3 / num!(14.0) + e2 * e2 / num!(24.0)
+            - three!() * e2 * e3 / num!(44.0))
+        / a.sqrt()
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
     use crate::compare_test_data;
 
@@ -252,6 +257,6 @@ mod test {
 
     #[test]
     fn test_ellipf() {
-        compare_test_data!("./tests/data/boost/ellint_f_data.txt", ellipf_k, 1e-14);
+        compare_test_data!("./tests/data/boost/ellint_f_data.txt", ellipf_k, 4.9e-16);
     }
 }
