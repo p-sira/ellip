@@ -11,7 +11,7 @@
 - `elliprj` and `elliprc`: Fix losing precision due to ln(1+x).
 
 **Changes**
-- Add dependency `num-traits`.
+- Add dependency `num-traits` and `num-lazy`.
 
 ## 0.2
 ### 0.2.1
