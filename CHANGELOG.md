@@ -4,6 +4,7 @@
 **New Features**
 - All functions now support generic Float.
 - `ellippi`: Complete elliptic integral of the third kind.
+- `ellippiinc`: Incomplete elliptic integral of the third kind.
 
 **Bug Fixes**
 - `elliprf`: Fix incorrect result for RF(x,x,0).
