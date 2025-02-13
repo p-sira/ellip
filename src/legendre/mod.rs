@@ -10,9 +10,11 @@ mod ellipeinc;
 mod ellipf;
 mod ellipk;
 mod ellippi;
+mod ellippiinc;
 
 pub use ellipe::ellipe;
 pub use ellipeinc::ellipeinc;
 pub use ellipf::ellipf;
 pub use ellipk::ellipk;
 pub use ellippi::ellippi;
+pub use ellippiinc::ellippiinc;

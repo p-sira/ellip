@@ -16,6 +16,7 @@
 //! ## Legendre's incomplete integrals
 //! - [fn@ellipf]: Incomplete elliptic integral of the first kind.
 //! - [fn@ellipeinc]: Incomplete elliptic integral of the second kind.
+//! - [fn@ellippiinc]: Incomplete elliptic integral of the third kind.
 //! ## Bulirsch's integrals
 //! - [fn@cel]: General complete elliptic integral
 //! ## Carlson's symmetric integrals
@@ -54,6 +55,7 @@ pub use legendre::ellippi;
 // Legendre's incomplete integrals
 pub use legendre::ellipeinc;
 pub use legendre::ellipf;
+pub use legendre::ellippiinc;
 
 // Bulirsch's integrals
 pub mod bulirsch;

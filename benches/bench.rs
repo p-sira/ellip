@@ -64,23 +64,27 @@ macro_rules! generate_benchmarks {
 }
 
 fn ellipk(inp: &[f64]) -> f64 {
-    ellip::ellipk(inp[0]).unwrap()
+    ellip::ellipk(inp[0] * inp[0]).unwrap()
 }
 
 fn ellipe(inp: &[f64]) -> f64 {
-    ellip::ellipe(inp[0]).unwrap()
+    ellip::ellipe(inp[0] * inp[0]).unwrap()
 }
 
 fn ellipf(inp: &[f64]) -> f64 {
-    ellip::ellipf(inp[0], inp[1]).unwrap()
+    ellip::ellipf(inp[0], inp[1] * inp[1]).unwrap()
 }
 
 fn ellipeinc(inp: &[f64]) -> f64 {
-    ellip::ellipeinc(inp[0], inp[1]).unwrap()
+    ellip::ellipeinc(inp[0], inp[1] * inp[1]).unwrap()
 }
 
 fn ellippi(inp: &[f64]) -> f64 {
-    ellip::ellippi(inp[0], inp[1]).unwrap()
+    ellip::ellippi(inp[0], inp[1] * inp[1]).unwrap()
+}
+
+fn ellippiinc(inp: &[f64]) -> f64 {
+    ellip::ellippiinc(inp[1], inp[0], inp[2] * inp[2]).unwrap()
 }
 
 fn elliprf(inp: &[f64]) -> f64 {
@@ -110,7 +114,8 @@ generate_benchmarks!(
     ellipe,
     ellipf,
     ellipeinc,
-    ellippi
+    ellippi,
+    ellippiinc
 );
 
 generate_benchmarks!(

@@ -7,10 +7,10 @@
 <p align="center">
     <a href="https://opensource.org/license/BSD-3-clause">
         <img src="https://img.shields.io/badge/License-BSD--3--Clause-brightgreen.svg" alt="License">
-    </a> 
+    </a>
     <a href="https://crates.io/crates/ellip">
         <img src="https://img.shields.io/crates/v/ellip" alt="Crate">
-    </a> 
+    </a>
     <a href="https://docs.rs/ellip">
         <img src="https://img.shields.io/badge/Docs-docs.rs-blue" alt="Documentation">
     </a>
@@ -32,6 +32,7 @@ Elliptic integrals for Rust
 - Legendre's incomplete integrals
     - `ellipf`: Incomplete elliptic integral of the first kind.
     - `ellipeinc`: Incomplete elliptic integral of the second kind.
+    - `ellippiinc`: Incomplete elliptic integral of the third kind.
 - Bulirsch's integrals
     - `cel`: General complete elliptic integral
 - Carlson's symmetric integrals
