@@ -10,6 +10,7 @@ SciPy is licensed under 3-Clause BSD.
 
 Submodules that derived from Boost Math Library are:
 - ellippi
+- ellippiinc
 
 The Boost Software License applies as follow:
 

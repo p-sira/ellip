@@ -68,7 +68,7 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, &'static str> {
 }
 
 #[inline]
-fn ellippi_vc<T: Float>(n: T, m: T, vc: T) -> Result<T, &'static str> {
+pub fn ellippi_vc<T: Float>(n: T, m: T, vc: T) -> Result<T, &'static str> {
     let x = zero!();
     let y = one!() - m;
     let z = one!();

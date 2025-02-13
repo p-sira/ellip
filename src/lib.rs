@@ -54,6 +54,7 @@ pub use legendre::ellippi;
 // Legendre's incomplete integrals
 pub use legendre::ellipeinc;
 pub use legendre::ellipf;
+pub use legendre::ellippiinc;
 
 // Bulirsch's integrals
 pub mod bulirsch;
