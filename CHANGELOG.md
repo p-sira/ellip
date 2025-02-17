@@ -22,7 +22,7 @@
 
 ### 0.2.0
 **New Features**
-- `cel`: Bulirsch's General complete elliptic integral
+- `cel`: Bulirsch's general complete elliptic integral
 - `elliprg`: Symmetric elliptic integral of the second kind.
 - `elliprj`: Symmetric elliptic integral of the third kind.
 
