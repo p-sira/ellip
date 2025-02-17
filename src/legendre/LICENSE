@@ -9,6 +9,8 @@ Submodules that derived from SciPy are:
 SciPy is licensed under 3-Clause BSD.
 
 Submodules that derived from Boost Math Library are:
+- ellipd
+- ellipdinc
 - ellippi
 - ellippiinc
 

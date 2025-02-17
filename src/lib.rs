@@ -13,10 +13,12 @@
 //! - [fn@ellipk]: Complete elliptic integral of the first kind.
 //! - [fn@ellipe]: Complete elliptic integral of the second kind.
 //! - [fn@ellippi]: Complete elliptic integral of the third kind.
+//! - [fn@ellipd]: Complete elliptic integral of Legendre's type.
 //! ## Legendre's incomplete integrals
 //! - [fn@ellipf]: Incomplete elliptic integral of the first kind.
 //! - [fn@ellipeinc]: Incomplete elliptic integral of the second kind.
 //! - [fn@ellippiinc]: Incomplete elliptic integral of the third kind.
+//! - [fn@ellipdinc]: Incomplete elliptic integral of Legendre's type.
 //! ## Bulirsch's integrals
 //! - [fn@cel]: General complete elliptic integral
 //! ## Carlson's symmetric integrals
@@ -48,11 +50,13 @@ declare_nums! {T}
 
 pub mod legendre;
 // Legendre's complete integrals
+pub use legendre::ellipd;
 pub use legendre::ellipe;
 pub use legendre::ellipk;
 pub use legendre::ellippi;
 
 // Legendre's incomplete integrals
+pub use legendre::ellipdinc;
 pub use legendre::ellipeinc;
 pub use legendre::ellipf;
 pub use legendre::ellippiinc;

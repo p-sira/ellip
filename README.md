@@ -29,10 +29,12 @@ Elliptic integrals for Rust
     - `ellipk`: Complete elliptic integral of the first kind.
     - `ellipe`: Complete elliptic integral of the second kind.
     - `ellippi`: Complete elliptic integral of the third kind.
+    - `ellipd`: Complete elliptic integral of Legendre's type.
 - Legendre's incomplete integrals
     - `ellipf`: Incomplete elliptic integral of the first kind.
     - `ellipeinc`: Incomplete elliptic integral of the second kind.
     - `ellippiinc`: Incomplete elliptic integral of the third kind.
+    - `ellipdinc`: Incomplete elliptic integral of Legendre's type.
 - Bulirsch's integrals
     - `cel`: General complete elliptic integral
 - Carlson's symmetric integrals

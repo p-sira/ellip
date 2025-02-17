@@ -2,9 +2,11 @@
 ## 0.3
 ### 0.3.0
 **New Features**
-- All functions now support generic Float.
 - `ellippi`: Complete elliptic integral of the third kind.
 - `ellippiinc`: Incomplete elliptic integral of the third kind.
+- `ellipd`: Complete elliptic integral of Legendre's type.
+- `ellipdinc`: Incomplete elliptic integral of Legendre's type.
+- All functions now support generic Float.
 
 **Bug Fixes**
 - `elliprf`: Fix incorrect result for RF(x,x,0).
