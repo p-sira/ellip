@@ -64,7 +64,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
 
     if n > zero!() && (one!() / n) < sp2 {
         // Complex result is a domain error:
-        return Err("result is complex for v > 1 / sin^2(phi)");
+        return Err("ellippiinc: result is complex for v > 1 / sin^2(phi)");
     }
 
     if n == one!() {
