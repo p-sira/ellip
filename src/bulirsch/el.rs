@@ -5,7 +5,7 @@
 
 use num_traits::Float;
 
-use super::BulirschConst;
+use super::{cel1, cel2, BulirschConst};
 
 // Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
 /// Compute [incomplete elliptic integral of the first kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E11_5)
@@ -28,6 +28,11 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
 
     if kc == zero!() {
         return Err("el1: kc cannot be zero.");
+    }
+
+    // phi = π/2
+    if x == inf!() {
+        return cel1(kc);
     }
 
     let mut y = (one!() / x).abs();
@@ -86,6 +91,11 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'sta
 
     if kc == zero!() {
         return Err("el2: kc cannot be zero.");
+    }
+
+    // phi = π/2
+    if x == inf!() {
+        return cel2(kc, a, b);
     }
 
     let mut b = b;
