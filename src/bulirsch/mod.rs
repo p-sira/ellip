@@ -7,7 +7,7 @@
 
 pub trait BulirschConst {
     /// Number of significant figures.
-    /// 
+    ///
     /// **D** is `7` for `f32` and `16` for `f64`.
     const D: i32;
 

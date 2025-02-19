@@ -13,13 +13,13 @@ use super::BulirschConst;
 ///                 arctan(x)                                                   
 ///                ⌠                             
 ///                |               dϑ
-/// el1(x, kc)  =  ⎮  ──────────────────────────── 
+/// el1(x, kc)  =  ⎮  ────────────────────────────
 ///                ⎮      ______________________
 ///                ⌡   ╲╱ cos²(ϑ) + kc² sin²(ϑ)    
 ///               0                                                   
 /// where kc ≠ 0
 /// ```
-/// 
+///
 /// Note that x = tan φ and kc² = mc = 1 - m.
 pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
     if x == zero!() {
@@ -62,7 +62,7 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
     }
 
     let e = ((m / y).atan() + pi!() * num!(l)) / m;
-    return Ok(if x < zero!() { -e } else { e });
+    Ok(if x < zero!() { -e } else { e })
 }
 
 #[cfg(test)]
