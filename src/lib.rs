@@ -64,6 +64,8 @@ pub use legendre::ellippiinc;
 // Bulirsch's integrals
 pub mod bulirsch;
 pub use bulirsch::cel;
+pub use bulirsch::cel1;
+pub use bulirsch::el1;
 
 // Carlson's symmetric integrals
 pub mod carlson;
