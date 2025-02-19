@@ -41,12 +41,12 @@
 //! - [Boost Math Library](https://www.boost.org/doc/libs/release/libs/math/)
 //! - [Russell Lab](https://github.com/cpmech/russell)
 //!
-//! Primary mathematical reference is [Chapter 19](https://dlmf.nist.gov/19) of the NIST Digital Library
-//! of Mathematical Functions, authored by [Carlson](https://dlmf.nist.gov/about/bio/BCCarlson), the legendary
-//! mathematician who discovered the symmetric integrals!
+//! References for original implementations are:
+//! - NIST Digital Library, [Chapter 19: Elliptic Integrals](https://dlmf.nist.gov/19) (Carlson, 2024).
+//! - Numerical calculation of elliptic integrals and elliptic functions [I](https://link.springer.com/article/10.1007/BF01397975) (Bulirsch, 1965), [II](https://doi.org/10.1007/BF01436529) (Bulirsch, 1965), and [III](https://doi.org/10.1007/BF02165405) (Bulirsch, 1969).
+//! - [Cylindrical magnets and ideal solenoids](https://doi.org/10.1119/1.3256157) (Derby and Olbert, 2010).
 //!
-//! Unicode-style mathematical notation are created using an awesome tool called
-//! [Diagon](https://github.com/ArthurSonzogni/Diagon).
+//! Unicode-style mathematical notation are created using [Diagon](https://github.com/ArthurSonzogni/Diagon).
 
 use num_lazy::declare_nums;
 declare_nums! {T}
