@@ -107,18 +107,18 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
     };
 
     let a = one!() - m;
-    let e = ellipe(m)?;
+    let ellipe = ellipe(m)?;
 
-    fn done<T: Float>(val: T, sign: T, npio2: T, e: T) -> Result<T, &'static str> {
-        Ok(sign * val + npio2 * e)
+    fn done<T: Float>(val: T, sign: T, npio2: T, ellipe: T) -> Result<T, &'static str> {
+        Ok(sign * val + npio2 * ellipe)
     }
 
     if a == zero!() {
-        return done(lphi.sin(), sign, npio2, e);
+        return done(lphi.sin(), sign, npio2, ellipe);
     }
 
     if a > one!() {
-        return done(ellipeinc_neg_m(lphi, m), sign, npio2, e);
+        return done(ellipeinc_neg_m(lphi, m), sign, npio2, ellipe);
     }
 
     if lphi < num!(0.135) {
@@ -144,7 +144,7 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
             ((((m11 * p2 + m9) * p2 + m7) * p2 + m5) * p2 + m3) * p2 * lphi + lphi,
             sign,
             npio2,
-            e,
+            ellipe,
         );
     }
 
@@ -156,10 +156,10 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
         if e.abs() < num!(10.0) {
             let e = e.atan();
             return done(
-                e + m * lphi.sin() * e.sin() - ellipeinc(e, m)?,
+                ellipe + m * lphi.sin() * e.sin() - ellipeinc(e, m)?,
                 sign,
                 npio2,
-                e,
+                ellipe,
             );
         }
     }
@@ -192,10 +192,10 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
     }
 
     done(
-        e / ellipk(m)? * (t.atan() + num!(mod_phi) * pi!()) / (d * a) + ee,
+        ellipe / ellipk(m)? * (t.atan() + num!(mod_phi) * pi!()) / (d * a) + ee,
         sign,
         npio2,
-        e,
+        ellipe,
     )
 }
 
