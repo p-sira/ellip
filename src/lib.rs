@@ -20,7 +20,10 @@
 //! - [fn@ellippiinc]: Incomplete elliptic integral of the third kind.
 //! - [fn@ellipdinc]: Incomplete elliptic integral of Legendre's type.
 //! ## Bulirsch's integrals
-//! - [fn@cel]: General complete elliptic integral
+//! - [fn@cel]: General complete elliptic integral in Bulirsch's form.
+//! - [fn@cel1]: Complete elliptic integral of the first kind in Bulirsch's form.
+//! - [fn@el1]: Incomplete elliptic integral of the first kind in Bulirsch's form.
+//! - [fn@el2]: Incomplete elliptic integral of the second kind in Bulirsch's form.
 //! ## Carlson's symmetric integrals
 //! - [fn@elliprf]: Symmetric elliptic integral of the first kind.
 //! - [fn@elliprg]: Symmetric elliptic integral of the second kind.
@@ -66,6 +69,7 @@ pub mod bulirsch;
 pub use bulirsch::cel;
 pub use bulirsch::cel1;
 pub use bulirsch::el1;
+pub use bulirsch::el2;
 
 // Carlson's symmetric integrals
 pub mod carlson;

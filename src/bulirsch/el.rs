@@ -65,10 +65,104 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
     Ok(if x < zero!() { -e } else { e })
 }
 
+/// Compute [incomplete elliptic integral of the second kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E12)
+/// ```text
+///                       arctan(x)                                                   
+///                      ⌠                             
+///                      |              a + b tan²(ϑ)
+/// el1(x, kc, a, b)  =  ⎮  ──────────────────────────────────── ⋅ dϑ
+///                      ⎮     ________________________________
+///                      ⌡  ╲╱ (1 + tan²(ϑ)) (1 + kc² tan²(ϑ))    
+///                     0                                                   
+/// where kc ≠ 0
+/// ```
+///
+/// Note that x = tan φ and kc² = mc = 1 - m.
+pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'static str> {
+    if x == zero!() {
+        return Ok(zero!());
+    }
+
+    if kc == zero!() {
+        return Err("el2: kc cannot be zero.");
+    }
+
+    let mut b = b;
+    let mut c = x * x;
+    let mut d = one!() + c;
+    let mut p = ((one!() + kc * kc * c) / d).sqrt();
+
+    d = x / d;
+    c = d / (p * two!());
+    let z = a - b;
+    let mut i = a;
+    let mut a = (b + a) / two!();
+    let mut y = (one!() / x).abs();
+    let mut f = zero!();
+    let mut l = 0;
+    let mut m = one!();
+    let mut kc = kc.abs();
+
+    loop {
+        b = i * kc + b;
+        let e = m * kc;
+        let mut g = e / p;
+        d = f * g + d;
+        f = c;
+        i = a;
+        p = g + p;
+        c = (d / p + c) / two!();
+        g = m;
+        m = kc + m;
+        a = (b / m + a) / two!();
+        y = -e / y + y;
+
+        if y == zero!() {
+            y = e.sqrt() * T::cb();
+        }
+
+        if (g - kc).abs() > T::ca() * g {
+            kc = e.sqrt() * two!();
+            l *= 2;
+            if y < zero!() {
+                l += 1;
+            }
+            continue;
+        }
+
+        break;
+    }
+
+    if y < zero!() {
+        l += 1;
+    }
+
+    let mut e = ((m / y).atan() + pi!() * num!(l)) * a / m;
+
+    if x < zero!() {
+        e = -e;
+    }
+
+    Ok(e + c * z)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{assert_close, ellipf, test_util::linspace};
+    use crate::{assert_close, ellipdinc, ellipeinc, ellipf, test_util::linspace};
+
+    #[test]
+    fn my() {
+        let x = 10.204081632653061;
+        let kc = -0.8980612244897959;
+
+        let k = (1.0 - kc * kc).sqrt();
+        let m = k * k;
+        let phi = x.atan();
+        let ans = ellipeinc(phi, m).unwrap();
+
+        println!("ans={}", ans)
+    }
 
     #[test]
     fn test_el1() {
@@ -113,5 +207,31 @@ mod tests {
         test_reference(1e12, 26.6148963052);
         test_reference(1e23, 26.7147303841);
         test_reference(f64::infinity(), 26.7147303841);
+    }
+
+    #[test]
+    fn test_el2() {
+        fn test_special_cases(x: f64, kc: f64) {
+            let k = (1.0 - kc * kc).sqrt();
+            let m = k * k;
+            let phi = x.atan();
+            let f = ellipf(phi, m).unwrap();
+            let e = ellipeinc(phi, m).unwrap();
+            let d = ellipdinc(phi, m).unwrap();
+
+            assert_close!(f, el2(x, kc, 1.0, 1.0).unwrap(), 5e-14);
+            assert_close!(e, el2(x, kc, 1.0, kc * kc).unwrap(), 7e-16);
+            assert_close!(d, el2(x, kc, 0.0, 1.0).unwrap(), 6e-14);
+        }
+
+        let x = linspace(0.0, 100.0, 50);
+        let linsp_neg = linspace(-1.0, -1e-3, 50);
+        x.iter()
+            .zip(linsp_neg.iter())
+            .for_each(|(&x, &kc)| test_special_cases(x, kc));
+        let linsp_pos = linspace(1e-3, 1.0, 50);
+        x.iter()
+            .zip(linsp_pos.iter())
+            .for_each(|(&x, &kc)| test_special_cases(x, kc));
     }
 }
