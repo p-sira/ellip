@@ -65,6 +65,7 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
     Ok(if x < zero!() { -e } else { e })
 }
 
+// Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
 /// Compute [incomplete elliptic integral of the second kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E12)
 /// ```text
 ///                       arctan(x)                                                   
