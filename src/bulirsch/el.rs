@@ -153,19 +153,6 @@ mod tests {
     use crate::{assert_close, ellipdinc, ellipeinc, ellipf, test_util::linspace};
 
     #[test]
-    fn my() {
-        let x = 10.204081632653061;
-        let kc = -0.8980612244897959;
-
-        let k = (1.0 - kc * kc).sqrt();
-        let m = k * k;
-        let phi = x.atan();
-        let ans = ellipeinc(phi, m).unwrap();
-
-        println!("ans={}", ans)
-    }
-
-    #[test]
     fn test_el1() {
         fn test_special_cases(x: f64, kc: f64) {
             let k = (1.0 - kc * kc).sqrt();
