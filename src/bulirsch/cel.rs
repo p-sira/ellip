@@ -5,6 +5,8 @@
 
 use num_traits::Float;
 
+use super::BulirschConst;
+
 // Reference: Derby and Olbert, “Cylindrical Magnets and Ideal Solenoids.”
 /// Compute [complete elliptic integral in Bulirsch form](https://dlmf.nist.gov/19.2#iii).
 /// ```text
@@ -16,7 +18,7 @@ use num_traits::Float;
 ///                     0                                                   
 /// where kc ≠ 0, p ≠ 0
 /// ```
-pub fn cel<T: Float>(kc: T, p: T, a: T, b: T) -> Result<T, &'static str> {
+pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, &'static str> {
     if kc == zero!() {
         return Err("cel: kc cannot be zero.");
     }
@@ -29,7 +31,7 @@ pub fn cel<T: Float>(kc: T, p: T, a: T, b: T) -> Result<T, &'static str> {
 }
 
 #[inline]
-fn _cel<T: Float>(kc: T, p: T, a: T, b: T) -> T {
+fn _cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> T {
     let mut k = kc.abs();
     let mut aa;
     let mut pp;
@@ -59,7 +61,7 @@ fn _cel<T: Float>(kc: T, p: T, a: T, b: T) -> T {
     em = em + k;
     let mut kk = k;
 
-    while (g - k).abs() > (g * num!(1e-6)) {
+    while (g - k).abs() > (g * T::ca()) {
         k = two!() * kk.sqrt();
         kk = k * em;
         f = aa;
@@ -93,7 +95,7 @@ mod tests {
             assert_close!(
                 (ellipe - kc * kc * ellipk) / m,
                 cel(kc, 1.0, 1.0, 0.0).unwrap(),
-                1e-10
+                2e-14
             );
         }
 
