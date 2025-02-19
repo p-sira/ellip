@@ -68,6 +68,7 @@ pub use legendre::ellippiinc;
 pub mod bulirsch;
 pub use bulirsch::cel;
 pub use bulirsch::cel1;
+pub use bulirsch::cel2;
 pub use bulirsch::el1;
 pub use bulirsch::el2;
 
