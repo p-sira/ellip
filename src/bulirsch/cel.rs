@@ -71,7 +71,8 @@ pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, &'sta
     Ok(pi_2!() * (bb + aa * em) / (em * (em + pp)))
 }
 
-/// Compute [complete elliptic integral of the first kind in Bulirsch form](https://link.springer.com/article/10.1007/bf01397975).
+// Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
+/// Compute [complete elliptic integral of the first kind in Bulirsch's form](https://link.springer.com/article/10.1007/bf01397975).
 /// ```text
 ///               π/2                                                   
 ///              ⌠               dϑ              
@@ -107,10 +108,54 @@ pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, &'static str> {
     Ok(pi!() / m)
 }
 
+// Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
+/// Compute [complete elliptic integral of the second kind in Bulirsch's form](https://link.springer.com/article/10.1007/bf01397975)
+/// ```text
+///                     π/2                           
+///                    ⌠              a + b tan²(ϑ)
+/// cel2(kc, a, b)  =  ⎮  ──────────────────────────────────── ⋅ dϑ
+///                    ⎮     ________________________________
+///                    ⌡  ╲╱ (1 + tan²(ϑ)) (1 + kc² tan²(ϑ))    
+///                    0                                                   
+/// where kc ≠ 0
+/// ```
+///
+/// Note that kc² = mc = 1 - m.
+pub fn cel2<T: Float + BulirschConst>(kc: T, a: T, b: T) -> Result<T, &'static str> {
+    if kc == zero!() {
+        return Err("cel2: kc cannot be zero.");
+    }
+
+    let mut kc = kc.abs();
+    let mut a = a;
+    let mut b = b;
+
+    let mut m = one!();
+    let mut c = a;
+    a = b + a;
+
+    loop {
+        b = (c * kc + b) * two!();
+        c = a;
+        let m0 = m;
+        m = kc + m;
+        a = b / m + a;
+
+        if (m0 - kc).abs() > T::ca() * m0 {
+            kc = (kc * m0).sqrt() * two!();
+            continue;
+        }
+
+        break;
+    }
+
+    Ok(pi!() / four!() * a / m)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{assert_close, el1, ellipe, ellipk, test_util::linspace};
+    use crate::{assert_close, ellipe, ellipk, test_util::linspace};
 
     /// Test using relationship with Legendre form.
     /// Reference: https://dlmf.nist.gov/19.2#iii
@@ -142,7 +187,20 @@ mod tests {
             let k = (1.0 - kc * kc).sqrt();
             let m = k * k;
             assert_close!(ellipk(m).unwrap(), cel1(kc).unwrap(), 5e-12);
-            assert_close!(el1(f64::infinity(), kc).unwrap(), cel1(kc).unwrap(), 1e-16);
+        }
+
+        let linsp_neg = linspace(-1.0, -1e-3, 100);
+        linsp_neg.iter().for_each(|kc| test_kc(*kc));
+        let linsp_pos = linspace(1e-3, 1.0, 100);
+        linsp_pos.iter().for_each(|kc| test_kc(*kc));
+    }
+
+    #[test]
+    fn test_cel2() {
+        fn test_kc(kc: f64) {
+            let k = (1.0 - kc * kc).sqrt();
+            let m = k * k;
+            assert_close!(ellipe(m).unwrap(), cel2(kc, 1.0, kc * kc).unwrap(), 7.7e-16);
         }
 
         let linsp_neg = linspace(-1.0, -1e-3, 100);

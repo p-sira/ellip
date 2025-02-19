@@ -45,5 +45,5 @@ impl BulirschConst for f64 {
 mod cel;
 mod el;
 
-pub use cel::{cel, cel1};
+pub use cel::{cel, cel1, cel2};
 pub use el::{el1, el2};
