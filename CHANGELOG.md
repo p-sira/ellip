@@ -7,6 +7,7 @@
 - `ellipd`: Complete elliptic integral of Legendre's type.
 - `ellipdinc`: Incomplete elliptic integral of Legendre's type.
 - `cel1`: Complete elliptic integral of the first kind in Bulirsch's form.
+- `cel2`: Complete elliptic integral of the second kind in Bulirsch's form.
 - `el1`: Incomplete elliptic integral of the first kind in Bulirsch's form.
 - `el2`: Incomplete elliptic integral of the second kind in Bulirsch's form.
 - All functions now support generic Float.

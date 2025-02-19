@@ -38,6 +38,7 @@ Elliptic integrals for Rust
 - Bulirsch's integrals
     - `cel`: General complete elliptic integral in Bulirsch's form.
     - `cel1`: Complete elliptic integral of the first kind in Bulirsch's form.
+    - `cel2`: Complete elliptic integral of the second kind in Bulirsch's form.
     - `el1`: Incomplete elliptic integral of the first kind in Bulirsch's form.
     - `el2`: Incomplete elliptic integral of the second kind in Bulirsch's form.
 - Carlson's symmetric integrals
