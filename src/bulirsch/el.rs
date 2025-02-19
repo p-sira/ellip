@@ -72,7 +72,7 @@ mod tests {
 
     #[test]
     fn test_el1() {
-        fn _test(x: f64, kc: f64) {
+        fn test_special_cases(x: f64, kc: f64) {
             let k = (1.0 - kc * kc).sqrt();
             let m = k * k;
             let phi = x.atan();
@@ -85,10 +85,33 @@ mod tests {
         let linsp_neg = linspace(-1.0, -1e-3, 50);
         x.iter()
             .zip(linsp_neg.iter())
-            .for_each(|(&x, &kc)| _test(x, kc));
+            .for_each(|(&x, &kc)| test_special_cases(x, kc));
         let linsp_pos = linspace(1e-3, 1.0, 50);
         x.iter()
             .zip(linsp_pos.iter())
-            .for_each(|(&x, &kc)| _test(x, kc));
+            .for_each(|(&x, &kc)| test_special_cases(x, kc));
+
+        // Test computed values from the reference
+        // Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
+        fn test_reference(x: f64, expected: f64) {
+            // The reference corrects to 10 decimals.
+            let significants = 1e10;
+
+            assert_eq!(
+                expected,
+                (el1(x, 1e-11).unwrap() * significants).round() / significants
+            );
+        }
+
+        test_reference(1e5, 12.2060726456);
+        test_reference(1e6, 14.5086577385);
+        test_reference(1e7, 16.8112428290);
+        test_reference(1e8, 19.1138276745);
+        test_reference(1e9, 21.4163880184);
+        test_reference(1e10, 23.7165074338);
+        test_reference(1e11, 25.8333567970);
+        test_reference(1e12, 26.6148963052);
+        test_reference(1e23, 26.7147303841);
+        test_reference(f64::infinity(), 26.7147303841);
     }
 }
