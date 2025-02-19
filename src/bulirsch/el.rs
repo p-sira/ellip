@@ -7,6 +7,7 @@ use num_traits::Float;
 
 use super::BulirschConst;
 
+// Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
 /// Compute [incomplete elliptic integral of the first kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E11_5)
 /// ```text
 ///                 arctan(x)                                                   
