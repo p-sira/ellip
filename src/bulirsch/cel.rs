@@ -27,11 +27,6 @@ pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, &'sta
         return Err("cel: p cannot be zero.");
     }
 
-    Ok(_cel(kc, p, a, b))
-}
-
-#[inline]
-fn _cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> T {
     let mut k = kc.abs();
     let mut aa;
     let mut pp;
@@ -73,7 +68,7 @@ fn _cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> T {
         em = em + k;
     }
 
-    pi_2!() * (bb + aa * em) / (em * (em + pp))
+    Ok(pi_2!() * (bb + aa * em) / (em * (em + pp)))
 }
 
 /// Compute [complete elliptic integral of the first kind in Bulirsch form](https://link.springer.com/article/10.1007/bf01397975).
