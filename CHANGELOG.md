@@ -11,6 +11,7 @@
 **Bug Fixes**
 - `elliprf`: Fix incorrect result for RF(x,x,0).
 - `elliprj` and `elliprc`: Fix losing precision due to ln(1+x).
+- `ellipe`: Fix incorrect result during internal condition |t| > 10.
 
 **Changes**
 - Add dependency `num-traits` and `num-lazy`.

@@ -36,7 +36,10 @@ Elliptic integrals for Rust
     - `ellippiinc`: Incomplete elliptic integral of the third kind.
     - `ellipdinc`: Incomplete elliptic integral of Legendre's type.
 - Bulirsch's integrals
-    - `cel`: General complete elliptic integral
+    - `cel`: General complete elliptic integral in Bulirsch's form.
+    - `cel1`: Complete elliptic integral of the first kind in Bulirsch's form.
+    - `el1`: Incomplete elliptic integral of the first kind in Bulirsch's form.
+    - `el2`: Incomplete elliptic integral of the second kind in Bulirsch's form.
 - Carlson's symmetric integrals
     - `elliprf`: Symmetric elliptic integral of the first kind.
     - `elliprg`: Symmetric elliptic integral of the second kind.
