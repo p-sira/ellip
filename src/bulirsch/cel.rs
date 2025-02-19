@@ -126,8 +126,8 @@ mod tests {
             let m = k * k;
             let ellipk = ellipk(m).unwrap();
             let ellipe = ellipe(m).unwrap();
-            assert_close!(ellipk, cel(kc, 1.0, 1.0, 1.0).unwrap(), 1e-10);
-            assert_close!(ellipe, cel(kc, 1.0, 1.0, kc * kc).unwrap(), 1e-10);
+            assert_close!(ellipk, cel(kc, 1.0, 1.0, 1.0).unwrap(), 5e-12);
+            assert_close!(ellipe, cel(kc, 1.0, 1.0, kc * kc).unwrap(), 1e-14);
             assert_close!(
                 (ellipe - kc * kc * ellipk) / m,
                 cel(kc, 1.0, 1.0, 0.0).unwrap(),
