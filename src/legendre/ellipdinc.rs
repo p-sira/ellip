@@ -88,8 +88,10 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
 
 #[cfg(test)]
 mod tests {
+    use core::f64;
+
     use super::*;
-    use crate::{compare_test_data, test_util::RTOL};
+    use crate::compare_test_data;
 
     fn ellipdinc_k(inp: &[f64]) -> f64 {
         ellipdinc(inp[0], inp[1] * inp[1]).unwrap()
@@ -97,6 +99,6 @@ mod tests {
 
     #[test]
     fn test_ellipd() {
-        compare_test_data!("./tests/data/boost/ellipdinc_data.txt", ellipdinc_k, RTOL);
+        compare_test_data!("./tests/data/boost/ellipdinc_data.txt", ellipdinc_k, 6.4e-16);
     }
 }

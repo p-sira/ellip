@@ -148,8 +148,10 @@ fn ellpk_q<T: Float>() -> [T; 11] {
 
 #[cfg(test)]
 mod tests {
+    use core::f64;
+
     use super::*;
-    use crate::{compare_test_data, test_util::RTOL};
+    use crate::compare_test_data;
 
     fn ellipk_k(k: &[f64]) -> f64 {
         ellipk(k[0] * k[0]).unwrap()
@@ -157,6 +159,6 @@ mod tests {
 
     #[test]
     fn test_ellipk() {
-        compare_test_data!("./tests/data/boost/ellipk_data.txt", ellipk_k, RTOL);
+        compare_test_data!("./tests/data/boost/ellipk_data.txt", ellipk_k, f64::EPSILON);
     }
 }

@@ -3,8 +3,6 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-pub const RTOL: f64 = 5.0 * f64::EPSILON;
-
 #[macro_export]
 macro_rules! compare_test_data {
     ($file_path:expr, $func:expr, $rtol:expr) => {

@@ -151,10 +151,12 @@ const N_MAX_ITERATIONS: usize = 11;
 
 #[cfg(test)]
 mod tests {
+    use core::f64;
+
     use itertools::Itertools;
 
     use super::*;
-    use crate::{assert_close, compare_test_data, test_util::RTOL};
+    use crate::{assert_close, compare_test_data};
 
     fn __elliprf(inp: &[&f64]) -> f64 {
         elliprf(*inp[0], *inp[1], *inp[2]).unwrap()
@@ -190,6 +192,6 @@ mod tests {
 
     #[test]
     fn test_elliprf_0yy() {
-        compare_test_data!("./tests/data/boost/elliprf_0yy.txt", _elliprf, RTOL);
+        compare_test_data!("./tests/data/boost/elliprf_0yy.txt", _elliprf, f64::EPSILON);
     }
 }

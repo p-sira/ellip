@@ -98,7 +98,7 @@ mod tests {
     use itertools::Itertools;
 
     use super::*;
-    use crate::{assert_close, compare_test_data, test_util::RTOL};
+    use crate::{assert_close, compare_test_data};
 
     fn __elliprg(inp: &[&f64]) -> f64 {
         elliprg(*inp[0], *inp[1], *inp[2]).unwrap()
@@ -134,6 +134,6 @@ mod tests {
 
     #[test]
     fn test_elliprg_00x() {
-        compare_test_data!("./tests/data/boost/elliprg_00x.txt", _elliprg, RTOL);
+        compare_test_data!("./tests/data/boost/elliprg_00x.txt", _elliprg, f64::EPSILON);
     }
 }

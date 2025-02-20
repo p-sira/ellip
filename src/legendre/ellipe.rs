@@ -154,8 +154,10 @@ fn ellpe_q<T: Float>() -> [T; 10] {
 
 #[cfg(test)]
 mod tests {
+    use core::f64;
+
     use super::*;
-    use crate::{compare_test_data, test_util::RTOL};
+    use crate::compare_test_data;
 
     fn ellipe_k(k: &[f64]) -> f64 {
         ellipe(k[0] * k[0]).unwrap()
@@ -163,6 +165,6 @@ mod tests {
 
     #[test]
     fn test_ellipe() {
-        compare_test_data!("./tests/data/boost/ellipe_data.txt", ellipe_k, RTOL);
+        compare_test_data!("./tests/data/boost/ellipe_data.txt", ellipe_k, f64::EPSILON);
     }
 }
