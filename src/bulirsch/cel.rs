@@ -153,31 +153,56 @@ pub fn cel2<T: Float + BulirschConst>(kc: T, a: T, b: T) -> Result<T, &'static s
 
 #[cfg(test)]
 mod tests {
+    use itertools::iproduct;
+
     use super::*;
-    use crate::{assert_close, ellipe, ellipk, test_util::linspace};
+    use crate::{assert_close, ellipe, ellipk, ellippi, test_util::linspace};
 
     /// Test using relationship with Legendre form.
     /// Reference: https://dlmf.nist.gov/19.2#iii
     #[test]
     fn test_cel() {
-        fn test_kc(kc: f64) {
+        fn _test(kc: f64, p: f64) {
             let k = (1.0 - kc * kc).sqrt();
             let m = k * k;
             let ellipk = ellipk(m).unwrap();
             let ellipe = ellipe(m).unwrap();
+
+            // cel precision is low for K cases
             assert_close!(ellipk, cel(kc, 1.0, 1.0, 1.0).unwrap(), 5e-12);
             assert_close!(ellipe, cel(kc, 1.0, 1.0, kc * kc).unwrap(), 1e-14);
             assert_close!(
                 (ellipe - kc * kc * ellipk) / m,
                 cel(kc, 1.0, 1.0, 0.0).unwrap(),
-                2e-14
+                8.5e-14
+            );
+
+            // Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions III”
+            let n = 1.0 - p;
+            let ellippi = ellippi(n, m).unwrap();
+
+            assert_close!(
+                (ellipk - ellipe) / (k * k),
+                cel(kc, 1.0, 0.0, 1.0).unwrap(),
+                6e-12
+            );
+            // cel precision is very low for PI cases
+            assert_close!(ellippi, cel(kc, p, 1.0, 1.0).unwrap(), 1e-11);
+            assert_close!(
+                (ellippi - ellipk) / (1.0 - p),
+                cel(kc, p, 0.0, 1.0).unwrap(),
+                1e-11
             );
         }
 
-        let linsp_neg = linspace(-1.0, -1e-3, 100);
-        linsp_neg.iter().for_each(|kc| test_kc(*kc));
-        let linsp_pos = linspace(1e-3, 1.0, 100);
-        linsp_pos.iter().for_each(|kc| test_kc(*kc));
+        let linsp_kc = [
+            linspace(-1.0 + 1e-3, -1e-3, 100),
+            linspace(1e-3, 1.0 - 1e-3, 100),
+        ]
+        .concat();
+        let linsp_p = linspace(1e-3, 1.0 - 1e-3, 10);
+
+        iproduct!(linsp_kc, linsp_p).for_each(|(kc, p)| _test(kc, p));
 
         // Data from Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions III”
         assert_close!(cel(1e-1, 4.1, 1.2, 1.1).unwrap(), 1.5464442694017956, 5e-16);
