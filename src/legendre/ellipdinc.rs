@@ -99,6 +99,10 @@ mod tests {
 
     #[test]
     fn test_ellipd() {
-        compare_test_data!("./tests/data/boost/ellipdinc_data.txt", ellipdinc_k, 6.4e-16);
+        compare_test_data!(
+            "./tests/data/boost/ellipdinc_data.txt",
+            ellipdinc_k,
+            6.4e-16
+        );
     }
 }
