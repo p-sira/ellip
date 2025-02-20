@@ -7,7 +7,7 @@ use num_traits::Float;
 
 use super::BulirschConst;
 
-// Reference: Derby and Olbert, “Cylindrical Magnets and Ideal Solenoids.”
+// Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions III.”
 /// Compute [complete elliptic integral in Bulirsch form](https://dlmf.nist.gov/19.2#iii).
 /// ```text
 ///                       π/2                                                   
@@ -27,48 +27,47 @@ pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, &'sta
         return Err("cel: p cannot be zero.");
     }
 
-    let mut k = kc.abs();
-    let mut aa;
-    let mut pp;
-    let mut bb: T;
+    let mut kc = kc.abs();
+    let mut p = p;
+    let mut a = a;
+    let mut b = b;
+
+    let mut e = kc;
+    let mut m = one!();
 
     if p > zero!() {
-        aa = a;
-        pp = p.sqrt();
-        bb = b / pp;
+        p = p.sqrt();
+        b = b / p;
     } else {
-        let f = kc * kc;
-        let q = (one!() - f) * (b - a * p);
+        let mut f = kc * kc;
+        let mut q = one!() - f;
         let g = one!() - p;
-        let h = f - p;
-        pp = (h / g).sqrt();
-        aa = (a - b) / g;
-        bb = -q / (g * g * pp) + aa * pp;
+        f = f - p;
+        q = (b - a * p) * q;
+        p = (f / g).sqrt();
+        a = (a - b) / g;
+        b = -q / (g * g * p) + a * p;
     }
 
-    let mut em = one!();
-    let mut f = aa;
-    aa = aa + bb / pp;
-    let mut g = k / pp;
-    bb = two!() * (bb + f * g);
-    pp = pp + g;
-    g = em;
-    em = em + k;
-    let mut kk = k;
+    loop {
+        let f = a;
+        a = b / p + a;
+        let g = e / p;
+        b = two!() * (f * g + b);
+        p = g + p;
+        let g = m;
+        m = kc + m;
 
-    while (g - k).abs() > (g * T::ca()) {
-        k = two!() * kk.sqrt();
-        kk = k * em;
-        f = aa;
-        aa = aa + bb / pp;
-        g = kk / pp;
-        bb = two!() * (bb + f * g);
-        pp = pp + g;
-        g = em;
-        em = em + k;
+        if (g - kc).abs() > g * T::ca() {
+            kc = two!() * e.sqrt();
+            e = kc * m;
+            continue;
+        }
+
+        break;
     }
 
-    Ok(pi_2!() * (bb + aa * em) / (em * (em + pp)))
+    Ok(pi_2!() * (a * m + b) / (m * (m + p)))
 }
 
 // Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
@@ -182,7 +181,11 @@ mod tests {
 
         // Data from Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions III”
         assert_close!(cel(1e-1, 4.1, 1.2, 1.1).unwrap(), 1.5464442694017956, 5e-16);
-        assert_close!(cel(1e-1, -4.1, 1.2, 1.1).unwrap(), -6.7687378198360556e-1, 5e-16);
+        assert_close!(
+            cel(1e-1, -4.1, 1.2, 1.1).unwrap(),
+            -6.7687378198360556e-1,
+            5e-16
+        );
     }
 
     #[test]
