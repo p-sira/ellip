@@ -10,6 +10,7 @@
 - `cel2`: Complete elliptic integral of the second kind in Bulirsch's form.
 - `el1`: Incomplete elliptic integral of the first kind in Bulirsch's form.
 - `el2`: Incomplete elliptic integral of the second kind in Bulirsch's form.
+- `el3`: Incomplete elliptic integral of the third kind in Bulirsch's form.
 - All functions now support generic Float.
 
 **Bug Fixes**

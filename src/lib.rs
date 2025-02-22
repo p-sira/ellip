@@ -25,6 +25,7 @@
 //! - [fn@cel2]: Complete elliptic integral of the second kind in Bulirsch's form.
 //! - [fn@el1]: Incomplete elliptic integral of the first kind in Bulirsch's form.
 //! - [fn@el2]: Incomplete elliptic integral of the second kind in Bulirsch's form.
+//! - [fn@el3]: Incomplete elliptic integral of the third kind in Bulirsch's form.
 //! ## Carlson's symmetric integrals
 //! - [fn@elliprf]: Symmetric elliptic integral of the first kind.
 //! - [fn@elliprg]: Symmetric elliptic integral of the second kind.
@@ -71,6 +72,7 @@ pub use bulirsch::cel1;
 pub use bulirsch::cel2;
 pub use bulirsch::el1;
 pub use bulirsch::el2;
+pub use bulirsch::el3;
 
 // Carlson's symmetric integrals
 pub mod carlson;

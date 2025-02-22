@@ -46,4 +46,4 @@ mod cel;
 mod el;
 
 pub use cel::{cel, cel1, cel2};
-pub use el::{el1, el2};
+pub use el::{el1, el2, el3};
