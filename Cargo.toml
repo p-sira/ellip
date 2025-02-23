@@ -16,12 +16,12 @@ edition = "2021"
 exclude = ["/logo", "/tests/data", "cpp"]
 
 [dependencies]
-num-lazy = "0.1.0"
-num-traits = "0.2.19"
+num-lazy = "~0.1"
+num-traits = "~0.2"
 
 [dev-dependencies]
-criterion = "0.5.1"
-itertools = "0.14.0"
+criterion = "~0.5"
+itertools = "~0.14"
 
 [[bench]]
 name = "bench"
