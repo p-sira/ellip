@@ -18,6 +18,7 @@ use super::BulirschConst;
 ///                     0                                                   
 /// where kc ≠ 0, p ≠ 0
 /// ```
+/// Note that kc² = mc = 1 - m. The precision can be adjusted by overwriting the trait [super::BulirschConst].
 pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, &'static str> {
     if kc == zero!() {
         return Err("cel: kc cannot be zero.");
@@ -82,7 +83,7 @@ pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, &'sta
 /// where kc ≠ 0
 /// ```
 ///
-/// Note that kc² = mc = 1 - m.
+/// Note that kc² = mc = 1 - m. The precision can be adjusted by overwriting the trait [super::BulirschConst].
 pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, &'static str> {
     if kc == zero!() {
         return Err("cel1: kc cannot be zero.");
@@ -108,7 +109,7 @@ pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, &'static str> {
 }
 
 // Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
-/// Compute [complete elliptic integral of the second kind in Bulirsch's form](https://link.springer.com/article/10.1007/bf01397975)
+/// Compute [complete elliptic integral of the second kind in Bulirsch's form](https://link.springer.com/article/10.1007/bf01397975).
 /// ```text
 ///                     π/2                           
 ///                    ⌠              a + b tan²(ϑ)
@@ -119,7 +120,7 @@ pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, &'static str> {
 /// where kc ≠ 0
 /// ```
 ///
-/// Note that kc² = mc = 1 - m.
+/// Note that kc² = mc = 1 - m. The precision can be adjusted by overwriting the trait [super::BulirschConst].
 pub fn cel2<T: Float + BulirschConst>(kc: T, a: T, b: T) -> Result<T, &'static str> {
     if kc == zero!() {
         return Err("cel2: kc cannot be zero.");

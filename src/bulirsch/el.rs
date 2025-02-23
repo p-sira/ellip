@@ -8,7 +8,7 @@ use num_traits::Float;
 use super::{cel1, cel2, BulirschConst};
 
 // Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
-/// Compute [incomplete elliptic integral of the first kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E11_5)
+/// Compute [incomplete elliptic integral of the first kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E11_5).
 /// ```text
 ///                 arctan(x)                                                   
 ///                ⌠                             
@@ -20,7 +20,7 @@ use super::{cel1, cel2, BulirschConst};
 /// where kc ≠ 0
 /// ```
 ///
-/// Note that x = tan φ and kc² = mc = 1 - m.
+/// Note that x = tan φ and kc² = mc = 1 - m. The precision can be adjusted by overwriting the trait [super::BulirschConst].
 pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
     if x == zero!() {
         return Ok(zero!());
@@ -71,7 +71,7 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
 }
 
 // Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
-/// Compute [incomplete elliptic integral of the second kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E12)
+/// Compute [incomplete elliptic integral of the second kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E12).
 /// ```text
 ///                       arctan(x)                                                   
 ///                      ⌠                             
@@ -83,7 +83,7 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
 /// where kc ≠ 0
 /// ```
 ///
-/// Note that x = tan φ and kc² = mc = 1 - m.
+/// Note that x = tan φ and kc² = mc = 1 - m. The precision can be adjusted by overwriting the trait [super::BulirschConst].
 pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'static str> {
     if x == zero!() {
         return Ok(zero!());
@@ -169,7 +169,7 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'sta
 ///                  0                                                   
 /// ```
 ///
-/// Note that x = tan φ and kc² = mc = 1 - m. The precision can be adjusted by overwriting [super::BulirschConst].
+/// Note that x = tan φ and kc² = mc = 1 - m. The precision can be adjusted by overwriting the trait [super::BulirschConst].
 pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, &'static str> {
     if x == zero!() {
         return Ok(zero!());
