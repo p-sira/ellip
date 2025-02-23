@@ -27,7 +27,9 @@ fn params_from_file(file_path: &str) -> Vec<Vec<f64>> {
         .map(|line| {
             line.expect("Cannot read line")
                 .split_whitespace()
-                .map(|arg| f64::from_str(arg).expect(&format!("Cannot parse param {}", arg)))
+                .map(|arg| {
+                    f64::from_str(arg).unwrap_or_else(|_| panic!("Cannot parse param {}", arg))
+                })
                 .collect()
         })
         .collect();
@@ -39,10 +41,10 @@ fn bench_cases<M: Measurement>(
     group: &mut BenchmarkGroup<M>,
     bench_name: &str,
     func: &dyn Fn(&[f64]) -> f64,
-    cases: &Vec<Vec<f64>>,
+    cases: &[Vec<f64>],
 ) {
     group.bench_function(bench_name, |b| {
-        b.iter(|| cases.iter().for_each(|case| assert!(!func(&case).is_nan())))
+        b.iter(|| cases.iter().for_each(|case| assert!(!func(case).is_nan())))
     });
 }
 

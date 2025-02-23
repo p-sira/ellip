@@ -6,11 +6,18 @@
 - `ellippiinc`: Incomplete elliptic integral of the third kind.
 - `ellipd`: Complete elliptic integral of Legendre's type.
 - `ellipdinc`: Incomplete elliptic integral of Legendre's type.
+- `cel1`: Complete elliptic integral of the first kind in Bulirsch's form.
+- `cel2`: Complete elliptic integral of the second kind in Bulirsch's form.
+- `el1`: Incomplete elliptic integral of the first kind in Bulirsch's form.
+- `el2`: Incomplete elliptic integral of the second kind in Bulirsch's form.
+- `el3`: Incomplete elliptic integral of the third kind in Bulirsch's form.
+- `BulirschConst` trait controls the precision of cel and el functions.
 - All functions now support generic Float.
 
 **Bug Fixes**
 - `elliprf`: Fix incorrect result for RF(x,x,0).
 - `elliprj` and `elliprc`: Fix losing precision due to ln(1+x).
+- `ellipe`: Fix incorrect result during internal condition |t| > 10.
 
 **Changes**
 - Add dependency `num-traits` and `num-lazy`.

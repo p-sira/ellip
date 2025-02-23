@@ -20,7 +20,12 @@
 //! - [fn@ellippiinc]: Incomplete elliptic integral of the third kind.
 //! - [fn@ellipdinc]: Incomplete elliptic integral of Legendre's type.
 //! ## Bulirsch's integrals
-//! - [fn@cel]: General complete elliptic integral
+//! - [fn@cel]: General complete elliptic integral in Bulirsch's form.
+//! - [fn@cel1]: Complete elliptic integral of the first kind in Bulirsch's form.
+//! - [fn@cel2]: Complete elliptic integral of the second kind in Bulirsch's form.
+//! - [fn@el1]: Incomplete elliptic integral of the first kind in Bulirsch's form.
+//! - [fn@el2]: Incomplete elliptic integral of the second kind in Bulirsch's form.
+//! - [fn@el3]: Incomplete elliptic integral of the third kind in Bulirsch's form.
 //! ## Carlson's symmetric integrals
 //! - [fn@elliprf]: Symmetric elliptic integral of the first kind.
 //! - [fn@elliprg]: Symmetric elliptic integral of the second kind.
@@ -38,12 +43,11 @@
 //! - [Boost Math Library](https://www.boost.org/doc/libs/release/libs/math/)
 //! - [Russell Lab](https://github.com/cpmech/russell)
 //!
-//! Primary mathematical reference is [Chapter 19](https://dlmf.nist.gov/19) of the NIST Digital Library
-//! of Mathematical Functions, authored by [Carlson](https://dlmf.nist.gov/about/bio/BCCarlson), the legendary
-//! mathematician who discovered the symmetric integrals!
+//! References for original implementations are:
+//! - NIST Digital Library, [Chapter 19: Elliptic Integrals](https://dlmf.nist.gov/19) (Carlson, 2024).
+//! - Numerical calculation of elliptic integrals and elliptic functions [I](https://link.springer.com/article/10.1007/BF01397975) (Bulirsch, 1965), [II](https://doi.org/10.1007/BF01436529) (Bulirsch, 1965), and [III](https://doi.org/10.1007/BF02165405) (Bulirsch, 1969).
 //!
-//! Unicode-style mathematical notation are created using an awesome tool called
-//! [Diagon](https://github.com/ArthurSonzogni/Diagon).
+//! Unicode-style mathematical notation are created using [Diagon](https://github.com/ArthurSonzogni/Diagon).
 
 use num_lazy::declare_nums;
 declare_nums! {T}
@@ -64,6 +68,11 @@ pub use legendre::ellippiinc;
 // Bulirsch's integrals
 pub mod bulirsch;
 pub use bulirsch::cel;
+pub use bulirsch::cel1;
+pub use bulirsch::cel2;
+pub use bulirsch::el1;
+pub use bulirsch::el2;
+pub use bulirsch::el3;
 
 // Carlson's symmetric integrals
 pub mod carlson;
