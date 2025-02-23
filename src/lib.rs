@@ -3,6 +3,8 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
+#![allow(clippy::excessive_precision)]
+
 //! # ELLIP
 //! **Ellip** is an elliptic integral functions for Rust.
 //!
@@ -10,11 +12,20 @@
 //! ## Legendre's complete integrals
 //! - [fn@ellipk]: Complete elliptic integral of the first kind.
 //! - [fn@ellipe]: Complete elliptic integral of the second kind.
+//! - [fn@ellippi]: Complete elliptic integral of the third kind.
+//! - [fn@ellipd]: Complete elliptic integral of Legendre's type.
 //! ## Legendre's incomplete integrals
 //! - [fn@ellipf]: Incomplete elliptic integral of the first kind.
 //! - [fn@ellipeinc]: Incomplete elliptic integral of the second kind.
+//! - [fn@ellippiinc]: Incomplete elliptic integral of the third kind.
+//! - [fn@ellipdinc]: Incomplete elliptic integral of Legendre's type.
 //! ## Bulirsch's integrals
-//! - [fn@cel]: General complete elliptic integral
+//! - [fn@cel]: General complete elliptic integral in Bulirsch's form.
+//! - [fn@cel1]: Complete elliptic integral of the first kind in Bulirsch's form.
+//! - [fn@cel2]: Complete elliptic integral of the second kind in Bulirsch's form.
+//! - [fn@el1]: Incomplete elliptic integral of the first kind in Bulirsch's form.
+//! - [fn@el2]: Incomplete elliptic integral of the second kind in Bulirsch's form.
+//! - [fn@el3]: Incomplete elliptic integral of the third kind in Bulirsch's form.
 //! ## Carlson's symmetric integrals
 //! - [fn@elliprf]: Symmetric elliptic integral of the first kind.
 //! - [fn@elliprg]: Symmetric elliptic integral of the second kind.
@@ -32,45 +43,48 @@
 //! - [Boost Math Library](https://www.boost.org/doc/libs/release/libs/math/)
 //! - [Russell Lab](https://github.com/cpmech/russell)
 //!
-//! Primary mathematical reference is [Chapter 19](https://dlmf.nist.gov/19) of the NIST Digital Library
-//! of Mathematical Functions, authored by [Carlson](https://dlmf.nist.gov/about/bio/BCCarlson), the legendary
-//! mathematician who discovered the symmetric integrals!
+//! References for original implementations are:
+//! - NIST Digital Library, [Chapter 19: Elliptic Integrals](https://dlmf.nist.gov/19) (Carlson, 2024).
+//! - Numerical calculation of elliptic integrals and elliptic functions [I](https://link.springer.com/article/10.1007/BF01397975) (Bulirsch, 1965), [II](https://doi.org/10.1007/BF01436529) (Bulirsch, 1965), and [III](https://doi.org/10.1007/BF02165405) (Bulirsch, 1969).
 //!
-//! Unicode-style mathematical notation are created using an awesome tool called
-//! [Diagon](https://github.com/ArthurSonzogni/Diagon).
+//! Unicode-style mathematical notation are created using [Diagon](https://github.com/ArthurSonzogni/Diagon).
 
+use num_lazy::declare_nums;
+declare_nums! {T}
+
+pub mod legendre;
 // Legendre's complete integrals
-mod ellipk;
-pub use ellipk::ellipk;
-mod ellipe;
-pub use ellipe::ellipe;
+pub use legendre::ellipd;
+pub use legendre::ellipe;
+pub use legendre::ellipk;
+pub use legendre::ellippi;
 
 // Legendre's incomplete integrals
-mod ellipf;
-pub use ellipf::ellipf;
-mod ellipeinc;
-pub use ellipeinc::ellipeinc;
+pub use legendre::ellipdinc;
+pub use legendre::ellipeinc;
+pub use legendre::ellipf;
+pub use legendre::ellippiinc;
 
 // Bulirsch's integrals
-mod cel;
-pub use cel::cel;
+pub mod bulirsch;
+pub use bulirsch::cel;
+pub use bulirsch::cel1;
+pub use bulirsch::cel2;
+pub use bulirsch::el1;
+pub use bulirsch::el2;
+pub use bulirsch::el3;
 
 // Carlson's symmetric integrals
-mod elliprf;
-pub use elliprf::elliprf;
-mod elliprg;
-pub use elliprg::elliprg;
-mod elliprj;
-pub use elliprj::elliprj;
-mod elliprc;
-pub use elliprc::elliprc;
-mod elliprd;
-pub use elliprd::elliprd;
+pub mod carlson;
+pub use carlson::elliprc;
+pub use carlson::elliprd;
+pub use carlson::elliprf;
+pub use carlson::elliprg;
+pub use carlson::elliprj;
 
 // Utilities
 mod polyeval;
 use polyeval::*;
-mod constants;
 
 #[cfg(test)]
 mod test_util;

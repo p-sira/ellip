@@ -67,12 +67,12 @@
  * - 06-23-2016: add code for evaluating rational functions
  */
 
+use num_traits::Float;
+
 /// Evaluate polynomial
 #[inline]
-pub fn polyeval(x: f64, coeff: &[f64], n: usize) -> f64 {
-    let mut ans = 0.0;
-    for k in coeff.iter().take(n + 1) {
-        ans = ans * x + k;
-    }
+pub fn polyeval<T: Float>(x: T, coeff: &[T]) -> T {
+    let mut ans = zero!();
+    coeff.iter().for_each(|k| ans = ans * x + *k);
     ans
 }

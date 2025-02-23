@@ -1,6 +1,6 @@
 [package]
 name = "ellip"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Sira Pornsiriprasert <code@psira.me>"]
 
 description = "Elliptic integrals for Rust"
@@ -13,9 +13,16 @@ readme = "README.md"
 license = "BSD-3-Clause"
 
 edition = "2021"
-exclude = ["/logo", "/tests/data"]
+exclude = ["/logo", "/tests/data", "cpp"]
 
 [dependencies]
+num-lazy = "~0.1"
+num-traits = "~0.2"
 
 [dev-dependencies]
-itertools = "0.14.0"
+criterion = "~0.5"
+itertools = "~0.14"
+
+[[bench]]
+name = "bench"
+harness = false

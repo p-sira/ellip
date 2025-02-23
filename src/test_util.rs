@@ -3,18 +3,23 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-pub const RTOL: f64 = 5.0 * f64::EPSILON;
-
 #[macro_export]
 macro_rules! compare_test_data {
     ($file_path:expr, $func:expr, $rtol:expr) => {
-        compare_test_data!($file_path, $func, $rtol, 0.0)
+        compare_test_data!($file_path, $func, f64, $rtol, 0.0)
+    };
+    ($file_path:expr, $func:expr, $t: ident, $rtol:expr) => {
+        compare_test_data!($file_path, $func, f64, $rtol, 0.0)
     };
     ($file_path:expr, $func:expr, $rtol:expr, $atol:expr) => {
+        compare_test_data!($file_path, $func, f64, $rtol, $atol)
+    };
+    ($file_path:expr, $func:expr, $t: ident, $rtol:expr, $atol:expr) => {
         {
             use std::fs::File;
-            use std::io::{self, BufRead};
+            use std::io::{BufRead, BufReader};
             use std::path::Path;
+            use std::str::FromStr;
 
             let path = Path::new($file_path);
             if !path.exists() {
@@ -23,30 +28,38 @@ macro_rules! compare_test_data {
             }
 
             let file = File::open($file_path).expect("Cannot open file");
-            let reader = io::BufReader::new(file);
+            let reader = BufReader::new(file);
 
             let mut total_cases = 0;
             let mut test_fail = 0;
             let mut worst_line = 0;
-            let mut worst_params: Vec<f64> = Vec::new();
-            let mut worst_errors = [0.0; 5];
+            let mut worst_params: Vec<$t> = Vec::new();
+            let mut worst_errors: [$t;5] = [0.0; 5];
+
             for (line_number, line) in reader.lines().enumerate() {
                 let line = line.expect("Cannot read line");
                 total_cases += 1;
 
                 let parts: Vec<&str> = line.split_whitespace().collect();
-                let inputs: Vec<f64> = parts[..parts.len() - 1]
+                let inputs: Vec<$t> = parts[..parts.len() - 1]
                     .iter()
-                    .map(|&v| v.parse().expect("Cannot parse input(s) as a number"))
+                    .map(|&v| $t::from_str(v).expect("Cannot parse input(s) as a number"))
                     .collect();
 
-                let expected: f64 = parts[parts.len() - 1]
-                    .parse()
+                let expected: $t = $t::from_str(parts[parts.len() - 1])
                     .expect("Cannot parse expected value as a number");
 
                 let result = $func(&inputs);
+
+                if result.is_nan() {
+                    panic! ("Test failed on line {}: input = {:?}, expected = {:?}, got = NAN",
+                    line_number + 1,
+                    inputs,
+                    expected,)
+                }
+
                 let error = (result - expected).abs();
-                let tol = $atol + $rtol * expected.abs();
+                let tol = $t::from($atol) + $t::from($rtol) * expected.abs();
                 if error > tol {
                     let rel = error / expected.abs();
                     test_fail += 1;
