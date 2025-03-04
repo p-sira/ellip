@@ -35,12 +35,12 @@ use num_traits::Float;
 ///
 /// Note that some mathematical references use the parameter k for the function,
 /// where k² = m.
-/// 
+///
 /// # Examples
 /// ```
 /// use ellip::{ellipdinc, util::assert_close};
 /// use std::f64::consts::FRAC_PI_4;
-/// 
+///
 /// assert_close(ellipdinc(FRAC_PI_4, 0.5).unwrap(), 0.15566274414316758, 1e-15);
 /// ```
 pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, &'static str> {

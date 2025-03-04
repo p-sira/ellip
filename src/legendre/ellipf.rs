@@ -80,12 +80,12 @@ use crate::ellipk;
 ///
 /// Note that some mathematical references use the parameter k for the function,
 /// where k² = m.
-/// 
+///
 /// # Examples
 /// ```
 /// use ellip::{ellipf, util::assert_close};
 /// use std::f64::consts::FRAC_PI_4;
-/// 
+///
 /// assert_close(ellipf(FRAC_PI_4, 0.5).unwrap(), 0.826017876249245, 1e-15);
 /// ```
 pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
