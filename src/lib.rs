@@ -105,7 +105,7 @@ pub use carlson::elliprj;
 // Utilities
 mod polyeval;
 use polyeval::*;
-pub mod util; 
+pub mod util;
 
 #[cfg(test)]
 mod test_util;
