@@ -18,14 +18,14 @@
 //!
 //! ## Example
 //! ```
-//! use ellip::elliprg;
+//! use ellip::{elliprg, util::assert_close};
 //!
 //! fn ellipse_length(a: f64, b: f64) -> Result<f64, &'static str> {
 //!     Ok(8.0 * elliprg(0.0, a * a, b * b)?)
 //! }
 //!
 //! let ans = ellipse_length(5.0, 3.0).unwrap();
-//! assert_eq!(ans, 25.526998863398124);
+//! assert_close(ans, 25.526998863398124, 1e-15);
 //! ```
 //!
 //! # Features
@@ -105,6 +105,7 @@ pub use carlson::elliprj;
 // Utilities
 mod polyeval;
 use polyeval::*;
+pub mod util; 
 
 #[cfg(test)]
 mod test_util;

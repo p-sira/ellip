@@ -1,5 +1,12 @@
 # Changelog
 ## 0.3
+### 0.3.1
+**Improvements**
+- Improve documentations
+
+**New Features**
+- Add `assert_close` function in `util` module.
+
 ### 0.3.0
 **New Features**
 - `ellippi`: Complete elliptic integral of the third kind.
