@@ -36,6 +36,13 @@ use crate::elliprd;
 ///
 /// Note that some mathematical references use the parameter k for the function,
 /// where k² = m.
+///
+/// # Examples
+/// ```
+/// use ellip::{ellipd, util::assert_close};
+///
+/// assert_close(ellipd(0.5).unwrap(), 1.0068615925073927, 1e-15);
+/// ```
 pub fn ellipd<T: Float>(m: T) -> Result<T, &'static str> {
     if m >= one!() {
         return Err("ellipd: m must be less than 1.");

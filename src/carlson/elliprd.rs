@@ -32,6 +32,12 @@ use num_traits::Float;
 /// where x ≥ 0, y ≥ 0, and at most one can be zero. z > 0.
 /// ```
 ///
+/// # Examples
+/// ```
+/// use ellip::{elliprd, util::assert_close};
+///
+/// assert_close(elliprd(1.0, 0.5, 0.25).unwrap(), 4.022594757168912, 1e-15);
+/// ```
 pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
     if x.min(y) < zero!() || x + y == zero!() {
         return Err("elliprd: x and y must be non-negative, and at most one can be zero.");

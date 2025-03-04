@@ -34,6 +34,13 @@ use crate::{ellipk, elliprf, elliprj};
 ///
 /// Note that some mathematical references use the parameter k and α for the function,
 /// where k² = m, α² = n.
+///
+/// # Examples
+/// ```
+/// use ellip::{ellippi, util::assert_close};
+///
+/// assert_close(ellippi(0.5, 0.5).unwrap(), 2.7012877620953506, 1e-15);
+/// ```
 pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, &'static str> {
     if m >= one!() {
         return Err("ellippi: m must be less than 1.");

@@ -37,6 +37,14 @@ use crate::{ellipeinc, ellipf, elliprf, elliprj};
 ///
 /// Note that some mathematical references use the parameter k and α for the function,
 /// where k² = m, α² = n.
+/// 
+/// # Examples
+/// ```
+/// use ellip::{ellippiinc, util::assert_close};
+/// use std::f64::consts::FRAC_PI_4;
+/// 
+/// assert_close(ellippiinc(FRAC_PI_4, 0.5, 0.5).unwrap(), 0.9190227391656969, 1e-15);
+/// ```
 pub fn ellippiinc<T: Float>(phi: T, n: T, m: T) -> Result<T, &'static str> {
     ellippiinc_vc(phi, n, m, one!() - n)
 }

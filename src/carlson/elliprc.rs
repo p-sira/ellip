@@ -31,6 +31,12 @@ use num_traits::Float;
 /// where x ≥ 0, y ≠ 0
 /// ```
 ///
+/// # Examples
+/// ```
+/// use ellip::{elliprc, util::assert_close};
+///
+/// assert_close(elliprc(1.0, 0.5).unwrap(), 1.2464504802804608, 1e-15);
+/// ```
 pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, &'static str> {
     if x < zero!() {
         return Err("elliprc: x must be non-negative.");

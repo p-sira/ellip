@@ -34,6 +34,12 @@ use num_traits::Float;
 /// where x ≥ 0, y ≥ 0, z ≥ 0, and at most one can be zero. p ≠ 0.
 /// ```
 ///
+/// # Examples
+/// ```
+/// use ellip::{elliprj, util::assert_close};
+///
+/// assert_close(elliprj(1.0, 0.5, 0.25, 0.125).unwrap(), 5.680557292035963, 1e-15);
+/// ```
 pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
     if x.min(y).min(z) < zero!() || (y + z).min(x + y).min(x + z) == zero!() {
         return Err("elliprj: x, y, and z must be non-negative, and at most one can be zero.");

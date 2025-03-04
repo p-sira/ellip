@@ -35,6 +35,12 @@ use crate::elliprc;
 /// where x ≥ 0, y ≥ 0, z ≥ 0, and at most one can be zero.
 /// ```
 ///
+/// # Examples
+/// ```
+/// use ellip::{elliprf, util::assert_close};
+///
+/// assert_close(elliprf(1.0, 0.5, 0.25).unwrap(), 1.370171633266872, 1e-15);
+/// ```
 pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
     if x.min(y).min(z) < zero!() || (y + z).min(x + y).min(x + z) < zero!() {
         return Err("elliprf: x, y, and z must be non-negative, and at most one can be zero.");

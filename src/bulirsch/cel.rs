@@ -19,6 +19,13 @@ use super::BulirschConst;
 /// where kc ≠ 0, p ≠ 0
 /// ```
 /// Note that kc² = mc = 1 - m. The precision can be adjusted by overwriting the trait [super::BulirschConst].
+///
+/// # Examples
+/// ```
+/// use ellip::{cel, util::assert_close};
+///
+/// assert_close(cel(0.5, 1.0, 1.0, 1.0).unwrap(), 2.1565156474996434, 1e-15);
+/// ```
 pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, &'static str> {
     if kc == zero!() {
         return Err("cel: kc cannot be zero.");
@@ -84,6 +91,13 @@ pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, &'sta
 /// ```
 ///
 /// Note that kc² = mc = 1 - m. The precision can be adjusted by overwriting the trait [super::BulirschConst].
+///
+/// # Examples
+/// ```
+/// use ellip::{cel1, util::assert_close};
+///
+/// assert_close(cel1(0.5).unwrap(), 2.1565156474996434, 1e-15);
+/// ```
 pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, &'static str> {
     if kc == zero!() {
         return Err("cel1: kc cannot be zero.");
@@ -121,6 +135,13 @@ pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, &'static str> {
 /// ```
 ///
 /// Note that kc² = mc = 1 - m. The precision can be adjusted by overwriting the trait [super::BulirschConst].
+///
+/// # Examples
+/// ```
+/// use ellip::{cel2, util::assert_close};
+///
+/// assert_close(cel2(0.5, 1.0, 1.0).unwrap(), 2.1565156474996434, 1e-15);
+/// ```
 pub fn cel2<T: Float + BulirschConst>(kc: T, a: T, b: T) -> Result<T, &'static str> {
     if kc == zero!() {
         return Err("cel2: kc cannot be zero.");

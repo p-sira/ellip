@@ -2,7 +2,7 @@
 ## 0.3
 ### 0.3.1
 **Improvements**
-- Improve documentations and add an example for each function.
+- Improve documentations and add examples for each function.
 
 **New Features**
 - Add `assert_close` function in `util` module.

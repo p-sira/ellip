@@ -25,6 +25,13 @@ use crate::{elliprc, elliprd, elliprf};
 ///                  0                                                             
 /// where x ≥ 0, y ≥ 0, z ≥ 0
 /// ```
+///
+/// # Examples
+/// ```
+/// use ellip::{elliprg, util::assert_close};
+///
+/// assert_close(elliprg(1.0, 0.5, 0.25).unwrap(), 0.7526721491833781, 1e-15);
+/// ```
 pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
     if x < zero!() || y < zero!() || z < zero!() {
         return Err("elliprg: x, y, and z must be non-negative.");

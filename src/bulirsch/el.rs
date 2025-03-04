@@ -21,6 +21,14 @@ use super::{cel1, cel2, BulirschConst};
 /// ```
 ///
 /// Note that x = tan φ and kc² = mc = 1 - m. The precision can be adjusted by overwriting the trait [super::BulirschConst].
+///
+/// # Examples
+/// ```
+/// use ellip::{el1, util::assert_close};
+/// use std::f64::consts::FRAC_PI_4;
+///
+/// assert_close(el1(FRAC_PI_4.tan(), 0.5).unwrap(), 0.8512237490711854, 1e-15);
+/// ```
 pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
     if x == zero!() {
         return Ok(zero!());
@@ -84,6 +92,14 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
 /// ```
 ///
 /// Note that x = tan φ and kc² = mc = 1 - m. The precision can be adjusted by overwriting the trait [super::BulirschConst].
+///
+/// # Examples
+/// ```
+/// use ellip::{el2, util::assert_close};
+/// use std::f64::consts::FRAC_PI_4;
+///
+/// assert_close(el2(FRAC_PI_4.tan(), 0.5, 1.0, 1.0).unwrap(), 0.8512237490711854, 1e-15);
+/// ```
 pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'static str> {
     if x == zero!() {
         return Ok(zero!());
@@ -170,6 +186,14 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'sta
 /// ```
 ///
 /// Note that x = tan φ and kc² = mc = 1 - m. The precision can be adjusted by overwriting the trait [super::BulirschConst].
+///
+/// # Examples
+/// ```
+/// use ellip::{el3, util::assert_close};
+/// use std::f64::consts::FRAC_PI_4;
+///
+/// assert_close(el3(FRAC_PI_4.tan(), 0.5, 1.0).unwrap(), 0.8512237490711854, 1e-15);
+/// ```
 pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, &'static str> {
     if x == zero!() {
         return Ok(zero!());

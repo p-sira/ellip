@@ -73,6 +73,7 @@ use crate::{ellipe, ellipk};
 ///
 /// Note that some mathematical references use the parameter k for the function,
 /// where k² = m.
+
 pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
     if m > one!() {
         return Err("ellipeinc: m must be less than 1.");

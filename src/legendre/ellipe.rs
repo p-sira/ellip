@@ -91,6 +91,13 @@ use crate::polyeval;
 ///
 /// Note that some mathematical references use the parameter k for the function,
 /// where k² = m.
+///
+/// # Examples
+/// ```
+/// use ellip::{ellipe, util::assert_close};
+///
+/// assert_close(ellipe(0.5).unwrap(), 1.3506438810476755, 1e-15);
+/// ```
 pub fn ellipe<T: Float>(m: T) -> Result<T, &'static str> {
     if m > one!() {
         return Err("ellipe: m must be less than 1.");
