@@ -8,6 +8,26 @@
 //! # ELLIP
 //! **Ellip** is an elliptic integral functions for Rust.
 //!
+//! ## Why Ellip
+//! Ellip is a pure-Rust implementation of [elliptic integrals](https://dlmf.nist.gov/19).
+//! This means there is no dependence on C++ libraries. Ellip also provides less common
+//! functions like Bulirsch's `cel` and `el`. Some applications of elliptic integrals include
+//! computing the [lengths of plane curves](https://dlmf.nist.gov/19.30), magnetic field from
+//! magnets of various shapes (e.g., [cylindrical](https://doi.org/10.1016/j.jmmm.2018.02.003)),
+//! [astrophysics](https://dx.doi.org/10.1088/0004-637X/696/2/1616), and [string theory](https://dx.doi.org/10.1088/1126-6708/2004/03/004).
+//!
+//! ## Example
+//! ```
+//! use ellip::elliprg;
+//!
+//! fn ellipse_length(a: f64, b: f64) -> Result<f64, &'static str> {
+//!     Ok(8.0 * elliprg(0.0, a * a, b * b)?)
+//! }
+//!
+//! let ans = ellipse_length(5.0, 3.0).unwrap();
+//! assert_eq!(ans, 25.526998863398124);
+//! ```
+//!
 //! # Features
 //! ## Legendre's complete integrals
 //! - [fn@ellipk]: Complete elliptic integral of the first kind.
