@@ -73,6 +73,14 @@ use crate::{ellipe, ellipk};
 ///
 /// Note that some mathematical references use the parameter k for the function,
 /// where k² = m.
+///
+/// # Examples
+/// ```
+/// use ellip::{ellipeinc, util::assert_close};
+/// use std::f64::consts::FRAC_PI_4;
+///
+/// assert_close(ellipeinc(FRAC_PI_4, 0.5).unwrap(), 0.7481865041776612, 1e-15);
+/// ```
 pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
     if m > one!() {
         return Err("ellipeinc: m must be less than 1.");
