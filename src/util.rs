@@ -11,7 +11,7 @@ use std::fmt::Debug;
 /// Assert that the actual value is within the relative tolerance of the expected value.
 ///
 /// Panics if the assertion is failed.
-pub fn assert_close<T: Float + Debug>(expected: T, actual: T, rtol: T) {
+pub fn assert_close<T: Float + Debug>(actual: T, expected: T, rtol: T) {
     let relative = (actual - expected).abs() / expected;
     if relative > rtol {
         panic!(
