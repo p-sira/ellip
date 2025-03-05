@@ -68,14 +68,15 @@ use crate::{ellipe, ellipk};
 /// E(φ, m)  =  │ \╱ 1 - m sin²θ  dθ
 ///             ⌡
 ///            0
-/// where m ≤ 1
+/// where 0 ≤ m sin²φ ≤ 1
 /// ```
 ///
 /// Note that some mathematical references use the parameter k for the function,
 /// where k² = m.
 pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
-    if m > one!() {
-        return Err("ellipeinc: m must be less than 1.");
+    let ms2p =  m * (phi.sin() * phi.sin());
+    if ms2p > one!() || ms2p < zero!() {
+        return Err("ellipeinc: m sin²φ must satisfy: 0 ≤ m sin²φ ≤ 1.");
     }
 
     if phi.is_infinite() {

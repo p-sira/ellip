@@ -1,5 +1,9 @@
 # Changelog
 ## 0.3
+### 0.3.1
+**Bug Fixes**
+- Fix domain for `ellipf` and `ellipeinc`.
+
 ### 0.3.0
 **New Features**
 - `ellippi`: Complete elliptic integral of the third kind.
