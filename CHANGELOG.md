@@ -7,6 +7,9 @@
 **New Features**
 - Add `assert_close` function in `util` module.
 
+**Bug Fixes**
+- Fix domain for `ellipf` and `ellipeinc`.
+
 ### 0.3.0
 **New Features**
 - `ellippi`: Complete elliptic integral of the third kind.

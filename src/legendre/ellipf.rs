@@ -75,7 +75,7 @@ use crate::ellipk;
 ///             │     _____________
 ///             ⌡   \╱ 1 - m sin²θ
 ///            0
-/// where m ≤ 1
+/// where 0 ≤ m sin²φ ≤ 1
 /// ```
 ///
 /// Note that some mathematical references use the parameter k for the function,
@@ -89,8 +89,9 @@ use crate::ellipk;
 /// assert_close(ellipf(FRAC_PI_4, 0.5).unwrap(), 0.826017876249245, 1e-15);
 /// ```
 pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
-    if m > one!() {
-        return Err("ellipf: m must be less than 1.");
+    let ms2p =  m * (phi.sin() * phi.sin());
+    if ms2p > one!() || ms2p < zero!() {
+        return Err("ellipf: m sin²φ must satisfy: 0 ≤ m sin²φ ≤ 1.");
     }
 
     if phi.is_infinite() || m.is_infinite() {
