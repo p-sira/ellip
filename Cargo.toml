@@ -22,6 +22,7 @@ num-traits = "~0.2"
 [dev-dependencies]
 criterion = "~0.5"
 itertools = "~0.14"
+plotters = "~0.3"
 
 [[bench]]
 name = "bench"
