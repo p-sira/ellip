@@ -1,8 +1,11 @@
 # Changelog
 ## 0.3
 ### 0.3.1
+**Improvements**
+- Increase the precision of the `ellipk` and `ellipf` functions.
+
 **Bug Fixes**
-- Fix domain for `ellipf` and `ellipeinc`.
+- Fix the domains for `ellipf` and `ellipeinc`.
 
 ### 0.3.0
 **New Features**
