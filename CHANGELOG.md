@@ -3,12 +3,13 @@
 ### 0.3.1
 **Improvements**
 - Improve documentations and add examples for each function.
+- Increase the precision of the `ellipk` and `ellipf` functions.
 
 **New Features**
 - Add `assert_close` function in `util` module.
 
 **Bug Fixes**
-- Fix domain for `ellipf` and `ellipeinc`.
+- Fix the domains for `ellipf` and `ellipeinc`.
 
 ### 0.3.0
 **New Features**

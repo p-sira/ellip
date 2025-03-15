@@ -4,11 +4,11 @@ Copyright 2025 Sira Pornsiriprasert <code@psira.me>
 Submodules that derived from SciPy are:
  - ellipe
  - ellipeinc
- - ellipf
- - ellipk
 SciPy is licensed under 3-Clause BSD.
 
 Submodules that derived from Boost Math Library are:
+- ellipk
+- ellipf
 - ellipd
 - ellipdinc
 - ellippi
