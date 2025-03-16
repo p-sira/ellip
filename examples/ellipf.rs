@@ -69,7 +69,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .configure_series_labels()
         .border_style(&BLACK)
         .background_style(&WHITE.mix(0.8))
-        .label_font(("serif", 20).into_font()).position(SeriesLabelPosition::LowerRight)
+        .label_font(("serif", 20).into_font())
+        .position(SeriesLabelPosition::LowerRight)
         .draw()?;
 
     root.present()?;

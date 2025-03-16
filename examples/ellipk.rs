@@ -40,7 +40,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Plot the result
     chart.draw_series(LineSeries::new(ellipk_points, RED.stroke_width(2)))?;
-    
+
     root.present()?;
     Ok(())
 }
