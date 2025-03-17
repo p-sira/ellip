@@ -2,7 +2,7 @@
 ## 0.3
 ### 0.3.1
 **Improvements**
-- Increase the precision of the `ellipk` and `ellipf` functions.
+- Improve the precision of the `ellipk`, `ellipf`, `ellipe`, and `ellipeinc` functions.
 
 **Bug Fixes**
 - Fix the domains for `ellipf` and `ellipeinc`.
