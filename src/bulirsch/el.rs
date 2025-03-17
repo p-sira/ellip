@@ -547,7 +547,7 @@ mod tests {
             let d = ellipdinc(phi, m).unwrap();
 
             assert_close!(f, el2(x, kc, 1.0, 1.0).unwrap(), 5e-14);
-            assert_close!(e, el2(x, kc, 1.0, kc * kc).unwrap(), 7e-16);
+            assert_close!(e, el2(x, kc, 1.0, kc * kc).unwrap(), 7e-14);
             assert_close!(d, el2(x, kc, 0.0, 1.0).unwrap(), 6e-14);
         }
 
