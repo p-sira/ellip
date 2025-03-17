@@ -4,6 +4,7 @@
  * This code is modified from Boost Math, see LICENSE in this directory.
  */
 
+// Original header from Boost Math
 //  Copyright (c) 2006 Xiaogang Zhang
 //  Copyright (c) 2006 John Maddock
 //  Copyright (c) 2024 Matt Borland
