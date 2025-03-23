@@ -14,7 +14,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut chart = ChartBuilder::on(&root)
         .caption(
-            "Incomplete Elliptic Integral of the First Kind (ellipf)",
+            "Incomplete Elliptic Integral of the First Kind",
             ("serif", 30),
         )
         .margin(20)
@@ -25,7 +25,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chart
         .configure_mesh()
         .x_desc("m (k²)")
-        .y_desc("Value")
+        .y_desc("ellipf(φ,m)")
         .axis_desc_style(("serif", 25).into_font())
         .label_style(("serif", 20).into_font())
         .draw()?;
@@ -52,24 +52,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Plot the result
     chart
         .draw_series(LineSeries::new(ellipfpi_2_points, RED.stroke_width(2)))?
-        .label("ellipf(π/2,m)")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &RED));
+        .label("φ=π/2")
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], RED.stroke_width(2)));
 
     chart
         .draw_series(LineSeries::new(ellipfpi_3_points, ORANGE.stroke_width(2)))?
-        .label("ellipf(π/3,m)")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &ORANGE));
+        .label("φ=π/3")
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], ORANGE.stroke_width(2)));
 
     chart
         .draw_series(LineSeries::new(ellipfpi_4_points, GREEN.stroke_width(2)))?
-        .label("ellipf(π/4,m)")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &GREEN));
+        .label("φ=π/4")
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], GREEN.stroke_width(2)));
 
     chart
         .configure_series_labels()
         .border_style(&BLACK)
         .background_style(&WHITE.mix(0.8))
-        .label_font(("serif", 20).into_font())
+        .label_font(("serif", 25).into_font())
         .position(SeriesLabelPosition::LowerRight)
         .draw()?;
 

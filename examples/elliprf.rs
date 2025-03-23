@@ -12,7 +12,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut chart = ChartBuilder::on(&root)
         .caption(
-            "Symmetric Elliptic Integral of the First Kind (elliprf)",
+            "Symmetric Elliptic Integral of the First Kind",
             ("serif", 30),
         )
         .margin(20)
@@ -23,7 +23,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chart
         .configure_mesh()
         .x_desc("x")
-        .y_desc("Value")
+        .y_desc("elliprf(x,y,1)")
         .axis_desc_style(("serif", 25).into_font())
         .label_style(("serif", 20).into_font())
         .draw()?;
@@ -51,29 +51,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Plot the result
     chart
         .draw_series(LineSeries::new(rf_0_1_points, RED.stroke_width(2)))?
-        .label("elliprf(x,0,1)")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &RED));
+        .label("y=0")
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], RED.stroke_width(2)));
 
     chart
         .draw_series(LineSeries::new(rf_01_1_points, ORANGE.stroke_width(2)))?
-        .label("elliprf(x,0.1,1)")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &ORANGE));
+        .label("y=0.1")
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], ORANGE.stroke_width(2)));
 
     chart
         .draw_series(LineSeries::new(rf_05_1_points, GREEN.stroke_width(2)))?
-        .label("elliprf(x,0.5,1)")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &GREEN));
+        .label("y=0.5")
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], GREEN.stroke_width(2)));
 
     chart
         .draw_series(LineSeries::new(rf_1_1_points, BLUE.stroke_width(2)))?
-        .label("elliprf(x,1,1)")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &BLUE));
+        .label("y=1")
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], BLUE.stroke_width(2)));
 
     chart
         .configure_series_labels()
         .border_style(&BLACK)
         .background_style(&WHITE.mix(0.8))
-        .label_font(("serif", 20).into_font())
+        .label_font(("serif", 25).into_font())
         .position(SeriesLabelPosition::UpperRight)
         .draw()?;
 

@@ -57,7 +57,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let mut chart = ChartBuilder::on(&root)
             .caption(
-                "Symmetric Elliptic Integral of the Third Kind (elliprj)",
+                "Symmetric Elliptic Integral of the Third Kind",
                 ("serif", 30),
             )
             .margin(20)
@@ -68,36 +68,37 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         chart
             .configure_mesh()
             .x_desc("x")
-            .y_desc("Value")
+            .y_desc("elliprj(x,y,1,p)")
             .axis_desc_style(("serif", 25).into_font())
             .label_style(("serif", 20).into_font())
             .draw()?;
 
+        // Positive p
         chart
             .draw_series(LineSeries::new(rj_0_1_points, RED.stroke_width(2)))?
-            .label("elliprj(x,0,1,2)")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &RED));
+            .label("y=0, p=2")
+            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], RED.stroke_width(2)));
 
         chart
             .draw_series(LineSeries::new(rj_01_1_points, ORANGE.stroke_width(2)))?
-            .label("elliprj(x,0.1,1,2)")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &ORANGE));
+            .label("y=0.1, p=2")
+            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], ORANGE.stroke_width(2)));
 
         chart
             .draw_series(LineSeries::new(rj_05_1_points, GREEN.stroke_width(2)))?
-            .label("elliprj(x,0.5,1,2)")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &GREEN));
+            .label("y=0.5, p=2")
+            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], GREEN.stroke_width(2)));
 
         chart
             .draw_series(LineSeries::new(rj_1_1_points, BLUE.stroke_width(2)))?
-            .label("elliprj(x,1,1,2)")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &BLUE));
+            .label("y=1, p=2")
+            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], BLUE.stroke_width(2)));
 
         chart
             .configure_series_labels()
             .border_style(&BLACK)
             .background_style(&WHITE.mix(0.8))
-            .label_font(("serif", 20).into_font())
+            .label_font(("serif", 25).into_font())
             .position(SeriesLabelPosition::UpperRight)
             .draw()?;
 
@@ -113,10 +114,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Negative p
     {
         let mut chart = ChartBuilder::on(&root)
-            .caption(
-                "Symmetric Elliptic Integral of the Third Kind (elliprj)",
-                ("serif", 30).with_color(TRANSPARENT),
-            )
+            .caption("RJ", ("serif", 30).with_color(TRANSPARENT))
             .margin(20)
             .x_label_area_size(50)
             .y_label_area_size(60)
@@ -125,7 +123,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         chart
             .configure_mesh()
             .x_desc("x")
-            .y_desc("Value")
+            .y_desc("V")
             .axis_desc_style(("serif", 25).into_font().color(&TRANSPARENT))
             .label_style(("serif", 20).into_font().color(&TRANSPARENT))
             .disable_x_axis()
@@ -135,30 +133,30 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .draw()?;
 
         chart
-            .draw_series(LineSeries::new(rj_0_1_neg_points, RED.stroke_width(2)))?
-            .label("elliprj(x,0,1,-2)")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &RED));
-
-        chart
-            .draw_series(LineSeries::new(rj_01_1_neg_points, ORANGE.stroke_width(2)))?
-            .label("elliprj(x,0.1,1,-2)")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &ORANGE));
+            .draw_series(LineSeries::new(rj_1_1_neg_points, BLUE.stroke_width(2)))?
+            .label("y=1, p=-2")
+            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], BLUE.stroke_width(2)));
 
         chart
             .draw_series(LineSeries::new(rj_05_1_neg_points, GREEN.stroke_width(2)))?
-            .label("elliprj(x,0.5,1,-2)")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &GREEN));
+            .label("y=0.5, p=-2")
+            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], GREEN.stroke_width(2)));
 
         chart
-            .draw_series(LineSeries::new(rj_1_1_neg_points, BLUE.stroke_width(2)))?
-            .label("elliprj(x,1,1,-2)")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &BLUE));
+            .draw_series(LineSeries::new(rj_01_1_neg_points, ORANGE.stroke_width(2)))?
+            .label("y=0.1, p=-2")
+            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], ORANGE.stroke_width(2)));
+
+        chart
+            .draw_series(LineSeries::new(rj_0_1_neg_points, RED.stroke_width(2)))?
+            .label("y=0, p=-2")
+            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], RED.stroke_width(2)));
 
         chart
             .configure_series_labels()
             .border_style(&BLACK)
             .background_style(&WHITE.mix(0.8))
-            .label_font(("serif", 20).into_font())
+            .label_font(("serif", 25).into_font())
             .position(SeriesLabelPosition::LowerRight)
             .draw()?;
     }

@@ -12,7 +12,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut chart = ChartBuilder::on(&root)
         .caption(
-            "Complete Elliptic Integral of the Second Kind (ellipe)",
+            "Complete Elliptic Integral of the Second Kind",
             ("serif", 30),
         )
         .margin(20)
