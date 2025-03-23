@@ -19,7 +19,7 @@
 
 use num_traits::Float;
 
-use crate::{ellipk, elliprf, elliprj};
+use crate::{ellipk, ellipe, elliprf, elliprj};
 
 /// Compute [complete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E8).
 /// ```text
@@ -38,7 +38,7 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, &'static str> {
     if m >= one!() {
         return Err("ellippi: m must be less than 1.");
     }
-    if n > one!() {
+    if n >= one!() {
         return Err("ellippi: n must be less than 1.");
     }
 
@@ -50,6 +50,13 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, &'static str> {
     }
 
     if n < zero!() {
+        // When m < 0, n < 0 and m == n, Boost implementation cancels out, resulting in inf.
+        // https://dlmf.nist.gov/19.6.E13 with phi = π/2
+        if m == n {
+            let mc = one!() - m;
+            return Ok(one!() / mc * ellipe(m)?)
+        }
+
         // Apply A&S 17.7.17
         let nn = (m - n) / (one!() - n);
         let nm1 = (one!() - m) / (one!() - n);
