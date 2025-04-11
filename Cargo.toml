@@ -22,6 +22,7 @@ num-traits = "~0.2"
 [dev-dependencies]
 criterion = "~0.5"
 itertools = "~0.14"
+plotly = { version = "0.12.1", features = ["kaleido"] }
 plotters = "~0.3"
 
 [[bench]]
