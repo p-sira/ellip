@@ -7,7 +7,7 @@ use ellip::ellipe;
 use plotly::{
     color::NamedColor,
     common::{Line, Mode},
-    layout::Axis,
+    layout::{Annotation, Axis},
     ImageFormat, Layout, Plot, Scatter,
 };
 
@@ -24,24 +24,34 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let trace = Scatter::new(m, ellipe_values)
         .mode(Mode::Lines)
-        .name("ellipe(m)")
+        .name("E(m)")
         .line(Line::new().color(NamedColor::Red));
 
     let mut plot = Plot::new();
     plot.add_trace(trace);
     plot.set_layout(
         Layout::new()
-            .title("Complete Elliptic Integral of the Second Kind")
+            .title("Complete Elliptic Integral of the Second Kind (E)")
             .x_axis(Axis::new().title("m").show_line(true))
             .y_axis(
                 Axis::new()
-                    .title("ellipe(m)")
+                    .title("E(m)")
                     .show_line(true)
                     .range(vec![0.0, 4.0]),
-            ),
+            )
+            .annotations(vec![Annotation::new()
+            .text(format!(
+                "Generated using the function <a href=\"https://docs.rs/ellip/latest/ellip/legendre/fn.ellipe.html\" target=\"_blank\">ellipe</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",
+                env!("CARGO_PKG_VERSION")
+            ))
+            .x_ref("paper")
+            .y_ref("paper")
+            .y(-0.15)
+            .x(1.05)
+            .show_arrow(false)]),
     );
 
     plot.show_html("figures/ellipe_plot.html");
-    plot.write_image("figures/ellipe_plot.svg", ImageFormat::SVG, 800, 600, 1.0);
+    plot.write_image("figures/ellipe_plot.svg", ImageFormat::SVG, 900, 600, 1.0);
     Ok(())
 }
