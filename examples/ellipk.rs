@@ -4,43 +4,43 @@
  */
 
 use ellip::ellipk;
-use plotters::prelude::*;
+use plotly::{
+    color::NamedColor,
+    common::{Line, Mode},
+    layout::Axis,
+    ImageFormat, Layout, Plot, Scatter,
+};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = SVGBackend::new("figures/ellipk_plot.svg", (800, 600)).into_drawing_area();
-    root.fill(&WHITE)?;
-
-    let mut chart = ChartBuilder::on(&root)
-        .caption(
-            "Complete Elliptic Integral of the First Kind",
-            ("serif", 30),
-        )
-        .margin(20)
-        .x_label_area_size(50)
-        .y_label_area_size(60)
-        .build_cartesian_2d(-2.0..1.0, 0.0..4.0)?;
-
-    chart
-        .configure_mesh()
-        .x_desc("m (k²)")
-        .y_desc("ellipk(m)")
-        .axis_desc_style(("serif", 25).into_font())
-        .label_style(("serif", 20).into_font())
-        .draw()?;
-
-    // Compute the integral
     let n_points = 100;
-    let range = [-2, 1];
-    let ellipk_points: Vec<(f64, f64)> = (range[0] * n_points..range[1] * n_points)
-        .map(|x| {
-            let m = x as f64 / n_points as f64;
-            (m, ellipk(m).unwrap())
-        })
+    let range_m = [-2, 1];
+
+    let m: Vec<f64> = (range_m[0] * n_points..range_m[1] * n_points)
+        .map(|x| x as f64 / n_points as f64)
         .collect();
 
-    // Plot the result
-    chart.draw_series(LineSeries::new(ellipk_points, RED.stroke_width(2)))?;
+    let ellipk_values: Vec<f64> = m.iter().map(|&m| ellipk(m).unwrap()).collect();
 
-    root.present()?;
+    let trace = Scatter::new(m, ellipk_values)
+        .mode(Mode::Lines)
+        .name("ellipk(m)")
+        .line(Line::new().color(NamedColor::Red));
+
+    let mut plot = Plot::new();
+    plot.add_trace(trace);
+    plot.set_layout(
+        Layout::new()
+            .title("Complete Elliptic Integral of the First Kind")
+            .x_axis(Axis::new().title("m").show_line(true))
+            .y_axis(
+                Axis::new()
+                    .title("ellipk(m)")
+                    .show_line(true)
+                    .range(vec![0.0, 4.0]),
+            ),
+    );
+
+    plot.show_html("figures/ellipk_plot.html");
+    plot.write_image("figures/ellipk_plot.svg", ImageFormat::SVG, 800, 600, 1.0);
     Ok(())
 }
