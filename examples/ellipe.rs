@@ -20,7 +20,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .map(|x| x as f64 / n_points as f64)
         .collect();
 
-    let ellipe_values: Vec<f64> = m.iter().map(|&m| ellipe(m).unwrap()).collect();
+    let ellipe_values: Vec<f64> = m.iter().map(|&mi| ellipe(mi).unwrap()).collect();
 
     let trace = Scatter::new(m, ellipe_values)
         .mode(Mode::Lines)

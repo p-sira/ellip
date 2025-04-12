@@ -19,7 +19,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .map(|x| x as f64 / n_points as f64)
         .collect();
 
-    let ellipk_values: Vec<f64> = m.iter().map(|&m| ellipk(m).unwrap()).collect();
+    let ellipk_values: Vec<f64> = m.iter().map(|&mi| ellipk(mi).unwrap()).collect();
 
     let trace = Scatter::new(m, ellipk_values)
         .mode(Mode::Lines)
