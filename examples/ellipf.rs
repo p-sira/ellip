@@ -6,73 +6,68 @@
 use std::f64::consts::{FRAC_PI_2, FRAC_PI_3, FRAC_PI_4};
 
 use ellip::ellipf;
-use plotters::{prelude::*, style::full_palette::ORANGE};
+use plotly::{
+    color::NamedColor,
+    common::{Line, Mode},
+    layout::{Annotation, Axis},
+    ImageFormat, Layout, Plot, Scatter,
+};
+
+macro_rules! get_trace {
+    ($phi: expr, $m: expr, $name: expr) => {{
+        let value = $m
+            .iter()
+            .map(|&mi| match ellipf($phi, mi) {
+                Ok(ans) => ans,
+                Err(_) => f64::NAN,
+            })
+            .collect();
+
+        Scatter::new($m.clone(), value)
+            .mode(Mode::Lines)
+            .name($name)
+    }};
+    ($phi: expr, $m: expr, $name: expr, $line_color: expr) => {
+        get_trace!($phi, $m, $name).line(Line::new().color($line_color))
+    };
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = SVGBackend::new("figures/ellipf_plot.svg", (800, 600)).into_drawing_area();
-    root.fill(&WHITE)?;
+    let n_points = 100;
+    let range_m = [-5, 2];
+    let m: Vec<f64> = (range_m[0] * n_points..range_m[1] * n_points)
+        .map(|x| x as f64 / n_points as f64)
+        .collect();
 
-    let mut chart = ChartBuilder::on(&root)
-        .caption(
-            "Incomplete Elliptic Integral of the First Kind",
-            ("serif", 30),
-        )
-        .margin(20)
-        .x_label_area_size(50)
-        .y_label_area_size(60)
-        .build_cartesian_2d(-5.0..2.0, 0.0..4.0)?;
+    let mut plot = Plot::new();
+    plot.add_traces(vec![
+        get_trace!(FRAC_PI_2, &m, "φ=π/2", NamedColor::Red),
+        get_trace!(FRAC_PI_3, &m, "φ=π/3"),
+        get_trace!(FRAC_PI_4, &m, "φ=π/4"),
+    ]);
+    plot.set_layout(
+        Layout::new()
+            .title("Incomplete Elliptic Integral of the First Kind (F)")
+            .x_axis(Axis::new().title("m").show_line(true))
+            .y_axis(
+                Axis::new()
+                    .title("F(φ,m)")
+                    .show_line(true)
+                    .range(vec![0.0, 4.0]),
+            )
+            .annotations(vec![Annotation::new()
+            .text(format!(
+                "Generated using the function <a href=\"https://docs.rs/ellip/latest/ellip/legendre/fn.ellipf.html\" target=\"_blank\">ellipf</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",
+                env!("CARGO_PKG_VERSION")
+            ))
+                .x_ref("paper")
+                .y_ref("paper")
+                .y(-0.15)
+                .x(1.08)
+                .show_arrow(false)]),
+    );
 
-    chart
-        .configure_mesh()
-        .x_desc("m (k²)")
-        .y_desc("ellipf(φ,m)")
-        .axis_desc_style(("serif", 25).into_font())
-        .label_style(("serif", 20).into_font())
-        .draw()?;
-
-    // Compute the integral
-    fn get_points(phi: f64) -> Vec<(f64, f64)> {
-        let n_points = 100;
-        let range = [-5, 2];
-        let mut points: Vec<(f64, f64)> = Vec::with_capacity(n_points);
-        for i in range[0] * n_points as i32..range[1] * n_points as i32 {
-            let m = i as f64 / n_points as f64;
-            match ellipf(phi, m) {
-                Ok(res) => points.push((m, res)),
-                Err(_) => (),
-            }
-        }
-        points
-    }
-
-    let ellipfpi_2_points: Vec<(f64, f64)> = get_points(FRAC_PI_2);
-    let ellipfpi_3_points: Vec<(f64, f64)> = get_points(FRAC_PI_3);
-    let ellipfpi_4_points: Vec<(f64, f64)> = get_points(FRAC_PI_4);
-
-    // Plot the result
-    chart
-        .draw_series(LineSeries::new(ellipfpi_2_points, RED.stroke_width(2)))?
-        .label("φ=π/2")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], RED.stroke_width(2)));
-
-    chart
-        .draw_series(LineSeries::new(ellipfpi_3_points, ORANGE.stroke_width(2)))?
-        .label("φ=π/3")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], ORANGE.stroke_width(2)));
-
-    chart
-        .draw_series(LineSeries::new(ellipfpi_4_points, GREEN.stroke_width(2)))?
-        .label("φ=π/4")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], GREEN.stroke_width(2)));
-
-    chart
-        .configure_series_labels()
-        .border_style(&BLACK)
-        .background_style(&WHITE.mix(0.8))
-        .label_font(("serif", 25).into_font())
-        .position(SeriesLabelPosition::LowerRight)
-        .draw()?;
-
-    root.present()?;
+    plot.show_html("figures/ellipf_plot.html");
+    plot.write_image("figures/ellipf_plot.svg", ImageFormat::SVG, 900, 600, 1.0);
     Ok(())
 }
