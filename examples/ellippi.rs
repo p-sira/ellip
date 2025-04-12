@@ -4,88 +4,114 @@
  */
 
 use ellip::ellippi;
-use plotters::prelude::*;
+use plotly::{
+    common::{ColorScale, ColorScalePalette},
+    layout::{Annotation, Axis, LayoutScene},
+    Layout, Plot, Surface,
+};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = SVGBackend::new("figures/ellippi_plot.svg", (800, 600)).into_drawing_area();
-    root.fill(&WHITE)?;
+    let n_points_n = 50;
+    let n_points_n_cauchy = 30;
+    let n_points_m = 50;
+    let range_n = [-2.0, 1.0 - 1e-5];
+    let range_n_cauchy = [1.0 + 1e-5, 2.0];
+    let range_m = [-2.0, 1.0 - 5.0 * f64::EPSILON];
 
-    // Define ranges
-    let n_points = 50;
-    let range_n = [-2, 1];
-    let range_n_over_one = [1, 2];
-    let range_m = [-2, 1];
-    let range_y = [-6.0, 6.0];
+    let n: Vec<f64> = (0..n_points_n)
+        .map(|i| range_n[0] + i as f64 * (range_n[1] - range_n[0]) / (n_points_n - 1) as f64)
+        .collect();
+    let n_cauchy: Vec<f64> = (0..n_points_n_cauchy)
+        .map(|i| {
+            range_n_cauchy[0]
+                + i as f64 * (range_n_cauchy[1] - range_n_cauchy[0])
+                    / (n_points_n_cauchy - 1) as f64
+        })
+        .collect();
+    let m: Vec<f64> = (0..n_points_m)
+        .map(|i| range_m[0] + i as f64 * (range_m[1] - range_m[0]) / (n_points_m - 1) as f64)
+        .collect();
 
-    let mut chart = ChartBuilder::on(&root)
-        .caption(
-            "Complete Elliptic Integral of the Third Kind",
-            ("serif", 30),
-        )
-        .margin(20)
-        .x_label_area_size(50)
-        .y_label_area_size(60)
-        .build_cartesian_3d(
-            range_n_over_one[1] as f64..range_n[0] as f64,
-            range_y[0]..range_y[1],
-            range_m[1] as f64..range_m[0] as f64,
-        )?;
+    let ellippi_values = m
+        .iter()
+        .map(|&mi| {
+            n.iter()
+                .map(|&nj| match ellippi(nj, mi) {
+                    Ok(ans) => ans,
+                    Err(_) => f64::NAN,
+                })
+                .collect()
+        })
+        .collect();
 
-    chart.with_projection(|mut p| {
-        p.yaw = 0.14;
-        p.into_matrix()
-    });
+    let trace = Surface::new(ellippi_values)
+        .x(n)
+        .y(m.clone())
+        .name("Π(n,m)")
+        .color_scale(ColorScale::Palette(ColorScalePalette::Viridis))
+        .cmin(-6.0)
+        .cmax(6.0);
 
-    chart.configure_axes().draw()?;
+    let ellippi_cauchy_values = m
+        .iter()
+        .map(|&mi| {
+            n_cauchy
+                .iter()
+                .map(|&nj| match ellippi(nj, mi) {
+                    Ok(ans) => ans,
+                    Err(_) => f64::NAN,
+                })
+                .collect()
+        })
+        .collect();
 
-    // Plot the result
-    // Separate the drawing process because the function is discontinuous
-    chart.draw_series(
-        SurfaceSeries::xoz(
-            (range_n[0] * n_points..=range_n[1] * n_points).map(|x| {
-                match x as f64 / n_points as f64 {
-                    1.0 => 1.0 - f64::EPSILON,
-                    i => i,
-                }
-            }),
-            (range_m[0] * n_points..=range_m[1] * n_points).map(|z| {
-                match z as f64 / n_points as f64 {
-                    1.0 => 1.0 - f64::EPSILON,
-                    i => i,
-                }
-            }),
-            |n, m| {
-                ellippi(n, m)
-                    .unwrap()
-                    .clamp(range_y[0] - 0.5, range_y[1] + 0.5)
-            },
-        )
-        .style_func(&|&y| ViridisRGB::get_color_normalized(y, range_y[0], range_y[1]).filled()),
-    )?;
+    let trace_cauchy = Surface::new(ellippi_cauchy_values)
+        .x(n_cauchy)
+        .y(m)
+        .name("Π(n,m)")
+        .color_scale(ColorScale::Palette(ColorScalePalette::Viridis))
+        .cmin(-6.0)
+        .cmax(6.0);
 
-    chart.draw_series(
-        SurfaceSeries::xoz(
-            (range_n_over_one[0] * n_points..=range_n_over_one[1] * n_points).map(|x| {
-                match x as f64 / n_points as f64 {
-                    1.0 => 1.0 + f64::EPSILON,
-                    n => n,
-                }
-            }),
-            (range_m[0] * n_points..=range_m[1] * n_points).map(|z| {
-                match z as f64 / n_points as f64 {
-                    1.0 => 1.0 - f64::EPSILON,
-                    i => i,
-                }
-            }),
-            |n, m| {
-                ellippi(n, m)
-                    .unwrap()
-                    .clamp(range_y[0] - 0.5, range_y[1] + 0.5)
-            },
-        )
-        .style_func(&|&y| ViridisRGB::get_color_normalized(y, range_y[0], range_y[1]).filled()),
-    )?;
+    let mut plot = Plot::new();
+    plot.add_trace(trace);
+    plot.add_trace(trace_cauchy);
+    plot.set_layout(
+        Layout::new()
+            .title("Complete Elliptic Integral of the Third Kind (Π)")
+            .width(800)
+            .height(600)
+            .scene(
+                LayoutScene::new()
+                    .x_axis(Axis::new().title("n").show_line(true))
+                    .y_axis(
+                        Axis::new()
+                            .title("m")
+                            .show_line(true)
+                            .range(vec![range_m[1], range_m[0]]),
+                    )
+                    .z_axis(
+                        Axis::new()
+                            .title("Π(n,m)")
+                            .show_line(true)
+                            .range(vec![-6.0, 6.0]),
+                    )
+            )
+            .annotations(vec![Annotation::new()
+            .text(format!(
+                "Generated using the function <a href=\"https://docs.rs/ellip/latest/ellip/legendre/fn.ellippi.html\" target=\"_blank\">ellippi</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",
+                env!("CARGO_PKG_VERSION")
+            ))
+            .x_ref("paper")
+            .y_ref("paper")
+            .y(-0.15)
+            .x(1.08)
+            .show_arrow(false)]),
+    );
 
-    root.present()?;
+    plot.show_html("figures/ellippi_plot.html");
+    // Current plotly.rs doesn't support exporting 3D plot as image.
+    // The workaround is using the capture function in the html to save a png file.
+    // plot.write_image("figures/ellippi_plot.svg", ImageFormat::SVG, 900, 900, 0.2);
     Ok(())
 }
