@@ -30,15 +30,15 @@
 //!
 //! # Features
 //! ## Legendre's complete integrals
-//! - [fn@ellipk]: Complete elliptic integral of the first kind.
-//! - [fn@ellipe]: Complete elliptic integral of the second kind.
-//! - [fn@ellippi]: Complete elliptic integral of the third kind.
-//! - [fn@ellipd]: Complete elliptic integral of Legendre's type.
+//! - [fn@ellipk]: Complete elliptic integral of the first kind (K).
+//! - [fn@ellipe]: Complete elliptic integral of the second kind (E).
+//! - [fn@ellippi]: Complete elliptic integral of the third kind (Π).
+//! - [fn@ellipd]: Complete elliptic integral of Legendre's type (D).
 //! ## Legendre's incomplete integrals
-//! - [fn@ellipf]: Incomplete elliptic integral of the first kind.
-//! - [fn@ellipeinc]: Incomplete elliptic integral of the second kind.
-//! - [fn@ellippiinc]: Incomplete elliptic integral of the third kind.
-//! - [fn@ellipdinc]: Incomplete elliptic integral of Legendre's type.
+//! - [fn@ellipf]: Incomplete elliptic integral of the first kind (F).
+//! - [fn@ellipeinc]: Incomplete elliptic integral of the second kind (E).
+//! - [fn@ellippiinc]: Incomplete elliptic integral of the third kind (Π).
+//! - [fn@ellipdinc]: Incomplete elliptic integral of Legendre's type (D).
 //! ## Bulirsch's integrals
 //! - [fn@cel]: General complete elliptic integral in Bulirsch's form.
 //! - [fn@cel1]: Complete elliptic integral of the first kind in Bulirsch's form.
@@ -47,18 +47,18 @@
 //! - [fn@el2]: Incomplete elliptic integral of the second kind in Bulirsch's form.
 //! - [fn@el3]: Incomplete elliptic integral of the third kind in Bulirsch's form.
 //! ## Carlson's symmetric integrals
-//! - [fn@elliprf]: Symmetric elliptic integral of the first kind.
-//! - [fn@elliprg]: Symmetric elliptic integral of the second kind.
-//! - [fn@elliprj]: Symmetric elliptic integral of the third kind.
-//! - [fn@elliprc]: Degenerate elliptic integral of RF.
-//! - [fn@elliprd]: Degenerate elliptic integral of the third kind.
+//! - [fn@elliprf]: Symmetric elliptic integral of the first kind (RF).
+//! - [fn@elliprg]: Symmetric elliptic integral of the second kind (RG).
+//! - [fn@elliprj]: Symmetric elliptic integral of the third kind (RJ).
+//! - [fn@elliprc]: Degenerate elliptic integral of RF (RC).
+//! - [fn@elliprd]: Degenerate elliptic integral of the third kind (RD).
 //!
 //! # Acknowledgment
 //! Ellip is derived from multiple mathematic libraries. We thank
 //! the opensource contributors for making mathematic libraries free for all.
 //! Following are the main original works used in the development of Ellip.
 //! Detailed credits are available in the source code.
-//! - [Scipy](https://github.com/scipy/scipy/)
+//! - [SciPy](https://github.com/scipy/scipy/)
 //! - [Cephes Math Library](https://netlib.org/cephes/)
 //! - [Boost Math Library](https://www.boost.org/doc/libs/release/libs/math/)
 //! - [Russell Lab](https://github.com/cpmech/russell)

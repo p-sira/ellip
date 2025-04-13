@@ -53,15 +53,15 @@ Learn more at [doc.rs](https://docs.rs/ellip).
 
 ## Features
 - Legendre's complete integrals
-    - `ellipk`: Complete elliptic integral of the first kind.
-    - `ellipe`: Complete elliptic integral of the second kind.
-    - `ellippi`: Complete elliptic integral of the third kind.
-    - `ellipd`: Complete elliptic integral of Legendre's type.
+    - `ellipk`: Complete elliptic integral of the first kind (K).
+    - `ellipe`: Complete elliptic integral of the second kind (E).
+    - `ellippi`: Complete elliptic integral of the third kind (Π).
+    - `ellipd`: Complete elliptic integral of Legendre's type (D).
 - Legendre's incomplete integrals
-    - `ellipf`: Incomplete elliptic integral of the first kind.
-    - `ellipeinc`: Incomplete elliptic integral of the second kind.
-    - `ellippiinc`: Incomplete elliptic integral of the third kind.
-    - `ellipdinc`: Incomplete elliptic integral of Legendre's type.
+    - `ellipf`: Incomplete elliptic integral of the first kind (F).
+    - `ellipeinc`: Incomplete elliptic integral of the second kind (E).
+    - `ellippiinc`: Incomplete elliptic integral of the third kind (Π).
+    - `ellipdinc`: Incomplete elliptic integral of Legendre's type (D).
 - Bulirsch's integrals
     - `cel`: General complete elliptic integral in Bulirsch's form.
     - `cel1`: Complete elliptic integral of the first kind in Bulirsch's form.
@@ -70,11 +70,11 @@ Learn more at [doc.rs](https://docs.rs/ellip).
     - `el2`: Incomplete elliptic integral of the second kind in Bulirsch's form.
     - `el3`: Incomplete elliptic integral of the third kind in Bulirsch's form.
 - Carlson's symmetric integrals
-    - `elliprf`: Symmetric elliptic integral of the first kind.
-    - `elliprg`: Symmetric elliptic integral of the second kind.
-    - `elliprj`: Symmetric elliptic integral of the third kind.
-    - `elliprc`: Degenerate elliptic integral of RF.
-    - `elliprd`: Degenerate elliptic integral of the third kind.
+    - `elliprf`: Symmetric elliptic integral of the first kind (RF).
+    - `elliprg`: Symmetric elliptic integral of the second kind (RG).
+    - `elliprj`: Symmetric elliptic integral of the third kind (RJ).
+    - `elliprc`: Degenerate elliptic integral of RF (RC).
+    - `elliprd`: Degenerate elliptic integral of the third kind (RD).
 
 ---
 
