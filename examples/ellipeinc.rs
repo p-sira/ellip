@@ -35,7 +35,7 @@ macro_rules! get_trace {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let n_points = 100;
     let range_m = [-5, 2];
-    let m: Vec<f64> = (range_m[0] * n_points..range_m[1] * n_points)
+    let m: Vec<f64> = (range_m[0] * n_points..=range_m[1] * n_points)
         .map(|x| x as f64 / n_points as f64)
         .collect();
 

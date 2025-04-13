@@ -34,7 +34,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let n_points = 100;
     let range_kc = [-3, 3];
     let mut kc: Vec<f64> = [
-        (range_kc[0] * n_points..range_kc[1] * n_points)
+        (range_kc[0] * n_points..=range_kc[1] * n_points)
             .map(|x| x as f64 / n_points as f64)
             .collect::<Vec<f64>>(),
         // Make the plot more dense near zero to improve the visual

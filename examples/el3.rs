@@ -36,9 +36,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let n_points = 100;
     let range_kc = [-3, 3];
 
-    let kc: Vec<f64> = (range_kc[0] * n_points..=range_kc[1] * n_points)
-        .map(|x| x as f64 / n_points as f64)
-        .collect();
+    let mut kc: Vec<f64> = [
+        (range_kc[0] * n_points..=range_kc[1] * n_points)
+            .map(|x| x as f64 / n_points as f64)
+            .collect(),
+        // Make the plot more dense near zero to improve the visual
+        (-1 * 5..1 * 5)
+            .map(|x| x as f64 / 500.0)
+            .skip(1)
+            .collect::<Vec<f64>>(),
+    ]
+    .concat();
+kc.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
     let mut plot = Plot::new();
     plot.add_traces(vec![
@@ -58,9 +67,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let n_points_neg = 35;
     let range_kc_neg_p = [-1, 1];
 
-    let kc_neg_p: Vec<f64> = (range_kc_neg_p[0] * n_points_neg..=range_kc_neg_p[1] * n_points_neg)
-        .map(|x| x as f64 / n_points_neg as f64)
-        .collect();
+    let mut kc_neg_p: Vec<f64> = [
+        (range_kc_neg_p[0] * n_points_neg..=range_kc_neg_p[1] * n_points_neg)
+            .map(|x| x as f64 / n_points_neg as f64)
+            .collect(),
+        // Make the plot more dense near zero to improve the visual
+        (-1 * 5..1 * 5)
+            .map(|x| x as f64 / 500.0)
+            .skip(1)
+            .collect::<Vec<f64>>(),
+    ]
+    .concat();
+    kc_neg_p.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
     plot.add_traces(vec![
         get_trace!(
             FRAC_PI_4.tan(),

@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let n_points = 100;
     let range_kc = [-3, 3];
 
-    let kc: Vec<f64> = (range_kc[0] * n_points..range_kc[1] * n_points)
+    let kc: Vec<f64> = (range_kc[0] * n_points..=range_kc[1] * n_points)
         .map(|x| x as f64 / n_points as f64)
         .collect();
 
