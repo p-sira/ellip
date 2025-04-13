@@ -494,12 +494,11 @@ mod tests {
     #[test]
     fn test_el1() {
         fn test_special_cases(x: f64, kc: f64) {
-            let k = (1.0 - kc * kc).sqrt();
-            let m = k * k;
+            let m = 1.0 - kc * kc;
             let phi = x.atan();
             let f = ellipf(phi, m).unwrap();
 
-            assert_close!(f, el1(x, kc).unwrap(), 5e-14);
+            assert_close!(f, el1(x, kc).unwrap(), 1.2e-14);
         }
 
         let x = linspace(0.0, 100.0, 50);
@@ -539,14 +538,13 @@ mod tests {
     #[test]
     fn test_el2() {
         fn test_special_cases(x: f64, kc: f64) {
-            let k = (1.0 - kc * kc).sqrt();
-            let m = k * k;
+            let m = 1.0 - kc * kc;
             let phi = x.atan();
             let f = ellipf(phi, m).unwrap();
             let e = ellipeinc(phi, m).unwrap();
             let d = ellipdinc(phi, m).unwrap();
 
-            assert_close!(f, el2(x, kc, 1.0, 1.0).unwrap(), 5e-14);
+            assert_close!(f, el2(x, kc, 1.0, 1.0).unwrap(), 1.2e-14);
             assert_close!(e, el2(x, kc, 1.0, kc * kc).unwrap(), 7e-14);
             assert_close!(d, el2(x, kc, 0.0, 1.0).unwrap(), 6e-14);
         }
@@ -565,8 +563,7 @@ mod tests {
     #[test]
     fn test_el3() {
         fn _test(x: f64, kc: f64, p: f64) {
-            let k = (1.0 - kc * kc).sqrt();
-            let m = k * k;
+            let m = 1.0 - kc * kc;
             let phi = x.atan();
             let n = 1.0 - p;
             let ellippi = ellippiinc(phi, n, m).unwrap();
