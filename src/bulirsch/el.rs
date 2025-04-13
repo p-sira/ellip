@@ -195,6 +195,10 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'sta
 /// assert_close(el3(FRAC_PI_4.tan(), 0.5, 1.0).unwrap(), 0.8512237490711854, 1e-15);
 /// ```
 pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, &'static str> {
+    if p < zero!() && kc.abs() > one!() {
+        return Err("el3: kc must satisfy: -1 ≤ kc ≤ 1 for p < 0.");
+    }
+
     if x == zero!() {
         return Ok(zero!());
     }
@@ -407,7 +411,7 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, &'static st
             if z < zero!() {
                 m += k;
             }
-            k = r.signum().to_i32().expect("el3: Cannot extract sign of r.");
+            k = if r < zero!() { -1 } else { 1 };
             h = e / (u * u + v * v);
             u = u * (one!() + h);
             v = v * (one!() - h);
@@ -468,7 +472,7 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, &'static st
             z = T::cb();
         }
         if z < zero!() {
-            m += h.signum().to_i32().expect("el3: Cannot extract sign of h.");
+            m += if h < zero!() { -1 } else { 1 };
         }
         s = (h / z).atan() + num!(m) * pi!();
     } else {
