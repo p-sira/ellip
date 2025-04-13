@@ -286,7 +286,7 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, &'static st
 
     w = one!() + f;
     if w == zero!() {
-        return Err("fail");
+        return Err("el3: 1 + p x² cannot be zero.");
     }
 
     let p1 = if p == zero!() { T::cb() / hh } else { p };
