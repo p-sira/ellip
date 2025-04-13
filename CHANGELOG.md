@@ -2,8 +2,9 @@
 ## 0.3
 ### 0.3.1
 **Improvements**
-- Improve documentations and add examples for each function.
+- Improve documentations and add graphs and examples for each function.
 - Improve the precision of the `ellipk`, `ellipf`, `ellipe`, and `ellipeinc` functions.
+- `el3`: Add error when parameter goes out of the function's range (|kc| > 0 for p < 0) and improved the error message when 1 + px² equals zero.
 
 **New Features**
 - Add `assert_close` function in `util` module.
