@@ -185,14 +185,13 @@ mod tests {
     #[test]
     fn test_cel() {
         fn _test(kc: f64, p: f64) {
-            let k = (1.0 - kc * kc).sqrt();
-            let m = k * k;
+            let m = 1.0 - kc * kc;
             let ellipk = ellipk(m).unwrap();
             let ellipe = ellipe(m).unwrap();
 
             // cel precision is low for K cases
-            assert_close!(ellipk, cel(kc, 1.0, 1.0, 1.0).unwrap(), 5e-12);
-            assert_close!(ellipe, cel(kc, 1.0, 1.0, kc * kc).unwrap(), 1e-14);
+            assert_close!(ellipk, cel(kc, 1.0, 1.0, 1.0).unwrap(), 2e-12);
+            assert_close!(ellipe, cel(kc, 1.0, 1.0, kc * kc).unwrap(), 1e-15);
             assert_close!(
                 (ellipe - kc * kc * ellipk) / m,
                 cel(kc, 1.0, 1.0, 0.0).unwrap(),
@@ -204,16 +203,16 @@ mod tests {
             let ellippi = ellippi(n, m).unwrap();
 
             assert_close!(
-                (ellipk - ellipe) / (k * k),
+                (ellipk - ellipe) / m,
                 cel(kc, 1.0, 0.0, 1.0).unwrap(),
                 6e-12
             );
             // cel precision is very low for PI cases
-            assert_close!(ellippi, cel(kc, p, 1.0, 1.0).unwrap(), 1e-11);
+            assert_close!(ellippi, cel(kc, p, 1.0, 1.0).unwrap(), 3.5e-12);
             assert_close!(
                 (ellippi - ellipk) / (1.0 - p),
                 cel(kc, p, 0.0, 1.0).unwrap(),
-                1e-11
+                3.5e-12
             );
         }
 
@@ -238,9 +237,8 @@ mod tests {
     #[test]
     fn test_cel1() {
         fn test_kc(kc: f64) {
-            let k = (1.0 - kc * kc).sqrt();
-            let m = k * k;
-            assert_close!(ellipk(m).unwrap(), cel1(kc).unwrap(), 5e-12);
+            let m = 1.0 - kc * kc;
+            assert_close!(ellipk(m).unwrap(), cel1(kc).unwrap(), 2e-12);
         }
 
         let linsp_neg = linspace(-1.0, -1e-3, 100);
@@ -252,8 +250,7 @@ mod tests {
     #[test]
     fn test_cel2() {
         fn test_kc(kc: f64) {
-            let k = (1.0 - kc * kc).sqrt();
-            let m = k * k;
+            let m = 1.0 - kc * kc;
             assert_close!(ellipe(m).unwrap(), cel2(kc, 1.0, kc * kc).unwrap(), 7.7e-16);
         }
 
