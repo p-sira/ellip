@@ -4,163 +4,84 @@
  */
 
 use ellip::elliprj;
-use plotters::{prelude::*, style::full_palette::ORANGE};
+use plotly::{
+    color::NamedColor,
+    common::{Anchor, Line, Mode},
+    layout::{Annotation, Axis, Legend},
+    ImageFormat, Layout, Plot, Scatter,
+};
+
+macro_rules! get_trace {
+    ($x: expr, $y: expr, $p: expr, $name: expr) => {{
+        let value = $x
+            .iter()
+            .map(|&xi| match elliprj(xi, $y, 1.0, $p) {
+                Ok(ans) => ans,
+                Err(_) => f64::NAN,
+            })
+            .collect();
+
+        Scatter::new($x.clone(), value)
+            .mode(Mode::Lines)
+            .name($name)
+    }};
+    ($x: expr, $y: expr, $p: expr, $name: expr, $line_color: expr) => {
+        get_trace!($x, $y, $p, $name).line(Line::new().color($line_color))
+    };
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = SVGBackend::new("figures/elliprj_plot.svg", (800, 600)).into_drawing_area();
-    root.fill(&WHITE)?;
+    let n_points = 100;
 
-    // Compute the integral
-    fn get_points(y: f64) -> Vec<(f64, f64)> {
-        let n_points = 500;
-        let range = [0, 1];
-        let mut points: Vec<(f64, f64)> = Vec::with_capacity(n_points);
-        for i in range[0] * n_points as i32..range[1] * n_points as i32 {
-            let x = i as f64 / n_points as f64;
-            match elliprj(x, y, 1.0, 2.0) {
-                Ok(res) => points.push((x, res)),
-                Err(_) => (),
-            }
-        }
-        points
-    }
+    // Make the plot more dense near x=0
+    let x_near_zero: Vec<f64> = (0..n_points)
+        .map(|i| i as f64 / n_points as f64 / 10.0)
+        .collect();
 
-    let rj_0_1_points = get_points(0.0);
-    let rj_01_1_points = get_points(0.1);
-    let rj_05_1_points = get_points(0.5);
-    let rj_1_1_points = get_points(1.0);
+    let x_full: Vec<f64> = (0..n_points)
+        .map(|i| 0.1 + 1e-5 + (1.0 - (0.1 + 1e-5)) * i as f64 / n_points as f64)
+        .collect();
 
-    fn get_neg_points(y: f64) -> Vec<(f64, f64)> {
-        let n_points = 500;
-        let range = [0, 1];
-        let mut points: Vec<(f64, f64)> = Vec::with_capacity(n_points);
-        for i in range[0] * n_points as i32..range[1] * n_points as i32 {
-            let x = i as f64 / n_points as f64;
-            match elliprj(x, y, 1.0, -2.0) {
-                Ok(res) => {
-                    if res >= -5.0 {
-                        points.push((x, res))
-                    }
-                }
-                Err(_) => (),
-            }
-        }
-        points
-    }
+    let x = [x_near_zero, x_full].concat();
 
-    let rj_0_1_neg_points = get_neg_points(0.0);
-    let rj_01_1_neg_points = get_neg_points(0.1);
-    let rj_05_1_neg_points = get_neg_points(0.5);
-    let rj_1_1_neg_points = get_neg_points(1.0);
+    let mut plot = Plot::new();
+    plot.add_traces(vec![
+        get_trace!(&x, 0.0, 2.0, "y=0.0, p=2", NamedColor::Red)
+            .legend_group("p=2")
+            .legend_group_title("p=2"),
+        get_trace!(&x, 0.1, 2.0, "y=0.1, p=2").legend_group("p=2"),
+        get_trace!(&x, 0.5, 2.0, "y=0.5, p=2").legend_group("p=2"),
+        get_trace!(&x, 1.0, 2.0, "y=1.0, p=2", NamedColor::Blue).legend_group("p=2"),
+        get_trace!(&x, 1.0, -2.0, "y=1.0, p=-2", NamedColor::Navy)
+            .legend_group("p=-2")
+            .legend_group_title("p=-2"),
+        get_trace!(&x, 0.5, -2.0, "y=0.5, p=-2", NamedColor::ForestGreen).legend_group("p=-2"),
+        get_trace!(&x, 0.1, -2.0, "y=0.1, p=-2", NamedColor::DarkOrange).legend_group("p=-2"),
+        get_trace!(&x, 0.0, -2.0, "y=0.0, p=-2", NamedColor::Crimson).legend_group("p=-2"),
+    ]);
+    plot.set_layout(
+        Layout::new()
+            .title("Symmetric Elliptic Integral of the Third Kind (RJ)")
+            .x_axis(Axis::new().title("x").show_line(true))
+            .y_axis(
+                Axis::new()
+                    .title("RJ(x,y,1,p)")
+                    .show_line(true)
+                    .range(vec![-5.0, 5.0]),
+            ).legend(Legend::new().y_anchor(Anchor::Middle).y(0.5))
+            .annotations(vec![Annotation::new()
+            .text(format!(
+                "Generated using the function <a href=\"https://docs.rs/ellip/latest/ellip/legendre/fn.elliprj.html\" target=\"_blank\">elliprj</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",
+                env!("CARGO_PKG_VERSION")
+            ))
+                .x_ref("paper")
+                .y_ref("paper")
+                .y(-0.15)
+                .x(1.08)
+                .show_arrow(false)]),
+    );
 
-    // Plot the result
-    {
-        let mut chart = ChartBuilder::on(&root)
-            .caption(
-                "Symmetric Elliptic Integral of the Third Kind",
-                ("serif", 30),
-            )
-            .margin(20)
-            .x_label_area_size(50)
-            .y_label_area_size(60)
-            .build_cartesian_2d(0.0..1.0, -5.0..5.0)?;
-
-        chart
-            .configure_mesh()
-            .x_desc("x")
-            .y_desc("elliprj(x,y,1,p)")
-            .axis_desc_style(("serif", 25).into_font())
-            .label_style(("serif", 20).into_font())
-            .draw()?;
-
-        // Positive p
-        chart
-            .draw_series(LineSeries::new(rj_0_1_points, RED.stroke_width(2)))?
-            .label("y=0, p=2")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], RED.stroke_width(2)));
-
-        chart
-            .draw_series(LineSeries::new(rj_01_1_points, ORANGE.stroke_width(2)))?
-            .label("y=0.1, p=2")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], ORANGE.stroke_width(2)));
-
-        chart
-            .draw_series(LineSeries::new(rj_05_1_points, GREEN.stroke_width(2)))?
-            .label("y=0.5, p=2")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], GREEN.stroke_width(2)));
-
-        chart
-            .draw_series(LineSeries::new(rj_1_1_points, BLUE.stroke_width(2)))?
-            .label("y=1, p=2")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], BLUE.stroke_width(2)));
-
-        chart
-            .configure_series_labels()
-            .border_style(&BLACK)
-            .background_style(&WHITE.mix(0.8))
-            .label_font(("serif", 25).into_font())
-            .position(SeriesLabelPosition::UpperRight)
-            .draw()?;
-
-        // Draw y=0 line for separation
-        chart.draw_series(LineSeries::new(
-            (0..=10)
-                .map(|x| (x as f64 / 10.0, 0.0))
-                .collect::<Vec<(f64, f64)>>(),
-            BLACK.stroke_width(1),
-        ))?;
-    }
-
-    // Negative p
-    {
-        let mut chart = ChartBuilder::on(&root)
-            .caption("RJ", ("serif", 30).with_color(TRANSPARENT))
-            .margin(20)
-            .x_label_area_size(50)
-            .y_label_area_size(60)
-            .build_cartesian_2d(0.0..1.0, -5.0..5.0)?;
-
-        chart
-            .configure_mesh()
-            .x_desc("x")
-            .y_desc("V")
-            .axis_desc_style(("serif", 25).into_font().color(&TRANSPARENT))
-            .label_style(("serif", 20).into_font().color(&TRANSPARENT))
-            .disable_x_axis()
-            .disable_x_mesh()
-            .disable_y_axis()
-            .disable_y_mesh()
-            .draw()?;
-
-        chart
-            .draw_series(LineSeries::new(rj_1_1_neg_points, BLUE.stroke_width(2)))?
-            .label("y=1, p=-2")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], BLUE.stroke_width(2)));
-
-        chart
-            .draw_series(LineSeries::new(rj_05_1_neg_points, GREEN.stroke_width(2)))?
-            .label("y=0.5, p=-2")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], GREEN.stroke_width(2)));
-
-        chart
-            .draw_series(LineSeries::new(rj_01_1_neg_points, ORANGE.stroke_width(2)))?
-            .label("y=0.1, p=-2")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], ORANGE.stroke_width(2)));
-
-        chart
-            .draw_series(LineSeries::new(rj_0_1_neg_points, RED.stroke_width(2)))?
-            .label("y=0, p=-2")
-            .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], RED.stroke_width(2)));
-
-        chart
-            .configure_series_labels()
-            .border_style(&BLACK)
-            .background_style(&WHITE.mix(0.8))
-            .label_font(("serif", 25).into_font())
-            .position(SeriesLabelPosition::LowerRight)
-            .draw()?;
-    }
-
-    root.present()?;
+    plot.show_html("figures/elliprj_plot.html");
+    plot.write_image("figures/elliprj_plot.svg", ImageFormat::SVG, 900, 600, 1.0);
     Ok(())
 }

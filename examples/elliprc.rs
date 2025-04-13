@@ -4,65 +4,67 @@
  */
 
 use ellip::elliprc;
-use plotters::prelude::*;
+use plotly::{
+    color::NamedColor,
+    common::{Line, Mode},
+    layout::{Annotation, Axis},
+    ImageFormat, Layout, Plot, Scatter,
+};
+
+macro_rules! get_trace {
+    ($x: expr, $y: expr, $name: expr) => {{
+        let value = $x
+            .iter()
+            .map(|&xi| match elliprc(xi, $y) {
+                Ok(ans) => ans,
+                Err(_) => f64::NAN,
+            })
+            .collect();
+
+        Scatter::new($x.clone(), value)
+            .mode(Mode::Lines)
+            .name($name)
+    }};
+    ($x: expr, $y: expr, $name: expr, $line_color: expr) => {
+        get_trace!($x, $y, $name).line(Line::new().color($line_color))
+    };
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = SVGBackend::new("figures/elliprc_plot.svg", (800, 600)).into_drawing_area();
-    root.fill(&WHITE)?;
-
-    let mut chart = ChartBuilder::on(&root)
-        .caption(
-            "Degenerate Symmetric Elliptic Integral of RF (RC)",
-            ("serif", 30),
-        )
-        .margin(20)
-        .x_label_area_size(50)
-        .y_label_area_size(60)
-        .build_cartesian_2d(-0.0..5.0, 0.0..2.0)?;
-
-    chart
-        .configure_mesh()
-        .x_desc("x")
-        .y_desc("elliprc(x,y)")
-        .axis_desc_style(("serif", 25).into_font())
-        .label_style(("serif", 20).into_font())
-        .draw()?;
-
-    // Compute the integral
     let n_points = 100;
-    let range = [0, 5];
-    let elliprc1_points: Vec<(f64, f64)> = (range[0] * n_points..range[1] * n_points)
-        .map(|i| {
-            let x = i as f64 / n_points as f64;
-            (x, elliprc(x, 1.0).unwrap())
-        })
+    let range_x = [0, 5];
+    let x: Vec<f64> = (range_x[0] * n_points..range_x[1] * n_points)
+        .map(|x| x as f64 / n_points as f64)
         .collect();
 
-    let elliprcneg1_points: Vec<(f64, f64)> = (range[0] * n_points..range[1] * n_points)
-        .map(|i| {
-            let x = i as f64 / n_points as f64;
-            (x, elliprc(x, -1.0).unwrap())
-        })
-        .collect();
+    let mut plot = Plot::new();
+    plot.add_traces(vec![
+        get_trace!(&x, 1.0, "y=1", NamedColor::Red),
+        get_trace!(&x, -1.0, "y=-1", NamedColor::Blue),
+    ]);
+    plot.set_layout(
+        Layout::new()
+            .title("Degenerate Symmetric Elliptic Integral of RF (RC)")
+            .x_axis(Axis::new().title("x").show_line(true))
+            .y_axis(
+                Axis::new()
+                    .title("RC(x,y)")
+                    .show_line(true)
+                    .range(vec![0.0, 2.0]),
+            )
+            .annotations(vec![Annotation::new()
+            .text(format!(
+                "Generated using the function <a href=\"https://docs.rs/ellip/latest/ellip/legendre/fn.elliprc.html\" target=\"_blank\">elliprc</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",
+                env!("CARGO_PKG_VERSION")
+            ))
+                .x_ref("paper")
+                .y_ref("paper")
+                .y(-0.15)
+                .x(1.08)
+                .show_arrow(false)]),
+    );
 
-    // Plot the result
-    chart
-        .draw_series(LineSeries::new(elliprc1_points, BLUE.stroke_width(2)))?
-        .label("y=1")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], BLUE.stroke_width(2)));
-    chart
-        .draw_series(LineSeries::new(elliprcneg1_points, RED.stroke_width(2)))?
-        .label("y=-1")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], RED.stroke_width(2)));
-
-    chart
-        .configure_series_labels()
-        .border_style(&BLACK)
-        .background_style(&WHITE.mix(0.8))
-        .label_font(("serif", 25).into_font())
-        .position(SeriesLabelPosition::LowerRight)
-        .draw()?;
-
-    root.present()?;
+    plot.show_html("figures/elliprc_plot.html");
+    plot.write_image("figures/elliprc_plot.svg", ImageFormat::SVG, 900, 600, 1.0);
     Ok(())
 }

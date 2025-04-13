@@ -4,92 +4,70 @@
  */
 
 use ellip::elliprd;
-use plotters::{
-    prelude::*,
-    style::full_palette::{ORANGE, PURPLE},
+use plotly::{
+    color::NamedColor,
+    common::{Line, Mode},
+    layout::{Annotation, Axis},
+    ImageFormat, Layout, Plot, Scatter,
 };
 
+macro_rules! get_trace {
+    ($x: expr, $y: expr, $name: expr) => {{
+        let value = $x
+            .iter()
+            .map(|&xi| match elliprd(xi, $y, 1.0) {
+                Ok(ans) => ans,
+                Err(_) => f64::NAN,
+            })
+            .collect();
+
+        Scatter::new($x.clone(), value)
+            .mode(Mode::Lines)
+            .name($name)
+    }};
+    ($x: expr, $y: expr, $name: expr, $line_color: expr) => {
+        get_trace!($x, $y, $name).line(Line::new().color($line_color))
+    };
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = SVGBackend::new("figures/elliprd_plot.svg", (800, 600)).into_drawing_area();
-    root.fill(&WHITE)?;
+    let n_points = 100;
+    let range_x = [0, 5];
+    let x: Vec<f64> = (range_x[0] * n_points..range_x[1] * n_points)
+        .map(|x| x as f64 / n_points as f64)
+        .collect();
 
-    let mut chart = ChartBuilder::on(&root)
-        .caption(
-            "Degenerate Symmetric Elliptic Integral of the Third Kind",
-            ("serif", 30),
-        )
-        .margin(20)
-        .x_label_area_size(50)
-        .y_label_area_size(60)
-        .build_cartesian_2d(0.0..2.0, 0.0..5.0)?;
+    let mut plot = Plot::new();
+    plot.add_traces(vec![
+        get_trace!(&x, 0.0, "y=0", NamedColor::Red),
+        get_trace!(&x, 0.1, "y=0.1"),
+        get_trace!(&x, 1.0, "y=1.0"),
+        get_trace!(&x, 5.0, "y=5.0", NamedColor::Blue),
+        get_trace!(&x, 25.0, "y=25.0"),
+    ]);
+    plot.set_layout(
+        Layout::new()
+            .title("Degenerate Symmetric Elliptic Integral of the Third Kind (RD)")
+            .x_axis(Axis::new().title("x").show_line(true))
+            .y_axis(
+                Axis::new()
+                    .title("RD(x,y,1)")
+                    .show_line(true)
+                    .range(vec![0.0, 2.0]),
+            )
+            .annotations(vec![Annotation::new()
+            .text(format!(
+                "Generated using the function <a href=\"https://docs.rs/ellip/latest/ellip/legendre/fn.elliprd.html\" target=\"_blank\">elliprd</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",
+                env!("CARGO_PKG_VERSION")
+            ))
+                .x_ref("paper")
+                .y_ref("paper")
+                .y(-0.15)
+                .x(1.08)
+                .show_arrow(false)]),
+    );
 
-    chart
-        .configure_mesh()
-        .x_desc("x")
-        .y_desc("elliprd(x,y,1)")
-        .axis_desc_style(("serif", 25).into_font())
-        .label_style(("serif", 20).into_font())
-        .draw()?;
-
-    // Compute the integral
-    fn get_points(y: f64) -> Vec<(f64, f64)> {
-        let n_points = 500;
-        let range = [0, 2];
-        let mut points: Vec<(f64, f64)> = Vec::with_capacity(n_points);
-        for i in range[0] * n_points as i32..range[1] * n_points as i32 {
-            let x = i as f64 / n_points as f64;
-            match elliprd(x, y, 1.0) {
-                Ok(res) => {
-                    if res <= 5.0 {
-                        points.push((x, res))
-                    }
-                }
-                Err(_) => (),
-            }
-        }
-        points
-    }
-
-    let rd_0_1_points = get_points(0.0);
-    let rd_01_1_points = get_points(0.1);
-    let rd_1_1_points = get_points(1.0);
-    let rd_5_1_points = get_points(5.0);
-    let rd_25_1_points = get_points(25.0);
-
-    // Plot the result
-    chart
-        .draw_series(LineSeries::new(rd_0_1_points, RED.stroke_width(2)))?
-        .label("y=0")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], RED.stroke_width(2)));
-
-    chart
-        .draw_series(LineSeries::new(rd_01_1_points, ORANGE.stroke_width(2)))?
-        .label("y=0.1")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], ORANGE.stroke_width(2)));
-
-    chart
-        .draw_series(LineSeries::new(rd_1_1_points, GREEN.stroke_width(2)))?
-        .label("y=1")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], GREEN.stroke_width(2)));
-
-    chart
-        .draw_series(LineSeries::new(rd_5_1_points, BLUE.stroke_width(2)))?
-        .label("y=5")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], BLUE.stroke_width(2)));
-
-    chart
-        .draw_series(LineSeries::new(rd_25_1_points, PURPLE.stroke_width(2)))?
-        .label("y=25")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], PURPLE.stroke_width(2)));
-
-    chart
-        .configure_series_labels()
-        .border_style(&BLACK)
-        .background_style(&WHITE.mix(0.8))
-        .label_font(("serif", 25).into_font())
-        .position(SeriesLabelPosition::UpperRight)
-        .draw()?;
-
-    root.present()?;
+    plot.show_html("figures/elliprd_plot.html");
+    plot.write_image("figures/elliprd_plot.svg", ImageFormat::SVG, 900, 600, 1.0);
     Ok(())
 }
