@@ -11,7 +11,6 @@ use plotly::{
     ImageFormat, Layout, Plot, Scatter,
 };
 
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let n_points = 100;
     let range_m = [-2, 1];

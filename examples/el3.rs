@@ -47,7 +47,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .collect::<Vec<f64>>(),
     ]
     .concat();
-kc.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    kc.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
     let mut plot = Plot::new();
     plot.add_traces(vec![
