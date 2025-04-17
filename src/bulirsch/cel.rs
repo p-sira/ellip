@@ -7,7 +7,6 @@ use num_traits::Float;
 
 use super::BulirschConst;
 
-// Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions III.”
 /// Compute [complete elliptic integral in Bulirsch form](https://dlmf.nist.gov/19.2#iii).
 /// ```text
 ///                       π/2                                                   
@@ -16,9 +15,32 @@ use super::BulirschConst;
 ///                      ⎮                         ______________________
 ///                      ⌡ (cos²(ϑ) + p sin²(ϑ)) ╲╱ cos²(ϑ) + kc² sin²(ϑ)    
 ///                     0                                                   
-/// where kc ≠ 0, p ≠ 0
 /// ```
-/// Note that kc² = mc = 1 - m. The precision can be adjusted by overwriting the trait [super::BulirschConst].
+///
+/// ## Parameters
+/// - kc: complementary modulus. kc ∈ ℝ, kc ≠ 0.
+/// - p ∈ ℝ, p ≠ 0
+/// - a ∈ ℝ
+/// - b ∈ ℝ
+/// 
+/// The precision of the function can be adjusted by overwriting the trait [super::BulirschConst].
+/// The default is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405) for [f64] and [f32].
+///
+/// ## Domain
+/// - Returns error if kc = 0 or p = 0.
+/// - Returns the principal value for p < 0.
+///
+/// ## Graph
+/// ![General Complete Elliptic Integral](https://github.com/p-sira/ellip/blob/main/figures/cel_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/cel_plot.html)
+///
+/// # Related Functions
+/// With kc² = 1 - m and p = 1 - n,
+/// - [ellipk](crate::ellipk)(m) = [cel](crate::cel)(kc, 1, 1, 1) = [cel1](crate::cel1)(kc)
+/// - [ellipe](crate::ellipe)(m) = [cel](crate::cel)(kc, 1, 1, kc²) = [cel2](crate::cel2)(kc, 1, kc²)
+/// - [ellipd](crate::ellipd)(m) = [cel](crate::cel)(kc, 1, 0, 1)
+/// - [ellippi](crate::ellippi)(n, m) = [cel](crate::cel)(kc, p, 1, 1)
 ///
 /// # Examples
 /// ```
@@ -26,6 +48,11 @@ use super::BulirschConst;
 ///
 /// assert_close(cel(0.5, 1.0, 1.0, 1.0).unwrap(), 2.1565156474996434, 1e-15);
 /// ```
+///
+/// # References
+/// - Bulirsch, R. “Numerical Calculation of Elliptic Integrals and Elliptic Functions. III.” Numerische Mathematik 13, no. 4 (August 1, 1969): 305–15. https://doi.org/10.1007/BF02165405.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. https://dlmf.nist.gov/19.
+///
 pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, &'static str> {
     if kc == zero!() {
         return Err("cel: kc cannot be zero.");
@@ -78,7 +105,6 @@ pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, &'sta
     Ok(pi_2!() * (a * m + b) / (m * (m + p)))
 }
 
-// Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
 /// Compute [complete elliptic integral of the first kind in Bulirsch's form](https://link.springer.com/article/10.1007/bf01397975).
 /// ```text
 ///               π/2                                                   
@@ -87,10 +113,24 @@ pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, &'sta
 ///              ⎮      ______________________
 ///              ⌡   ╲╱ cos²(ϑ) + kc² sin²(ϑ)    
 ///             0                                                   
-/// where kc ≠ 0
 /// ```
 ///
-/// Note that kc² = mc = 1 - m. The precision can be adjusted by overwriting the trait [super::BulirschConst].
+/// ## Parameters
+/// - kc: complementary modulus. kc ∈ ℝ, kc ≠ 0.
+///
+/// Returns error if kc = 0.
+///
+/// The precision of the function can be adjusted by overwriting the trait [super::BulirschConst].
+/// The default is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405) for [f64] and [f32].
+///
+/// ## Graph
+/// ![General Complete Elliptic Integral](https://github.com/p-sira/ellip/blob/main/figures/cel1_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/cel1_plot.html)
+///
+/// # Related Functions
+/// With kc² = 1 - m,
+/// - [ellipk](crate::ellipk)(m) = [cel](crate::cel)(kc, 1, 1, 1) = [cel1](crate::cel1)(kc)
 ///
 /// # Examples
 /// ```
@@ -98,6 +138,11 @@ pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, &'sta
 ///
 /// assert_close(cel1(0.5).unwrap(), 2.1565156474996434, 1e-15);
 /// ```
+///
+/// # References
+/// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. https://doi.org/10.1007/BF01397975.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. https://dlmf.nist.gov/19.
+///
 pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, &'static str> {
     if kc == zero!() {
         return Err("cel1: kc cannot be zero.");
@@ -122,7 +167,6 @@ pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, &'static str> {
     Ok(pi!() / m)
 }
 
-// Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
 /// Compute [complete elliptic integral of the second kind in Bulirsch's form](https://link.springer.com/article/10.1007/bf01397975).
 /// ```text
 ///                     π/2                           
@@ -134,7 +178,24 @@ pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, &'static str> {
 /// where kc ≠ 0
 /// ```
 ///
-/// Note that kc² = mc = 1 - m. The precision can be adjusted by overwriting the trait [super::BulirschConst].
+/// ## Parameters
+/// - kc: complementary modulus. kc ∈ ℝ, kc ≠ 0.
+/// - a ∈ ℝ
+/// - b ∈ ℝ
+///
+/// Returns error if kc = 0.
+///
+/// The precision of the function can be adjusted by overwriting the trait [super::BulirschConst].
+/// The default is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405) for [f64] and [f32].
+///
+/// ## Graph
+/// ![General Complete Elliptic Integral](https://github.com/p-sira/ellip/blob/main/figures/cel1_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/cel1_plot.html)
+///
+/// # Related Functions
+/// With kc² = 1 - m,
+/// - [ellipe](crate::ellipe)(m) = [cel](crate::cel)(kc, 1, 1, kc²) = [cel2](crate::cel2)(kc, 1, kc²)
 ///
 /// # Examples
 /// ```
@@ -142,6 +203,11 @@ pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, &'static str> {
 ///
 /// assert_close(cel2(0.5, 1.0, 1.0).unwrap(), 2.1565156474996434, 1e-15);
 /// ```
+///
+/// # References
+/// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. https://doi.org/10.1007/BF01397975.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. https://dlmf.nist.gov/19.
+///
 pub fn cel2<T: Float + BulirschConst>(kc: T, a: T, b: T) -> Result<T, &'static str> {
     if kc == zero!() {
         return Err("cel2: kc cannot be zero.");
