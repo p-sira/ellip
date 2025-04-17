@@ -29,7 +29,7 @@ use super::{cel1, cel2, BulirschConst};
 /// - Returns error if kc = 0.
 ///
 /// ## Graph
-/// ![General Complete Elliptic Integral](https://github.com/p-sira/ellip/blob/main/figures/el1_plot.svg?raw=true)
+/// ![Bulirsch's Incomplete Elliptic Integral of the First Kind](https://github.com/p-sira/ellip/blob/main/figures/el1_plot.svg?raw=true)
 ///
 /// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/el1_plot.html)
 ///
@@ -125,9 +125,9 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
 /// - Returns error if kc = 0.
 ///
 /// ## Graph
-/// ![General Complete Elliptic Integral](https://github.com/p-sira/ellip/blob/main/figures/el1_plot.svg?raw=true)
+/// ![Bulirsch's Incomplete Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/el2_plot.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/el1_plot.html)
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/el2_plot.html)
 ///
 /// # Related Functions
 /// With x = tan φ and kc² = 1 - m,
@@ -247,9 +247,9 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'sta
 /// - Returns the principal value when 1 + px² < 0
 ///
 /// ## Graph
-/// ![General Complete Elliptic Integral](https://github.com/p-sira/ellip/blob/main/figures/el1_plot.svg?raw=true)
+/// ![Bulirsch's Incomplete Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/el3_plot.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/el1_plot.html)
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/el3_plot.html)
 ///
 /// # Related Functions
 /// With x = tan φ, p = 1 - n, and kc² = 1 - m,

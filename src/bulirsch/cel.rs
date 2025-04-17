@@ -124,7 +124,7 @@ pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, &'sta
 /// The default is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405) for [f64] and [f32].
 ///
 /// ## Graph
-/// ![General Complete Elliptic Integral](https://github.com/p-sira/ellip/blob/main/figures/cel1_plot.svg?raw=true)
+/// ![Bulirsch's Complete Elliptic Integral of the First Kind](https://github.com/p-sira/ellip/blob/main/figures/cel1_plot.svg?raw=true)
 ///
 /// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/cel1_plot.html)
 ///
@@ -189,9 +189,9 @@ pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, &'static str> {
 /// The default is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405) for [f64] and [f32].
 ///
 /// ## Graph
-/// ![General Complete Elliptic Integral](https://github.com/p-sira/ellip/blob/main/figures/cel1_plot.svg?raw=true)
+/// ![Bulirsch's Complete Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/cel2_plot.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/cel1_plot.html)
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/cel2_plot.html)
 ///
 /// # Related Functions
 /// With kc² = 1 - m,
