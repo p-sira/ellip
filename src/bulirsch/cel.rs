@@ -7,7 +7,7 @@ use num_traits::Float;
 
 use super::BulirschConst;
 
-/// Compute [complete elliptic integral in Bulirsch form](https://dlmf.nist.gov/19.2#iii).
+/// Computes [complete elliptic integral in Bulirsch form](https://dlmf.nist.gov/19.2#iii).
 /// ```text
 ///                       π/2                                                   
 ///                      ⌠            a cos²(ϑ) + b sin²(ϑ)               
@@ -22,7 +22,7 @@ use super::BulirschConst;
 /// - p ∈ ℝ, p ≠ 0
 /// - a ∈ ℝ
 /// - b ∈ ℝ
-/// 
+///
 /// The precision of the function can be adjusted by overwriting the trait [super::BulirschConst].
 /// The default is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405) for [f64] and [f32].
 ///
@@ -105,7 +105,7 @@ pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, &'sta
     Ok(pi_2!() * (a * m + b) / (m * (m + p)))
 }
 
-/// Compute [complete elliptic integral of the first kind in Bulirsch's form](https://link.springer.com/article/10.1007/bf01397975).
+/// Computes [complete elliptic integral of the first kind in Bulirsch's form](https://link.springer.com/article/10.1007/bf01397975).
 /// ```text
 ///               π/2                                                   
 ///              ⌠               dϑ              
@@ -118,10 +118,11 @@ pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, &'sta
 /// ## Parameters
 /// - kc: complementary modulus. kc ∈ ℝ, kc ≠ 0.
 ///
-/// Returns error if kc = 0.
-///
 /// The precision of the function can be adjusted by overwriting the trait [super::BulirschConst].
 /// The default is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405) for [f64] and [f32].
+///
+/// ## Domain
+/// - Returns error if kc = 0.
 ///
 /// ## Graph
 /// ![Bulirsch's Complete Elliptic Integral of the First Kind](https://github.com/p-sira/ellip/blob/main/figures/cel1_plot.svg?raw=true)
@@ -167,7 +168,7 @@ pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, &'static str> {
     Ok(pi!() / m)
 }
 
-/// Compute [complete elliptic integral of the second kind in Bulirsch's form](https://link.springer.com/article/10.1007/bf01397975).
+/// Computes [complete elliptic integral of the second kind in Bulirsch's form](https://link.springer.com/article/10.1007/bf01397975).
 /// ```text
 ///                     π/2                           
 ///                    ⌠              a + b tan²(ϑ)
@@ -183,10 +184,11 @@ pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, &'static str> {
 /// - a ∈ ℝ
 /// - b ∈ ℝ
 ///
-/// Returns error if kc = 0.
-///
 /// The precision of the function can be adjusted by overwriting the trait [super::BulirschConst].
 /// The default is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405) for [f64] and [f32].
+///
+/// ## Domain
+/// - Returns error if kc = 0.
 ///
 /// ## Graph
 /// ![Bulirsch's Complete Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/cel2_plot.svg?raw=true)

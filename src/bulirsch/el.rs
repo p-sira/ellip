@@ -7,7 +7,7 @@ use num_traits::Float;
 
 use super::{cel1, cel2, BulirschConst};
 
-/// Compute [incomplete elliptic integral of the first kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E11_5).
+/// Computes [incomplete elliptic integral of the first kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E11_5).
 /// ```text
 ///                 arctan(x)                                                   
 ///                ⌠                             
@@ -100,7 +100,7 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
 }
 
 // Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
-/// Compute [incomplete elliptic integral of the second kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E12).
+/// Computes [incomplete elliptic integral of the second kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E12).
 /// ```text
 ///                       arctan(x)                                                   
 ///                      ⌠                             
@@ -109,7 +109,6 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
 ///                      ⎮     ________________________________
 ///                      ⌡  ╲╱ (1 + tan²(ϑ)) (1 + kc² tan²(ϑ))    
 ///                     0                                                   
-/// where kc ≠ 0
 /// ```
 ///
 /// ## Parameters
@@ -220,7 +219,7 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'sta
     Ok(e + c * z)
 }
 
-/// Compute [incomplete elliptic integral of the third kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E16).
+/// Computes [incomplete elliptic integral of the third kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E16).
 /// ```text
 ///                    arctan(x)                                                   
 ///                   ⌠                             
