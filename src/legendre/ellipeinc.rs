@@ -98,7 +98,7 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
     } else {
         let s2p = rphi.sin() * rphi.sin();
         if m * s2p >= one!() {
-            return Err("ellipeinc: m sin²φ must satisfy: 0 ≤ m sin²φ < 1.");
+            return Err("ellipeinc: m sin²φ must be smaller than one.");
         }
         let c2p = rphi.cos() * rphi.cos();
         let c = one!() / s2p;

@@ -80,7 +80,7 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
     let cm1 = cosp2 / sinp2; // c - 1
 
     if m * sinp2 > one!() {
-        return Err("ellipdinc: The argument must satisfy m sin²φ < 1.");
+        return Err("ellipdinc: m sin²φ must be smaller than one.");
     }
 
     let mut result = zero!();

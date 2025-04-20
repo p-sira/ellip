@@ -76,7 +76,7 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
     let s2p = rphi.sin() * rphi.sin();
     let ms2p = m * s2p;
     if ms2p >= one!() {
-        return Err("ellipf: m sin²φ must satisfy: 0 ≤ m sin²φ < 1.");
+        return Err("ellipf: m sin²φ must be smaller than one.");
     }
 
     let c2p = rphi.cos() * rphi.cos();
