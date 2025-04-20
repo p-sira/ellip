@@ -50,7 +50,7 @@ use num_traits::Float;
 ///
 /// # Related Functions
 /// With c = csc²φ,
-/// - [ellipd](crate::ellipd)(φ, m) = [elliprd](crate::elliprd)(c - 1, c - m, c) / 3
+/// - [ellipdinc](crate::ellipdinc)(φ, m) = [elliprd](crate::elliprd)(c - 1, c - m, c) / 3
 ///
 /// # Examples
 /// ```
