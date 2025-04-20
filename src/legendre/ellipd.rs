@@ -23,7 +23,7 @@ use num_traits::Float;
 
 use crate::elliprd;
 
-/// Compute [complete elliptic integral of Legendre's type](https://dlmf.nist.gov/19.2.E8).
+/// Computes [complete elliptic integral of Legendre's type](https://dlmf.nist.gov/19.2.E8).
 /// ```text
 ///           π/2
 ///          ⌠       sin²θ dθ
@@ -31,22 +31,31 @@ use crate::elliprd;
 ///          │     _____________
 ///          ⌡   \╱ 1 - m sin²θ
 ///         0
-/// where m < 1
 /// ```
 ///
-/// Note that some mathematical references use the parameter k for the function,
-/// where k² = m.
+/// ## Parameters
+/// - m: elliptic parameter. m ∈ ℝ, m < 1.
 ///
+/// The elliptic modulus (k) is also frequently used instead of the parameter (m), where k² = m.
+///
+/// ## Domain
+/// - Returns error if m > 1.
+///
+/// ## Graph
+/// ![Complete Elliptic Integral of Legendre's Type](https://github.com/p-sira/ellip/blob/main/figures/ellipd_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipd_plot.html)
+///
+/// # Related Functions
+/// - [ellipd](crate::ellipd)(m) = ([ellipk](crate::ellipk)(m) - [ellipe](crate::ellipe)(m)) / m
+/// - [ellipd](crate::ellipd)(m) = [elliprd](crate::elliprd)(0, 1 - m, 1) / 3
+/// - [ellipdinc](crate::ellipdinc)(π/2, m) = [ellipd](crate::ellipd)(m)
 /// # Examples
 /// ```
 /// use ellip::{ellipd, util::assert_close};
 ///
 /// assert_close(ellipd(0.5).unwrap(), 1.0068615925073927, 1e-15);
 /// ```
-///
-/// # Related Functions
-/// - [ellipd](crate::ellipd)(m) = ([ellipk](crate::ellipk)(m) - [ellipe](crate::ellipe)(m)) / m
-/// - [ellipd](crate::ellipd)(m) = [elliprd](crate::elliprd)(0, 1 - m, 1) / 3
 ///
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.

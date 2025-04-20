@@ -21,7 +21,7 @@ use num_traits::Float;
 
 use crate::{ellipe, ellipk, elliprf, elliprj};
 
-/// Compute [complete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E8).
+/// Computes [complete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E8).
 /// ```text
 ///              π/2                              
 ///             ⌠                 dϑ              
@@ -29,11 +29,26 @@ use crate::{ellipe, ellipk, elliprf, elliprj};
 ///             ⎮   _____________                
 ///             ⌡ ╲╱ 1 - m sin²ϑ  ⋅ ( 1 - n sin²ϑ )
 ///            0              
-/// where m < 1, n ≠ 1               
 /// ```
 ///
-/// Note that some mathematical references use the parameter k and α for the function,
-/// where k² = m, α² = n.
+/// ## Parameters
+/// - n: characteristic, n ∈ ℝ, n ≠ 1.
+/// - m: elliptic parameter. m ∈ ℝ, m < 1.
+///
+/// The elliptic modulus (k) is frequently used instead of the parameter (m), where k² = m.
+/// The characteristic (n) is also sometimes expressed in term of α, where α² = n.
+///
+/// ## Domain
+/// - Returns error if n = 1 or m > 1.
+/// - Returns the principal value if n > 1.
+///
+/// ## Graph
+/// ![Complete Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/ellippi_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellippi_plot.html)
+///
+/// # Related Functions
+/// - [ellippi](crate::ellippi)(n, m) = n / 3 * [elliprj](crate::elliprj)(0, 1 - m, 1, 1 - n) + [ellipk](crate::ellipk)(m)
 ///
 /// # Examples
 /// ```
@@ -41,6 +56,11 @@ use crate::{ellipe, ellipk, elliprf, elliprj};
 ///
 /// assert_close(ellippi(0.5, 0.5).unwrap(), 2.7012877620953506, 1e-15);
 /// ```
+///
+/// # References
+/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+///
 pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, &'static str> {
     if m > one!() {
         return Err("ellippi: m must be less than 1.");
