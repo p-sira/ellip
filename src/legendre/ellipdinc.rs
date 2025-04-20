@@ -22,7 +22,7 @@
 use crate::{ellipd, elliprd};
 use num_traits::Float;
 
-/// Compute [incomplete elliptic integral of Legendre's type](https://dlmf.nist.gov/19.2.E6).
+/// Compute [incomplete elliptic integral of Legendre's type](<https://dlmf.nist.gov/19>.2.E6).
 /// ```text
 ///              φ
 ///             ⌠       sin²θ dθ

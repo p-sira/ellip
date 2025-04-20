@@ -21,7 +21,7 @@ use num_traits::Float;
 
 use crate::{ellipe, ellipk, elliprf, elliprj};
 
-/// Compute [complete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E8).
+/// Compute [complete elliptic integral of the third kind](<https://dlmf.nist.gov/19>.2.E8).
 /// ```text
 ///              π/2                              
 ///             ⌠                 dϑ              
@@ -58,13 +58,13 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, &'static str> {
 
     if n > one!() {
         // n -> 1+
-        // https://dlmf.nist.gov/19.6.E6
+        // <https://dlmf.nist.gov/19>.6.E6
         if n - one!() <= epsilon!() {
             return Ok(ellipk(m)? - ellipe(m)? / (one!() - m));
         }
 
         // Use Cauchy principal value
-        // https://dlmf.nist.gov/19.25.E4
+        // <https://dlmf.nist.gov/19>.25.E4
         return Ok(-third!() * m / n * elliprj(zero!(), one!() - m, one!(), one!() - m / n)?);
     }
 
@@ -82,7 +82,7 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, &'static str> {
 
     if n < zero!() {
         // When m < 0, n < 0 and m == n, Boost implementation cancels out, resulting in inf.
-        // https://dlmf.nist.gov/19.6.E13 with phi = π/2
+        // <https://dlmf.nist.gov/19>.6.E13 with phi = π/2
         if m == n {
             let mc = one!() - m;
             return Ok(one!() / mc * ellipe(m)?);

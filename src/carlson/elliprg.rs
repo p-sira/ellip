@@ -15,7 +15,7 @@ use crate::{elliprc, elliprd, elliprf};
 //  Boost Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-/// Computes RG ([symmetric elliptic integral of the second kind](https://dlmf.nist.gov/19.16.E2_5)).
+/// Computes RG ([symmetric elliptic integral of the second kind](<https://dlmf.nist.gov/19>.16.E2_5)).
 /// ```text
 ///                     ∞                                                             
 ///                 1  ⌠             t              ⎛   x       y       z   ⎞     
@@ -54,8 +54,8 @@ use crate::{elliprc, elliprd, elliprf};
 /// ```
 ///
 /// # References
-/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html.
-/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. https://dlmf.nist.gov/19.
+/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 ///
 pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
     if x < zero!() || y < zero!() || z < zero!() {

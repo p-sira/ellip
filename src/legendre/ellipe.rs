@@ -23,7 +23,7 @@ use num_traits::Float;
 
 use crate::{elliprg, polyeval};
 
-/// Compute [complete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E8).
+/// Compute [complete elliptic integral of the second kind](<https://dlmf.nist.gov/19>.2.E8).
 ///
 /// ```text
 ///           π/2
@@ -258,7 +258,7 @@ fn ellipe_precise<T: Float>(m: T) -> Result<T, &'static str> {
         return Err("ellipe: m must be less than 1.");
     }
 
-    // Special cases: https://dlmf.nist.gov/19.6.E1
+    // Special cases: <https://dlmf.nist.gov/19>.6.E1
     if m == one!() {
         return Ok(one!());
     }
