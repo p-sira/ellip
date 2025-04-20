@@ -43,12 +43,27 @@ use crate::elliprd;
 ///
 /// assert_close(ellipd(0.5).unwrap(), 1.0068615925073927, 1e-15);
 /// ```
+///
+/// # Related Functions
+/// - [ellipd](crate::ellipd)(m) = ([ellipk](crate::ellipk)(m) - [ellipe](crate::ellipe)(m)) / m
+/// - [ellipd](crate::ellipd)(m) = [elliprd](crate::elliprd)(0, 1 - m, 1) / 3
+///
+/// # References
+/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. https://dlmf.nist.gov/19.
+///
 pub fn ellipd<T: Float>(m: T) -> Result<T, &'static str> {
-    if m >= one!() {
+    if m > one!() {
         return Err("ellipd: m must be less than 1.");
     }
 
-    if m <= epsilon!() {
+    // https://dlmf.nist.gov/19.2.E8
+    // Using this relation, D evaluates to inf at m=1.
+    if m == one!() {
+        return Ok(inf!());
+    }
+
+    if m.abs() <= epsilon!() {
         return Ok(pi!() / four!());
     }
 
@@ -57,8 +72,6 @@ pub fn ellipd<T: Float>(m: T) -> Result<T, &'static str> {
 
 #[cfg(test)]
 mod tests {
-    use core::f64;
-
     use super::*;
     use crate::compare_test_data;
 

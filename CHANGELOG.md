@@ -10,6 +10,7 @@
 - Add `assert_close` function in `util` module.
 
 **Bug Fixes**
+- `ellipd`: Fix incorrect answers for m < 0. The function also returns infinity instead of throwing error at m = 1.
 - Fix the domains for `ellipf` and `ellipeinc`.
 
 ### 0.3.0
