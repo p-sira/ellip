@@ -68,6 +68,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     plot.show_html("figures/ellipdinc_plot.html");
-    plot.write_image("figures/ellipdinc_plot.svg", ImageFormat::SVG, 900, 600, 1.0);
+    plot.write_image(
+        "figures/ellipdinc_plot.svg",
+        ImageFormat::SVG,
+        900,
+        600,
+        1.0,
+    );
     Ok(())
 }
