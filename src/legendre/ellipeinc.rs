@@ -23,7 +23,7 @@ use num_traits::Float;
 
 use crate::{ellipe, elliprd, elliprf};
 
-/// Compute [incomplete elliptic integral of the second kind](<https://dlmf.nist.gov/19>.2.E5).
+/// Compute [incomplete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E5).
 /// ```text
 ///              φ
 ///             ⌠   _____________

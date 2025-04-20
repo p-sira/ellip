@@ -21,7 +21,7 @@ use std::mem::swap;
 
 use num_traits::Float;
 
-/// Computes RD ([degenerate symmetric elliptic integral of the third kind](<https://dlmf.nist.gov/19>.16.E5)).
+/// Computes RD ([degenerate symmetric elliptic integral of the third kind](https://dlmf.nist.gov/19.16.E5)).
 /// ```text
 ///                     ∞                                        
 ///                 3  ⌠                   dt                   
@@ -60,8 +60,8 @@ use num_traits::Float;
 /// ```
 ///
 /// # References
-/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
-/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. https://dlmf.nist.gov/19.
 ///
 pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
     if x.min(y) < zero!() || x + y == zero!() {

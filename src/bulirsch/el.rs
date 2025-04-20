@@ -7,7 +7,7 @@ use num_traits::Float;
 
 use super::{cel1, cel2, BulirschConst};
 
-/// Computes [incomplete elliptic integral of the first kind in Bulirsch's form](<https://dlmf.nist.gov/19>.2.E11_5).
+/// Computes [incomplete elliptic integral of the first kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E11_5).
 /// ```text
 ///                 arctan(x)                                                   
 ///                ⌠                             
@@ -47,8 +47,8 @@ use super::{cel1, cel2, BulirschConst};
 /// ```
 ///
 /// # References
-/// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
-/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+/// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. https://doi.org/10.1007/BF01397975.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. https://dlmf.nist.gov/19.
 ///
 pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
     if x == zero!() {
@@ -100,7 +100,7 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
 }
 
 // Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
-/// Computes [incomplete elliptic integral of the second kind in Bulirsch's form](<https://dlmf.nist.gov/19>.2.E12).
+/// Computes [incomplete elliptic integral of the second kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E12).
 /// ```text
 ///                       arctan(x)                                                   
 ///                      ⌠                             
@@ -143,8 +143,8 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
 /// ```
 ///
 /// # References
-/// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
-/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+/// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. https://doi.org/10.1007/BF01397975.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. https://dlmf.nist.gov/19.
 ///
 pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'static str> {
     if x == zero!() {
@@ -219,7 +219,7 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'sta
     Ok(e + c * z)
 }
 
-/// Computes [incomplete elliptic integral of the third kind in Bulirsch's form](<https://dlmf.nist.gov/19>.2.E16).
+/// Computes [incomplete elliptic integral of the third kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E16).
 /// ```text
 ///                    arctan(x)                                                   
 ///                   ⌠                             
@@ -263,8 +263,8 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'sta
 /// ```
 ///
 /// # References
-/// - Bulirsch, R. “Numerical Calculation of Elliptic Integrals and Elliptic Functions. III.” Numerische Mathematik 13, no. 4 (August 1, 1969): 305–15. <https://doi.org/10.1007/BF02165405>.
-/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+/// - Bulirsch, R. “Numerical Calculation of Elliptic Integrals and Elliptic Functions. III.” Numerische Mathematik 13, no. 4 (August 1, 1969): 305–15. https://doi.org/10.1007/BF02165405.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. https://dlmf.nist.gov/19.
 ///
 pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, &'static str> {
     if p < zero!() && kc.abs() > one!() {

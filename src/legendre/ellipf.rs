@@ -25,7 +25,7 @@ use crate::elliprf;
 
 use super::ellipk::ellipk_precise;
 
-/// Compute [incomplete elliptic integral of the first kind](<https://dlmf.nist.gov/19>.2.E4).
+/// Compute [incomplete elliptic integral of the first kind](https://dlmf.nist.gov/19.2.E4).
 ///
 /// ```text
 ///              φ

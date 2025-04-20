@@ -23,7 +23,7 @@ use num_traits::Float;
 
 use crate::{elliprf, polyeval};
 
-/// Compute [complete elliptic integral of the first kind](<https://dlmf.nist.gov/19>.2.E8).
+/// Compute [complete elliptic integral of the first kind](https://dlmf.nist.gov/19.2.E8).
 /// ```text
 ///           π/2
 ///          ⌠          dθ
@@ -261,7 +261,7 @@ pub(crate) fn ellipk_precise<T: Float>(m: T) -> Result<T, &'static str> {
         return Err("ellipk: m must be less than 1.");
     }
 
-    // Special cases: <https://dlmf.nist.gov/19>.6.E1
+    // Special cases: https://dlmf.nist.gov/19.6.E1
     if m == one!() {
         return Ok(inf!());
     }
