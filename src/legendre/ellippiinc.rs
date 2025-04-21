@@ -32,11 +32,35 @@ use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj};
 ///                ⎮   _____________                
 ///                ⌡ ╲╱ 1 - m sin²ϑ  ⋅ ( 1 - n sin²ϑ )
 ///               0              
-/// where 0 ≤ m sin²φ ≤ 1               
 /// ```
 ///
-/// Note that some mathematical references use the parameter k and α for the function,
-/// where k² = m, α² = n.
+/// ## Parameters
+/// - phi: amplitude angle (φ). φ ∈ ℝ.
+/// - n: characteristic, n ∈ ℝ, n ≠ 1.
+/// - m: elliptic parameter. m ∈ ℝ.
+///
+/// The elliptic modulus (k) is frequently used instead of the parameter (m), where k² = m.
+/// The characteristic (n) is also sometimes expressed in term of α, where α² = n.
+///
+/// ## Domain
+/// - Returns error when m sin²φ > 1 and (n <= csc²φ or m < 1).
+/// - Returns the principal value if m sin²φ > 1
+///
+/// ## Graph
+/// ![Incomplete Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/ellippiinc_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellippiinc_plot.html)
+///
+/// ![Incomplete Elliptic Integral of the Third Kind (3D Plot)](https://github.com/p-sira/ellip/blob/main/figures/ellippiinc_plot_3d.png?raw=true)
+///
+/// [Interactive 3D Plot](https://github.com/p-sira/ellip/blob/main/figures/ellippiinc_plot_3d.html)
+///
+/// # Related Functions
+/// With c = csc²φ,
+/// - [ellippiinc](crate::ellippiinc)(φ, n, m) = n / 3 * [elliprj](crate::elliprj)(c - 1, c - m, c, c - n) + [ellipf](crate::ellipf)(φ, m)
+/// 
+/// With x = tan φ, p = 1 - n, and kc² = 1 - m,
+/// - [ellippiinc](crate::ellippiinc)(φ, n, m) = [el3](crate::el3)(x, kc, p)
 ///
 /// # Examples
 /// ```
@@ -45,6 +69,11 @@ use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj};
 ///
 /// assert_close(ellippiinc(FRAC_PI_4, 0.5, 0.5).unwrap(), 0.9190227391656969, 1e-15);
 /// ```
+///
+/// # References
+/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+///
 pub fn ellippiinc<T: Float>(phi: T, n: T, m: T) -> Result<T, &'static str> {
     ellippiinc_vc(phi, n, m, one!() - n)
 }
@@ -62,7 +91,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
         if n <= c {
             // For n<=c, there are a few special cases listed in https://dlmf.nist.gov/19.6.iv
             // that allow calculation of the p.v.
-            return Err("ellippiinc: n must be greater than cosec²φ to compute the Cauchy principal value when m sin²φ > 1.");
+            return Err("ellippiinc: n must be greater than csc²φ to compute the Cauchy principal value when m sin²φ > 1.");
         }
 
         // The p.v. can be calculated when 1 < c < m
@@ -84,10 +113,6 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
             + ((c - one!()) * (c - m) / (n - one!()) / (one!() - w2)).sqrt()
                 * elliprc(c * (n - one!()) * (one!() - w2), (n - c) * (c - w2))?);
     }
-
-    // if m < zero!() {
-    //     return Err("ellippiinc: m must be greater than zero.");
-    // }
 
     // Special cases first:
     if n == zero!() {
