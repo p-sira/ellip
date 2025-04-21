@@ -2,13 +2,14 @@ Ellip is licensed under The 3-Clause BSD, see LICENSE.
 Copyright 2025 Sira Pornsiriprasert <code@psira.me>
 
 Submodules that derived from SciPy are:
- - ellipe
- - ellipeinc
- - ellipf
- - ellipk
+- None in this version
 SciPy is licensed under 3-Clause BSD.
 
 Submodules that derived from Boost Math Library are:
+- ellipk
+- ellipf
+- ellipe
+- ellipeinc
 - ellipd
 - ellipdinc
 - ellippi

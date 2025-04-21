@@ -20,7 +20,7 @@
 
 use num_traits::Float;
 
-/// Compute [degenerate symmetric elliptic integral of RF](https://dlmf.nist.gov/19.16.E6).
+/// Computes RC ([degenerate symmetric elliptic integral of RF](https://dlmf.nist.gov/19.16.E6)).
 /// ```text
 ///                  ∞                  
 ///              1  ⌠        dt        
@@ -28,8 +28,38 @@ use num_traits::Float;
 ///              2  ⎮             _____
 ///                 ⌡ (t + y) ⋅ ╲╱t + x
 ///                0                  
-/// where x ≥ 0, y ≠ 0
 /// ```
+///
+/// ## Parameters
+/// - x ∈ ℝ, x ≥ 0
+/// - y ∈ ℝ, y ≠ 0
+///
+/// ## Domain
+/// - Returns error if x < 0 or y = 0.
+/// - Returns the principal value if y < 0.
+///
+/// ## Graph
+/// ![Degenerate Symmetric Elliptic Integral of RF (RC)](https://github.com/p-sira/ellip/blob/main/figures/elliprc_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprc_plot.html)
+///
+/// ## Notes
+/// RC is a degenerate case of the RF. It is an elementary function rather than an elliptic integral.
+///
+/// # Related Functions
+/// - [elliprc](crate::elliprc)(x, y) = [elliprf](crate::elliprf)(x, y, y)
+///
+/// # Examples
+/// ```
+/// use ellip::{elliprc, util::assert_close};
+///
+/// assert_close(elliprc(1.0, 0.5).unwrap(), 1.2464504802804608, 1e-15);
+/// ```
+///
+/// # References
+/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+/// - The SciPy Community. “SciPy: Special Functions - Elliprc.” Accessed April 17, 2025. <https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.elliprc.html>.
 ///
 pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, &'static str> {
     if x < zero!() {

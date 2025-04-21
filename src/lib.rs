@@ -8,17 +8,37 @@
 //! # ELLIP
 //! **Ellip** is an elliptic integral functions for Rust.
 //!
+//! ## Why Ellip
+//! Ellip is a pure-Rust implementation of [elliptic integrals](https://dlmf.nist.gov/19).
+//! This means there is no dependence on C++ libraries. Ellip also provides less common
+//! functions like Bulirsch's `cel` and `el`. Some applications of elliptic integrals include
+//! computing the [lengths of plane curves](https://dlmf.nist.gov/19.30), magnetic field from
+//! magnets of various shapes (e.g., [cylindrical](https://doi.org/10.1016/j.jmmm.2018.02.003)),
+//! [astrophysics](https://dx.doi.org/10.1088/0004-637X/696/2/1616), and [string theory](https://dx.doi.org/10.1088/1126-6708/2004/03/004).
+//!
+//! ## Example
+//! ```
+//! use ellip::{elliprg, util::assert_close};
+//!
+//! fn ellipse_length(a: f64, b: f64) -> Result<f64, &'static str> {
+//!     Ok(8.0 * elliprg(0.0, a * a, b * b)?)
+//! }
+//!
+//! let ans = ellipse_length(5.0, 3.0).unwrap();
+//! assert_close(ans, 25.526998863398124, 1e-15);
+//! ```
+//!
 //! # Features
 //! ## Legendre's complete integrals
-//! - [fn@ellipk]: Complete elliptic integral of the first kind.
-//! - [fn@ellipe]: Complete elliptic integral of the second kind.
-//! - [fn@ellippi]: Complete elliptic integral of the third kind.
-//! - [fn@ellipd]: Complete elliptic integral of Legendre's type.
+//! - [fn@ellipk]: Complete elliptic integral of the first kind (K).
+//! - [fn@ellipe]: Complete elliptic integral of the second kind (E).
+//! - [fn@ellippi]: Complete elliptic integral of the third kind (Π).
+//! - [fn@ellipd]: Complete elliptic integral of Legendre's type (D).
 //! ## Legendre's incomplete integrals
-//! - [fn@ellipf]: Incomplete elliptic integral of the first kind.
-//! - [fn@ellipeinc]: Incomplete elliptic integral of the second kind.
-//! - [fn@ellippiinc]: Incomplete elliptic integral of the third kind.
-//! - [fn@ellipdinc]: Incomplete elliptic integral of Legendre's type.
+//! - [fn@ellipf]: Incomplete elliptic integral of the first kind (F).
+//! - [fn@ellipeinc]: Incomplete elliptic integral of the second kind (E).
+//! - [fn@ellippiinc]: Incomplete elliptic integral of the third kind (Π).
+//! - [fn@ellipdinc]: Incomplete elliptic integral of Legendre's type (D).
 //! ## Bulirsch's integrals
 //! - [fn@cel]: General complete elliptic integral in Bulirsch's form.
 //! - [fn@cel1]: Complete elliptic integral of the first kind in Bulirsch's form.
@@ -27,18 +47,18 @@
 //! - [fn@el2]: Incomplete elliptic integral of the second kind in Bulirsch's form.
 //! - [fn@el3]: Incomplete elliptic integral of the third kind in Bulirsch's form.
 //! ## Carlson's symmetric integrals
-//! - [fn@elliprf]: Symmetric elliptic integral of the first kind.
-//! - [fn@elliprg]: Symmetric elliptic integral of the second kind.
-//! - [fn@elliprj]: Symmetric elliptic integral of the third kind.
-//! - [fn@elliprc]: Degenerate elliptic integral of RF.
-//! - [fn@elliprd]: Degenerate elliptic integral of the third kind.
+//! - [fn@elliprf]: Symmetric elliptic integral of the first kind (RF).
+//! - [fn@elliprg]: Symmetric elliptic integral of the second kind (RG).
+//! - [fn@elliprj]: Symmetric elliptic integral of the third kind (RJ).
+//! - [fn@elliprc]: Degenerate elliptic integral of RF (RC).
+//! - [fn@elliprd]: Degenerate elliptic integral of the third kind (RD).
 //!
 //! # Acknowledgment
 //! Ellip is derived from multiple mathematic libraries. We thank
 //! the opensource contributors for making mathematic libraries free for all.
 //! Following are the main original works used in the development of Ellip.
 //! Detailed credits are available in the source code.
-//! - [Scipy](https://github.com/scipy/scipy/)
+//! - [SciPy](https://github.com/scipy/scipy/)
 //! - [Cephes Math Library](https://netlib.org/cephes/)
 //! - [Boost Math Library](https://www.boost.org/doc/libs/release/libs/math/)
 //! - [Russell Lab](https://github.com/cpmech/russell)
@@ -85,6 +105,7 @@ pub use carlson::elliprj;
 // Utilities
 mod polyeval;
 use polyeval::*;
+pub mod util;
 
 #[cfg(test)]
 mod test_util;

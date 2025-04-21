@@ -22,9 +22,9 @@ use num_traits::Float;
 
 use crate::legendre::ellippi::ellippi_vc;
 
-use crate::{ellipeinc, ellipf, elliprf, elliprj};
+use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj};
 
-/// Compute [incomplete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E7).
+/// Computes [incomplete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E7).
 /// ```text
 ///                 φ                              
 ///                ⌠                 dϑ              
@@ -32,11 +32,44 @@ use crate::{ellipeinc, ellipf, elliprf, elliprj};
 ///                ⎮   _____________                
 ///                ⌡ ╲╱ 1 - m sin²ϑ  ⋅ ( 1 - n sin²ϑ )
 ///               0              
-/// where 0 ≤ m sin²φ ≤ 1               
 /// ```
 ///
-/// Note that some mathematical references use the parameter k and α for the function,
-/// where k² = m, α² = n.
+/// ## Parameters
+/// - phi: amplitude angle (φ). φ ∈ ℝ.
+/// - n: characteristic, n ∈ ℝ, n ≠ 1.
+/// - m: elliptic parameter. m ∈ ℝ.
+///
+/// The elliptic modulus (k) is frequently used instead of the parameter (m), where k² = m.
+/// The characteristic (n) is also sometimes expressed in term of α, where α² = n.
+///
+/// ## Domain
+/// - Returns error when m sin²φ > 1 and (n <= csc²φ or m < 1).
+/// - Returns the principal value if m sin²φ > 1
+///
+/// ## Graph
+/// ![Incomplete Elliptic Integral of the Third Kind (3D Plot)](https://github.com/p-sira/ellip/blob/main/figures/ellippiinc_plot_3d.png?raw=true)
+///
+/// [Interactive 3D Plot](https://github.com/p-sira/ellip/blob/main/figures/ellippiinc_plot_3d.html)
+///
+/// # Related Functions
+/// With c = csc²φ,
+/// - [ellippiinc](crate::ellippiinc)(φ, n, m) = n / 3 * [elliprj](crate::elliprj)(c - 1, c - m, c, c - n) + [ellipf](crate::ellipf)(φ, m)
+///
+/// With x = tan φ, p = 1 - n, and kc² = 1 - m,
+/// - [ellippiinc](crate::ellippiinc)(φ, n, m) = [el3](crate::el3)(x, kc, p)
+///
+/// # Examples
+/// ```
+/// use ellip::{ellippiinc, util::assert_close};
+/// use std::f64::consts::FRAC_PI_4;
+///
+/// assert_close(ellippiinc(FRAC_PI_4, 0.5, 0.5).unwrap(), 0.9190227391656969, 1e-15);
+/// ```
+///
+/// # References
+/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+///
 pub fn ellippiinc<T: Float>(phi: T, n: T, m: T) -> Result<T, &'static str> {
     ellippiinc_vc(phi, n, m, one!() - n)
 }
@@ -48,10 +81,6 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
     let sp2 = sphi * sphi;
     let mut result = zero!();
 
-    if m * sp2 > one!() || m < zero!() {
-        return Err("ellippiinc: The argument must satisfy 0 ≤ m sin²φ ≤ 1.");
-    }
-
     // Special cases first:
     if n == zero!() {
         // A&S 17.7.18 & 19
@@ -62,10 +91,13 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
         };
     }
 
-    if n > zero!() && (one!() / n) < sp2 {
-        // Complex result is a domain error:
-        return Err("ellippiinc: result is complex for v > 1 / sin^2(phi)");
-    }
+    // I cannot find the reference for this property
+    // but Wolfram Engine seems to give real results for this case.
+    // This section from Boost Math is kept as a reference.
+    // if n > zero!() && (one!() / n) < sp2 {
+    //     // Complex result is a domain error:
+    //     return Err("ellippiinc: result is complex for v > 1 / sin^2(phi)");
+    // }
 
     if n == one!() {
         if m == zero!() {
@@ -124,6 +156,36 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
         } else {
             Ok(result)
         };
+    }
+
+    // Evaluate the p.v. here after normalizing phi
+    if m * sp2 > one!() {
+        // Use Cauchy principal value
+        let c = one!() / sp2; //csc2 phi
+        if n <= c {
+            // For n<=c, there are a few special cases listed in https://dlmf.nist.gov/19.6.iv
+            // that allow calculation of the p.v.
+            return Err("ellippiinc: n must be greater than csc²φ to compute the Cauchy principal value when m sin²φ > 1.");
+        }
+
+        // The p.v. can be calculated when 1 < c < m
+        if m < one!() {
+            // c < m is already caught at m * sp2 > one!()
+            return Err("ellippiinc: m must be greater than 1 to compute the Cauchy principal value when m sin²φ > 1.");
+        }
+
+        let w2 = m / n;
+
+        // This also works but it's recursive.
+        // https://dlmf.nist.gov/19.7.E8
+        // return Ok((ellipf(phi, m)?
+        //     + c.sqrt() * elliprc((c - one!()) * (c - m), (c - n) * (c - w2))?)
+        //     - ellippiinc(phi, w2, m)?);
+
+        // https://dlmf.nist.gov/19.25.E16
+        return Ok(-third!() * w2 * elliprj(c - one!(), c - m, c, c - w2)?
+            + ((c - one!()) * (c - m) / (n - one!()) / (one!() - w2)).sqrt()
+                * elliprc(c * (n - one!()) * (one!() - w2), (n - c) * (c - w2))?);
     }
 
     if m == zero!() {

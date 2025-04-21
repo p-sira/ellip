@@ -1,5 +1,18 @@
 # Changelog
 ## 0.3
+### 0.3.1
+**Improvements**
+- Improve documentations and add graphs and examples for each function.
+- Improve the precision of the `ellipk`, `ellipf`, `ellipe`, and `ellipeinc` functions.
+- `el3`: Add error when parameter goes out of the function's range (|kc| > 0 for p < 0) and improved the error message when 1 + px² equals zero.
+
+**New Features**
+- Add `assert_close` function in `util` module.
+
+**Bug Fixes**
+- `ellipd`: Fix incorrect answers for m < 0. The function also returns infinity instead of throwing error at m = 1.
+- Fix the domains for `ellipf` and `ellipeinc`.
+
 ### 0.3.0
 **New Features**
 - `ellippi`: Complete elliptic integral of the third kind.

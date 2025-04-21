@@ -1,6 +1,6 @@
 [package]
 name = "ellip"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Sira Pornsiriprasert <code@psira.me>"]
 
 description = "Elliptic integrals for Rust"
@@ -22,6 +22,8 @@ num-traits = "~0.2"
 [dev-dependencies]
 criterion = "~0.5"
 itertools = "~0.14"
+plotly = { version = "0.12.1", features = ["kaleido", "kaleido_download"] }
+serde = "1.0.219"
 
 [[bench]]
 name = "bench"

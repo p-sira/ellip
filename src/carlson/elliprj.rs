@@ -23,7 +23,7 @@ use std::mem::swap;
 use crate::{elliprc, elliprd, elliprf};
 use num_traits::Float;
 
-/// Compute [symmetric elliptic integral of the third kind](https://dlmf.nist.gov/19.16.E2).
+/// Computes RJ ([symmetric elliptic integral of the third kind](https://dlmf.nist.gov/19.16.E2)).
 /// ```text
 ///                        ∞                              
 ///                    3  ⌠                  dt              
@@ -31,8 +31,42 @@ use num_traits::Float;
 ///                    2  ⎮             _______________________
 ///                       ⌡ (t + p) ⋅ ╲╱(t + x) (t + y) (t + z)
 ///                      0
-/// where x ≥ 0, y ≥ 0, z ≥ 0, and at most one can be zero. p ≠ 0.
 /// ```
+///
+/// ## Parameters
+/// - x ∈ ℝ, x ≥ 0
+/// - y ∈ ℝ, y ≥ 0
+/// - z ∈ ℝ, z ≥ 0
+/// - p ∈ ℝ, p ≠ 0
+///
+/// The parameters x, y, and z are symmetric. This means swapping them does not change the value of the function.
+/// At most one of them can be zero.
+///
+/// ## Domain
+/// - Returns error if:
+///   - any of x, y, or z is negative, or more than one of them are zero,
+///   - or p = 0.
+/// - Returns the principal value if p < 0.
+///
+/// ## Graph
+/// ![Symmetric Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprj_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprj_plot.html)
+///
+/// # Related Functions
+/// With c = csc²φ and kc² = 1 - m,
+/// - [ellippi](crate::ellippi)(φ, n, m) = n / 3 * [elliprj](crate::elliprj)(c - 1, c - m, c, c - n) + [ellipf](crate::ellipf)(φ, m)
+///
+/// # Examples
+/// ```
+/// use ellip::{elliprj, util::assert_close};
+///
+/// assert_close(elliprj(1.0, 0.5, 0.25, 0.125).unwrap(), 5.680557292035963, 1e-15);
+/// ```
+///
+/// # References
+/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 ///
 pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
     if x.min(y).min(z) < zero!() || (y + z).min(x + y).min(x + z) == zero!() {
