@@ -23,7 +23,7 @@ use num_traits::Float;
 
 use crate::{elliprf, polyeval};
 
-/// Compute [complete elliptic integral of the first kind](https://dlmf.nist.gov/19.2.E8).
+/// Computes [complete elliptic integral of the first kind](https://dlmf.nist.gov/19.2.E8).
 /// ```text
 ///           π/2
 ///          ⌠          dθ
@@ -31,11 +31,35 @@ use crate::{elliprf, polyeval};
 ///          │     _____________
 ///          ⌡   \╱ 1 - m sin²θ
 ///         0
-/// where m ≤ 1
 /// ```
 ///
-/// Note that some mathematical references use the parameter k for the function,
-/// where k² = m.
+/// ## Parameters
+/// - m: elliptic parameter. m ∈ ℝ, m < 1.
+///
+/// The elliptic modulus (k) is also frequently used instead of the parameter (m), where k² = m.
+///
+/// ## Domain
+/// - Returns error if m > 1.
+///
+/// ## Graph
+/// ![Complete Elliptic Integral of the First Kind](https://github.com/p-sira/ellip/blob/main/figures/ellipk_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipk_plot.html)
+///
+/// # Related Functions
+/// - [ellipk](crate::ellipk)(m) = [elliprf](crate::elliprf)(0, 1 - m, 1)
+/// - [ellipf](crate::ellipf)(π/2, m) = [ellipk](crate::ellipk)(m)
+///
+/// # Examples
+/// ```
+/// use ellip::{ellipk, util::assert_close};
+///
+/// assert_close(ellipk(0.5).unwrap(), 1.8540746773013719, 1e-15);
+/// ```
+///
+/// # References
+/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 ///
 pub fn ellipk<T: Float>(m: T) -> Result<T, &'static str> {
     // If T is f128

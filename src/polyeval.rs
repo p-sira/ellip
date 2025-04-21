@@ -67,6 +67,8 @@
  * - 06-23-2016: add code for evaluating rational functions
  */
 
+//! Polynomial evaluation
+
 use num_traits::Float;
 
 /// Evaluate polynomial

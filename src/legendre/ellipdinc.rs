@@ -22,7 +22,7 @@
 use crate::{ellipd, elliprd};
 use num_traits::Float;
 
-/// Compute [incomplete elliptic integral of Legendre's type](https://dlmf.nist.gov/19.2.E6).
+/// Computes [incomplete elliptic integral of Legendre's type](https://dlmf.nist.gov/19.2.E6).
 /// ```text
 ///              φ
 ///             ⌠       sin²θ dθ
@@ -30,11 +30,43 @@ use num_traits::Float;
 ///             │     _____________
 ///             ⌡   \╱ 1 - m sin²θ
 ///            0
-/// where m < 1
 /// ```
 ///
-/// Note that some mathematical references use the parameter k for the function,
-/// where k² = m.
+/// ## Parameters
+/// - phi: amplitude angle (φ). φ ∈ ℝ.
+/// - m: elliptic parameter. m ∈ ℝ.
+///
+/// The elliptic modulus (k) is also frequently used instead of the parameter (m), where k² = m.
+///
+/// ## Domain
+/// - Returns error if m sin²φ > 1.
+///
+/// ## Graph
+/// ![Incomplete Elliptic Integral of Legendre's Type](https://github.com/p-sira/ellip/blob/main/figures/ellipdinc_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipdinc_plot.html)
+///
+/// ![Incomplete Elliptic Integral of Legendre's Type (3D Plot)](https://github.com/p-sira/ellip/blob/main/figures/ellipdinc_plot_3d.png?raw=true)
+///
+/// [Interactive 3D Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipdinc_plot_3d.html)
+///
+/// # Related Functions
+/// With c = csc²φ,
+/// - [ellipdinc](crate::ellipdinc)(φ, m) = ([ellipf](crate::ellipf)(φ, m) - [ellipeinc](crate::ellipeinc)(φ, m)) / m
+/// - [ellipdinc](crate::ellipdinc)(φ, m) = [elliprd](crate::elliprd)(c - 1, c - m, c) / 3
+///
+/// # Examples
+/// ```
+/// use ellip::{ellipdinc, util::assert_close};
+/// use std::f64::consts::FRAC_PI_4;
+///
+/// assert_close(ellipdinc(FRAC_PI_4, 0.5).unwrap(), 0.15566274414316758, 1e-15);
+/// ```
+///
+/// # References
+/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+///
 pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
     let sign = if phi < zero!() { -one!() } else { one!() };
 
@@ -72,7 +104,7 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
     let cm1 = cosp2 / sinp2; // c - 1
 
     if m * sinp2 > one!() {
-        return Err("ellipdinc: The argument must satisfy m sin²φ < 1.");
+        return Err("ellipdinc: m sin²φ must be smaller than one.");
     }
 
     let mut result = zero!();

@@ -7,8 +7,7 @@ use num_traits::Float;
 
 use super::{cel1, cel2, BulirschConst};
 
-// Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
-/// Compute [incomplete elliptic integral of the first kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E11_5).
+/// Computes [incomplete elliptic integral of the first kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E11_5).
 /// ```text
 ///                 arctan(x)                                                   
 ///                ⌠                             
@@ -17,10 +16,40 @@ use super::{cel1, cel2, BulirschConst};
 ///                ⎮      ______________________
 ///                ⌡   ╲╱ cos²(ϑ) + kc² sin²(ϑ)    
 ///               0                                                   
-/// where kc ≠ 0
 /// ```
 ///
-/// Note that x = tan φ and kc² = mc = 1 - m. The precision can be adjusted by overwriting the trait [super::BulirschConst].
+/// ## Parameters
+/// - x: tangent of amplitude angle. x ∈ ℝ.
+/// - kc: complementary modulus. kc ∈ ℝ, kc ≠ 0.
+///
+/// The precision of the function can be adjusted by overwriting the trait [super::BulirschConst].
+/// The default is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405) for [f64] and [f32].
+///
+/// ## Domain
+/// - Returns error if kc = 0.
+///
+/// ## Graph
+/// ![Bulirsch's Incomplete Elliptic Integral of the First Kind](https://github.com/p-sira/ellip/blob/main/figures/el1_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/el1_plot.html)
+///
+/// # Related Functions
+/// With x = tan φ and kc² = 1 - m,
+/// - [ellipf](crate::ellipf)(φ, m) = [el1](crate::el1)(x, kc) = [el2](crate::el2)(x, kc, 1, 1)
+/// - [el1](crate::el1)(∞, kc) = [cel1](crate::cel1)(kc)
+///
+/// # Examples
+/// ```
+/// use ellip::{el1, util::assert_close};
+/// use std::f64::consts::FRAC_PI_4;
+///
+/// assert_close(el1(FRAC_PI_4.tan(), 0.5).unwrap(), 0.8512237490711854, 1e-15);
+/// ```
+///
+/// # References
+/// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+///
 pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
     if x == zero!() {
         return Ok(zero!());
@@ -71,7 +100,7 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
 }
 
 // Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
-/// Compute [incomplete elliptic integral of the second kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E12).
+/// Computes [incomplete elliptic integral of the second kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E12).
 /// ```text
 ///                       arctan(x)                                                   
 ///                      ⌠                             
@@ -80,10 +109,43 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
 ///                      ⎮     ________________________________
 ///                      ⌡  ╲╱ (1 + tan²(ϑ)) (1 + kc² tan²(ϑ))    
 ///                     0                                                   
-/// where kc ≠ 0
 /// ```
 ///
-/// Note that x = tan φ and kc² = mc = 1 - m. The precision can be adjusted by overwriting the trait [super::BulirschConst].
+/// ## Parameters
+/// - x: tangent of amplitude angle. x ∈ ℝ.
+/// - kc: complementary modulus. kc ∈ ℝ, kc ≠ 0.
+/// - a ∈ ℝ
+/// - b ∈ ℝ
+///
+/// The precision of the function can be adjusted by overwriting the trait [super::BulirschConst].
+/// The default is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405) for [f64] and [f32].
+///
+/// ## Domain
+/// - Returns error if kc = 0.
+///
+/// ## Graph
+/// ![Bulirsch's Incomplete Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/el2_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/el2_plot.html)
+///
+/// # Related Functions
+/// With x = tan φ and kc² = 1 - m,
+/// - [ellipf](crate::ellipf)(φ, m) = [el1](crate::el1)(x, kc) = [el2](crate::el2)(x, kc, 1, 1)
+/// - [ellipeinc](crate::ellipeinc)(φ, m) = [el2](crate::el2)(x, kc, 1, kc²)
+/// - [el2](crate::el2)(∞, kc, a, b) = [cel1](crate::cel2)(kc, a, b)
+///
+/// # Examples
+/// ```
+/// use ellip::{el2, util::assert_close};
+/// use std::f64::consts::FRAC_PI_4;
+///
+/// assert_close(el2(FRAC_PI_4.tan(), 0.5, 1.0, 1.0).unwrap(), 0.8512237490711854, 1e-15);
+/// ```
+///
+/// # References
+/// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+///
 pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'static str> {
     if x == zero!() {
         return Ok(zero!());
@@ -157,8 +219,7 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'sta
     Ok(e + c * z)
 }
 
-// Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions. III”
-/// Compute [incomplete elliptic integral of the third kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E16).
+/// Computes [incomplete elliptic integral of the third kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E16).
 /// ```text
 ///                    arctan(x)                                                   
 ///                   ⌠                             
@@ -169,8 +230,47 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'sta
 ///                  0                                                   
 /// ```
 ///
-/// Note that x = tan φ and kc² = mc = 1 - m. The precision can be adjusted by overwriting the trait [super::BulirschConst].
+/// ## Parameters
+/// - x: tangent of amplitude angle. x ∈ ℝ.
+/// - kc: complementary modulus. kc ∈ ℝ, kc ≠ 0.
+/// - p ∈ ℝ
+///
+/// The precision of the function can be adjusted by overwriting the trait [super::BulirschConst].
+/// The default is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405) for [f64] and [f32].
+///
+/// ## Domain
+/// - Returns error if:
+///   - kc = 0,
+///   - 1 + px² = 0,
+///   - or |kc| > 1 for p < 0.
+/// - Returns the principal value when 1 + px² < 0
+///
+/// ## Graph
+/// ![Bulirsch's Incomplete Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/el3_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/el3_plot.html)
+///
+/// # Related Functions
+/// With x = tan φ, p = 1 - n, and kc² = 1 - m,
+/// - [ellippiinc](crate::ellippiinc)(φ, n, m) = [el3](crate::el3)(x, kc, p)
+///
+/// # Examples
+/// ```
+/// use ellip::{el3, util::assert_close};
+/// use std::f64::consts::FRAC_PI_4;
+///
+/// assert_close(el3(FRAC_PI_4.tan(), 0.5, 1.0).unwrap(), 0.8512237490711854, 1e-15);
+/// ```
+///
+/// # References
+/// - Bulirsch, R. “Numerical Calculation of Elliptic Integrals and Elliptic Functions. III.” Numerische Mathematik 13, no. 4 (August 1, 1969): 305–15. <https://doi.org/10.1007/BF02165405>.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+///
 pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, &'static str> {
+    if p < zero!() && kc.abs() > one!() {
+        return Err("el3: kc must satisfy: -1 ≤ kc ≤ 1 for p < 0.");
+    }
+
     if x == zero!() {
         return Ok(zero!());
     }
@@ -262,7 +362,7 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, &'static st
 
     w = one!() + f;
     if w == zero!() {
-        return Err("fail");
+        return Err("el3: 1 + px² cannot be zero.");
     }
 
     let p1 = if p == zero!() { T::cb() / hh } else { p };
@@ -383,7 +483,7 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, &'static st
             if z < zero!() {
                 m += k;
             }
-            k = r.signum().to_i32().expect("el3: Cannot extract sign of r.");
+            k = if r < zero!() { -1 } else { 1 };
             h = e / (u * u + v * v);
             u = u * (one!() + h);
             v = v * (one!() - h);
@@ -444,7 +544,7 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, &'static st
             z = T::cb();
         }
         if z < zero!() {
-            m += h.signum().to_i32().expect("el3: Cannot extract sign of h.");
+            m += if h < zero!() { -1 } else { 1 };
         }
         s = (h / z).atan() + num!(m) * pi!();
     } else {
@@ -470,12 +570,11 @@ mod tests {
     #[test]
     fn test_el1() {
         fn test_special_cases(x: f64, kc: f64) {
-            let k = (1.0 - kc * kc).sqrt();
-            let m = k * k;
+            let m = 1.0 - kc * kc;
             let phi = x.atan();
             let f = ellipf(phi, m).unwrap();
 
-            assert_close!(f, el1(x, kc).unwrap(), 5e-14);
+            assert_close!(f, el1(x, kc).unwrap(), 1.2e-14);
         }
 
         let x = linspace(0.0, 100.0, 50);
@@ -515,14 +614,13 @@ mod tests {
     #[test]
     fn test_el2() {
         fn test_special_cases(x: f64, kc: f64) {
-            let k = (1.0 - kc * kc).sqrt();
-            let m = k * k;
+            let m = 1.0 - kc * kc;
             let phi = x.atan();
             let f = ellipf(phi, m).unwrap();
             let e = ellipeinc(phi, m).unwrap();
             let d = ellipdinc(phi, m).unwrap();
 
-            assert_close!(f, el2(x, kc, 1.0, 1.0).unwrap(), 5e-14);
+            assert_close!(f, el2(x, kc, 1.0, 1.0).unwrap(), 1.2e-14);
             assert_close!(e, el2(x, kc, 1.0, kc * kc).unwrap(), 7e-14);
             assert_close!(d, el2(x, kc, 0.0, 1.0).unwrap(), 6e-14);
         }
@@ -541,8 +639,7 @@ mod tests {
     #[test]
     fn test_el3() {
         fn _test(x: f64, kc: f64, p: f64) {
-            let k = (1.0 - kc * kc).sqrt();
-            let m = k * k;
+            let m = 1.0 - kc * kc;
             let phi = x.atan();
             let n = 1.0 - p;
             let ellippi = ellippiinc(phi, n, m).unwrap();

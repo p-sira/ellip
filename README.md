@@ -24,17 +24,44 @@ Elliptic integrals for Rust
 >> cargo add ellip
 ```
 
+## Why Ellip
+Ellip is a pure-Rust implementation of [elliptic integrals](https://dlmf.nist.gov/19). This means there is no dependence on C++ libraries. Ellip also provides less common functions like Bulirsch's `cel` and `el`. 
+
+Some applications of elliptic integrals include computing the [lengths of plane curves](https://dlmf.nist.gov/19.30), [magnetism](https://doi.org/10.1016/j.jmmm.2018.02.003), [astrophysics](https://dx.doi.org/10.1088/0004-637X/696/2/1616), and [string theory](https://dx.doi.org/10.1088/1126-6708/2004/03/004).
+
+## Quick Start
+
+Start by installing Ellip.
+```shell
+>> cargo add ellip
+```
+
+Let's compute the circumference of an ellipse.
+
+```rust
+use ellip::{elliprg, util::assert_close};
+
+fn ellipse_length(a: f64, b: f64) -> Result<f64, &'static str> {
+    Ok(8.0 * elliprg(0.0, a * a, b * b)?)
+}
+
+let ans = ellipse_length(5.0, 3.0).unwrap();
+assert_close(ans, 25.526998863398124, 1e-15);
+```
+
+Learn more at [doc.rs](https://docs.rs/ellip).
+
 ## Features
 - Legendre's complete integrals
-    - `ellipk`: Complete elliptic integral of the first kind.
-    - `ellipe`: Complete elliptic integral of the second kind.
-    - `ellippi`: Complete elliptic integral of the third kind.
-    - `ellipd`: Complete elliptic integral of Legendre's type.
+    - `ellipk`: Complete elliptic integral of the first kind (K).
+    - `ellipe`: Complete elliptic integral of the second kind (E).
+    - `ellippi`: Complete elliptic integral of the third kind (Π).
+    - `ellipd`: Complete elliptic integral of Legendre's type (D).
 - Legendre's incomplete integrals
-    - `ellipf`: Incomplete elliptic integral of the first kind.
-    - `ellipeinc`: Incomplete elliptic integral of the second kind.
-    - `ellippiinc`: Incomplete elliptic integral of the third kind.
-    - `ellipdinc`: Incomplete elliptic integral of Legendre's type.
+    - `ellipf`: Incomplete elliptic integral of the first kind (F).
+    - `ellipeinc`: Incomplete elliptic integral of the second kind (E).
+    - `ellippiinc`: Incomplete elliptic integral of the third kind (Π).
+    - `ellipdinc`: Incomplete elliptic integral of Legendre's type (D).
 - Bulirsch's integrals
     - `cel`: General complete elliptic integral in Bulirsch's form.
     - `cel1`: Complete elliptic integral of the first kind in Bulirsch's form.
@@ -43,11 +70,11 @@ Elliptic integrals for Rust
     - `el2`: Incomplete elliptic integral of the second kind in Bulirsch's form.
     - `el3`: Incomplete elliptic integral of the third kind in Bulirsch's form.
 - Carlson's symmetric integrals
-    - `elliprf`: Symmetric elliptic integral of the first kind.
-    - `elliprg`: Symmetric elliptic integral of the second kind.
-    - `elliprj`: Symmetric elliptic integral of the third kind.
-    - `elliprc`: Degenerate elliptic integral of RF.
-    - `elliprd`: Degenerate elliptic integral of the third kind.
+    - `elliprf`: Symmetric elliptic integral of the first kind (RF).
+    - `elliprg`: Symmetric elliptic integral of the second kind (RG).
+    - `elliprj`: Symmetric elliptic integral of the third kind (RJ).
+    - `elliprc`: Degenerate elliptic integral of RF (RC).
+    - `elliprd`: Degenerate elliptic integral of the third kind (RD).
 
 ---
 

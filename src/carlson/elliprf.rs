@@ -24,7 +24,7 @@ use num_traits::Float;
 
 use crate::elliprc;
 
-/// Compute [symmetric elliptic integral of the first kind](https://dlmf.nist.gov/19.16.E1).
+/// Computes RF ([symmetric elliptic integral of the first kind](https://dlmf.nist.gov/19.16.E1)).
 /// ```text
 ///                     ∞                              
 ///                 1  ⌠             dt              
@@ -32,8 +32,39 @@ use crate::elliprc;
 ///                 2  ⎮   ________________________
 ///                    ⌡ ╲╱(t + x) (t + y) (t + z)
 ///                   0                              
-/// where x ≥ 0, y ≥ 0, z ≥ 0, and at most one can be zero.
 /// ```
+///
+/// ## Parameters
+/// - x ∈ ℝ, x ≥ 0
+/// - y ∈ ℝ, y ≥ 0
+/// - z ∈ ℝ, z ≥ 0
+///
+/// The parameters x, y, and z are symmetric. This means swapping them does not change the value of the function.
+/// At most one of them can be zero.
+///
+/// ## Domain
+/// - Returns error if any of x, y, or z is negative, or more than one of them are zero.
+///
+/// ## Graph
+/// ![Symmetric Elliptic Integral of the First Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprf_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprf_plot.html)
+///
+/// # Related Functions
+/// With c = csc²φ, r = 1/x², and kc² = 1 - m,
+/// - [ellipf](crate::ellipf)(φ,m) = [elliprf](crate::elliprf)(c - 1, c - m, c)
+/// - [el1](crate::el1)(x, kc) = [elliprf](crate::elliprf)(r, r + m, r + 1)
+///
+/// # Examples
+/// ```
+/// use ellip::{elliprf, util::assert_close};
+///
+/// assert_close(elliprf(1.0, 0.5, 0.25).unwrap(), 1.370171633266872, 1e-15);
+/// ```
+///
+/// # References
+/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 ///
 pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
     if x.min(y).min(z) < zero!() || (y + z).min(x + y).min(x + z) < zero!() {

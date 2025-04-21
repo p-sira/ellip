@@ -23,7 +23,7 @@ use num_traits::Float;
 
 use crate::{elliprg, polyeval};
 
-/// Compute [complete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E8).
+/// Computes [complete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E8).
 ///
 /// ```text
 ///           π/2
@@ -31,11 +31,36 @@ use crate::{elliprg, polyeval};
 /// E(m)  =  │ \╱ 1 - m sin²θ  dθ
 ///          ⌡
 ///         0
-/// where m ≤ 1
 /// ```
 ///
-/// Note that some mathematical references use the parameter k for the function,
-/// where k² = m.
+/// ## Parameters
+/// - m: elliptic parameter. m ∈ ℝ, m < 1.
+///
+/// The elliptic modulus (k) is also frequently used instead of the parameter (m), where k² = m.
+///
+/// ## Domain
+/// - Returns error if m > 1.
+///
+/// ## Graph
+/// ![Complete Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/ellipe_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipe_plot.html)
+///
+/// # Related Functions
+/// - [ellipe](crate::ellipe)(m) = 2 [elliprg](crate::elliprg)(0, 1 - m, 1)
+/// - [ellipeinc](crate::ellipeinc)(π/2, m) = [ellipe](crate::ellipe)(m)
+///
+/// # Examples
+/// ```
+/// use ellip::{ellipe, util::assert_close};
+///
+/// assert_close(ellipe(0.5).unwrap(), 1.3506438810476755, 1e-15);
+/// ```
+///
+/// # References
+/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+///
 pub fn ellipe<T: Float>(m: T) -> Result<T, &'static str> {
     // If T is f128
     if max_val!() > num!(f64::MAX) {
