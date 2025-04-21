@@ -290,7 +290,7 @@ pub(crate) fn ellipk_precise<T: Float>(m: T) -> Result<T, &'static str> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compare_test_data;
+    use crate::compare_test_data_boost;
 
     fn ellipk_k(k: &[f64]) -> f64 {
         ellipk(k[0] * k[0]).unwrap()
@@ -298,6 +298,6 @@ mod tests {
 
     #[test]
     fn test_ellipk() {
-        compare_test_data!("./tests/data/boost/ellipk_data.txt", ellipk_k, f64::EPSILON);
+        compare_test_data_boost!("./tests/data/boost/ellipk_data.txt", ellipk_k, f64::EPSILON);
     }
 }

@@ -317,7 +317,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
 
 #[cfg(test)]
 mod tests {
-    use crate::compare_test_data;
+    use crate::compare_test_data_boost;
 
     use super::*;
 
@@ -327,7 +327,7 @@ mod tests {
 
     #[test]
     fn test_ellippi() {
-        compare_test_data!(
+        compare_test_data_boost!(
             "./tests/data/boost/ellippiinc_data.txt",
             ellippiinc_k,
             2.1e-15
@@ -336,7 +336,7 @@ mod tests {
 
     #[test]
     fn test_ellippi_large() {
-        compare_test_data!(
+        compare_test_data_boost!(
             "./tests/data/boost/ellippi3_large_data.txt",
             ellippiinc_k,
             6e-15

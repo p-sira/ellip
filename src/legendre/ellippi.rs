@@ -138,7 +138,7 @@ pub fn ellippi_vc<T: Float>(n: T, m: T, vc: T) -> Result<T, &'static str> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compare_test_data;
+    use crate::compare_test_data_boost;
 
     fn ellippi_k(inp: &[f64]) -> f64 {
         ellippi(inp[0], inp[1] * inp[1]).unwrap()
@@ -146,7 +146,7 @@ mod tests {
 
     #[test]
     fn test_ellippi() {
-        compare_test_data!(
+        compare_test_data_boost!(
             "./tests/data/boost/ellippi2_data_f64.txt",
             ellippi_k,
             4.4e-16

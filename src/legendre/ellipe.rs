@@ -289,7 +289,7 @@ mod tests {
     use core::f64;
 
     use super::*;
-    use crate::compare_test_data;
+    use crate::compare_test_data_boost;
 
     fn ellipe_k(k: &[f64]) -> f64 {
         ellipe(k[0] * k[0]).unwrap()
@@ -297,6 +297,6 @@ mod tests {
 
     #[test]
     fn test_ellipe() {
-        compare_test_data!("./tests/data/boost/ellipe_data.txt", ellipe_k, f64::EPSILON);
+        compare_test_data_boost!("./tests/data/boost/ellipe_data.txt", ellipe_k, f64::EPSILON);
     }
 }

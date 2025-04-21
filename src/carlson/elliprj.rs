@@ -252,7 +252,7 @@ mod tests {
     use itertools::Itertools;
 
     use super::*;
-    use crate::{assert_close, compare_test_data};
+    use crate::{assert_close, compare_test_data_boost};
 
     fn __elliprj(inp: &[&f64]) -> f64 {
         elliprj(*inp[0], *inp[1], *inp[2], *inp[3]).unwrap()
@@ -274,7 +274,7 @@ mod tests {
 
     #[test]
     fn test_elliprj() {
-        compare_test_data!(
+        compare_test_data_boost!(
             "./tests/data/boost/elliprj_data.txt",
             _elliprj,
             2.7e-14,
@@ -284,7 +284,7 @@ mod tests {
 
     #[test]
     fn test_elliprj_e2() {
-        compare_test_data!(
+        compare_test_data_boost!(
             "./tests/data/boost/elliprj_e2.txt",
             _elliprj,
             4.8e-14,
@@ -294,7 +294,7 @@ mod tests {
 
     #[test]
     fn test_elliprj_e3() {
-        compare_test_data!(
+        compare_test_data_boost!(
             "./tests/data/boost/elliprj_e3.txt",
             _elliprj,
             3.1e-15,
@@ -304,7 +304,7 @@ mod tests {
 
     #[test]
     fn test_elliprj_e4() {
-        compare_test_data!(
+        compare_test_data_boost!(
             "./tests/data/boost/elliprj_e4.txt",
             _elliprj,
             2.2e-16,
@@ -314,7 +314,7 @@ mod tests {
 
     #[test]
     fn test_elliprj_zp() {
-        compare_test_data!(
+        compare_test_data_boost!(
             "./tests/data/boost/elliprj_zp.txt",
             _elliprj,
             3.5e-15,

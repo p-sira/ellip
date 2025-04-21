@@ -141,7 +141,7 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
 
 #[cfg(test)]
 mod tests {
-    use crate::compare_test_data;
+    use crate::compare_test_data_boost;
 
     use super::*;
 
@@ -151,7 +151,7 @@ mod tests {
 
     #[test]
     fn test_ellipeinc() {
-        compare_test_data!(
+        compare_test_data_boost!(
             "./tests/data/boost/ellipeinc_data.txt",
             ellipeinc_k::<f64>,
             5e-16

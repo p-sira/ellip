@@ -10,17 +10,81 @@ use serde::Deserialize;
 
 #[macro_export]
 macro_rules! compare_test_data {
+    ($func: expr, $inputs :expr, $expected: expr, $t: ident, $rtol:expr, $atol:expr) => {
+        let mut test_fail = 0;
+        let mut worst_line = 0;
+        let mut worst_params: Vec<$t> = Vec::new();
+        let mut worst_errors: [$t;5] = [0.0; 5];
+
+        for (i, (inp, exp)) in $inputs.iter().zip($expected).enumerate() {
+            let result = $func(&inp);
+
+            if result.is_nan() {
+                panic! ("Test failed on case {}: input = {:?}, expected = {:?}, got = NAN",
+                i + 1,
+                inp,
+                exp,)
+            }
+
+            let error = (result - exp).abs();
+            let tol = $t::from($atol) + $t::from($rtol) * exp.abs();
+            if error > tol {
+                let rel = error / exp.abs();
+                test_fail += 1;
+                if rel > worst_errors[1] {
+                    worst_line = i + 1;
+                    worst_errors = [error, rel, tol, exp, result];
+                    worst_params = inp.clone();
+                }
+                eprintln!(
+                    "Test failed on case {}: input = {:?}, expected = {:?}, got = {:?} \n error = {:?}, rel = {:?}, abs = {:?}, rtol = {:?}, atol = {:?}\n",
+                    i + 1,
+                    inp,
+                    exp,
+                    result,
+                    error,
+                    rel,
+                    tol,
+                    $rtol,
+                    $atol,
+                );
+            }
+
+            if test_fail > 0 {
+                panic!(
+                    "Failed {}/{} cases. Worst on case {}: input = {:?}, expected = {:?}, got = {:?} \n error = {:?}, rel = {:?}, abs = {:?}, rtol = {:?}, atol = {:?}",
+                    test_fail,
+                    $inputs.len(),
+                    worst_line,
+                    worst_params,
+                    worst_errors[3],
+                    worst_errors[4],
+                    worst_errors[0],
+                    worst_errors[1],
+                    worst_errors[2],
+                    $rtol,
+                    $atol,
+                );
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! compare_test_data_boost {
     ($file_path:expr, $func:expr, $rtol:expr) => {
-        compare_test_data!($file_path, $func, f64, $rtol, 0.0)
+        compare_test_data_boost!($file_path, $func, f64, $rtol, 0.0)
     };
     ($file_path:expr, $func:expr, $t: ident, $rtol:expr) => {
-        compare_test_data!($file_path, $func, f64, $rtol, 0.0)
+        compare_test_data_boost!($file_path, $func, f64, $rtol, 0.0)
     };
     ($file_path:expr, $func:expr, $rtol:expr, $atol:expr) => {
-        compare_test_data!($file_path, $func, f64, $rtol, $atol)
+        compare_test_data_boost!($file_path, $func, f64, $rtol, $atol)
     };
     ($file_path:expr, $func:expr, $t: ident, $rtol:expr, $atol:expr) => {
         {
+            use crate::compare_test_data;
+
             use std::fs::File;
             use std::io::{BufRead, BufReader};
             use std::path::Path;
@@ -35,75 +99,24 @@ macro_rules! compare_test_data {
             let file = File::open($file_path).expect("Cannot open file");
             let reader = BufReader::new(file);
 
-            let mut total_cases = 0;
-            let mut test_fail = 0;
-            let mut worst_line = 0;
-            let mut worst_params: Vec<$t> = Vec::new();
-            let mut worst_errors: [$t;5] = [0.0; 5];
+            let mut inputs: Vec<Vec<$t>> = Vec::new();
+            let mut expected: Vec<$t> = Vec::new();
 
-            for (line_number, line) in reader.lines().enumerate() {
+            reader.lines().for_each(|line| {
                 let line = line.expect("Cannot read line");
-                total_cases += 1;
-
                 let parts: Vec<&str> = line.split_whitespace().collect();
-                let inputs: Vec<$t> = parts[..parts.len() - 1]
-                    .iter()
-                    .map(|&v| $t::from_str(v).expect("Cannot parse input(s) as a number"))
-                    .collect();
-
-                let expected: $t = $t::from_str(parts[parts.len() - 1])
-                    .expect("Cannot parse expected value as a number");
-
-                let result = $func(&inputs);
-
-                if result.is_nan() {
-                    panic! ("Test failed on line {}: input = {:?}, expected = {:?}, got = NAN",
-                    line_number + 1,
-                    inputs,
-                    expected,)
-                }
-
-                let error = (result - expected).abs();
-                let tol = $t::from($atol) + $t::from($rtol) * expected.abs();
-                if error > tol {
-                    let rel = error / expected.abs();
-                    test_fail += 1;
-                    if rel > worst_errors[1] {
-                        worst_line = line_number + 1;
-                        worst_errors = [error, rel, tol, expected, result];
-                        worst_params = inputs.clone();
-                    }
-                    eprintln!(
-                        "Test failed on line {}: input = {:?}, expected = {:?}, got = {:?} \n error = {:?}, rel = {:?}, abs = {:?}, rtol = {:?}, atol = {:?}\n",
-                        line_number + 1,
-                        inputs,
-                        expected,
-                        result,
-                        error,
-                        rel,
-                        tol,
-                        $rtol,
-                        $atol,
-                    );
-                }
-            }
-
-            if test_fail > 0 {
-                panic!(
-                    "Failed {}/{} cases. Worst on line {}: input = {:?}, expected = {:?}, got = {:?} \n error = {:?}, rel = {:?}, abs = {:?}, rtol = {:?}, atol = {:?}",
-                    test_fail,
-                    total_cases,
-                    worst_line,
-                    worst_params,
-                    worst_errors[3],
-                    worst_errors[4],
-                    worst_errors[0],
-                    worst_errors[1],
-                    worst_errors[2],
-                    $rtol,
-                    $atol,
+                inputs.push(
+                    parts[..parts.len() - 1]
+                        .iter()
+                        .map(|&v| $t::from_str(v).expect("Cannot parse input(s) as a number"))
+                        .collect(),
                 );
-            }
+                expected.push(
+                    $t::from_str(parts[parts.len() - 1]).expect("Cannot parse expected value as a number"),
+                );
+            });
+
+            compare_test_data!($func, inputs, expected, $t, $rtol, $atol);
         }
     };
 }

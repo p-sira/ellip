@@ -123,7 +123,7 @@ mod tests {
     use core::f64;
 
     use super::*;
-    use crate::compare_test_data;
+    use crate::compare_test_data_boost;
 
     fn ellipdinc_k(inp: &[f64]) -> f64 {
         ellipdinc(inp[0], inp[1] * inp[1]).unwrap()
@@ -131,7 +131,7 @@ mod tests {
 
     #[test]
     fn test_ellipd() {
-        compare_test_data!(
+        compare_test_data_boost!(
             "./tests/data/boost/ellipdinc_data.txt",
             ellipdinc_k,
             6.4e-16

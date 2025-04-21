@@ -108,7 +108,7 @@ fn _elliprc<T: Float>(x: T, y: T) -> T {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compare_test_data;
+    use crate::compare_test_data_boost;
 
     fn _elliprc(inp: &[f64]) -> f64 {
         elliprc(inp[0], inp[1]).unwrap()
@@ -116,7 +116,7 @@ mod tests {
 
     #[test]
     fn test_elliprc() {
-        compare_test_data!(
+        compare_test_data_boost!(
             "./tests/data/boost/elliprc_data.txt",
             _elliprc,
             f64::EPSILON

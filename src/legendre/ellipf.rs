@@ -136,7 +136,7 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compare_test_data;
+    use crate::compare_test_data_boost;
 
     fn ellipf_k(inp: &[f64]) -> f64 {
         ellipf(inp[0], inp[1] * inp[1]).unwrap()
@@ -144,6 +144,6 @@ mod tests {
 
     #[test]
     fn test_ellipf() {
-        compare_test_data!("./tests/data/boost/ellipf_data.txt", ellipf_k, 5.1e-16);
+        compare_test_data_boost!("./tests/data/boost/ellipf_data.txt", ellipf_k, 5.1e-16);
     }
 }

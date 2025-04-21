@@ -187,7 +187,7 @@ mod tests {
     use itertools::Itertools;
 
     use super::*;
-    use crate::{assert_close, compare_test_data};
+    use crate::{assert_close, compare_test_data_boost};
 
     fn __elliprf(inp: &[&f64]) -> f64 {
         elliprf(*inp[0], *inp[1], *inp[2]).unwrap()
@@ -203,26 +203,26 @@ mod tests {
 
     #[test]
     fn test_elliprf() {
-        compare_test_data!("./tests/data/boost/elliprf_data.txt", _elliprf, 4.5e-16);
+        compare_test_data_boost!("./tests/data/boost/elliprf_data.txt", _elliprf, 4.5e-16);
     }
 
     #[test]
     fn test_elliprf_xxx() {
-        compare_test_data!("./tests/data/boost/elliprf_xxx.txt", _elliprf, 2.3e-16);
+        compare_test_data_boost!("./tests/data/boost/elliprf_xxx.txt", _elliprf, 2.3e-16);
     }
 
     #[test]
     fn test_elliprf_xy0() {
-        compare_test_data!("./tests/data/boost/elliprf_xy0.txt", _elliprf, 4.2e-16);
+        compare_test_data_boost!("./tests/data/boost/elliprf_xy0.txt", _elliprf, 4.2e-16);
     }
 
     #[test]
     fn test_elliprf_xyy() {
-        compare_test_data!("./tests/data/boost/elliprf_xyy.txt", _elliprf, 5.3e-16);
+        compare_test_data_boost!("./tests/data/boost/elliprf_xyy.txt", _elliprf, 5.3e-16);
     }
 
     #[test]
     fn test_elliprf_0yy() {
-        compare_test_data!("./tests/data/boost/elliprf_0yy.txt", _elliprf, f64::EPSILON);
+        compare_test_data_boost!("./tests/data/boost/elliprf_0yy.txt", _elliprf, f64::EPSILON);
     }
 }
