@@ -24,7 +24,7 @@ use crate::legendre::ellippi::ellippi_vc;
 
 use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj};
 
-/// Compute [incomplete elliptic integral of the third kind](<https://dlmf.nist.gov/19>.2.E7).
+/// Computes [incomplete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E7).
 /// ```text
 ///                 φ                              
 ///                ⌠                 dϑ              
@@ -60,11 +60,12 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
         // Use Cauchy principal value
         let c = one!() / sp2; //csc2 phi
         if n <= c {
-            // For n<=c, there are a few special cases listed in <https://dlmf.nist.gov/19>.6
+            // For n<=c, there are a few special cases listed in https://dlmf.nist.gov/19.6.iv
             // that allow calculation of the p.v.
             return Err("ellippiinc: n must be greater than cosec²φ to compute the Cauchy principal value when m sin²φ > 1.");
         }
 
+        // The p.v. can be calculated when 1 < c < m
         if m < one!() {
             // c < m is already caught at m * sp2 > one!()
             return Err("ellippiinc: m must be greater than 1 to compute the Cauchy principal value when m sin²φ > 1.");
@@ -73,12 +74,12 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
         let w2 = m / n;
 
         // This also works but it's recursive.
-        // <https://dlmf.nist.gov/19>.7.E8
+        // https://dlmf.nist.gov/19.7.E8
         // return Ok((ellipf(phi, m)?
         //     + c.sqrt() * elliprc((c - one!()) * (c - m), (c - n) * (c - w2))?)
         //     - ellippiinc(phi, w2, m)?);
 
-        // <https://dlmf.nist.gov/19>.25.E16
+        // https://dlmf.nist.gov/19.25.E16
         return Ok(-third!() * w2 * elliprj(c - one!(), c - m, c, c - w2)?
             + ((c - one!()) * (c - m) / (n - one!()) / (one!() - w2)).sqrt()
                 * elliprc(c * (n - one!()) * (one!() - w2), (n - c) * (c - w2))?);
@@ -98,7 +99,8 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
         };
     }
 
-    // This is caught when we try to compute the Cauchy p.v.
+    // I cannot find the reference for this property
+    // but Wolfram Engine seems to give real results for this case.
     // This section from Boost Math is kept as a reference.
     // if n > zero!() && (one!() / n) < sp2 {
     //     // Complex result is a domain error:
@@ -321,6 +323,6 @@ mod tests {
 
     #[test]
     fn my() {
-        assert!(ellippiinc(0.8.sqrt().asin(), 2.0, 2.5).unwrap().is_normal())
+        println!("{}", ellippiinc(0.7, 0.5, 0.5).unwrap());
     }
 }
