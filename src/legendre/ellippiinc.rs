@@ -47,10 +47,6 @@ use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj};
 /// - Returns the principal value if m sin²φ > 1
 ///
 /// ## Graph
-/// ![Incomplete Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/ellippiinc_plot.svg?raw=true)
-///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellippiinc_plot.html)
-///
 /// ![Incomplete Elliptic Integral of the Third Kind (3D Plot)](https://github.com/p-sira/ellip/blob/main/figures/ellippiinc_plot_3d.png?raw=true)
 ///
 /// [Interactive 3D Plot](https://github.com/p-sira/ellip/blob/main/figures/ellippiinc_plot_3d.html)
@@ -58,7 +54,7 @@ use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj};
 /// # Related Functions
 /// With c = csc²φ,
 /// - [ellippiinc](crate::ellippiinc)(φ, n, m) = n / 3 * [elliprj](crate::elliprj)(c - 1, c - m, c, c - n) + [ellipf](crate::ellipf)(φ, m)
-/// 
+///
 /// With x = tan φ, p = 1 - n, and kc² = 1 - m,
 /// - [ellippiinc](crate::ellippiinc)(φ, n, m) = [el3](crate::el3)(x, kc, p)
 ///
