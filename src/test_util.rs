@@ -3,6 +3,11 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
+use std::fmt::{Display, Error, Formatter};
+
+use num_traits::Float;
+use serde::Deserialize;
+
 #[macro_export]
 macro_rules! compare_test_data {
     ($file_path:expr, $func:expr, $rtol:expr) => {
@@ -129,4 +134,64 @@ pub fn linspace(start: f64, end: f64, num: usize) -> Vec<f64> {
     }
 
     result
+}
+
+/*
+ * WolframFloat
+*/
+#[derive(Debug)]
+pub enum WolframFloat {
+    Value(f64),
+    Infinity,
+    NegativeInfinity,
+    ComplexInfinity,
+    Indeterminate,
+    NaN,
+}
+
+#[allow(dead_code)]
+impl WolframFloat {
+    pub fn to_float<T: Float>(&self) -> T {
+        match *self {
+            WolframFloat::Value(v) => T::from(v).unwrap_or_else(|| nan!()),
+            WolframFloat::Infinity => inf!(),
+            WolframFloat::NegativeInfinity => neg_inf!(),
+            WolframFloat::ComplexInfinity => inf!(),
+            WolframFloat::Indeterminate => nan!(),
+            WolframFloat::NaN => nan!(),
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for WolframFloat {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let s: &str = Deserialize::deserialize(deserializer)?;
+        match s {
+            "Infinity" => Ok(WolframFloat::Infinity),
+            "-Infinity" => Ok(WolframFloat::NegativeInfinity),
+            "ComplexInfinity" => Ok(WolframFloat::ComplexInfinity),
+            "Indeterminate" => Ok(WolframFloat::Indeterminate),
+            "NaN" => Ok(WolframFloat::NaN),
+            _ => s
+                .parse::<f64>()
+                .map(WolframFloat::Value)
+                .map_err(serde::de::Error::custom),
+        }
+    }
+}
+
+impl Display for WolframFloat {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        match *self {
+            WolframFloat::Value(v) => write!(f, "{}", v),
+            WolframFloat::Infinity => write!(f, "Infinity"),
+            WolframFloat::NegativeInfinity => write!(f, "NegativeInfinity"),
+            WolframFloat::ComplexInfinity => write!(f, "ComplexInfinity"),
+            WolframFloat::Indeterminate => write!(f, "Indeterminate"),
+            WolframFloat::NaN => write!(f, "NaN"),
+        }
+    }
 }

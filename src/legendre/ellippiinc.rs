@@ -342,9 +342,4 @@ mod tests {
             6e-15
         );
     }
-
-    #[test]
-    fn my() {
-        println!("{}", ellippiinc(0.7, 0.5, 0.5).unwrap());
-    }
 }
