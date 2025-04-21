@@ -81,35 +81,6 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
     let sp2 = sphi * sphi;
     let mut result = zero!();
 
-    if m * sp2 > one!() {
-        // Use Cauchy principal value
-        let c = one!() / sp2; //csc2 phi
-        if n <= c {
-            // For n<=c, there are a few special cases listed in https://dlmf.nist.gov/19.6.iv
-            // that allow calculation of the p.v.
-            return Err("ellippiinc: n must be greater than csc²φ to compute the Cauchy principal value when m sin²φ > 1.");
-        }
-
-        // The p.v. can be calculated when 1 < c < m
-        if m < one!() {
-            // c < m is already caught at m * sp2 > one!()
-            return Err("ellippiinc: m must be greater than 1 to compute the Cauchy principal value when m sin²φ > 1.");
-        }
-
-        let w2 = m / n;
-
-        // This also works but it's recursive.
-        // https://dlmf.nist.gov/19.7.E8
-        // return Ok((ellipf(phi, m)?
-        //     + c.sqrt() * elliprc((c - one!()) * (c - m), (c - n) * (c - w2))?)
-        //     - ellippiinc(phi, w2, m)?);
-
-        // https://dlmf.nist.gov/19.25.E16
-        return Ok(-third!() * w2 * elliprj(c - one!(), c - m, c, c - w2)?
-            + ((c - one!()) * (c - m) / (n - one!()) / (one!() - w2)).sqrt()
-                * elliprc(c * (n - one!()) * (one!() - w2), (n - c) * (c - w2))?);
-    }
-
     // Special cases first:
     if n == zero!() {
         // A&S 17.7.18 & 19
@@ -185,6 +156,36 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
         } else {
             Ok(result)
         };
+    }
+
+    // Evaluate the p.v. here after normalizing phi
+    if m * sp2 > one!() {
+        // Use Cauchy principal value
+        let c = one!() / sp2; //csc2 phi
+        if n <= c {
+            // For n<=c, there are a few special cases listed in https://dlmf.nist.gov/19.6.iv
+            // that allow calculation of the p.v.
+            return Err("ellippiinc: n must be greater than csc²φ to compute the Cauchy principal value when m sin²φ > 1.");
+        }
+
+        // The p.v. can be calculated when 1 < c < m
+        if m < one!() {
+            // c < m is already caught at m * sp2 > one!()
+            return Err("ellippiinc: m must be greater than 1 to compute the Cauchy principal value when m sin²φ > 1.");
+        }
+
+        let w2 = m / n;
+
+        // This also works but it's recursive.
+        // https://dlmf.nist.gov/19.7.E8
+        // return Ok((ellipf(phi, m)?
+        //     + c.sqrt() * elliprc((c - one!()) * (c - m), (c - n) * (c - w2))?)
+        //     - ellippiinc(phi, w2, m)?);
+
+        // https://dlmf.nist.gov/19.25.E16
+        return Ok(-third!() * w2 * elliprj(c - one!(), c - m, c, c - w2)?
+            + ((c - one!()) * (c - m) / (n - one!()) / (one!() - w2)).sqrt()
+                * elliprc(c * (n - one!()) * (one!() - w2), (n - c) * (c - w2))?);
     }
 
     if m == zero!() {
