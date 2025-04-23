@@ -43,8 +43,8 @@ use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj};
 /// The characteristic (n) is also sometimes expressed in term of α, where α² = n.
 ///
 /// ## Domain
-/// - Returns error when m sin²φ > 1 and (n <= csc²φ or m < 1).
-/// - Returns the Cauchy principal value if m sin²φ > 1
+/// - Returns error when [m sin²φ > 1 and (n <= csc²φ or m < 1)].
+/// - Returns the Cauchy principal value if m sin²φ > 1.
 ///
 /// ## Graph
 /// ![Incomplete Elliptic Integral of the Third Kind (3D Plot)](https://github.com/p-sira/ellip/blob/main/figures/ellippiinc_plot_3d.png?raw=true)
