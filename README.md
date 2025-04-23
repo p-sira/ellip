@@ -73,6 +73,11 @@ Learn more at [doc.rs](https://docs.rs/ellip).
     - `elliprc`: Degenerate elliptic integral of RF (RC).
     - `elliprd`: Degenerate elliptic integral of the third kind (RD).
 
+# Testing
+The function results are compared with Boost Math test data and Wolfram Engine test data.
+The accuracy report and the test data along with the test generation scripts can
+be found [here](https://github.com/p-sira/ellip/blob/main/tests).
+
 ---
 
 Learn more at [docs.rs](https://docs.rs/ellip).
