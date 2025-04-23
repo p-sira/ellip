@@ -40,7 +40,7 @@ use crate::{ellipe, ellipk, elliprf, elliprj};
 ///
 /// ## Domain
 /// - Returns error if n = 1 or m > 1.
-/// - Returns the principal value if n > 1.
+/// - Returns the Cauchy principal value if n > 1.
 ///
 /// ## Graph
 /// ![Complete Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/ellippi_plot.svg?raw=true)

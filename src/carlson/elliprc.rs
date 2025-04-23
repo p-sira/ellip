@@ -36,7 +36,7 @@ use num_traits::Float;
 ///
 /// ## Domain
 /// - Returns error if x < 0 or y = 0.
-/// - Returns the principal value if y < 0.
+/// - Returns the Cauchy principal value if y < 0.
 ///
 /// ## Graph
 /// ![Degenerate Symmetric Elliptic Integral of RF (RC)](https://github.com/p-sira/ellip/blob/main/figures/elliprc_plot.svg?raw=true)

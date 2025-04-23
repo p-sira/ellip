@@ -46,7 +46,7 @@ use num_traits::Float;
 /// - Returns error if:
 ///   - any of x, y, or z is negative, or more than one of them are zero,
 ///   - or p = 0.
-/// - Returns the principal value if p < 0.
+/// - Returns the Cauchy principal value if p < 0.
 ///
 /// ## Graph
 /// ![Symmetric Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprj_plot.svg?raw=true)

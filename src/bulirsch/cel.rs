@@ -28,7 +28,7 @@ use super::BulirschConst;
 ///
 /// ## Domain
 /// - Returns error if kc = 0 or p = 0.
-/// - Returns the principal value for p < 0.
+/// - Returns the Cauchy principal value for p < 0.
 ///
 /// ## Graph
 /// ![General Complete Elliptic Integral](https://github.com/p-sira/ellip/blob/main/figures/cel_plot.svg?raw=true)

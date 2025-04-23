@@ -243,7 +243,7 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'sta
 ///   - kc = 0,
 ///   - 1 + px² = 0,
 ///   - or |kc| > 1 for p < 0.
-/// - Returns the principal value when 1 + px² < 0
+/// - Returns the Cauchy principal value when 1 + px² < 0
 ///
 /// ## Graph
 /// ![Bulirsch's Incomplete Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/el3_plot.svg?raw=true)
