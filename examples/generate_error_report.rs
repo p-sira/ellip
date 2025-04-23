@@ -170,9 +170,8 @@ fn generate_error_entry_from_file<T: Float>(file_path: &str, func: &dyn Fn(&Vec<
     let result = read_wolfram_data(file_path);
     match result {
         Ok(cases) => Stats::from_vec(&compute_errors_from_cases(func, cases)),
-        Err(_) => Stats::nan()
+        Err(_) => Stats::nan(),
     }
-    
 }
 
 fn generate_error_table(entries: &[(&str, Stats)]) -> String {

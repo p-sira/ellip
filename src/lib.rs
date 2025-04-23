@@ -57,7 +57,7 @@
 //! The function results are compared with Boost Math test data and Wolfram Engine test data.
 //! The accuracy report and the test data along with the test generation scripts can
 //! be found [here](https://github.com/p-sira/ellip/blob/main/tests).
-//! 
+//!
 //! # Acknowledgment
 //! Ellip is derived from multiple mathematic libraries. We thank
 //! the opensource contributors for making mathematic libraries free for all.
