@@ -3,10 +3,12 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-use std::fmt::{Display, Error, Formatter};
+use std::{
+    fmt::{Display, Error, Formatter},
+    str::FromStr,
+};
 
 use num_traits::Float;
-use serde::Deserialize;
 
 #[macro_export]
 macro_rules! compare_test_data {
@@ -19,11 +21,27 @@ macro_rules! compare_test_data {
         for (i, (inp, exp)) in $inputs.iter().zip($expected).enumerate() {
             let result = $func(&inp);
 
+            if exp.is_nan() && result.is_nan() {
+                continue;
+            }
+
             if result.is_nan() {
-                panic! ("Test failed on case {}: input = {:?}, expected = {:?}, got = NAN",
-                i + 1,
-                inp,
-                exp,)
+                eprintln! ("Test failed on case {}: input = {:?}, expected = {:?}, got = NAN",
+                    i + 1,
+                    inp,
+                    exp,);
+                test_fail += 1;
+            }
+
+            if !result.is_finite() {
+                if result != exp {
+                    eprintln! ("Test failed on case {}: input = {:?}, expected = {:?}, got = {:?}",
+                        i + 1,
+                        inp,
+                        exp,
+                        result);
+                    test_fail += 1;
+                }
             }
 
             let error = (result - exp).abs();
@@ -49,23 +67,23 @@ macro_rules! compare_test_data {
                     $atol,
                 );
             }
+        }
 
-            if test_fail > 0 {
-                panic!(
-                    "Failed {}/{} cases. Worst on case {}: input = {:?}, expected = {:?}, got = {:?} \n error = {:?}, rel = {:?}, abs = {:?}, rtol = {:?}, atol = {:?}",
-                    test_fail,
-                    $inputs.len(),
-                    worst_line,
-                    worst_params,
-                    worst_errors[3],
-                    worst_errors[4],
-                    worst_errors[0],
-                    worst_errors[1],
-                    worst_errors[2],
-                    $rtol,
-                    $atol,
-                );
-            }
+        if test_fail > 0 {
+            panic!(
+                "Failed {}/{} cases. Worst on case {}: input = {:?}, expected = {:?}, got = {:?} \n error = {:?}, rel = {:?}, abs = {:?}, rtol = {:?}, atol = {:?}",
+                test_fail,
+                $inputs.len(),
+                worst_line,
+                worst_params,
+                worst_errors[3],
+                worst_errors[4],
+                worst_errors[0],
+                worst_errors[1],
+                worst_errors[2],
+                $rtol,
+                $atol,
+            );
         }
     };
 }
@@ -122,6 +140,54 @@ macro_rules! compare_test_data_boost {
 }
 
 #[macro_export]
+macro_rules! compare_test_data_wolfram {
+    ($file_path:expr, $func:expr, $rtol:expr) => {
+        compare_test_data_wolfram!($file_path, $func, f64, $rtol, 0.0)
+    };
+    ($file_path:expr, $func:expr, $t: ident, $rtol:expr, $atol:expr) => {{
+        {
+            use crate::compare_test_data;
+            use crate::test_util::WolframFloat;
+            use std::str::FromStr;
+
+            use std::fs::File;
+            use std::path::Path;
+            use csv::ReaderBuilder;
+
+            let path = Path::new($file_path);
+            if !path.exists() {
+                eprintln!("Skipping test due to test data not found: {}\nDownload test data from: https://github.com/p-sira/ellip/tree/main/tests/data", $file_path);
+                return;
+            }
+
+            let file = File::open(path).expect("Cannot open file");
+            let mut reader = ReaderBuilder::new().has_headers(false).from_reader(file);
+
+            let mut inputs: Vec<Vec<$t>> = Vec::new();
+            let mut expected: Vec<$t> = Vec::new();
+
+            for record in reader.records() {
+                let row = record.expect("Cannot read row");
+                let len = row.len();
+
+                inputs.push(
+                    row.iter().take(len - 1).map(|s| {
+                        WolframFloat::from_str(s).expect("Cannot parse input(s) as a number")
+                        .to_float::<$t>()
+                    }).collect()
+                );
+                expected.push(
+                    WolframFloat::from_str(&row[len - 1]).expect("Cannot parse expected value as a number")
+                    .to_float::<$t>(),
+                );
+            }
+
+            compare_test_data!($func, inputs, expected, $t, $rtol, $atol);
+        }
+    }};
+}
+
+#[macro_export]
 macro_rules! assert_close {
     ($expected: expr, $actual: expr, $rtol: expr) => {
         let relative = ($actual - $expected).abs() / $expected;
@@ -153,8 +219,10 @@ pub fn linspace(start: f64, end: f64, num: usize) -> Vec<f64> {
  * WolframFloat
 */
 #[derive(Debug)]
+#[allow(dead_code)]
 pub enum WolframFloat {
-    Value(f64),
+    Float64(f64),
+    Float32(f32),
     Infinity,
     NegativeInfinity,
     ComplexInfinity,
@@ -162,11 +230,11 @@ pub enum WolframFloat {
     NaN,
 }
 
-#[allow(dead_code)]
 impl WolframFloat {
     pub fn to_float<T: Float>(&self) -> T {
         match *self {
-            WolframFloat::Value(v) => T::from(v).unwrap_or_else(|| nan!()),
+            WolframFloat::Float64(v) => T::from(v).unwrap_or_else(|| nan!()),
+            WolframFloat::Float32(v) => T::from(v).unwrap_or_else(|| nan!()),
             WolframFloat::Infinity => inf!(),
             WolframFloat::NegativeInfinity => neg_inf!(),
             WolframFloat::ComplexInfinity => inf!(),
@@ -176,22 +244,17 @@ impl WolframFloat {
     }
 }
 
-impl<'de> Deserialize<'de> for WolframFloat {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let s: &str = Deserialize::deserialize(deserializer)?;
-        match s {
+impl FromStr for WolframFloat {
+    type Err = std::num::ParseFloatError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.trim() {
             "Infinity" => Ok(WolframFloat::Infinity),
             "-Infinity" => Ok(WolframFloat::NegativeInfinity),
             "ComplexInfinity" => Ok(WolframFloat::ComplexInfinity),
             "Indeterminate" => Ok(WolframFloat::Indeterminate),
             "NaN" => Ok(WolframFloat::NaN),
-            _ => s
-                .parse::<f64>()
-                .map(WolframFloat::Value)
-                .map_err(serde::de::Error::custom),
+            _ => Ok(WolframFloat::Float64(s.parse::<f64>()?)),
         }
     }
 }
@@ -199,7 +262,8 @@ impl<'de> Deserialize<'de> for WolframFloat {
 impl Display for WolframFloat {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         match *self {
-            WolframFloat::Value(v) => write!(f, "{}", v),
+            WolframFloat::Float64(v) => write!(f, "{}", v),
+            WolframFloat::Float32(v) => write!(f, "{}", v),
             WolframFloat::Infinity => write!(f, "Infinity"),
             WolframFloat::NegativeInfinity => write!(f, "NegativeInfinity"),
             WolframFloat::ComplexInfinity => write!(f, "ComplexInfinity"),
