@@ -24,10 +24,7 @@ Elliptic integrals for Rust
 >> cargo add ellip
 ```
 
-## Why Ellip
-Ellip is a pure-Rust implementation of [elliptic integrals](https://dlmf.nist.gov/19). This means there is no dependence on C++ libraries. Ellip also provides less common functions like Bulirsch's `cel` and `el`. 
-
-Some applications of elliptic integrals include computing the [lengths of plane curves](https://dlmf.nist.gov/19.30), [magnetism](https://doi.org/10.1016/j.jmmm.2018.02.003), [astrophysics](https://dx.doi.org/10.1088/0004-637X/696/2/1616), and [string theory](https://dx.doi.org/10.1088/1126-6708/2004/03/004).
+Ellip is a pure-Rust implementation of [elliptic integrals](https://dlmf.nist.gov/19). Ellip also provides less common functions like Bulirsch's `cel` and `el`. Some applications of the elliptic integrals include computing the [lengths of plane curves](https://dlmf.nist.gov/19.30), [magnetism](https://doi.org/10.1016/j.jmmm.2018.02.003), [astrophysics](https://dx.doi.org/10.1088/0004-637X/696/2/1616), and [string theory](https://dx.doi.org/10.1088/1126-6708/2004/03/004).
 
 ## Quick Start
 
