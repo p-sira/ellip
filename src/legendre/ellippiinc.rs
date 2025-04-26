@@ -55,9 +55,9 @@ use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj};
 ///
 /// ## Notes
 /// The [ellippiinc] (of the [crate]) is the circular or hyperbolic case of the elliptic integral
-/// of the third kind, since n and m are real. It is called circular if `n (n - m) (n - 1)` is 
+/// of the third kind, since n and m are real. It is called circular if `n (n - m) (n - 1)` is
 /// negative and hyperbolic if it is positive.  
-/// 
+///
 /// # Related Functions
 /// With c = csc²φ,
 /// - [ellippiinc](crate::ellippiinc)(φ, n, m) = n / 3 * [elliprj](crate::elliprj)(c - 1, c - m, c, c - n) + [ellipf](crate::ellipf)(φ, m)
