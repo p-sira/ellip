@@ -43,14 +43,21 @@ use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj};
 /// The characteristic (n) is also sometimes expressed in term of α, where α² = n.
 ///
 /// ## Domain
-/// - Returns error when [m sin²φ > 1 and (n <= csc²φ or m < 1)].
-/// - Returns the Cauchy principal value if m sin²φ > 1.
+/// - Returns error when:
+///   - m sin²φ > 1,
+///   - or n sin²φ = 1.
+/// - Returns the Cauchy principal value if n sin²φ > 1.
 ///
 /// ## Graph
 /// ![Incomplete Elliptic Integral of the Third Kind (3D Plot)](https://github.com/p-sira/ellip/blob/main/figures/ellippiinc_plot_3d.png?raw=true)
 ///
 /// [Interactive 3D Plot](https://github.com/p-sira/ellip/blob/main/figures/ellippiinc_plot_3d.html)
 ///
+/// ## Notes
+/// The [ellippiinc] (of the [crate]) is the circular or hyperbolic case of the elliptic integral
+/// of the third kind, since n and m are real. It is called circular if `n (n - m) (n - 1)` is 
+/// negative and hyperbolic if it is positive.  
+/// 
 /// # Related Functions
 /// With c = csc²φ,
 /// - [ellippiinc](crate::ellippiinc)(φ, n, m) = n / 3 * [elliprj](crate::elliprj)(c - 1, c - m, c, c - n) + [ellipf](crate::ellipf)(φ, m)
@@ -69,17 +76,22 @@ use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj};
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+/// - Wolfram Research. “EllipticPi,” 2022. <https://reference.wolfram.com/language/ref/EllipticPi.html>.
 ///
 pub fn ellippiinc<T: Float>(phi: T, n: T, m: T) -> Result<T, &'static str> {
     ellippiinc_vc(phi, n, m, one!() - n)
 }
 
 #[inline]
-fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str> {
+fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, &'static str> {
     // Note vc = 1-v presumably without cancellation error
     let sphi = phi.abs().sin();
     let sp2 = sphi * sphi;
     let mut result = zero!();
+
+    if m * sp2 > one!() {
+        return Err("ellippiinc: m sin²φ must be smaller or equal to one.");
+    }
 
     // Special cases first:
     if n == zero!() {
@@ -90,14 +102,6 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
             ellipf(phi, m)
         };
     }
-
-    // I cannot find the reference for this property
-    // but Wolfram Engine seems to give real results for this case.
-    // This section from Boost Math is kept as a reference.
-    // if n > zero!() && (one!() / n) < sp2 {
-    //     // Complex result is a domain error:
-    //     return Err("ellippiinc: result is complex for v > 1 / sin^2(phi)");
-    // }
 
     if n == one!() {
         if m == zero!() {
@@ -117,7 +121,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
         // tan(phi).
         // Also note that since we can't represent PI/2 exactly
         // this is a bit of a guess as to the users true intent...
-        return ellippi_vc(n, m, vc);
+        return ellippi_vc(n, m, nc);
     }
 
     if phi > pi_2!() || phi < zero!() {
@@ -130,7 +134,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
 
             // Phi is so large that phi%pi is necessarily zero (or garbage),
             // just return the second part of the duplication formula:
-            result = two!() * phi.abs() * ellippi_vc(n, m, vc)? / pi!();
+            result = two!() * phi.abs() * ellippi_vc(n, m, nc)? / pi!();
         } else {
             let mut rphi = phi.abs() % pi_2!();
             let mut mm = ((phi.abs() - rphi) / pi_2!()).round();
@@ -146,9 +150,9 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
                 rphi = pi_2!() - rphi;
             }
 
-            result = sign * ellippiinc_vc(rphi, n, m, vc)?;
-            if mm > zero!() && vc > zero!() {
-                result = result + mm * ellippi_vc(n, m, vc)?;
+            result = sign * ellippiinc_vc(rphi, n, m, nc)?;
+            if mm > zero!() && nc > zero!() {
+                result = result + mm * ellippi_vc(n, m, nc)?;
             }
         }
         return if phi < zero!() {
@@ -158,22 +162,10 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
         };
     }
 
-    // Evaluate the p.v. here after normalizing phi
-    if m * sp2 > one!() {
-        // Use Cauchy principal value
+    // https://reference.wolfram.com/language/ref/EllipticPi.html
+    // Return the Cauchy principal value after normalizing phi
+    if n * sp2 > one!() {
         let c = one!() / sp2; //csc2 phi
-        if n <= c {
-            // For n<=c, there are a few special cases listed in https://dlmf.nist.gov/19.6.iv
-            // that allow calculation of the p.v.
-            return Err("ellippiinc: n must be greater than csc²φ to compute the Cauchy principal value when m sin²φ > 1.");
-        }
-
-        // The p.v. can be calculated when 1 < c < m
-        if m < one!() {
-            // c < m is already caught at m * sp2 > one!()
-            return Err("ellippiinc: m must be greater than 1 to compute the Cauchy principal value when m sin²φ > 1.");
-        }
-
         let w2 = m / n;
 
         // This also works but it's recursive.
@@ -191,11 +183,11 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
     if m == zero!() {
         // A&S 17.7.20:
         if n < one!() {
-            let vcr = vc.sqrt();
+            let vcr = nc.sqrt();
             return Ok((vcr * phi.tan()).atan() / vcr);
         } else {
             // v > 1:
-            let vcr = (-vc).sqrt();
+            let vcr = (-nc).sqrt();
             let arg = vcr * phi.tan();
             return Ok((arg.ln_1p() - (-arg).ln_1p()) / (two!() * vcr));
         }
@@ -307,7 +299,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
     let p = if n * t < half!() {
         one!() - n * t
     } else {
-        x + vc * t
+        x + nc * t
     };
 
     let result = sphi * (elliprf(x, y, z)? + n * t * elliprj(x, y, z, p)? / three!());
