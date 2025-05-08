@@ -3,6 +3,8 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  *)
 
+(* In the Wolfram function repository, m is defined as kc^2. *)
+
 precision = 15;
 
 kcRange = DeleteCases[Subdivide[-2, 2, 20], 0];
