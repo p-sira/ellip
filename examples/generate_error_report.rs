@@ -53,45 +53,45 @@ impl Stats {
         };
     }
 
-    pub fn from_vec(v: &Vec<f64>) -> Self {
-        let mut valids: Vec<f64> = v
-            .iter()
-            .filter(|x| !x.is_nan() && x.is_finite())
-            .cloned()
-            .collect();
-
-        if valids.is_empty() {
+    pub fn from_iter<I: Iterator<Item = f64>>(iter: I) -> Self {
+        let mut count = 0;
+        let mut sum = 0.0;
+        let mut max = f64::NEG_INFINITY;
+        let mut values = Vec::new();
+        
+        for x in iter {
+            if !x.is_nan() && x.is_finite() {
+                count += 1;
+                sum += x;
+                max = max.max(x);
+                values.push(x);
+            }
+        }
+        
+        if count == 0 {
             return Self::nan();
         }
-
-        valids.sort_by(|a, b| a.partial_cmp(b).unwrap());
-
-        let sum: f64 = valids.iter().sum();
-        let count = valids.len();
+        
         let mean = sum / count as f64;
-
+        
+        values.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        
         // Calculate median
         let median = if count % 2 == 0 {
-            (valids[count / 2 - 1] + valids[count / 2]) / 2.0
+            (values[count / 2 - 1] + values[count / 2]) / 2.0
         } else {
-            valids[count / 2]
+            values[count / 2]
         };
-
+        
         // Calculate variance
-        let variance = valids
+        let variance = values
             .iter()
             .map(|x| {
                 let diff = mean - x;
                 diff * diff
             })
-            .sum::<f64>()
-            / count as f64;
-
-        let max = *valids
-            .iter()
-            .max_by(|a, b| a.partial_cmp(b).unwrap())
-            .unwrap_or(&f64::NAN);
-
+            .sum::<f64>() / count as f64;
+            
         Stats {
             mean,
             median,
@@ -99,57 +99,69 @@ impl Stats {
             max,
         }
     }
+
+    #[allow(dead_code)]
+    pub fn from_vec(v: &Vec<f64>) -> Self {
+        Self::from_iter(v.iter().cloned())
+    }
 }
 
 /// Reads wolfram data from file and returns a vector of Cases
-fn read_wolfram_data<T: Float>(file_path: &str) -> Result<Vec<Case<T>>, &'static str> {
+fn read_wolfram_data<T: Float + 'static>(
+    file_path: &str,
+) -> Box<dyn Iterator<Item = Case<T>>> {
     use csv::ReaderBuilder;
     use std::fs::File;
     use std::path::Path;
+    use std::io::BufReader;
 
     let path = Path::new(file_path);
-    let file = File::open(path).map_err(|_| {
-        eprintln!("Test data not found: {file_path} Download from: https://github.com/p-sira/ellip/tree/main/tests/data");
-        "Test data not found."
-    })?;
-    let mut reader = ReaderBuilder::new().has_headers(false).from_reader(file);
+    let file = match File::open(path) {
+        Ok(f) => f,
+        Err(_) => {
+            eprintln!(
+                "Test data not found: {file_path}\nDownload from: https://github.com/p-sira/ellip/tree/main/tests/data"
+            );
+            return Box::new(std::iter::empty());
+        }
+    };
 
-    let mut results = Vec::new();
+    let reader = ReaderBuilder::new()
+        .has_headers(false)
+        .from_reader(BufReader::new(file));
 
-    for record in reader.records() {
-        let row = record.expect("Cannot read row");
-        let len = row.len();
+    let iter = reader
+        .into_records()
+        .filter_map(|result| match result {
+            Ok(row) => {
+                let len = row.len();
+                let inputs = row
+                    .iter()
+                    .take(len - 1)
+                    .map(parse_wolfram_str)
+                    .collect::<Result<Vec<T>, _>>()
+                    .ok()?;
+                let expected = parse_wolfram_str(&row[len - 1]).ok()?;
+                Some(Case { inputs, expected })
+            }
+            Err(_) => None,
+        });
 
-        let inputs = row
-            .iter()
-            .take(len - 1)
-            .map(|s| parse_wolfram_str(s).expect(&format!("Cannot parse data {s}")))
-            .collect();
-        let expected = {
-            let s = &row[len - 1];
-            parse_wolfram_str(s).expect(&format!("Cannot parse data {s}"))
-        };
-        results.push(Case { inputs, expected });
-    }
-
-    Ok(results)
+    Box::new(iter)
 }
 
-fn compute_errors_from_cases<T: Float>(
-    func: &dyn Fn(&Vec<T>) -> T,
-    cases: Vec<Case<T>>,
-) -> Vec<f64> {
-    cases
-        .iter()
-        .map(|case| {
-            if case.expected.is_finite() {
-                let res = func(&case.inputs);
-                rel_err(res, case.expected)
-            } else {
-                f64::NAN
-            }
-        })
-        .collect()
+fn compute_errors_from_cases<T: Float + 'static, I: Iterator<Item = Case<T>>>(
+    func: &'static dyn Fn(&Vec<T>) -> T,
+    cases: I,
+) -> impl Iterator<Item = f64> {
+    cases.map(move |case| {
+        if case.expected.is_finite() {
+            let res = func(&case.inputs);
+            rel_err(res, case.expected)
+        } else {
+            f64::NAN
+        }
+    })
 }
 
 fn format_float(value: &f64) -> String {
@@ -170,12 +182,10 @@ struct ErrorEntry<'a> {
     max: f64,
 }
 
-fn generate_error_entry_from_file<T: Float>(file_path: &str, func: &dyn Fn(&Vec<T>) -> T) -> Stats {
-    let result = read_wolfram_data(file_path);
-    match result {
-        Ok(cases) => Stats::from_vec(&compute_errors_from_cases(func, cases)),
-        Err(_) => Stats::nan(),
-    }
+fn generate_error_entry_from_file<T: Float + 'static>(file_path: &str, func: &'static dyn Fn(&Vec<T>) -> T) -> Stats {
+    let cases = read_wolfram_data(file_path);
+    let errors = compute_errors_from_cases(func, cases);
+    Stats::from_iter(errors)
 }
 
 fn generate_error_table(entries: &[(&str, Stats)]) -> String {
@@ -269,6 +279,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "You can find the scripts in the directory [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/).",
         &format!("This report is generated on {} rustc {} using ellip v{} at `f64` precision (ε≈2.22e-16).", platform, rust_version, ellip_version),
         "",
+        "Since the test relied on fixed `f64` precision, the precision deteriorates at extreme values (too big or too small).",
+        "However, the calculation via Wolfram Engine utilized arbitary precision up to 50 digits.",
+        "This could lead to decrepancies in the results.",
+        "",
         "## Legendre's Complete Elliptic Integrals",
         &generate_error_table(&[
             get_entry!("ellipk_data", "ellipk", ellipk, 1),
@@ -291,11 +305,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             get_entry!("ellipeinc_data", "ellipeinc", ellipeinc, 2),
             get_entry!("ellipeinc_neg", "ellipeinc (Negative m)", ellipeinc, 2),
             get_entry!("ellipeinc_limit", "ellipeinc (Near limits)", ellipeinc, 2),
+            get_entry!("ellippiinc_data", "ellippiinc", ellippiinc, 3),
+            get_entry!("ellippiinc_neg", "ellippiinc (Negative m)", ellippiinc, 3),
+            get_entry!("ellippiinc_limit", "ellippiinc (Near limits)", ellippiinc, 3),
         ]),
         "",
-        "## Bulirsch's Complete Elliptic Integrals",
-        "",
-        "## Bulirsch's Incomplete Elliptic Integrals",
+        "## Bulirsch's Elliptic Integrals",
+        "For Bulirsh's elliptic integrals, the reference values are generated using the function",
+        "submitted by Jan Mangaldan on [Wolfram Function Repository](https://resources.wolframcloud.com/FunctionRepository/).",
+
+        &generate_error_table(&[
+            get_entry!("cel_data", "cel", cel, 4),
+            get_entry!("cel_pv", "cel (p.v.)", cel, 4),
+            get_entry!("el1_data", "el1", el1, 2),
+            get_entry!("el1_limit", "el1 (Near limits)", el1, 2),
+            get_entry!("el2_data", "el2", el2, 4),
+            get_entry!("el2_limit", "el2 (Near limits)", el2, 4),
+            get_entry!("el3_data", "el3", el3, 3),
+            get_entry!("el3_pv", "el3 (p.v.)", el3, 3),
+            get_entry!("el3_limit", "el3 (Near limits)", el3, 3),
+        ]),
         "",
         "## Carlson's Symmetric Elliptic Integrals",
         "",
