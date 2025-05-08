@@ -5,7 +5,7 @@
 
 (* In the Wolfram function repository, m is defined as kc^2. *)
 
-precision = 15;
+precision = 17;
 
 kcRange = DeleteCases[Subdivide[-2, 2, 20], 0];
 

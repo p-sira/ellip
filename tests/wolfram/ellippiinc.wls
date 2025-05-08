@@ -3,7 +3,7 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  *)
 
-precision = 15;
+precision = 17;
 
 epsilon = 1*^-4;
 
