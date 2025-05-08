@@ -9,11 +9,11 @@ epsilon = 1*^-4;
 
 (* Sample domain limits *)
 
-PHI = Subdivide[0, Pi / 2, 20];
+PHI = Subdivide[0, Pi / 2, 15];
 
-M = Subdivide[0, 2, 40];
+M = Subdivide[0, 2, 30];
 
-MNeg = Subdivide[-1, 0, 40];
+MNeg = Subdivide[-1, 0, 30];
 
 NVals = Subdivide[-1, 2, 10];
 
