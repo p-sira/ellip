@@ -54,7 +54,11 @@ impl Stats {
     }
 
     pub fn from_vec(v: &Vec<f64>) -> Self {
-        let mut valids: Vec<f64> = v.iter().filter(|x| x.is_normal()).cloned().collect();
+        let mut valids: Vec<f64> = v
+            .iter()
+            .filter(|x| !x.is_nan() && x.is_finite())
+            .cloned()
+            .collect();
 
         if valids.is_empty() {
             return Self::nan();
