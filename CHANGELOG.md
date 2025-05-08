@@ -12,6 +12,7 @@
 **Bug Fixes**
 - `ellipd`: Fix incorrect answers for m < 0. The function also returns infinity instead of throwing error at m = 1.
 - Fix the domains for `ellipf` and `ellipeinc`.
+- `el3`: Fix index out of bound in small el3 cases.
 
 ### 0.3.0
 **New Features**

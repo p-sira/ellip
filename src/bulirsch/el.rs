@@ -338,7 +338,7 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, &'static st
         s = p + pm;
 
         let mut rr: Vec<T> = vec![zero!(); nd - 2];
-        for k in 0..=nd - 2 {
+        for k in 0..nd - 2 {
             rr[k] = s;
             pm = pm * t * ra[k];
             s = s * p + pm;
@@ -346,7 +346,7 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, &'static st
         s = s * zd;
         u = s;
         bo = false;
-        for k in (0..=nd - 2).rev() {
+        for k in (0..nd - 2).rev() {
             u = u + (rr[k] - u) * rb[k];
             bo = !bo;
             let v = if bo { -u } else { u };
