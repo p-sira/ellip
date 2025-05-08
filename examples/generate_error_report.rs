@@ -58,7 +58,7 @@ impl Stats {
         let mut sum = 0.0;
         let mut max = f64::NEG_INFINITY;
         let mut values = Vec::new();
-        
+
         for x in iter {
             if !x.is_nan() && x.is_finite() {
                 count += 1;
@@ -67,22 +67,22 @@ impl Stats {
                 values.push(x);
             }
         }
-        
+
         if count == 0 {
             return Self::nan();
         }
-        
+
         let mean = sum / count as f64;
-        
+
         values.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        
+
         // Calculate median
         let median = if count % 2 == 0 {
             (values[count / 2 - 1] + values[count / 2]) / 2.0
         } else {
             values[count / 2]
         };
-        
+
         // Calculate variance
         let variance = values
             .iter()
@@ -90,8 +90,9 @@ impl Stats {
                 let diff = mean - x;
                 diff * diff
             })
-            .sum::<f64>() / count as f64;
-            
+            .sum::<f64>()
+            / count as f64;
+
         Stats {
             mean,
             median,
@@ -107,13 +108,11 @@ impl Stats {
 }
 
 /// Reads wolfram data from file and returns a vector of Cases
-fn read_wolfram_data<T: Float + 'static>(
-    file_path: &str,
-) -> Box<dyn Iterator<Item = Case<T>>> {
+fn read_wolfram_data<T: Float + 'static>(file_path: &str) -> Box<dyn Iterator<Item = Case<T>>> {
     use csv::ReaderBuilder;
     use std::fs::File;
-    use std::path::Path;
     use std::io::BufReader;
+    use std::path::Path;
 
     let path = Path::new(file_path);
     let file = match File::open(path) {
@@ -130,22 +129,20 @@ fn read_wolfram_data<T: Float + 'static>(
         .has_headers(false)
         .from_reader(BufReader::new(file));
 
-    let iter = reader
-        .into_records()
-        .filter_map(|result| match result {
-            Ok(row) => {
-                let len = row.len();
-                let inputs = row
-                    .iter()
-                    .take(len - 1)
-                    .map(parse_wolfram_str)
-                    .collect::<Result<Vec<T>, _>>()
-                    .ok()?;
-                let expected = parse_wolfram_str(&row[len - 1]).ok()?;
-                Some(Case { inputs, expected })
-            }
-            Err(_) => None,
-        });
+    let iter = reader.into_records().filter_map(|result| match result {
+        Ok(row) => {
+            let len = row.len();
+            let inputs = row
+                .iter()
+                .take(len - 1)
+                .map(parse_wolfram_str)
+                .collect::<Result<Vec<T>, _>>()
+                .ok()?;
+            let expected = parse_wolfram_str(&row[len - 1]).ok()?;
+            Some(Case { inputs, expected })
+        }
+        Err(_) => None,
+    });
 
     Box::new(iter)
 }
@@ -182,7 +179,10 @@ struct ErrorEntry<'a> {
     max: f64,
 }
 
-fn generate_error_entry_from_file<T: Float + 'static>(file_path: &str, func: &'static dyn Fn(&Vec<T>) -> T) -> Stats {
+fn generate_error_entry_from_file<T: Float + 'static>(
+    file_path: &str,
+    func: &'static dyn Fn(&Vec<T>) -> T,
+) -> Stats {
     let cases = read_wolfram_data(file_path);
     let errors = compute_errors_from_cases(func, cases);
     Stats::from_iter(errors)
