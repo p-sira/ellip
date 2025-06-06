@@ -43,6 +43,7 @@ struct Stats {
     median: f64,
     variance: f64,
     max: f64,
+    p99: f64,
 }
 
 impl Stats {
@@ -52,6 +53,7 @@ impl Stats {
             median: f64::NAN,
             variance: f64::NAN,
             max: f64::NAN,
+            p99: f64::NAN,
         };
     }
 
@@ -79,6 +81,12 @@ impl Stats {
             valids[count / 2]
         };
 
+        // Calculate P99 error
+        let p99_pos = count as f64 * 0.99;
+        let p99_pos_low = p99_pos as usize;
+        let p99_frac = p99_pos - p99_pos_low as f64;
+        let p99 = valids[p99_pos_low] * (1.0 - p99_frac) + valids[p99_pos_low + 1] * p99_frac;
+
         // Calculate variance
         let variance = valids
             .iter()
@@ -99,6 +107,7 @@ impl Stats {
             median,
             variance,
             max,
+            p99,
         }
     }
 }
@@ -173,6 +182,8 @@ struct ErrorEntry<'a> {
     mean: f64,
     #[tabled(rename = "Median (ε)", display = "format_float")]
     median: f64,
+    #[tabled(rename = "P99 (ε)", display = "format_float")]
+    p99: f64,
     #[tabled(rename = "Max (ε)", display = "format_float")]
     max: f64,
     #[tabled(rename = "Variance (ε²)", display = "format_float")]
@@ -197,6 +208,7 @@ fn generate_error_table(entries: &[(&str, Stats)]) -> String {
             name,
             mean: stats.mean,
             median: stats.median,
+            p99: stats.p99,
             max: stats.max,
             variance: stats.variance,
         })
