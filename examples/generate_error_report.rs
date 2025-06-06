@@ -3,6 +3,8 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
+use std::fmt::Debug;
+
 use ellip::*;
 use num_traits::Float;
 use tabled::{settings::Style, Table, Tabled};
@@ -135,7 +137,7 @@ fn read_wolfram_data<T: Float>(file_path: &str) -> Result<Vec<Case<T>>, &'static
     Ok(results)
 }
 
-fn compute_errors_from_cases<T: Float>(
+fn compute_errors_from_cases<T: Float + Debug>(
     func: &dyn Fn(&Vec<T>) -> T,
     cases: Vec<Case<T>>,
 ) -> Vec<f64> {
@@ -144,7 +146,14 @@ fn compute_errors_from_cases<T: Float>(
         .map(|case| {
             if case.expected.is_finite() {
                 let res = func(&case.inputs);
-                rel_err(res, case.expected)
+                let err = rel_err(res, case.expected);
+                // if err > 20.0 {
+                //     println!(
+                //         "Using parameters: {:?}, got={:?}, actual={:?} (error={:.2})",
+                //         &case.inputs, res, case.expected, err
+                //     );
+                // }
+                err
             } else {
                 f64::NAN
             }
@@ -170,7 +179,10 @@ struct ErrorEntry<'a> {
     max: f64,
 }
 
-fn generate_error_entry_from_file<T: Float>(file_path: &str, func: &dyn Fn(&Vec<T>) -> T) -> Stats {
+fn generate_error_entry_from_file<T: Float + Debug>(
+    file_path: &str,
+    func: &dyn Fn(&Vec<T>) -> T,
+) -> Stats {
     let result = read_wolfram_data(file_path);
     match result {
         Ok(cases) => Stats::from_vec(&compute_errors_from_cases(func, cases)),
