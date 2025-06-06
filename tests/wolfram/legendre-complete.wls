@@ -3,40 +3,30 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  *)
 
-precision = 17;
+epsilon = 2.22*^-16;
 
-M = Subdivide[0, 0.999, 1000];
+mu = 1 * epsilon;
 
-MLimit = Subdivide[0.999, 1, 100];
+M = Subdivide[0, 1 - mu, 1000];
 
-MNeg = Subdivide[-5, -0.001, 1000];
+MNeg = Subdivide[-5, -mu, 1000];
 
-ellipK = Table[{SetPrecision[m, precision], N[EllipticK[m], precision
-    ]}, {m, M}];
+(* Complete Elliptic Integrals of the First Kind *)
+
+ellipK = Table[{m, EllipticK[m]}, {m, M}];
 
 Export["../data/wolfram/ellipk_data.csv", ellipK, "CSV"];
 
-ellipKLimit = Table[{SetPrecision[m, precision], N[EllipticK[m], precision
-    ]}, {m, MLimit}];
-
-Export["../data/wolfram/ellipk_limit.csv", ellipKLimit, "CSV"];
-
-ellipKNeg = Table[{SetPrecision[m, precision], N[EllipticK[m], precision
-    ]}, {m, MNeg}];
+ellipKNeg = Table[{m, EllipticK[m]}, {m, MNeg}];
 
 Export["../data/wolfram/ellipk_neg.csv", ellipKNeg, "CSV"];
 
-ellipE = Table[{SetPrecision[m, precision], N[EllipticE[m], precision
-    ]}, {m, M}];
+(* Complete Elliptic Integrals of the Second Kind *)
+
+ellipE = Table[{m, EllipticE[m]}, {m, M}];
 
 Export["../data/wolfram/ellipe_data.csv", ellipE, "CSV"];
 
-ellipELimit = Table[{SetPrecision[m, precision], N[EllipticE[m], precision
-    ]}, {m, MLimit}];
-
-Export["../data/wolfram/ellipe_limit.csv", ellipELimit, "CSV"];
-
-ellipENeg = Table[{SetPrecision[m, precision], N[EllipticE[m], precision
-    ]}, {m, MNeg}];
+ellipENeg = Table[{m, EllipticE[m]}, {m, MNeg}];
 
 Export["../data/wolfram/ellipe_neg.csv", ellipENeg, "CSV"];
