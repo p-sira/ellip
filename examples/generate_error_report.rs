@@ -173,10 +173,10 @@ struct ErrorEntry<'a> {
     mean: f64,
     #[tabled(rename = "Median (ε)", display = "format_float")]
     median: f64,
-    #[tabled(rename = "Variance (ε²)", display = "format_float")]
-    variance: f64,
     #[tabled(rename = "Max (ε)", display = "format_float")]
     max: f64,
+    #[tabled(rename = "Variance (ε²)", display = "format_float")]
+    variance: f64,
 }
 
 fn generate_error_entry_from_file<T: Float + Debug>(
@@ -197,8 +197,8 @@ fn generate_error_table(entries: &[(&str, Stats)]) -> String {
             name,
             mean: stats.mean,
             median: stats.median,
-            variance: stats.variance,
             max: stats.max,
+            variance: stats.variance,
         })
         .collect();
 
@@ -285,27 +285,32 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &generate_error_table(&[
             get_entry!("ellipk_data", "ellipk", ellipk, 1),
             get_entry!("ellipk_neg", "ellipk (Negative m)", ellipk, 1),
-            get_entry!("ellipk_limit", "ellipk (Near limits)", ellipk, 1),
             get_entry!("ellipe_data", "ellipe", ellipe, 1),
             get_entry!("ellipe_neg", "ellipe (Negative m)", ellipe, 1),
-            get_entry!("ellipe_limit", "ellipe (Near limits)", ellipe, 1),
             get_entry!("ellippi_data", "ellippi", ellippi, 2),
             get_entry!("ellippi_neg", "ellippi (Negative m)", ellippi, 2),
             get_entry!("ellippi_pv", "ellippi (p.v.)", ellippi, 2),
-            get_entry!("ellippi_limit", "ellippi (Near limits)", ellippi, 2),
         ]),
         "",
         "## Legendre's Incomplete Elliptic Integrals",
-        &generate_error_table(&[
-            get_entry!("ellipf_data", "ellipf", ellipf, 2),
-            get_entry!("ellipf_neg", "ellipf (Negative m)", ellipf, 2),
-            get_entry!("ellipf_limit", "ellipf (Near limits)", ellipf, 2),
-            get_entry!("ellipeinc_data", "ellipeinc", ellipeinc, 2),
-            get_entry!("ellipeinc_neg", "ellipeinc (Negative m)", ellipeinc, 2),
-            get_entry!("ellipeinc_limit", "ellipeinc (Near limits)", ellipeinc, 2),
-        ]),
+        // &generate_error_table(&[
+        //     get_entry!("ellipf_data", "ellipf", ellipf, 2),
+        //     get_entry!("ellipf_neg", "ellipf (Negative m)", ellipf, 2),
+        //     get_entry!("ellipeinc_data", "ellipeinc", ellipeinc, 2),
+        //     get_entry!("ellipeinc_neg", "ellipeinc (Negative m)", ellipeinc, 2),
+        // ]),
         "",
         "## Bulirsch's Complete Elliptic Integrals",
+        "For Bulirsh's elliptic integrals, except for the third kind, the reference values are generated using the function",
+        "submitted by Jan Mangaldan on [Wolfram Function Repository](https://resources.wolframcloud.com/FunctionRepository/).",
+        &generate_error_table(&[
+            // get_entry!("cel_data", "cel", cel, 4),
+            // get_entry!("cel_pv", "cel (p.v.)", cel, 4),
+            // get_entry!("el1_data", "el1", el1, 2),
+            // get_entry!("el2_data", "el2", el2, 4),
+            // get_entry!("el3_data", "el3", el3, 3),
+            // get_entry!("el3_pv", "el3 (p.v.)", el3, 3),
+        ]),
         "",
         "## Bulirsch's Incomplete Elliptic Integrals",
         "",
