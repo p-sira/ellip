@@ -3,8 +3,6 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  *)
 
-precision = 17;
-
 epsilon = 2.22*^-16;
 
 (* Mu helps prevent answers approaching infinity, making the comparison fairer. *)
