@@ -5,37 +5,44 @@
 
 precision = 17;
 
-mNormal = Subdivide[0, 0.999, 100];
+epsilon = 2.22*^-16;
 
-ns = Subdivide[0, 0.9, 50];
+(* Mu helps prevent answers approaching infinity, making the comparison fairer. *)
+mu = 50 * epsilon 
 
-ellipPiNormal = Flatten[Table[{SetPrecision[n, precision], SetPrecision[
-    m, precision], N[EllipticPi[n, m], precision]}, {n, ns}, {m, mNormal}
-    ], 1];
+mNormal = Subdivide[0, 1 - mu, 50];
 
-Export["../data/wolfram/ellippi_data.csv", ellipPiNormal, "CSV"];
+ns = Subdivide[0, 1 - mu, 20];
 
-mNeg = Subdivide[-5, -0.001, 100];
+(* Elliptic integrals of the Third Kind - Normal domain *)
 
-ellipPiNeg = Flatten[Table[{SetPrecision[n, precision], SetPrecision[
-    m, precision], N[EllipticPi[n, m], precision]}, {n, ns}, {m, mNeg}], 
-    1];
+ellipPiNormal = Flatten[Table[{n, m, EllipticPi[n, m]}, {n, ns}, {m, 
+    mNormal}], 1];
 
-Export["../data/wolfram/ellippi_neg.csv", ellipPiNeg, "CSV"];
+ellipPiNormal = Select[ellipPiNormal, Element[#[[3]], Reals]&];
 
-nPV = Subdivide[1.001, 10, 50];
+Export["../data/wolfram/ellippi_data.csv", N[ellipPiNormal], "CSV"];
 
-mPV = Subdivide[0, 0.99, 50];
+(* Elliptic integrals of the Third Kind - Negative m domain *)
 
-ellipPiPV = Flatten[Table[{SetPrecision[n, precision], SetPrecision[m,
-     precision], N[EllipticPi[n, m], precision]}, {n, nPV}, {m, mPV}], 1];
+mNeg = Subdivide[-5, -0.001, 50];
 
-Export["../data/wolfram/ellippi_pv.csv", ellipPiPV, "CSV"];
+ellipPiNeg = Flatten[Table[{n, m, EllipticPi[n, m]}, {n, ns}, {m, mNeg
+    }], 1];
 
-mLimit = Subdivide[0.999, 1, 50];
+ellipPiNeg = Select[ellipPiNeg, Element[#[[3]], Reals]&];
 
-ellipPiLimit = Flatten[Table[{SetPrecision[n, precision], SetPrecision[
-    m, precision], N[EllipticPi[n, m], precision]}, {n, ns}, {m, mLimit}],
-     1];
+Export["../data/wolfram/ellippi_neg.csv", N[ellipPiNeg], "CSV"];
 
-Export["../data/wolfram/ellippi_limit.csv", ellipPiLimit, "CSV"];
+(* Elliptic integrals of the Third Kind - PV domain *)
+
+nPV = Subdivide[1 + mu, 10, 20];
+
+mPV = Subdivide[0, 1 - mu, 25];
+
+ellipPiPV = Flatten[Table[{n, m, EllipticPi[n, m]}, {n, nPV}, {m, mPV
+    }], 1];
+
+ellipPiPV = Select[ellipPiPV, Element[#[[3]], Reals]&];
+
+Export["../data/wolfram/ellippi_pv.csv", N[ellipPiPV], "CSV"];
