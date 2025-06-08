@@ -3,7 +3,8 @@
 ### 0.3.1
 **Improvements**
 - Improve documentations and add graphs and examples for each function.
-- Improve the precision of the `ellipk`, `ellipf`, `ellipe`, and `ellipeinc` functions.
+- Improve the precision of the `ellipk`, `ellipf`, `ellipe`, `ellipeinc`, and `ellippiinc` functions.
+- Improve the speed of `ellippiinc` function.
 - `el3`: Add error when parameter goes out of the function's range (|kc| > 0 for p < 0) and improved the error message when 1 + px² equals zero.
 
 **New Features**
@@ -13,6 +14,7 @@
 - `ellipd`: Fix incorrect answers for m < 0. The function also returns infinity instead of throwing error at m = 1.
 - Fix the domains for `ellipf` and `ellipeinc`.
 - `el3`: Fix index out of bound in small el3 cases.
+- `ellippiinc`: Fix infinite loop leading to stack overflow.
 
 ### 0.3.0
 **New Features**
