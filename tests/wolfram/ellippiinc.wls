@@ -3,64 +3,39 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  *)
 
-precision = 17;
+epsilon = 2.22*^-16;
 
-epsilon = 1*^-4;
+mu = 50 * epsilon;
 
-(* Sample domain limits *)
+PHI = Subdivide[0, Pi / 2, 5];
 
-PHI = Subdivide[0, Pi / 2, 15];
+mNormal = Subdivide[0, 2, 35];
 
-M = Subdivide[0, 2, 30];
+mNeg = Subdivide[-1, 0, 15];
 
-MNeg = Subdivide[-1, 0, 30];
+mPV = Subdivide[0, 1, 80];
 
-NVals = Subdivide[-1, 2, 10];
+NVals = Subdivide[-1, 2, 5];
+
+(* Elliptic integrals of the Third Kind - Normal domain *)
 
 normalTriplets =
     Select[
-        Flatten[Table[{phi, m, n}, {phi, PHI}, {m, M}, {n, NVals}], 2
-            ]
+        Flatten[Table[{phi, m, n}, {phi, PHI}, {m, mNormal}, {n, NVals
+            }], 2]
         ,
         With[{phi = #[[1]], m = #[[2]], n = #[[3]], s2 = Sin[#[[1]]] 
             ^ 2},
-            m * s2 < 1 || n * s2 != 1
+            m * s2 < 1 - mu || n * s2 != 1
         ]&
     ];
-
-MLim = Subdivide[1.001, 3, 10]
-
-epsilon = 1*^-4;
-
-limitTriplets = Reap[
-        Do[
-            If[m > epsilon,
-                Module[{s2Low, s2High, phiLow, phiHigh, phiSample},
-                    s2Low = (1 - epsilon) / m;
-                    s2High = (1 + epsilon) / m;
-                    If[0 < s2Low < 1 && 0 < s2High < 1,
-                        phiLow = ArcSin[Sqrt[s2Low]];
-                        phiHigh = ArcSin[Sqrt[s2High]];
-                        phiSample = Subdivide[phiLow, phiHigh, 5];
-                        Do[Sow[{phi, m, n}], {phi, phiSample}, {n, NVals
-                            }];
-                    ];
-                ]
-            ]
-            ,
-            {m, MLim}
-        ]
-    ][[2, 1]];
-
-(* Normal domain *)
 
 ellipPiInc =
     Select[
         Table[
             With[{phi = triplet[[1]], m = triplet[[2]], n = triplet[[
                 3]]},
-                {SetPrecision[phi, precision], SetPrecision[n, precision
-                    ], SetPrecision[m, precision], N[EllipticPi[n, phi, m], precision]}
+                {phi, n, m, EllipticPi[n, phi, m]}
             ]
             ,
             {triplet, normalTriplets}
@@ -69,19 +44,20 @@ ellipPiInc =
         Im[#[[4]]] == 0&
     ];
 
-(* Negative m values *)
+Export["../data/wolfram/ellippiinc_data.csv", N[ellipPiInc], "CSV"];
+
+(* Elliptic integrals of the Third Kind - Negative m domain *)
 
 ellipPiIncNeg =
     Flatten[
         Table[
             With[{phi = phiVal, m = mVal, n = nVal},
-                {SetPrecision[phi, precision], SetPrecision[n, precision
-                    ], SetPrecision[m, precision], N[EllipticPi[n, phi, m], precision]}
+                {phi, n, m, EllipticPi[n, phi, m]}
             ]
             ,
             {phiVal, PHI}
             ,
-            {mVal, MNeg}
+            {mVal, mNeg}
             ,
             {nVal, NVals}
         ]
@@ -89,25 +65,33 @@ ellipPiIncNeg =
         2
     ];
 
-(* Limit approaching m s2p = 1- *)
+Export["../data/wolfram/ellippiinc_neg.csv", N[ellipPiIncNeg], "CSV"];
 
-ellipPiIncLimit =
+(* Elliptic integrals of the Third Kind - PV domain *)
+
+pvTriplets =
+    Select[
+        Flatten[Table[{phi, m, n}, {phi, PHI}, {m, mPV}, {n, NVals}],
+             2]
+        ,
+        With[{phi = #[[1]], m = #[[2]], n = #[[3]], s2 = Sin[#[[1]]] 
+            ^ 2},
+            n * s2 > 1 + mu && m * s2 < 1 - mu
+        ]&
+    ];
+
+ellipPiIncPV =
     Select[
         Table[
-            With[{phi = N[triple[[1]], precision], m = N[triple[[2]],
-                 precision], n = N[triple[[3]], precision]},
-                {phi, n, m, N[EllipticPi[n, phi, m], precision]}
+            With[{phi = triplet[[1]], m = triplet[[2]], n = triplet[[
+                3]]},
+                {phi, n, m, EllipticPi[n, phi, m]}
             ]
             ,
-            {triple, limitTriplets}
+            {triplet, pvTriplets}
         ]
         ,
         Im[#[[4]]] == 0&
     ];
 
-Export["../data/wolfram/ellippiinc_data.csv", ellipPiInc, "CSV"];
-
-Export["../data/wolfram/ellippiinc_neg.csv", ellipPiIncNeg, "CSV"];
-
-Export["../data/wolfram/ellippiinc_limit.csv", ellipPiIncLimit, "CSV"
-    ];
+Export["../data/wolfram/ellippiinc_pv.csv", N[ellipPiIncPV], "CSV"];
