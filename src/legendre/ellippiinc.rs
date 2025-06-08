@@ -173,16 +173,16 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, &'static str>
         let c = one!() / sp2; //csc2 phi
         let w2 = m / n;
 
-        // This also works but it's recursive.
+        // This appears to have lower error in test dataset.
         // https://dlmf.nist.gov/19.7.E8
-        // return Ok((ellipf(phi, m)?
-        //     + c.sqrt() * elliprc((c - one!()) * (c - m), (c - n) * (c - w2))?)
-        //     - ellippiinc(phi, w2, m)?);
+        return Ok((ellipf(phi, m)?
+            + c.sqrt() * elliprc((c - one!()) * (c - m), (c - n) * (c - w2))?)
+            - ellippiinc(phi, w2, m)?);
 
         // https://dlmf.nist.gov/19.25.E16
-        return Ok(-third!() * w2 * elliprj(c - one!(), c - m, c, c - w2)?
-            + ((c - one!()) * (c - m) / (n - one!()) / (one!() - w2)).sqrt()
-                * elliprc(c * (n - one!()) * (one!() - w2), (n - c) * (c - w2))?);
+        // return Ok(-third!() * w2 * elliprj(c - one!(), c - m, c, c - w2)?
+        //     + ((c - one!()) * (c - m) / (n - one!()) / (one!() - w2)).sqrt()
+        //         * elliprc(c * (n - one!()) * (one!() - w2), (n - c) * (c - w2))?);
     }
 
     if m == zero!() {
