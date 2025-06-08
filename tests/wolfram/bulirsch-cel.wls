@@ -5,30 +5,28 @@
 
 (* In the Wolfram function repository, m is defined as kc^2. *)
 
-precision = 17;
+epsilon = 2.22*^-16;
 
-kcRange = DeleteCases[Subdivide[-2, 2, 20], 0];
+mu = 1 * epsilon;
 
-pRange = DeleteCases[Subdivide[0.01, 1, 10], 0];
+kcRange = Union[Subdivide[-2, -mu, 5], Subdivide[mu, 2, 5]];
 
-pRangePV = Subdivide[-1, -0.01, 10];
+pRange = Subdivide[mu, 1, 5];
 
-aRange = Subdivide[-2, 2, 5];
+pRangePV = Subdivide[-1, -mu, 5];
 
-bRange = Subdivide[-2, 2, 5];
+aRange = Subdivide[-2, 2, 4];
 
-cel = Select[Flatten[Table[{SetPrecision[kc, precision], SetPrecision[
-    p, precision], SetPrecision[a, precision], SetPrecision[b, precision],
-     N[ResourceFunction["BulirschCEL"][kc * kc, p, a, b], precision]}, {kc,
-     kcRange}, {p, pRange}, {a, aRange}, {b, bRange}], 3], Element[#[[5]],
-     Reals]&];
+bRange = Subdivide[-2, 2, 4];
 
-celPV = Select[Flatten[Table[{SetPrecision[kc, precision], SetPrecision[
-    p, precision], SetPrecision[a, precision], SetPrecision[b, precision],
-     N[ResourceFunction["BulirschCEL"][kc * kc, p, a, b], precision]}, {kc,
-     kcRange}, {p, pRangePV}, {a, aRange}, {b, bRange}], 3], Element[#[[5
-    ]], Reals]&];
+cel = Select[Flatten[Table[{kc, p, a, b, ResourceFunction["BulirschCEL"
+    ][kc * kc, p, a, b]}, {kc, kcRange}, {p, pRange}, {a, aRange}, {b, bRange
+    }], 3], Element[#[[5]], Reals]&];
 
-Export["../data/wolfram/cel_data.csv", cel, "CSV"];
+celPV = Select[Flatten[Table[{kc, p, a, b, ResourceFunction["BulirschCEL"
+    ][kc * kc, p, a, b]}, {kc, kcRange}, {p, pRangePV}, {a, aRange}, {b, 
+    bRange}], 3], Element[#[[5]], Reals]&];
 
-Export["../data/wolfram/cel_pv.csv", celPV, "CSV"];
+Export["../data/wolfram/cel_data.csv", N[cel], "CSV"];
+
+Export["../data/wolfram/cel_pv.csv", N[celPV], "CSV"];
