@@ -291,13 +291,27 @@ pub(crate) fn ellipk_precise<T: Float>(m: T) -> Result<T, &'static str> {
 mod tests {
     use super::*;
     use crate::compare_test_data_boost;
+    use crate::compare_test_data_wolfram;
 
     fn ellipk_k(k: &[f64]) -> f64 {
         ellipk(k[0] * k[0]).unwrap()
     }
 
+    fn ellipk_m(m: &[f64]) -> f64 {
+        ellipk(m[0]).unwrap()
+    }
+
     #[test]
-    fn test_ellipk() {
+    fn test_ellipk_boost() {
         compare_test_data_boost!("./tests/data/boost/ellipk_data.txt", ellipk_k, f64::EPSILON);
+    }
+
+    #[test]
+    fn test_ellipk_wolfram() {
+        compare_test_data_wolfram!(
+            "./tests/data/wolfram/ellipk_data.csv",
+            ellipk_m,
+            2.0 * f64::EPSILON
+        );
     }
 }
