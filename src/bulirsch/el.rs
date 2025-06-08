@@ -656,5 +656,32 @@ mod tests {
         let linsp_p = linspace(1e-3, 1.0 - 1e-3, 10);
 
         iproduct!(linsp_x, linsp_kc, linsp_p).for_each(|(x, kc, p)| _test(x, kc, p));
+
+        // Test computed values from the reference
+        // Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions III.”
+        fn test_reference(x: f64, kc: f64, p: f64, expected: f64) {
+            assert_close!(expected, el3(x, kc, p).unwrap(), 2.0 * f64::EPSILON);
+        }
+
+        test_reference(1.3, 0.11, 4.21, 6.6220785847015254e-1);
+        test_reference(1.3, 0.11, 0.82, 1.1307046442074609);
+        test_reference(1.3, 0.92, 0.71, 1.0058286266977115);
+        test_reference(1.3, 0.92, 0.23, 1.1884070823345123);
+        test_reference(1.3, 0.12, -0.11, 1.7259650355348878);
+        test_reference(1.3, 0.12, -2.11, 2.4416814520721179e-1);
+        test_reference(1.3, 0.40, 0.1600001, 1.4004165258366944);
+        test_reference(1.3, 1.0e-10, 0.82, 1.1341505395282723);
+        test_reference(1.3e-10, 1.0e-10, 1.0e-10, 1.3e-10);
+        test_reference(1.6, 1.90, 9.81, 3.8572324379967252e-1);
+        test_reference(1.6, 1.90, 1.22, 7.6656179311956402e-1);
+        test_reference(1.6, 1.90, 0.87, 8.3210591112618096e-1);
+        test_reference(1.6, 1.90, 0.21, 1.0521272221906806);
+        test_reference(1.6, 1.90, -0.21, 1.4730439889554361);
+        test_reference(1.6, 1.90, -4.30, 2.5467519341311686e-1);
+        test_reference(1.6, 1.01e1, -1.0e-5, 3.9501709882649139e-1);
+        test_reference(1.6, 1.50, 2.24999, 7.0057431688357934e-1);
+        test_reference(1.6, 1e10, 1.20, 2.3734774669772208e-9);
+        test_reference(-1.6, 1e10, 1.20, -2.3734774669772208e-9);
+        test_reference(1.0, 0.31, 9.90e-2, 1.0903577921777398);
     }
 }
