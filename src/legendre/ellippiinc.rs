@@ -124,6 +124,11 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, &'static str>
         return ellippi_vc(n, m, nc);
     }
 
+    // https://dlmf.nist.gov/19.6.E11
+    if phi == zero!() {
+        return Ok(zero!());
+    }
+
     if phi > pi_2!() || phi < zero!() {
         // Carlson's algorithm works only for |phi| <= pi/2,
         // use the integrand's periodicity to normalize phi
@@ -215,17 +220,14 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, &'static str>
         //
         let nn = (m - n) / (one!() - n);
         let nm1 = (one!() - m) / (one!() - n);
-        let mut p2 = -n * nn;
 
-        if p2 <= min_val!() {
-            p2 = (-n).sqrt() * nn.sqrt();
-        } else {
-            p2 = p2.sqrt();
-        }
-
-        let delta = (one!() - m * sp2).sqrt();
         if nn > m {
-            result = ellippiinc_vc(phi, nn, m, nm1)?;
+            result = if nn.abs() < n.abs() {
+                ellippiinc_vc(phi, nn, m, nm1)?
+            } else {
+                let c = one!() / sp2;
+                nn / three!() * elliprj(c - one!(), c - m, c, c - nn)? + ellipf(phi, m)?
+            };
             result = result * n / (n - one!());
             result = result * (m - one!()) / (n - m);
         }
@@ -235,6 +237,15 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, &'static str>
             t = t * m / (m - n);
             result = result + t;
         }
+
+        let mut p2 = -n * nn;
+        if p2 <= min_val!() {
+            p2 = (-n).sqrt() * nn.sqrt();
+        } else {
+            p2 = p2.sqrt();
+        }
+
+        let delta = (one!() - m * sp2).sqrt();
         let t = n / ((m - n) * (n - one!()));
         if t > min_val!() {
             result = result + ((p2 / two!()) * (two!() * phi).sin() / delta).atan() * t.sqrt();
