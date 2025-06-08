@@ -267,8 +267,11 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'sta
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 ///
 pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, &'static str> {
-    if p < zero!() && kc.abs() > one!() {
-        return Err("el3: kc must satisfy: -1 ≤ kc ≤ 1 for p < 0.");
+    // if p < zero!() && kc.abs() > one!() {
+    //     return Err("el3: kc must satisfy: -1 ≤ kc ≤ 1 for p < 0.");
+    // }
+    if kc == zero!() {
+        return Err("el3: kc must not be zero.");
     }
 
     if x == zero!() {
