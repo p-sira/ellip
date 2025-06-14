@@ -6,7 +6,8 @@
 epsilon = 2.22*^-16;
 
 (* Mu helps prevent answers approaching infinity, making the comparison fairer. *)
-mu = 50 * epsilon 
+
+mu = 50 * epsilon
 
 mNormal = Subdivide[0, 1 - mu, 50];
 
