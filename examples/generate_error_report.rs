@@ -188,6 +188,8 @@ struct ErrorEntry<'a> {
     max: f64,
     #[tabled(rename = "Variance (ε²)", display = "format_float")]
     variance: f64,
+    #[tabled(rename = "μ (ε²)")]
+    mu: u32,
 }
 
 fn generate_error_entry_from_file<T: Float + Debug>(
@@ -201,16 +203,17 @@ fn generate_error_entry_from_file<T: Float + Debug>(
     }
 }
 
-fn generate_error_table(entries: &[(&str, Stats)]) -> String {
+fn generate_error_table(entries: &[(&str, Stats, u32)]) -> String {
     let rows: Vec<ErrorEntry> = entries
         .iter()
-        .map(|(name, stats)| ErrorEntry {
+        .map(|(name, stats, mu)| ErrorEntry {
             name,
             mean: stats.mean,
             median: stats.median,
             p99: stats.p99,
             max: stats.max,
             variance: stats.variance,
+            mu: *mu,
         })
         .collect();
 
@@ -246,7 +249,7 @@ macro_rules! func_wrapper {
 }
 
 macro_rules! get_entry {
-    ($file_name: expr, $name: expr, $func: expr, $arg_count: tt) => {{
+    ($file_name: expr, $name: expr, $func: expr, $arg_count: tt, $mu: expr) => {{
         func_wrapper!($func, $arg_count);
 
         let file_path = ["./tests/data/wolfram/", $file_name, ".csv"].concat();
@@ -254,6 +257,7 @@ macro_rules! get_entry {
         (
             $name,
             generate_error_entry_from_file(&file_path, &wrapped_func),
+            $mu,
         )
     }};
 }
@@ -287,41 +291,46 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let lines = [
         "# Testing",
-        "This report presents the accuracy of the ellip crate using [symmetric relative error](https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/relative_error.html)",
-        "metric. The errors are expressed in units of machine epsilon (ε).",
-        "The reference values are computed using [Wolfram Engine](https://www.wolfram.com/engine/),",
+        "This report presents the accuracy of the ellip crate using [**symmetric relative error**](https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/relative_error.html)",
+        "metric. Errors are expressed in units of machine epsilon (ε).",
+        "The test data spans the domain of each function up to **μ** to avoid approaching the function's limit.",
+        "The reference values are computed using [**Wolfram Engine**](https://www.wolfram.com/engine/).",
         "You can find the scripts in the directory [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/).",
         &format!("This report is generated on {} rustc {} using ellip v{} at `f64` precision (ε≈2.22e-16).", platform, rust_version, ellip_version),
         "",
         "## Legendre's Complete Elliptic Integrals",
         &generate_error_table(&[
-            get_entry!("ellipk_data", "ellipk", ellipk, 1),
-            get_entry!("ellipk_neg", "ellipk (Negative m)", ellipk, 1),
-            get_entry!("ellipe_data", "ellipe", ellipe, 1),
-            get_entry!("ellipe_neg", "ellipe (Negative m)", ellipe, 1),
-            get_entry!("ellippi_data", "ellippi", ellippi, 2),
-            get_entry!("ellippi_neg", "ellippi (Negative m)", ellippi, 2),
-            get_entry!("ellippi_pv", "ellippi (p.v.)", ellippi, 2),
+            get_entry!("ellipk_data", "ellipk", ellipk, 1, 1),
+            get_entry!("ellipk_neg", "ellipk (Neg m)", ellipk, 1, 1),
+            get_entry!("ellipe_data", "ellipe", ellipe, 1, 1),
+            get_entry!("ellipe_neg", "ellipe (Neg m)", ellipe, 1, 1),
+            get_entry!("ellippi_data", "ellippi", ellippi, 2, 50),
+            get_entry!("ellippi_neg", "ellippi (Neg m)", ellippi, 2, 50),
+            get_entry!("ellippi_pv", "ellippi (p.v.)", ellippi, 2, 50),
         ]),
         "",
         "## Legendre's Incomplete Elliptic Integrals",
-        // &generate_error_table(&[
-        //     get_entry!("ellipf_data", "ellipf", ellipf, 2),
-        //     get_entry!("ellipf_neg", "ellipf (Negative m)", ellipf, 2),
-        //     get_entry!("ellipeinc_data", "ellipeinc", ellipeinc, 2),
-        //     get_entry!("ellipeinc_neg", "ellipeinc (Negative m)", ellipeinc, 2),
-        // ]),
+        &generate_error_table(&[
+            get_entry!("ellipf_data", "ellipf", ellipf, 2, 1),
+            get_entry!("ellipf_neg", "ellipf (Neg m)", ellipf, 2, 1),
+            get_entry!("ellipeinc_data", "ellipeinc", ellipeinc, 2, 1),
+            get_entry!("ellipeinc_neg", "ellipeinc (Neg m)", ellipeinc, 2, 1),
+            get_entry!("ellippiinc_data", "ellippiinc", ellippiinc, 3, 50),
+            get_entry!("ellippiinc_neg", "ellippiinc (Neg m)", ellippiinc, 3, 50),
+            get_entry!("ellippiinc_pv", "ellippiinc (p.v.)", ellippiinc, 3, 50),
+        ]),
         "",
-        "## Bulirsch's Complete Elliptic Integrals",
+        "## Bulirsch's Elliptic Integrals",
         "For Bulirsh's elliptic integrals, except for the third kind, the reference values are generated using the function",
         "submitted by Jan Mangaldan on [Wolfram Function Repository](https://resources.wolframcloud.com/FunctionRepository/).",
+        "Bulirsch's incomplete elliptic integrals of the third kind is compared to its Legendre's form on Wolfram.",
         &generate_error_table(&[
-            // get_entry!("cel_data", "cel", cel, 4),
-            // get_entry!("cel_pv", "cel (p.v.)", cel, 4),
-            // get_entry!("el1_data", "el1", el1, 2),
-            // get_entry!("el2_data", "el2", el2, 4),
-            // get_entry!("el3_data", "el3", el3, 3),
-            // get_entry!("el3_pv", "el3 (p.v.)", el3, 3),
+            get_entry!("cel_data", "cel", cel, 4, 1),
+            get_entry!("cel_pv", "cel (p.v.)", cel, 4, 1),
+            get_entry!("el1_data", "el1", el1, 2, 1),
+            get_entry!("el2_data", "el2", el2, 4, 1),
+            get_entry!("el3_data", "el3", el3, 3, 1),
+            get_entry!("el3_pv", "el3 (p.v.)", el3, 3, 1),
         ]),
         "",
         "## Bulirsch's Incomplete Elliptic Integrals",
