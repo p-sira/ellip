@@ -5,6 +5,8 @@
 
 use num_traits::Float;
 
+use crate::{ellipeinc, ellipf};
+
 use super::{cel1, cel2, BulirschConst};
 
 /// Computes [incomplete elliptic integral of the first kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E11_5).
@@ -267,9 +269,6 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'sta
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 ///
 pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, &'static str> {
-    // if p < zero!() && kc.abs() > one!() {
-    //     return Err("el3: kc must satisfy: -1 ≤ kc ≤ 1 for p < 0.");
-    // }
     if kc == zero!() {
         return Err("el3: kc must not be zero.");
     }
@@ -277,6 +276,53 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, &'static st
     if x == zero!() {
         return Ok(zero!());
     }
+
+    // Handle special cases
+    let phi = x.atan();
+    let m = one!() - kc * kc;
+    let n = one!() - p;
+
+    if kc == one!() {
+        // A&S 17.7.20:
+        if n < one!() {
+            let vcr = p.sqrt();
+            return Ok((vcr * phi.tan()).atan() / vcr);
+        } else {
+            // v > 1:
+            let vcr = (-p).sqrt();
+            let arg = vcr * phi.tan();
+            return Ok((arg.ln_1p() - (-arg).ln_1p()) / (two!() * vcr));
+        }
+    }
+
+    // Didn't improve the accuracy
+    // if n == zero!() {
+    //     // A&S 17.7.18 & 19
+    //     return if m == zero!() {
+    //         Ok(phi)
+    //     } else {
+    //         ellipf(phi, m)
+    //     };
+    // }
+
+    // This cutpoint is empirical
+    if p.abs() <= num!(1e-10) {
+        if m == zero!() {
+            return Ok(phi.tan());
+        }
+
+        // http://functions.wolfram.com/08.06.03.0008.01
+        let sp2 = phi.sin() * phi.sin();
+        let mut result = (one!() - m * sp2).sqrt() * phi.tan() - ellipeinc(phi, m)?;
+        result = result / (one!() - m);
+        result = result + ellipf(phi, m)?;
+        return Ok(result);
+    }
+
+    // // https://dlmf.nist.gov/19.6.E11
+    // if phi == zero!() {
+    //     return Ok(zero!());
+    // }
 
     // real
     let mut c;
