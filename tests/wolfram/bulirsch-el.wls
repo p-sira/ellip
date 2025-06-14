@@ -5,113 +5,100 @@
 
 (* In the Wolfram function repository, m is defined as kc^2. *)
 
-precision = 17;
-xRange = DeleteCases[Subdivide[-2, 2, 30], 0];
-kcRange = DeleteCases[Subdivide[-2, 2, 30], 0];
+epsilon = 2.22*^-16;
 
-(* el1 test data - Complete elliptic integral of the first kind *)
-(* Regular data points *)
-kcForEl1 = Delete[kcRange, {{1}, {-1}}]; (* Remove extreme values *)
-el1 = Flatten[Table[{
-  SetPrecision[x, precision],
-  SetPrecision[kc, precision], 
-  N[ResourceFunction["BulirschEL1"][x, kc*kc], precision]
-}, {x, xRange}, {kc, kcForEl1}], 1];
-Export["../data/wolfram/el1_data.csv", el1, "CSV"];
+muEL1 = epsilon;
 
-(* el1 limit test data - approaching kc->0 *)
-kcNearZero = SetPrecision[{0.1, 0.05, 0.01, 0.005, 0.001}, precision];
-el1Limit = Flatten[Table[{
-  SetPrecision[x, precision],
-  kc, 
-  N[ResourceFunction["BulirschEL1"][x, kc*kc], precision]
-}, {x, xRange}, {kc, kcNearZero}], 1];
-Export["../data/wolfram/el1_limit.csv", el1Limit, "CSV"];
+muEL2 = epsilon;
 
-(* el2 test data - Complete elliptic integral of the second kind *)
-(* Regular data points *)
-kcForEl2 = Delete[kcRange, {{1}, {-1}}]; (* Remove extreme values *)
-xRange = DeleteCases[Subdivide[-2, 2, 10], 0];
-kcRange = DeleteCases[Subdivide[-2, 2, 20], 0];
-aRange = Subdivide[-2, 2, 5];
-bRange = Subdivide[-2, 2, 5];
+muEL3 = 50 * epsilon;
 
-el2 = Flatten[Table[{
-  SetPrecision[x, precision],
-  SetPrecision[kc, precision], 
-  SetPrecision[a, precision],
-  SetPrecision[b, precision],
-  N[ResourceFunction["BulirschEL2"][x, kc * kc, a, b], precision]
-}, {x, xRange}, {kc, kcForEl2}, {a, aRange}, {b, bRange}], 3];
-el2 = Select[el2, Element[#[[5]], Reals] &];
-Export["../data/wolfram/el2_data.csv", el2, "CSV"];
+(* Bulirsch's Incomplete Elliptic integrals of the First Kind *)
 
-(* el2 limit test data - approaching kc->0 *)
-el2Limit = Flatten[Table[{
-  SetPrecision[x, precision],
-  kc,
-  SetPrecision[a, precision],
-  SetPrecision[b, precision],
-  N[ResourceFunction["BulirschEL2"][x, kc * kc, a, b], precision]
-}, {x, xRange}, {kc, kcNearZero}, {a, aRange}, {b, bRange}], 3];
-el2Limit = Select[el2Limit, Element[#[[5]], Reals] &];
-Export["../data/wolfram/el2_limit.csv", el2Limit, "CSV"];
+xRange = Subdivide[-2, 2, 30];
 
-(* el3 normal test data *)
-xRange = DeleteCases[Subdivide[-2, 2, 20], 0];
-kcRange = DeleteCases[Subdivide[-2, 2, 20], 0];
-pRange = DeleteCases[Subdivide[0.01, 1, 10], 0];
-pRangePV = Subdivide[-1, -0.01, 10];
+kcRange = Union[Subdivide[-2, -muEL1, 15], Subdivide[muEL1, 2, 15]];
 
-(* Avoid: kc = 0, 1+px^2 = 0, and |kc| > 1 for p < 0 *)
-validKcPX = Flatten[Table[
-  With[{x = SetPrecision[x, precision], kc = SetPrecision[kc, precision], p = SetPrecision[p, precision]},
-    If[kc != 0 && (1 + p*x^2) != 0 && (p >= 0 || Abs[kc] <= 1), 
-      {x, kc, p}, 
-      Nothing
+el1 = Flatten[Table[{x, kc, ResourceFunction["BulirschEL1"][x, kc * kc
+  ]}, {x, xRange}, {kc, kcRange}], 1];
+
+Export["../data/wolfram/el1_data.csv", N[el1], "CSV"];
+
+(* Bulirsch's Incomplete Elliptic integrals of the Second Kind *)
+
+xRange = Subdivide[-1, 1, 10];
+
+kcRange = Union[Subdivide[-1, -muEL2, 10], Subdivide[muEL2, 1, 10]];
+
+aRange = Subdivide[-1, 1, 5];
+
+bRange = Subdivide[-1, 1, 5];
+
+el2 = Select[Flatten[Table[{x, kc, a, b, ResourceFunction["BulirschEL2"
+  ][x, kc * kc, a, b]}, {x, xRange}, {kc, kcRange}, {a, aRange}, {b, bRange
+  }], 3], Im[#[[5]]] == 0&];
+
+Export["../data/wolfram/el2_data.csv", N[el2], "CSV"];
+
+(* Bulirsch's Incomplete Elliptic integrals of the Third Kind - Normal domain *)
+
+xRange = Union[Subdivide[-1, 1, 10], {0}];
+
+kcRange = Union[Subdivide[-1.5, -muEL3, 10], Subdivide[muEL3, 1.5, 10
+  ]];
+
+pRange = Subdivide[muEL3, 1.0, 10];
+
+pRangePV = Subdivide[-3.0, -1.1, 10];
+
+validKcPX =
+  Select[
+    Flatten[Table[{x, kc, p}, {x, xRange}, {kc, kcRange}, {p, pRange}
+      ], 2]
+    ,
+    With[{x = #[[1]], kc = #[[2]], p = #[[3]]},
+      kc != 0 && (1 + p * x^2) > muEL3
+    ]&
+  ];
+
+el3 =
+  Select[
+    Table[
+      With[{x = data[[1]], kc = data[[2]], p = data[[3]]},
+        {x, kc, p, ResourceFunction["BulirschEL3"][x, kc * kc, p]}
+      ]
+      ,
+      {data, validKcPX}
     ]
-  ],
-  {x, xRange}, {kc, kcRange}, {p, pRange}
-], 2];
+    ,
+    Im[#[[4]]] == 0&
+  ];
 
-el3 = Table[
-  With[{x = data[[1]], kc = data[[2]], p = data[[3]]},
-    {x, kc, p, N[ResourceFunction["BulirschEL3"][x, kc * kc, p], precision]}
-  ],
-  {data, validKcPX}
-];
-el3 = Select[el3, Element[#[[4]], Reals] &];
-Export["../data/wolfram/el3_data.csv", el3, "CSV"];
+Export["../data/wolfram/el3_data.csv", N[el3], "CSV"];
 
-(* el3 with Cauchy principal value when 1 + px^2 < 0 *)
-validKcPXPV = Flatten[Table[
-  With[{x = SetPrecision[x, precision], kc = SetPrecision[kc, precision], p = SetPrecision[p, precision]},
-    If[kc != 0 && (1 + p*x^2) < 0 && (p >= 0 || Abs[kc] <= 1), 
-      {x, kc, p}, 
-      Nothing
+(* Bulirsch's Incomplete Elliptic integrals of the Third Kind - PV domain (1 + px^2 < 0) *)
+
+validKcPXPV =
+  Select[
+    Flatten[Table[{x, kc, p}, {x, xRange}, {kc, kcRange}, {p, pRangePV
+      }], 2]
+    ,
+    With[{x = #[[1]], kc = #[[2]], p = #[[3]]},
+      kc != 0 && (1 + p * x^2) < -muEL3
+    ]&
+  ];
+
+el3PV =
+  Select[
+    Table[
+      With[{x = data[[1]], kc = data[[2]], p = data[[3]]},
+        {x, kc, p, ResourceFunction["BulirschEL3"][x, kc * kc, p]}
+      ]
+      ,
+      {data, validKcPXPV}
     ]
-  ],
-  {x, xRange}, {kc, kcRange}, {p, pRangePV}
-], 2];
+    ,
+    Im[#[[4]]] == 0&
+  ];
 
-el3PV = Table[
-  With[{x = data[[1]], kc = data[[2]], p = data[[3]]},
-    {x, kc, p, N[ResourceFunction["BulirschEL3"][x, kc * kc, p], precision]}
-  ],
-  {data, validKcPXPV}
-];
-el3PV = Select[el3PV, Element[#[[4]], Reals] &];
-Export["../data/wolfram/el3_pv.csv", el3PV, "CSV"];
-
-(* el3 limit test data - approaching critical values *)
-(* Near kc = 0 *)
-kcNearZero = SetPrecision[{0.1, 0.05, 0.01, 0.005, 0.001}, precision];
-xForLimit = SetPrecision[{0.5, 1.0, 1.5}, precision];
-pForLimit = SetPrecision[{0.1, 0.5, 1.0}, precision];
-
-el3LimitKc = Flatten[Table[
-  {x, kc, p, N[ResourceFunction["BulirschEL3"][x, kc * kc, p], precision]},
-  {x, xForLimit}, {kc, kcNearZero}, {p, pForLimit}
-], 2];
-el3LimitKc = Select[el3LimitKc, Element[#[[4]], Reals] &];
-Export["../data/wolfram/el3_limit.csv", el3LimitKc, "CSV"];
+Export["../data/wolfram/el3_pv.csv", N[el3PV], "CSV"];
