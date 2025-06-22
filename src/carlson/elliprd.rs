@@ -41,7 +41,6 @@ use num_traits::Float;
 ///
 /// ## Domain
 /// - Returns error if x < 0, y < 0, z ≤ 0 or when both x and y are zero.
-/// - Returns the Cauchy principal value if y < 0.
 ///
 /// ## Graph
 /// ![Degenerate Symmetric Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprd_plot.svg?raw=true)
