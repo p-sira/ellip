@@ -332,10 +332,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             get_entry!("el3_pv", "el3 (p.v.)", el3, 3, 50),
         ]),
         "",
-        "## Bulirsch's Incomplete Elliptic Integrals",
-        "",
         "## Carlson's Symmetric Elliptic Integrals",
         "",
+        &generate_error_table(&[
+            get_entry!("elliprf_data", "elliprf", elliprf, 3, 1),
+            get_entry!("elliprg_data", "elliprg", elliprg, 3, 50),
+            get_entry!("elliprj_data", "elliprj", elliprj, 4, 100),
+            get_entry!("elliprj_pv", "elliprj (p.v.)", elliprj, 4, 100),
+            get_entry!("elliprc_data", "elliprc", elliprc, 2, 1),
+            get_entry!("elliprc_pv", "elliprc (p.v.)", elliprc, 2, 1),
+            get_entry!("elliprd_data", "elliprd", elliprd, 3, 50),
+        ]),
     ];
 
     let path = "tests/README.md";
