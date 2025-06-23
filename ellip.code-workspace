@@ -104,7 +104,24 @@
             "typeinfo": "cpp",
             "valarray": "cpp",
             "variant": "cpp",
-            "*.ipp": "cpp"
+            "*.ipp": "cpp",
+            "barrier": "cpp",
+            "csetjmp": "cpp",
+            "csignal": "cpp",
+            "cuchar": "cpp",
+            "regex": "cpp",
+            "flat_map": "cpp",
+            "flat_set": "cpp",
+            "generator": "cpp",
+            "latch": "cpp",
+            "print": "cpp",
+            "queue": "cpp",
+            "ranges": "cpp",
+            "scoped_allocator": "cpp",
+            "spanstream": "cpp",
+            "stack": "cpp",
+            "stacktrace": "cpp",
+            "syncstream": "cpp"
         }
     },
 }
