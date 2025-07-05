@@ -11,6 +11,9 @@
     <a href="https://crates.io/crates/ellip">
         <img src="https://img.shields.io/crates/v/ellip" alt="Crate">
     </a>
+    <a href="https://crates.io/crates/ellip">
+        <img src="https://img.shields.io/crates/d/ellip" alt="Total Downloads">
+    </a>
     <a href="https://docs.rs/ellip">
         <img src="https://img.shields.io/badge/Docs-docs.rs-blue" alt="Documentation">
     </a>
