@@ -99,7 +99,8 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
         let p = (z * (x + y + q) - x * y) / (z + q);
         let mut value = (p - z) * _elliprj(x, y, z, p)?;
         value = value - three!() * elliprf(x, y, z)?;
-        value = value + three!() * ((x * y * z) / (x * y + p * q)).sqrt() * elliprc(x * y + p * q, p * q)?;
+        value = value
+            + three!() * ((x * y * z) / (x * y + p * q)).sqrt() * elliprc(x * y + p * q, p * q)?;
         return Ok(value / (z + q));
     }
 
