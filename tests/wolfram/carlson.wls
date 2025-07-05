@@ -15,7 +15,7 @@ muRG = 50 * epsilon;
 
 muRF = epsilon;
 
-muRJ = 100 * epsilon;
+muRJ = 50 * epsilon;
 
 (* Carlson RC - Degenerate symmetric elliptic integral of RF *)
 
