@@ -21,7 +21,7 @@ use std::mem::swap;
 
 use num_traits::Float;
 
-/// Compute [degenerate symmetric elliptic integral of the third kind](https://dlmf.nist.gov/19.16.E5).
+/// Computes RD ([degenerate symmetric elliptic integral of the third kind](https://dlmf.nist.gov/19.16.E5)).
 /// ```text
 ///                     ∞                                        
 ///                 3  ⌠                   dt                   
@@ -29,8 +29,38 @@ use num_traits::Float;
 ///                 2  ⎮             ___________________________
 ///                    ⌡ (t + z) ⋅ ╲╱(t + x) ⋅ (t + y) ⋅ (t + z)
 ///                   0                                        
-/// where x ≥ 0, y ≥ 0, and at most one can be zero. z > 0.
 /// ```
+///
+/// ## Parameters
+/// - x ∈ ℝ, x ≥ 0
+/// - y ∈ ℝ, y ≥ 0
+/// - z ∈ ℝ, z > 0
+///
+/// The parameters x and y (but not z!) are symmetric. This means swapping them does not change the value of the function.
+/// At most one of them can be zero.
+///
+/// ## Domain
+/// - Returns error if x < 0, y < 0, z ≤ 0 or when both x and y are zero.
+///
+/// ## Graph
+/// ![Degenerate Symmetric Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprd_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprd_plot.html)
+///
+/// # Related Functions
+/// With c = csc²φ,
+/// - [ellipdinc](crate::ellipdinc)(φ, m) = [elliprd](crate::elliprd)(c - 1, c - m, c) / 3
+///
+/// # Examples
+/// ```
+/// use ellip::{elliprd, util::assert_close};
+///
+/// assert_close(elliprd(1.0, 0.5, 0.25).unwrap(), 4.022594757168912, 1e-15);
+/// ```
+///
+/// # References
+/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 ///
 pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
     if x.min(y) < zero!() || x + y == zero!() {
@@ -143,7 +173,7 @@ const N_MAX_ITERATIONS: usize = 50;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compare_test_data;
+    use crate::compare_test_data_boost;
 
     fn _elliprd(inp: &[f64]) -> f64 {
         elliprd(inp[0], inp[1], inp[2]).unwrap()
@@ -151,30 +181,30 @@ mod tests {
 
     #[test]
     fn test_elliprd() {
-        compare_test_data!("./tests/data/boost/elliprd_data.txt", _elliprd, 4.8e-16);
+        compare_test_data_boost!("./tests/data/boost/elliprd_data.txt", _elliprd, 4.8e-16);
     }
 
     #[test]
     fn test_elliprd_0xy() {
-        compare_test_data!("./tests/data/boost/elliprd_0xy.txt", _elliprd, 5.9e-16);
+        compare_test_data_boost!("./tests/data/boost/elliprd_0xy.txt", _elliprd, 5.9e-16);
     }
 
     #[test]
     fn test_elliprd_0yy() {
-        compare_test_data!("./tests/data/boost/elliprd_0yy.txt", _elliprd, 2.6e-16);
+        compare_test_data_boost!("./tests/data/boost/elliprd_0yy.txt", _elliprd, 2.6e-16);
     }
     #[test]
     fn test_elliprd_xxx() {
-        compare_test_data!("./tests/data/boost/elliprd_xxx.txt", _elliprd, 2.3e-16);
+        compare_test_data_boost!("./tests/data/boost/elliprd_xxx.txt", _elliprd, 2.3e-16);
     }
 
     #[test]
     fn test_elliprd_xxz() {
-        compare_test_data!("./tests/data/boost/elliprd_xxz.txt", _elliprd, 7.9e-16);
+        compare_test_data_boost!("./tests/data/boost/elliprd_xxz.txt", _elliprd, 7.9e-16);
     }
 
     #[test]
     fn test_elliprd_xyy() {
-        compare_test_data!("./tests/data/boost/elliprd_xyy.txt", _elliprd, 3.7e-15);
+        compare_test_data_boost!("./tests/data/boost/elliprd_xyy.txt", _elliprd, 3.7e-15);
     }
 }

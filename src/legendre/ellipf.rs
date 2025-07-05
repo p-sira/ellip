@@ -1,72 +1,31 @@
 /*
  * Ellip is licensed under The 3-Clause BSD, see LICENSE.
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
- * This code is translated from SciPy C++ implementation to Rust.
+ * This code is modified from Boost Math, see LICENSE in this directory.
  */
 
-/* Translated into C++ by SciPy developers in 2024.
- * Original header with Copyright information appears below.
- */
-
-/*                                                     ellik.c
- *
- *     Incomplete elliptic integral of the first kind
- *
- *
- *
- * SYNOPSIS:
- *
- * double phi, m, y, ellik();
- *
- * y = ellik( phi, m );
- *
- *
- *
- * DESCRIPTION:
- *
- * Approximates the integral
- *
- *
- *
- *                phi
- *                 -
- *                | |
- *                |           dt
- * F(phi | m) =   |    ------------------
- *                |                   2
- *              | |    sqrt( 1 - m sin t )
- *               -
- *                0
- *
- * of amplitude phi and modulus m, using the arithmetic -
- * geometric mean algorithm.
- *
- *
- *
- *
- * ACCURACY:
- *
- * Tested at random points with m in [0, 1] and phi as indicated.
- *
- *                      Relative error:
- * arithmetic   domain     # trials      peak         rms
- *    IEEE     -10,10       200000      7.4e-16     1.0e-16
- *
- *
- */
-
-/*
- * Cephes Math Library Release 2.0:  April, 1987
- * Copyright 1984, 1987 by Stephen L. Moshier
- * Direct inquiries to 30 Frost Street, Cambridge, MA 02140
- */
-/* Copyright 2014, Eric W. Moore */
+// Original header from Boost Math
+//  Copyright (c) 2006 Xiaogang Zhang
+//  Copyright (c) 2006 John Maddock
+//  Copyright (c) 2024 Matt Borland
+//  Use, modification and distribution are subject to the
+//  Boost Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+//  History:
+//  XZ wrote the original of this file as part of the Google
+//  Summer of Code 2006.  JM modified it to fit into the
+//  Boost.Math conceptual framework better, and to ensure
+//  that the code continues to work no matter how many digits
+//  type T has.
 
 use num_traits::Float;
 
-use crate::ellipk;
+use crate::elliprf;
 
-/// Compute [incomplete elliptic integral of the first kind](https://dlmf.nist.gov/19.2.E4).
+use super::ellipk::ellipk_precise;
+
+/// Computes [incomplete elliptic integral of the first kind](https://dlmf.nist.gov/19.2.E4).
 ///
 /// ```text
 ///              φ
@@ -75,181 +34,109 @@ use crate::ellipk;
 ///             │     _____________
 ///             ⌡   \╱ 1 - m sin²θ
 ///            0
-/// where m ≤ 1
 /// ```
 ///
-/// Note that some mathematical references use the parameter k for the function,
-/// where k² = m.
+/// ## Parameters
+/// - phi: amplitude angle (φ). φ ∈ ℝ.
+/// - m: elliptic parameter. m ∈ ℝ.
+///
+/// The elliptic modulus (k) is also frequently used instead of the parameter (m), where k² = m.
+///
+/// ## Domain
+/// - Returns error if m sin²φ > 1.
+///
+/// ## Graph
+/// ![Incomplete Elliptic Integral of the First Kind](https://github.com/p-sira/ellip/blob/main/figures/ellipf_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipf_plot.html)
+///
+/// ![Incomplete Elliptic Integral of the First Kind (3D Plot)](https://github.com/p-sira/ellip/blob/main/figures/ellipf_plot_3d.png?raw=true)
+///
+/// [Interactive 3D Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipf_plot_3d.html)
+///
+/// # Related Functions
+/// With c = csc²φ,
+/// - [ellipf](crate::ellipf)(φ,m) = [elliprf](crate::elliprf)(c - 1, c - m, c)
+///
+/// # Examples
+/// ```
+/// use ellip::{ellipf, util::assert_close};
+/// use std::f64::consts::FRAC_PI_4;
+///
+/// assert_close(ellipf(FRAC_PI_4, 0.5).unwrap(), 0.826017876249245, 1e-15);
+/// ```
+///
+/// # References
+/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+/// - The MathWorks, Inc. “ellipticF.” Accessed April 21, 2025. <https://www.mathworks.com/help/symbolic/sym.ellipticf.html>.
+///
 pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
-    if m > one!() {
-        return Err("ellipf: m must be less than 1.");
+    let invert = if phi < zero!() { -one!() } else { one!() };
+    let phi = phi.abs();
+
+    if phi >= max_val!() {
+        return Ok(invert * inf!());
     }
 
-    if phi.is_infinite() || m.is_infinite() {
-        if phi.is_infinite() {
-            return Ok(inf!());
-        }
-
-        if m.is_infinite() {
-            return Ok(zero!());
-        }
-
-        return Err("ellipf: m or φ must be finite");
+    if phi > one!() / epsilon!() {
+        // Phi is so large that phi%pi is necessarily zero (or garbage),
+        // just return the second part of the duplication formula:
+        return Ok(invert * two!() * phi * ellipk_precise(m)? / pi!());
     }
 
-    if m == zero!() {
-        return Ok(phi);
+    // Carlson's algorithm works only for |phi| <= pi/2,
+    // use the integrand's periodicity to normalize phi
+    let mut rphi = phi % pi_2!();
+    let mut mm = ((phi - rphi) / pi_2!()).round();
+
+    let mut s = one!();
+    if mm % two!() > half!() {
+        mm = mm + one!();
+        s = -one!();
+        rphi = pi_2!() - rphi;
     }
 
-    if m == one!() {
-        if phi.abs() >= pi_2!() {
-            return Ok(inf!());
-        }
-        return Ok(phi.tan().sinh().atanh());
+    let s2p = rphi.sin() * rphi.sin();
+    let ms2p = m * s2p;
+    if ms2p >= one!() {
+        return Err("ellipf: m sin²φ must be smaller than one.");
     }
 
-    let mut npio2 = (phi / pi_2!()).floor();
-    if (npio2.abs() % two!()) == one!() {
-        npio2 = npio2 + one!();
-    }
-
-    let mut phi = phi;
-    let mut k;
-    if npio2 != zero!() {
-        k = ellipk(m)?;
-        phi = phi - npio2 * pi_2!();
-    } else {
-        k = zero!();
-    }
-
-    let sign = if phi < zero!() {
-        phi = -phi;
-        -one!()
-    } else {
-        one!()
-    };
-
-    fn done<T: Float>(val: T, sign: T, npio2: T, k: T) -> Result<T, &'static str> {
-        Ok(sign * val + npio2 * k)
-    }
-
-    let a = one!() - m;
-    if a > one!() {
-        return done(ellipf_neg_m(phi, m), sign, npio2, k);
-    }
-
-    let mut b = a.sqrt();
-    let mut t = phi.tan();
-    if t.abs() > num!(10.0) {
-        let mut e = one!() / (b * t);
-        if e.abs() < num!(10.0) {
-            e = e.atan();
-            if npio2 == zero!() {
-                k = ellipk(m)?;
+    let c2p = rphi.cos() * rphi.cos();
+    let mut result;
+    if s2p > min_val!() {
+        // Use http://dlmf.nist.gov/19.25#E5, note that
+        // c-1 simplifies to cot^2(rphi) which avoids cancellation.
+        // Likewise c - k^2 is the same as (c - 1) + (1 - k^2).
+        //
+        let c = one!() / s2p;
+        let c_minus_one = c2p / s2p;
+        let arg2 = if m != zero!() {
+            let cross = (c / m).abs();
+            if cross > num!(0.9) && cross < num!(1.1) {
+                c_minus_one + one!() - m
+            } else {
+                c - m
             }
-            return done(k - ellipf(e, m)?, sign, npio2, k);
-        }
-    }
-
-    let mut a = one!();
-    let mut c = m.sqrt();
-    let mut d = one!();
-    let mut mod_phi = zero!();
-
-    while (c / a).abs() > epsilon!() {
-        let temp = b / a;
-        phi = phi + (t * temp).atan() + mod_phi * pi!();
-        let denom = one!() - temp * t * t;
-        if denom.abs() > num!(10.0) * epsilon!() {
-            t = t * (one!() + temp) / denom;
-            mod_phi = num!(((phi + pi_2!()) / pi!()).to_i32().unwrap());
         } else {
-            t = phi.tan();
-            mod_phi = num!(((phi - t.atan()) / pi!()).floor().to_i32().unwrap());
-        }
-        c = (a - b) / two!();
-        let temp = (a * b).sqrt();
-        a = (a + b) / two!();
-        b = temp;
-        d = d * two!();
-    }
-
-    done((t.atan() + mod_phi * pi!()) / (d * a), sign, npio2, k)
-}
-
-/// Compute elliptic integral of the first kind for m<0.
-#[inline]
-fn ellipf_neg_m<T: Float>(phi: T, m: T) -> T {
-    let mpp = m * phi * phi;
-
-    if -mpp < num!(1e-6) && phi < -m {
-        return phi
-            + (-mpp * phi * phi / num!(30.0) + three!() * mpp * mpp / num!(40.0) + mpp / six!())
-                * phi;
-    }
-
-    if -mpp > num!(4e7) {
-        let sm = (-m).sqrt();
-        let sp = phi.sin();
-        let cp = phi.cos();
-
-        let a = (four!() * sp * sm / (one!() + cp)).ln();
-        let b = -(one!() + cp / (sp * sp) - a) / (four!() * m);
-        return (a + b) / sm;
-    }
-
-    let (scale, x, y, z) = if phi > num!(1e-153) && m > num!(-1e305) {
-        let s = phi.sin();
-        let phi_tan = phi.tan();
-        let csc2 = one!() / (s * s);
-        (one!(), one!() / (phi_tan * phi_tan), csc2 - m, csc2)
+            c
+        };
+        result = s * elliprf(c_minus_one, arg2, c)?;
     } else {
-        (phi, one!(), one!() - m * phi * phi, one!())
-    };
-
-    if x == y && x == z {
-        return scale / x.sqrt();
+        result = s * rphi.sin();
+    }
+    if mm != zero!() {
+        result = result + mm * ellipk_precise(m)?;
     }
 
-    let a0 = (x + y + z) / three!();
-    let mut a = a0;
-    let mut x1 = x;
-    let mut y1 = y;
-    let mut z1 = z;
-    let mut q = num!(400.0) * (a0 - x).abs().max((a0 - y).abs()).max((a0 - z).abs());
-    let mut n = 0;
-
-    while q > a.abs() && n <= 100 {
-        let sx = x1.sqrt();
-        let sy = y1.sqrt();
-        let sz = z1.sqrt();
-        let lam = sx * sy + sx * sz + sy * sz;
-        x1 = (x1 + lam) / four!();
-        y1 = (y1 + lam) / four!();
-        z1 = (z1 + lam) / four!();
-        a = (x1 + y1 + z1) / three!();
-        n += 1;
-        q = q / four!();
-    }
-
-    let two_to_2n = num!(1u32 << (2 * n));
-    let x = (a0 - x) / a / two_to_2n;
-    let y = (a0 - y) / a / two_to_2n;
-    let z = -(x + y);
-
-    let e2 = x * y - z * z;
-    let e3 = x * y * z;
-
-    scale
-        * (one!() - e2 / num!(10.0) + e3 / num!(14.0) + e2 * e2 / num!(24.0)
-            - three!() * e2 * e3 / num!(44.0))
-        / a.sqrt()
+    Ok(invert * result)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compare_test_data;
+    use crate::compare_test_data_boost;
 
     fn ellipf_k(inp: &[f64]) -> f64 {
         ellipf(inp[0], inp[1] * inp[1]).unwrap()
@@ -257,6 +144,6 @@ mod tests {
 
     #[test]
     fn test_ellipf() {
-        compare_test_data!("./tests/data/boost/ellipf_data.txt", ellipf_k, 4.9e-16);
+        compare_test_data_boost!("./tests/data/boost/ellipf_data.txt", ellipf_k, 5.1e-16);
     }
 }

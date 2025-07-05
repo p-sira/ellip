@@ -23,7 +23,7 @@ use std::mem::swap;
 use crate::{elliprc, elliprd, elliprf};
 use num_traits::Float;
 
-/// Compute [symmetric elliptic integral of the third kind](https://dlmf.nist.gov/19.16.E2).
+/// Computes RJ ([symmetric elliptic integral of the third kind](https://dlmf.nist.gov/19.16.E2)).
 /// ```text
 ///                        ∞                              
 ///                    3  ⌠                  dt              
@@ -31,8 +31,42 @@ use num_traits::Float;
 ///                    2  ⎮             _______________________
 ///                       ⌡ (t + p) ⋅ ╲╱(t + x) (t + y) (t + z)
 ///                      0
-/// where x ≥ 0, y ≥ 0, z ≥ 0, and at most one can be zero. p ≠ 0.
 /// ```
+///
+/// ## Parameters
+/// - x ∈ ℝ, x ≥ 0
+/// - y ∈ ℝ, y ≥ 0
+/// - z ∈ ℝ, z ≥ 0
+/// - p ∈ ℝ, p ≠ 0
+///
+/// The parameters x, y, and z are symmetric. This means swapping them does not change the value of the function.
+/// At most one of them can be zero.
+///
+/// ## Domain
+/// - Returns error if:
+///   - any of x, y, or z is negative, or more than one of them are zero,
+///   - or p = 0.
+/// - Returns the Cauchy principal value if p < 0.
+///
+/// ## Graph
+/// ![Symmetric Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprj_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprj_plot.html)
+///
+/// # Related Functions
+/// With c = csc²φ and kc² = 1 - m,
+/// - [ellippi](crate::ellippi)(φ, n, m) = n / 3 * [elliprj](crate::elliprj)(c - 1, c - m, c, c - n) + [ellipf](crate::ellipf)(φ, m)
+///
+/// # Examples
+/// ```
+/// use ellip::{elliprj, util::assert_close};
+///
+/// assert_close(elliprj(1.0, 0.5, 0.25, 0.125).unwrap(), 5.680557292035963, 1e-15);
+/// ```
+///
+/// # References
+/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 ///
 pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
     if x.min(y).min(z) < zero!() || (y + z).min(x + y).min(x + z) == zero!() {
@@ -42,6 +76,62 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
         return Err("elliprj: p must be non-zero");
     }
 
+    let mut x = x;
+    let mut y = y;
+    let mut z = z;
+
+    // for p < 0, the integral is singular, return Cauchy principal value
+    if p < zero!() {
+        // We must ensure that x < y < z.
+        // Since the integral is symmetrical in x, y and z
+        // we can just permute the values:
+        if x > y {
+            swap(&mut x, &mut y);
+        }
+        if y > z {
+            swap(&mut y, &mut z);
+        }
+        if x > y {
+            swap(&mut x, &mut y);
+        }
+
+        let q = -p;
+        let p = (z * (x + y + q) - x * y) / (z + q);
+        let mut value = (p - z) * _elliprj(x, y, z, p)?;
+        value = value - three!() * elliprf(x, y, z)?;
+        value = value
+            + three!() * ((x * y * z) / (x * y + p * q)).sqrt() * elliprc(x * y + p * q, p * q)?;
+        return Ok(value / (z + q));
+    }
+
+    _elliprj(x, y, z, p)
+}
+
+/// Calculate RC(1, 1 + x)
+#[inline]
+fn elliprc1p<T: Float>(y: T) -> Result<T, &'static str> {
+    // We can skip this check since the call from elliprj already did the check.
+    // if y == -1.0 {
+    //     return Err("elliprc1p: y cannot be -1.0.");
+    // }
+
+    // for 1 + y < 0, the integral is singular, return Cauchy principal value
+    if y < -one!() {
+        Ok((one!() / -y).sqrt() * elliprc(-y, -one!() - y)?)
+    } else if y == zero!() {
+        Ok(one!())
+    } else if y > zero!() {
+        Ok(y.sqrt().atan() / y.sqrt())
+    } else if y > num!(-0.5) {
+        let arg = (-y).sqrt();
+        Ok((arg.ln_1p() - (-arg).ln_1p()) / (two!() * (-y).sqrt()))
+    } else {
+        Ok(((one!() + (-y).sqrt()) / (one!() + y).sqrt()).ln() / (-y).sqrt())
+    }
+}
+
+#[inline]
+fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
     let mut x = x;
     let mut z = z;
     // Special cases
@@ -80,60 +170,6 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
         return elliprd(x, y, z);
     }
 
-    // for p < 0, the integral is singular, return Cauchy principal value
-    if p < zero!() {
-        let mut x = x;
-        let mut y = y;
-        let mut z = z;
-        // We must ensure that x < y < z.
-        // Since the integral is symmetrical in x, y and z
-        // we can just permute the values:
-        if x > y {
-            swap(&mut x, &mut y);
-        }
-        if y > z {
-            swap(&mut y, &mut z);
-        }
-        if x > y {
-            swap(&mut x, &mut y);
-        }
-
-        let q = -p;
-        let p = (z * (x + y + q) - x * y) / (z + q);
-
-        let value = (p - z) * elliprj(x, y, z, p)? - three!() * elliprf(x, y, z)?
-            + three!() * ((x * y * z) / (x * y + p * q)).sqrt() * elliprc(x * y + p * q, p * q)?;
-        return Ok(value / (z + q));
-    }
-
-    _elliprj(x, y, z, p)
-}
-
-/// Calculate RC(1, 1 + x)
-#[inline]
-fn elliprc1p<T: Float>(y: T) -> Result<T, &'static str> {
-    // We can skip this check since the call from elliprj already did the check.
-    // if y == -1.0 {
-    //     return Err("elliprc1p: y cannot be -1.0.");
-    // }
-
-    // for 1 + y < 0, the integral is singular, return Cauchy principal value
-    if y < -one!() {
-        Ok((one!() / -y).sqrt() * elliprc(-y, -one!() - y)?)
-    } else if y == zero!() {
-        Ok(one!())
-    } else if y > zero!() {
-        Ok(y.sqrt().atan() / y.sqrt())
-    } else if y > num!(-0.5) {
-        let arg = (-y).sqrt();
-        Ok(((arg).ln_1p() - (-arg).ln_1p()) / (two!() * (-y).sqrt()))
-    } else {
-        Ok(((one!() + (-y).sqrt()) / (one!() + y).sqrt()).ln() / (-y).sqrt())
-    }
-}
-
-#[inline]
-fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
     let mut xn = x;
     let mut yn = y;
     let mut zn = z;
@@ -218,7 +254,7 @@ mod tests {
     use itertools::Itertools;
 
     use super::*;
-    use crate::{assert_close, compare_test_data};
+    use crate::{assert_close, compare_test_data_boost};
 
     fn __elliprj(inp: &[&f64]) -> f64 {
         elliprj(*inp[0], *inp[1], *inp[2], *inp[3]).unwrap()
@@ -240,7 +276,7 @@ mod tests {
 
     #[test]
     fn test_elliprj() {
-        compare_test_data!(
+        compare_test_data_boost!(
             "./tests/data/boost/elliprj_data.txt",
             _elliprj,
             2.7e-14,
@@ -250,7 +286,7 @@ mod tests {
 
     #[test]
     fn test_elliprj_e2() {
-        compare_test_data!(
+        compare_test_data_boost!(
             "./tests/data/boost/elliprj_e2.txt",
             _elliprj,
             4.8e-14,
@@ -260,7 +296,7 @@ mod tests {
 
     #[test]
     fn test_elliprj_e3() {
-        compare_test_data!(
+        compare_test_data_boost!(
             "./tests/data/boost/elliprj_e3.txt",
             _elliprj,
             3.1e-15,
@@ -270,7 +306,7 @@ mod tests {
 
     #[test]
     fn test_elliprj_e4() {
-        compare_test_data!(
+        compare_test_data_boost!(
             "./tests/data/boost/elliprj_e4.txt",
             _elliprj,
             2.2e-16,
@@ -280,7 +316,7 @@ mod tests {
 
     #[test]
     fn test_elliprj_zp() {
-        compare_test_data!(
+        compare_test_data_boost!(
             "./tests/data/boost/elliprj_zp.txt",
             _elliprj,
             3.5e-15,

@@ -15,7 +15,7 @@ use crate::{elliprc, elliprd, elliprf};
 //  Boost Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-/// Compute [symmetric elliptic integral of the second kind](https://dlmf.nist.gov/19.16.E2_5).
+/// Computes RG ([symmetric elliptic integral of the second kind](https://dlmf.nist.gov/19.16.E2_5)).
 /// ```text
 ///                     ∞                                                             
 ///                 1  ⌠             t              ⎛   x       y       z   ⎞     
@@ -23,8 +23,40 @@ use crate::{elliprc, elliprd, elliprf};
 ///                 4  ⎮   ________________________ ⎝ t + x   t + y   t + z ⎠     
 ///                    ⌡ ╲╱(t + x) (t + y) (t + z)                               
 ///                  0                                                             
-/// where x ≥ 0, y ≥ 0, z ≥ 0
 /// ```
+///
+/// ## Parameters
+/// - x ∈ ℝ, x ≥ 0
+/// - y ∈ ℝ, y ≥ 0
+/// - z ∈ ℝ, z ≥ 0
+///
+/// The parameters x, y, and z are symmetric. This means swapping them does not change the value of the function.
+/// At most one of them can be zero.
+///
+/// ## Domain
+/// - Returns error if any of x, y, or z is negative, or more than one of them are zero.
+///
+/// ## Graph
+/// ![Symmetric Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprg_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprg_plot.html)
+///
+/// # Related Functions
+/// With c = csc²φ, r = 1/x², and kc² = 1 - m,
+/// - [ellipe](crate::ellipe)(m) = 2 [elliprg](crate::elliprg)(0, kc², 1)
+/// - [ellipeinc](crate::ellipeinc)(φ, m) = 2 [elliprg](crate::elliprg)(c - 1, c - m, c) - (c - 1) [elliprf](crate::elliprf)(c - 1, c - m, c) - [sqrt](Float::sqrt)((c - 1) * (c - m) / c)
+///
+/// # Examples
+/// ```
+/// use ellip::{elliprg, util::assert_close};
+///
+/// assert_close(elliprg(1.0, 0.5, 0.25).unwrap(), 0.7526721491833781, 1e-15);
+/// ```
+///
+/// # References
+/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+///
 pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
     if x < zero!() || y < zero!() || z < zero!() {
         return Err("elliprg: x, y, and z must be non-negative.");
@@ -98,7 +130,7 @@ mod tests {
     use itertools::Itertools;
 
     use super::*;
-    use crate::{assert_close, compare_test_data};
+    use crate::{assert_close, compare_test_data_boost};
 
     fn __elliprg(inp: &[&f64]) -> f64 {
         elliprg(*inp[0], *inp[1], *inp[2]).unwrap()
@@ -114,26 +146,26 @@ mod tests {
 
     #[test]
     fn test_elliprg() {
-        compare_test_data!("./tests/data/boost/elliprg_data.txt", _elliprg, 8.1e-16);
+        compare_test_data_boost!("./tests/data/boost/elliprg_data.txt", _elliprg, 8.1e-16);
     }
 
     #[test]
     fn test_elliprg_xxx() {
-        compare_test_data!("./tests/data/boost/elliprg_xxx.txt", _elliprg, 2.4e-16);
+        compare_test_data_boost!("./tests/data/boost/elliprg_xxx.txt", _elliprg, 2.4e-16);
     }
 
     #[test]
     fn test_elliprg_xy0() {
-        compare_test_data!("./tests/data/boost/elliprg_xy0.txt", _elliprg, 4.4e-16);
+        compare_test_data_boost!("./tests/data/boost/elliprg_xy0.txt", _elliprg, 4.4e-16);
     }
 
     #[test]
     fn test_elliprg_xyy() {
-        compare_test_data!("./tests/data/boost/elliprg_xyy.txt", _elliprg, 5.4e-16);
+        compare_test_data_boost!("./tests/data/boost/elliprg_xyy.txt", _elliprg, 5.4e-16);
     }
 
     #[test]
     fn test_elliprg_00x() {
-        compare_test_data!("./tests/data/boost/elliprg_00x.txt", _elliprg, f64::EPSILON);
+        compare_test_data_boost!("./tests/data/boost/elliprg_00x.txt", _elliprg, f64::EPSILON);
     }
 }

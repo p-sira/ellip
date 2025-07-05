@@ -22,9 +22,9 @@ use num_traits::Float;
 
 use crate::legendre::ellippi::ellippi_vc;
 
-use crate::{ellipeinc, ellipf, elliprf, elliprj};
+use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj};
 
-/// Compute [incomplete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E7).
+/// Computes [incomplete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E7).
 /// ```text
 ///                 φ                              
 ///                ⌠                 dϑ              
@@ -32,24 +32,65 @@ use crate::{ellipeinc, ellipf, elliprf, elliprj};
 ///                ⎮   _____________                
 ///                ⌡ ╲╱ 1 - m sin²ϑ  ⋅ ( 1 - n sin²ϑ )
 ///               0              
-/// where 0 ≤ m sin²φ ≤ 1               
 /// ```
 ///
-/// Note that some mathematical references use the parameter k and α for the function,
-/// where k² = m, α² = n.
+/// ## Parameters
+/// - phi: amplitude angle (φ). φ ∈ ℝ.
+/// - n: characteristic, n ∈ ℝ, n ≠ 1.
+/// - m: elliptic parameter. m ∈ ℝ.
+///
+/// The elliptic modulus (k) is frequently used instead of the parameter (m), where k² = m.
+/// The characteristic (n) is also sometimes expressed in term of α, where α² = n.
+///
+/// ## Domain
+/// - Returns error when:
+///   - m sin²φ > 1,
+///   - or n sin²φ = 1.
+/// - Returns the Cauchy principal value if n sin²φ > 1.
+///
+/// ## Graph
+/// ![Incomplete Elliptic Integral of the Third Kind (3D Plot)](https://github.com/p-sira/ellip/blob/main/figures/ellippiinc_plot_3d.png?raw=true)
+///
+/// [Interactive 3D Plot](https://github.com/p-sira/ellip/blob/main/figures/ellippiinc_plot_3d.html)
+///
+/// ## Notes
+/// The [ellippiinc] (of the [crate]) is the circular or hyperbolic case of the elliptic integral
+/// of the third kind, since n and m are real. It is called circular if `n (n - m) (n - 1)` is
+/// negative and hyperbolic if it is positive.  
+///
+/// # Related Functions
+/// With c = csc²φ,
+/// - [ellippiinc](crate::ellippiinc)(φ, n, m) = n / 3 * [elliprj](crate::elliprj)(c - 1, c - m, c, c - n) + [ellipf](crate::ellipf)(φ, m)
+///
+/// With x = tan φ, p = 1 - n, and kc² = 1 - m,
+/// - [ellippiinc](crate::ellippiinc)(φ, n, m) = [el3](crate::el3)(x, kc, p)
+///
+/// # Examples
+/// ```
+/// use ellip::{ellippiinc, util::assert_close};
+/// use std::f64::consts::FRAC_PI_4;
+///
+/// assert_close(ellippiinc(FRAC_PI_4, 0.5, 0.5).unwrap(), 0.9190227391656969, 1e-15);
+/// ```
+///
+/// # References
+/// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+/// - Wolfram Research. “EllipticPi,” 2022. <https://reference.wolfram.com/language/ref/EllipticPi.html>.
+///
 pub fn ellippiinc<T: Float>(phi: T, n: T, m: T) -> Result<T, &'static str> {
     ellippiinc_vc(phi, n, m, one!() - n)
 }
 
 #[inline]
-fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str> {
+fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, &'static str> {
     // Note vc = 1-v presumably without cancellation error
     let sphi = phi.abs().sin();
     let sp2 = sphi * sphi;
     let mut result = zero!();
 
-    if m * sp2 > one!() || m < zero!() {
-        return Err("ellippiinc: The argument must satisfy 0 ≤ m sin²φ ≤ 1.");
+    if m * sp2 > one!() {
+        return Err("ellippiinc: m sin²φ must be smaller or equal to one.");
     }
 
     // Special cases first:
@@ -60,11 +101,6 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
         } else {
             ellipf(phi, m)
         };
-    }
-
-    if n > zero!() && (one!() / n) < sp2 {
-        // Complex result is a domain error:
-        return Err("ellippiinc: result is complex for v > 1 / sin^2(phi)");
     }
 
     if n == one!() {
@@ -85,7 +121,12 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
         // tan(phi).
         // Also note that since we can't represent PI/2 exactly
         // this is a bit of a guess as to the users true intent...
-        return ellippi_vc(n, m, vc);
+        return ellippi_vc(n, m, nc);
+    }
+
+    // https://dlmf.nist.gov/19.6.E11
+    if phi == zero!() {
+        return Ok(zero!());
     }
 
     if phi > pi_2!() || phi < zero!() {
@@ -98,7 +139,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
 
             // Phi is so large that phi%pi is necessarily zero (or garbage),
             // just return the second part of the duplication formula:
-            result = two!() * phi.abs() * ellippi_vc(n, m, vc)? / pi!();
+            result = two!() * phi.abs() * ellippi_vc(n, m, nc)? / pi!();
         } else {
             let mut rphi = phi.abs() % pi_2!();
             let mut mm = ((phi.abs() - rphi) / pi_2!()).round();
@@ -114,9 +155,9 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
                 rphi = pi_2!() - rphi;
             }
 
-            result = sign * ellippiinc_vc(rphi, n, m, vc)?;
-            if mm > zero!() && vc > zero!() {
-                result = result + mm * ellippi_vc(n, m, vc)?;
+            result = sign * ellippiinc_vc(rphi, n, m, nc)?;
+            if mm > zero!() && nc > zero!() {
+                result = result + mm * ellippi_vc(n, m, nc)?;
             }
         }
         return if phi < zero!() {
@@ -126,14 +167,32 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
         };
     }
 
+    // https://reference.wolfram.com/language/ref/EllipticPi.html
+    // Return the Cauchy principal value after normalizing phi
+    if n * sp2 > one!() {
+        let c = one!() / sp2; //csc2 phi
+        let w2 = m / n;
+
+        // This appears to have lower error in test dataset.
+        // https://dlmf.nist.gov/19.7.E8
+        return Ok((ellipf(phi, m)?
+            + c.sqrt() * elliprc((c - one!()) * (c - m), (c - n) * (c - w2))?)
+            - ellippiinc(phi, w2, m)?);
+
+        // https://dlmf.nist.gov/19.25.E16
+        // return Ok(-third!() * w2 * elliprj(c - one!(), c - m, c, c - w2)?
+        //     + ((c - one!()) * (c - m) / (n - one!()) / (one!() - w2)).sqrt()
+        //         * elliprc(c * (n - one!()) * (one!() - w2), (n - c) * (c - w2))?);
+    }
+
     if m == zero!() {
         // A&S 17.7.20:
         if n < one!() {
-            let vcr = vc.sqrt();
+            let vcr = nc.sqrt();
             return Ok((vcr * phi.tan()).atan() / vcr);
         } else {
             // v > 1:
-            let vcr = (-vc).sqrt();
+            let vcr = (-nc).sqrt();
             let arg = vcr * phi.tan();
             return Ok((arg.ln_1p() - (-arg).ln_1p()) / (two!() * vcr));
         }
@@ -161,17 +220,14 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
         //
         let nn = (m - n) / (one!() - n);
         let nm1 = (one!() - m) / (one!() - n);
-        let mut p2 = -n * nn;
 
-        if p2 <= min_val!() {
-            p2 = (-n).sqrt() * nn.sqrt();
-        } else {
-            p2 = p2.sqrt();
-        }
-
-        let delta = (one!() - m * sp2).sqrt();
         if nn > m {
-            result = ellippiinc_vc(phi, nn, m, nm1)?;
+            result = if nn.abs() < n.abs() {
+                ellippiinc_vc(phi, nn, m, nm1)?
+            } else {
+                let c = one!() / sp2;
+                nn / three!() * elliprj(c - one!(), c - m, c, c - nn)? + ellipf(phi, m)?
+            };
             result = result * n / (n - one!());
             result = result * (m - one!()) / (n - m);
         }
@@ -181,6 +237,15 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
             t = t * m / (m - n);
             result = result + t;
         }
+
+        let mut p2 = -n * nn;
+        if p2 <= min_val!() {
+            p2 = (-n).sqrt() * nn.sqrt();
+        } else {
+            p2 = p2.sqrt();
+        }
+
+        let delta = (one!() - m * sp2).sqrt();
         let t = n / ((m - n) * (n - one!()));
         if t > min_val!() {
             result = result + ((p2 / two!()) * (two!() * phi).sin() / delta).atan() * t.sqrt();
@@ -245,7 +310,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
     let p = if n * t < half!() {
         one!() - n * t
     } else {
-        x + vc * t
+        x + nc * t
     };
 
     let result = sphi * (elliprf(x, y, z)? + n * t * elliprj(x, y, z, p)? / three!());
@@ -255,7 +320,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, vc: T) -> Result<T, &'static str>
 
 #[cfg(test)]
 mod tests {
-    use crate::compare_test_data;
+    use crate::compare_test_data_boost;
 
     use super::*;
 
@@ -265,7 +330,7 @@ mod tests {
 
     #[test]
     fn test_ellippi() {
-        compare_test_data!(
+        compare_test_data_boost!(
             "./tests/data/boost/ellippiinc_data.txt",
             ellippiinc_k,
             2.1e-15
@@ -274,7 +339,7 @@ mod tests {
 
     #[test]
     fn test_ellippi_large() {
-        compare_test_data!(
+        compare_test_data_boost!(
             "./tests/data/boost/ellippi3_large_data.txt",
             ellippiinc_k,
             6e-15
