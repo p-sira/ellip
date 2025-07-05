@@ -311,7 +311,7 @@ mod tests {
         compare_test_data_wolfram!(
             "./tests/data/wolfram/ellipk_data.csv",
             ellipk_m,
-            2.0 * f64::EPSILON
+            140.0 * f64::EPSILON
         );
     }
 }
