@@ -77,6 +77,61 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
     }
 
     let mut x = x;
+    let mut y = y;
+    let mut z = z;
+
+    // for p < 0, the integral is singular, return Cauchy principal value
+    if p < zero!() {
+        // We must ensure that x < y < z.
+        // Since the integral is symmetrical in x, y and z
+        // we can just permute the values:
+        if x > y {
+            swap(&mut x, &mut y);
+        }
+        if y > z {
+            swap(&mut y, &mut z);
+        }
+        if x > y {
+            swap(&mut x, &mut y);
+        }
+
+        let q = -p;
+        let p = (z * (x + y + q) - x * y) / (z + q);
+        let mut value = (p - z) * _elliprj(x, y, z, p)?;
+        value = value - three!() * elliprf(x, y, z)?;
+        value = value + three!() * ((x * y * z) / (x * y + p * q)).sqrt() * elliprc(x * y + p * q, p * q)?;
+        return Ok(value / (z + q));
+    }
+
+    _elliprj(x, y, z, p)
+}
+
+/// Calculate RC(1, 1 + x)
+#[inline]
+fn elliprc1p<T: Float>(y: T) -> Result<T, &'static str> {
+    // We can skip this check since the call from elliprj already did the check.
+    // if y == -1.0 {
+    //     return Err("elliprc1p: y cannot be -1.0.");
+    // }
+
+    // for 1 + y < 0, the integral is singular, return Cauchy principal value
+    if y < -one!() {
+        Ok((one!() / -y).sqrt() * elliprc(-y, -one!() - y)?)
+    } else if y == zero!() {
+        Ok(one!())
+    } else if y > zero!() {
+        Ok(y.sqrt().atan() / y.sqrt())
+    } else if y > num!(-0.5) {
+        let arg = (-y).sqrt();
+        Ok((arg.ln_1p() - (-arg).ln_1p()) / (two!() * (-y).sqrt()))
+    } else {
+        Ok(((one!() + (-y).sqrt()) / (one!() + y).sqrt()).ln() / (-y).sqrt())
+    }
+}
+
+#[inline]
+fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
+    let mut x = x;
     let mut z = z;
     // Special cases
     // https://dlmf.nist.gov/19.20#iii
@@ -114,60 +169,6 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
         return elliprd(x, y, z);
     }
 
-    // for p < 0, the integral is singular, return Cauchy principal value
-    if p < zero!() {
-        let mut x = x;
-        let mut y = y;
-        let mut z = z;
-        // We must ensure that x < y < z.
-        // Since the integral is symmetrical in x, y and z
-        // we can just permute the values:
-        if x > y {
-            swap(&mut x, &mut y);
-        }
-        if y > z {
-            swap(&mut y, &mut z);
-        }
-        if x > y {
-            swap(&mut x, &mut y);
-        }
-
-        let q = -p;
-        let p = (z * (x + y + q) - x * y) / (z + q);
-
-        let value = (p - z) * elliprj(x, y, z, p)? - three!() * elliprf(x, y, z)?
-            + three!() * ((x * y * z) / (x * y + p * q)).sqrt() * elliprc(x * y + p * q, p * q)?;
-        return Ok(value / (z + q));
-    }
-
-    _elliprj(x, y, z, p)
-}
-
-/// Calculate RC(1, 1 + x)
-#[inline]
-fn elliprc1p<T: Float>(y: T) -> Result<T, &'static str> {
-    // We can skip this check since the call from elliprj already did the check.
-    // if y == -1.0 {
-    //     return Err("elliprc1p: y cannot be -1.0.");
-    // }
-
-    // for 1 + y < 0, the integral is singular, return Cauchy principal value
-    if y < -one!() {
-        Ok((one!() / -y).sqrt() * elliprc(-y, -one!() - y)?)
-    } else if y == zero!() {
-        Ok(one!())
-    } else if y > zero!() {
-        Ok(y.sqrt().atan() / y.sqrt())
-    } else if y > num!(-0.5) {
-        let arg = (-y).sqrt();
-        Ok(((arg).ln_1p() - (-arg).ln_1p()) / (two!() * (-y).sqrt()))
-    } else {
-        Ok(((one!() + (-y).sqrt()) / (one!() + y).sqrt()).ln() / (-y).sqrt())
-    }
-}
-
-#[inline]
-fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
     let mut xn = x;
     let mut yn = y;
     let mut zn = z;
