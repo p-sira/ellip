@@ -1,6 +1,6 @@
 [package]
 name = "ellip"
-version = "0.3.1"
+version = "0.3.2"
 authors = ["Sira Pornsiriprasert <code@psira.me>"]
 
 description = "Elliptic integrals for Rust"
