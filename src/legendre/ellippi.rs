@@ -19,7 +19,7 @@
 
 use num_traits::Float;
 
-use crate::{ellipe, ellipk, elliprf, elliprj};
+use crate::{ellipe, ellipk, elliprf, elliprj, StrErr};
 
 /// Computes [complete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E8).
 /// ```text
@@ -61,7 +61,7 @@ use crate::{ellipe, ellipk, elliprf, elliprj};
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 ///
-pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, &'static str> {
+pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
     if m > one!() {
         return Err("ellippi: m must be less than 1.");
     }
@@ -126,7 +126,7 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, &'static str> {
 }
 
 #[inline]
-pub fn ellippi_vc<T: Float>(n: T, m: T, vc: T) -> Result<T, &'static str> {
+pub fn ellippi_vc<T: Float>(n: T, m: T, vc: T) -> Result<T, StrErr> {
     let x = zero!();
     let y = one!() - m;
     let z = one!();

@@ -21,7 +21,7 @@
 
 use num_traits::Float;
 
-use crate::{elliprg, polyeval};
+use crate::{elliprg, polyeval, StrErr};
 
 /// Computes [complete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E8).
 ///
@@ -61,7 +61,7 @@ use crate::{elliprg, polyeval};
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 ///
-pub fn ellipe<T: Float>(m: T) -> Result<T, &'static str> {
+pub fn ellipe<T: Float>(m: T) -> Result<T, StrErr> {
     // If T is f128
     if max_val!() > num!(f64::MAX) {
         return ellipe_precise(m);
@@ -80,7 +80,7 @@ pub fn ellipe<T: Float>(m: T) -> Result<T, &'static str> {
 }
 
 #[inline]
-fn _ellipe<T: Float>(m: T) -> Result<T, &'static str> {
+fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
     match (m * num!(20.0)).to_i32().unwrap() {
         0 | 1 => {
             let coeffs = [
@@ -271,7 +271,7 @@ fn _ellipe<T: Float>(m: T) -> Result<T, &'static str> {
 }
 
 #[inline]
-fn ellipe_precise<T: Float>(m: T) -> Result<T, &'static str> {
+fn ellipe_precise<T: Float>(m: T) -> Result<T, StrErr> {
     if m > one!() {
         return Err("ellipe: m must be less than 1.");
     }

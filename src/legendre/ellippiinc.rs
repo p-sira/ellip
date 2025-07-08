@@ -22,7 +22,7 @@ use num_traits::Float;
 
 use crate::legendre::ellippi::ellippi_vc;
 
-use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj};
+use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj, StrErr};
 
 /// Computes [incomplete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E7).
 /// ```text
@@ -78,12 +78,12 @@ use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj};
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 /// - Wolfram Research. “EllipticPi,” 2022. <https://reference.wolfram.com/language/ref/EllipticPi.html>.
 ///
-pub fn ellippiinc<T: Float>(phi: T, n: T, m: T) -> Result<T, &'static str> {
+pub fn ellippiinc<T: Float>(phi: T, n: T, m: T) -> Result<T, StrErr> {
     ellippiinc_vc(phi, n, m, one!() - n)
 }
 
 #[inline]
-fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, &'static str> {
+fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
     // Note vc = 1-v presumably without cancellation error
     let sphi = phi.abs().sin();
     let sp2 = sphi * sphi;
