@@ -13,7 +13,19 @@ readme = "README.md"
 license = "BSD-3-Clause"
 
 edition = "2021"
-exclude = ["logo", "figures", "tests/data", "tests/wolfram", "examples", "benches", "cpp"]
+exclude = [
+    "logo",
+    "figures",
+    "tests/data",
+    "tests/wolfram",
+    "examples",
+    "benches",
+    "cpp",
+    ".github",
+    ".gitignore",
+    ".gitattributes",
+    "ellip.code-workspace",
+]
 
 [dependencies]
 num-lazy = "~0.1"
