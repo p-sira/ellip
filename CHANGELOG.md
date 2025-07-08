@@ -1,5 +1,11 @@
 # Changelog
 ## 0.3
+### 0.3.2
+**Improvements**
+- Reduce package size.
+- Use custom error type `StrErr` instead of `&'static str` to improve readability.
+- Format documentations
+
 ### 0.3.1
 **Improvements**
 - Improve documentations and add graphs and examples for each function.
