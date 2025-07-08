@@ -4,11 +4,11 @@
 **Improvements**
 - Reduce package size.
 - Use custom error type `StrErr` instead of `&'static str` to improve readability.
-- Format documentations
+- Format documentation.
 
 ### 0.3.1
 **Improvements**
-- Improve documentations and add graphs and examples for each function.
+- Improve documentation and add graphs and examples for each function.
 - Improve the precision of the `ellipk`, `ellipf`, `ellipe`, `ellipeinc`, `ellippiinc`, and `elliprj` functions.
 - Improve the speed of `ellippiinc` function.
 - `el3`: Add error when parameter goes out of the function's range (|kc| > 0 for p < 0) and improved the error message when 1 + px² equals zero.
@@ -51,7 +51,7 @@
 
 ### 0.2.0
 **New Features**
-- `cel`: Bulirsch's general complete elliptic integral
+- `cel`: Bulirsch's general complete elliptic integral.
 - `elliprg`: Symmetric elliptic integral of the second kind.
 - `elliprj`: Symmetric elliptic integral of the third kind.
 
@@ -65,7 +65,7 @@
 - Split error message in `elliprd`.
 
 **Bug Fixes**
-- Fix domain error message in `elliprd`
+- Fix domain error message in `elliprd`.
 
 **Others**
 - Add Ellip logo
@@ -80,7 +80,7 @@
 ### 0.1.1
 **Others**
 - Update README to reflect the crate's functionalities.
-- Add CHANGELOG
+- Add CHANGELOG.
 
 ### 0.1.0
 **New Features**
