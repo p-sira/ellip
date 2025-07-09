@@ -20,6 +20,8 @@
 
 use num_traits::Float;
 
+use crate::StrErr;
+
 /// Computes RC ([degenerate symmetric elliptic integral of RF](https://dlmf.nist.gov/19.16.E6)).
 /// ```text
 ///                  ∞                  
@@ -61,7 +63,7 @@ use num_traits::Float;
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 /// - The SciPy Community. “SciPy: Special Functions - Elliprc.” Accessed April 17, 2025. <https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.elliprc.html>.
 ///
-pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, &'static str> {
+pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, StrErr> {
     if x < zero!() {
         return Err("elliprc: x must be non-negative.");
     }

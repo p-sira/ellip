@@ -20,7 +20,7 @@ fn rel_err<T: Float>(a: T, b: T) -> f64 {
         .expect("Cannot convert to f64")
 }
 
-fn parse_wolfram_str<T: Float>(s: &str) -> Result<T, &'static str> {
+fn parse_wolfram_str<T: Float>(s: &str) -> Result<T, StrErr> {
     Ok(match s.trim() {
         "Infinity" => T::infinity(),
         "-Infinity" => T::neg_infinity(),
@@ -113,7 +113,7 @@ impl Stats {
 }
 
 /// Reads wolfram data from file and returns a vector of Cases
-fn read_wolfram_data<T: Float>(file_path: &str) -> Result<Vec<Case<T>>, &'static str> {
+fn read_wolfram_data<T: Float>(file_path: &str) -> Result<Vec<Case<T>>, StrErr> {
     use csv::ReaderBuilder;
     use std::fs::File;
     use std::path::Path;

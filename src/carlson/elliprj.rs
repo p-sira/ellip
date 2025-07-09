@@ -20,7 +20,7 @@
 
 use std::mem::swap;
 
-use crate::{elliprc, elliprd, elliprf};
+use crate::{elliprc, elliprd, elliprf, StrErr};
 use num_traits::Float;
 
 /// Computes RJ ([symmetric elliptic integral of the third kind](https://dlmf.nist.gov/19.16.E2)).
@@ -68,7 +68,7 @@ use num_traits::Float;
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 ///
-pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
+pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
     if x.min(y).min(z) < zero!() || (y + z).min(x + y).min(x + z) == zero!() {
         return Err("elliprj: x, y, and z must be non-negative, and at most one can be zero.");
     }
@@ -109,7 +109,7 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
 
 /// Calculate RC(1, 1 + x)
 #[inline]
-fn elliprc1p<T: Float>(y: T) -> Result<T, &'static str> {
+fn elliprc1p<T: Float>(y: T) -> Result<T, StrErr> {
     // We can skip this check since the call from elliprj already did the check.
     // if y == -1.0 {
     //     return Err("elliprc1p: y cannot be -1.0.");
@@ -131,7 +131,7 @@ fn elliprc1p<T: Float>(y: T) -> Result<T, &'static str> {
 }
 
 #[inline]
-fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, &'static str> {
+fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
     let mut x = x;
     let mut z = z;
     // Special cases

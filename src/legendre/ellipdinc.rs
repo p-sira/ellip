@@ -19,7 +19,7 @@
 //  that the code continues to work no matter how many digits
 //  type T has.
 
-use crate::{ellipd, elliprd};
+use crate::{ellipd, elliprd, StrErr};
 use num_traits::Float;
 
 /// Computes [incomplete elliptic integral of Legendre's type](https://dlmf.nist.gov/19.2.E6).
@@ -67,7 +67,7 @@ use num_traits::Float;
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 ///
-pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
+pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     let sign = if phi < zero!() { -one!() } else { one!() };
 
     let phi = phi.abs();

@@ -22,7 +22,7 @@ use std::mem::swap;
 
 use num_traits::Float;
 
-use crate::elliprc;
+use crate::{elliprc, StrErr};
 
 /// Computes RF ([symmetric elliptic integral of the first kind](https://dlmf.nist.gov/19.16.E1)).
 /// ```text
@@ -66,7 +66,7 @@ use crate::elliprc;
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 ///
-pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, &'static str> {
+pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
     if x.min(y).min(z) < zero!() || (y + z).min(x + y).min(x + z) < zero!() {
         return Err("elliprf: x, y, and z must be non-negative, and at most one can be zero.");
     }

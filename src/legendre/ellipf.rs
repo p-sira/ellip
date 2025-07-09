@@ -21,7 +21,7 @@
 
 use num_traits::Float;
 
-use crate::elliprf;
+use crate::{elliprf, StrErr};
 
 use super::ellipk::ellipk_precise;
 
@@ -71,7 +71,7 @@ use super::ellipk::ellipk_precise;
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 /// - The MathWorks, Inc. “ellipticF.” Accessed April 21, 2025. <https://www.mathworks.com/help/symbolic/sym.ellipticf.html>.
 ///
-pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, &'static str> {
+pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     let invert = if phi < zero!() { -one!() } else { one!() };
     let phi = phi.abs();
 

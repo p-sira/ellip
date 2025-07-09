@@ -11,6 +11,9 @@
     <a href="https://crates.io/crates/ellip">
         <img src="https://img.shields.io/crates/v/ellip" alt="Crate">
     </a>
+    <a href="https://crates.io/crates/ellip">
+        <img src="https://img.shields.io/crates/d/ellip" alt="Total Downloads">
+    </a>
     <a href="https://docs.rs/ellip">
         <img src="https://img.shields.io/badge/Docs-docs.rs-blue" alt="Documentation">
     </a>
@@ -38,7 +41,7 @@ Let's compute the circumference of an ellipse.
 ```rust
 use ellip::{elliprg, util::assert_close};
 
-fn ellipse_length(a: f64, b: f64) -> Result<f64, &'static str> {
+fn ellipse_length(a: f64, b: f64) -> Result<f64, StrErr> {
     Ok(8.0 * elliprg(0.0, a * a, b * b)?)
 }
 

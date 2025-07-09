@@ -5,7 +5,7 @@
 
 use num_traits::Float;
 
-use crate::{ellipeinc, ellipf};
+use crate::{ellipeinc, ellipf, StrErr};
 
 use super::{cel1, cel2, BulirschConst};
 
@@ -52,7 +52,7 @@ use super::{cel1, cel2, BulirschConst};
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 ///
-pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
+pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, StrErr> {
     if x == zero!() {
         return Ok(zero!());
     }
@@ -148,7 +148,7 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, &'static str> {
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 ///
-pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'static str> {
+pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
     if x == zero!() {
         return Ok(zero!());
     }
@@ -268,7 +268,7 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, &'sta
 /// - Bulirsch, R. “Numerical Calculation of Elliptic Integrals and Elliptic Functions. III.” Numerische Mathematik 13, no. 4 (August 1, 1969): 305–15. <https://doi.org/10.1007/BF02165405>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 ///
-pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, &'static str> {
+pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
     if kc == zero!() {
         return Err("el3: kc must not be zero.");
     }
