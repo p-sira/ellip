@@ -8,7 +8,7 @@
 //  Copyright (c) 2006 Xiaogang Zhang
 //  Copyright (c) 2006 John Maddock
 //  Use, modification and distribution are subject to the
-//  Boost Software License, Version one!(). (See accompanying file
+//  Boost Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 //  History:
@@ -60,79 +60,80 @@ use crate::{ellipe, ellipk, elliprf, elliprj, StrErr};
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-///
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
-    if m > one!() {
+    if m > 1.0 {
         return Err("ellippi: m must be less than 1.");
     }
 
-    if n == one!() {
+    if n == 1.0 {
         return Err("ellippi: n cannot be 1.");
     }
 
     // m -> 1-
-    if one!() - m <= epsilon!() {
-        let sign = (one!() - n).signum();
+    if 1.0 - m <= epsilon!() {
+        let sign = (1.0 - n).signum();
         return Ok(sign * inf!());
     }
 
-    if n > one!() {
+    if n > 1.0 {
         // n -> 1+
         // https://dlmf.nist.gov/19.6.E6
-        if n - one!() <= epsilon!() {
-            return Ok(ellipk(m)? - ellipe(m)? / (one!() - m));
+        if n - 1.0 <= epsilon!() {
+            return Ok(ellipk(m)? - ellipe(m)? / (1.0 - m));
         }
 
         // Use Cauchy principal value
         // https://dlmf.nist.gov/19.25.E4
-        return Ok(-third!() * m / n * elliprj(zero!(), one!() - m, one!(), one!() - m / n)?);
+        return Ok(-1.0 / 3.0 * m / n * elliprj(0.0, 1.0 - m, 1.0, 1.0 - m / n)?);
     }
 
     // n < 1 and n -> 1-
-    if one!() - n <= epsilon!() {
+    if 1.0 - n <= epsilon!() {
         return Ok(inf!());
     }
 
-    if n == zero!() {
-        if m == zero!() {
+    if n == 0.0 {
+        if m == 0.0 {
             return Ok(pi_2!());
         }
         return ellipk(m);
     }
 
-    if n < zero!() {
+    if n < 0.0 {
         // When m < 0, n < 0 and m == n, Boost implementation cancels out, resulting in inf.
         // https://dlmf.nist.gov/19.6.E13 with phi = π/2
         if m == n {
-            let mc = one!() - m;
-            return Ok(one!() / mc * ellipe(m)?);
+            let mc = 1.0 - m;
+            return Ok(1.0 / mc * ellipe(m)?);
         }
 
         // Apply A&S 17.7.17
-        let nn = (m - n) / (one!() - n);
-        let nm1 = (one!() - m) / (one!() - n);
+        let nn = (m - n) / (1.0 - n);
+        let nm1 = (1.0 - m) / (1.0 - n);
 
         let mut result = ellippi_vc(nn, m, nm1)?;
         // Split calculations to avoid overflow/underflow
-        result = result * -n / (one!() - n);
-        result = result * (one!() - m) / (m - n);
+        result = result * -n / (1.0 - n);
+        result = result * (1.0 - m) / (m - n);
         result = result + ellipk(m)? * m / (m - n);
         return Ok(result);
     }
 
     // Compute vc = 1-n without cancellation errors
-    let vc = one!() - n;
+    let vc = 1.0 - n;
     ellippi_vc(n, m, vc)
 }
 
 #[inline]
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellippi_vc<T: Float>(n: T, m: T, vc: T) -> Result<T, StrErr> {
-    let x = zero!();
-    let y = one!() - m;
-    let z = one!();
+    let x = 0.0;
+    let y = 1.0 - m;
+    let z = 1.0;
     let p = vc;
 
-    Ok(elliprf(x, y, z)? + n * elliprj(x, y, z, p)? / three!())
+    Ok(elliprf(x, y, z)? + n * elliprj(x, y, z, p)? / 3.0)
 }
 
 #[cfg(test)]

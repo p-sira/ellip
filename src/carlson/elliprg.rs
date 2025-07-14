@@ -56,9 +56,9 @@ use crate::{elliprc, elliprd, elliprf, StrErr};
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-///
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
-    if x < zero!() || y < zero!() || z < zero!() {
+    if x < 0.0 || y < 0.0 || z < 0.0 {
         return Err("elliprg: x, y, and z must be non-negative.");
     }
 
@@ -80,48 +80,47 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
             return Ok(x.sqrt());
         }
 
-        if y == zero!() {
-            return Ok(pi!() * x.sqrt() / four!());
+        if y == 0.0 {
+            return Ok(pi!() * x.sqrt() / 4.0);
         }
 
-        if x == zero!() {
-            return Ok(y.sqrt() / two!());
+        if x == 0.0 {
+            return Ok(y.sqrt() / 2.0);
         }
 
-        return Ok((x * elliprc(y, x)? + y.sqrt()) / two!());
+        return Ok((x * elliprc(y, x)? + y.sqrt()) / 2.0);
     }
 
     if y == z {
-        if y == zero!() {
-            return Ok(x.sqrt() / two!());
+        if y == 0.0 {
+            return Ok(x.sqrt() / 2.0);
         }
 
-        return Ok((y * elliprc(x, y)? + x.sqrt()) / two!());
+        return Ok((y * elliprc(x, y)? + x.sqrt()) / 2.0);
     }
 
-    if y == zero!() {
+    if y == 0.0 {
         let mut xn = x.sqrt();
         let mut yn = z.sqrt();
         let x0 = xn;
         let y0 = yn;
-        let mut sum = zero!();
-        let mut sum_pow = num!(0.25);
+        let mut sum = 0.0;
+        let mut sum_pow = 0.25;
 
-        while (xn - yn).abs() >= num!(2.7) * epsilon!() * xn.abs() {
+        while (xn - yn).abs() >= 2.7 * epsilon!() * xn.abs() {
             let t = (xn * yn).sqrt();
-            xn = (xn + yn) / two!();
+            xn = (xn + yn) / 2.0;
             yn = t;
-            sum_pow = sum_pow * two!();
+            sum_pow = sum_pow * 2.0;
             sum = sum + sum_pow * (xn - yn) * (xn - yn);
         }
         let rf = pi!() / (xn + yn);
-        return Ok(((x0 + y0) * (x0 + y0) / four!() - sum) * rf / two!());
+        return Ok(((x0 + y0) * (x0 + y0) / 4.0 - sum) * rf / 2.0);
     }
 
     Ok(
-        (z * elliprf(x, y, z)? - (x - z) * (y - z) * elliprd(x, y, z)? / three!()
-            + (x * y / z).sqrt())
-            / two!(),
+        (z * elliprf(x, y, z)? - (x - z) * (y - z) * elliprd(x, y, z)? / 3.0 + (x * y / z).sqrt())
+            / 2.0,
     )
 }
 

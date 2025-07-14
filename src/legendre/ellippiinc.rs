@@ -77,40 +77,37 @@ use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj, StrErr};
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 /// - Wolfram Research. “EllipticPi,” 2022. <https://reference.wolfram.com/language/ref/EllipticPi.html>.
-///
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellippiinc<T: Float>(phi: T, n: T, m: T) -> Result<T, StrErr> {
-    ellippiinc_vc(phi, n, m, one!() - n)
+    ellippiinc_vc(phi, n, m, 1.0 - n)
 }
 
 #[inline]
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
     // Note vc = 1-v presumably without cancellation error
     let sphi = phi.abs().sin();
     let sp2 = sphi * sphi;
-    let mut result = zero!();
+    let mut result = 0.0;
 
-    if m * sp2 > one!() {
+    if m * sp2 > 1.0 {
         return Err("ellippiinc: m sin²φ must be smaller or equal to one.");
     }
 
     // Special cases first:
-    if n == zero!() {
+    if n == 0.0 {
         // A&S 17.7.18 & 19
-        return if m == zero!() {
-            Ok(phi)
-        } else {
-            ellipf(phi, m)
-        };
+        return if m == 0.0 { Ok(phi) } else { ellipf(phi, m) };
     }
 
-    if n == one!() {
-        if m == zero!() {
+    if n == 1.0 {
+        if m == 0.0 {
             return Ok(phi.tan());
         }
 
         // http://functions.wolfram.com/08.06.03.0008.01
-        result = (one!() - m * sp2).sqrt() * phi.tan() - ellipeinc(phi, m)?;
-        result = result / (one!() - m);
+        result = (1.0 - m * sp2).sqrt() * phi.tan() - ellipeinc(phi, m)?;
+        result = result / (1.0 - m);
         result = result + ellipf(phi, m)?;
         return Ok(result);
     }
@@ -125,80 +122,76 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
     }
 
     // https://dlmf.nist.gov/19.6.E11
-    if phi == zero!() {
-        return Ok(zero!());
+    if phi == 0.0 {
+        return Ok(0.0);
     }
 
-    if phi > pi_2!() || phi < zero!() {
+    if phi > pi_2!() || phi < 0.0 {
         // Carlson's algorithm works only for |phi| <= pi/2,
         // use the integrand's periodicity to normalize phi
 
-        if phi.abs() > one!() / epsilon!() {
+        if phi.abs() > 1.0 / epsilon!() {
             // Invalid for v > 1, this case is caught above since v > 1 implies 1/v < sin^2(phi)
-            debug_assert!(n <= one!());
+            debug_assert!(n <= 1.0);
 
             // Phi is so large that phi%pi is necessarily zero (or garbage),
             // just return the second part of the duplication formula:
-            result = two!() * phi.abs() * ellippi_vc(n, m, nc)? / pi!();
+            result = 2.0 * phi.abs() * ellippi_vc(n, m, nc)? / pi!();
         } else {
             let mut rphi = phi.abs() % pi_2!();
             let mut mm = ((phi.abs() - rphi) / pi_2!()).round();
-            let mut sign = one!();
+            let mut sign = 1.0;
 
-            if mm != zero!() && m >= one!() {
+            if mm != 0.0 && m >= 1.0 {
                 return Err("ellippiinc: The result is complex.");
             }
 
-            if mm % two!() > half!() {
-                mm = mm + one!();
-                sign = -one!();
+            if mm % 2.0 > 0.5 {
+                mm = mm + 1.0;
+                sign = -1.0;
                 rphi = pi_2!() - rphi;
             }
 
             result = sign * ellippiinc_vc(rphi, n, m, nc)?;
-            if mm > zero!() && nc > zero!() {
+            if mm > 0.0 && nc > 0.0 {
                 result = result + mm * ellippi_vc(n, m, nc)?;
             }
         }
-        return if phi < zero!() {
-            Ok(-result)
-        } else {
-            Ok(result)
-        };
+        return if phi < 0.0 { Ok(-result) } else { Ok(result) };
     }
 
     // https://reference.wolfram.com/language/ref/EllipticPi.html
     // Return the Cauchy principal value after normalizing phi
-    if n * sp2 > one!() {
-        let c = one!() / sp2; //csc2 phi
+    if n * sp2 > 1.0 {
+        let c = 1.0 / sp2; //csc2 phi
         let w2 = m / n;
 
         // This appears to have lower error in test dataset.
         // https://dlmf.nist.gov/19.7.E8
         return Ok((ellipf(phi, m)?
-            + c.sqrt() * elliprc((c - one!()) * (c - m), (c - n) * (c - w2))?)
+            + c.sqrt() * elliprc((c - 1.0) * (c - m), (c - n) * (c - w2))?)
             - ellippiinc(phi, w2, m)?);
 
         // https://dlmf.nist.gov/19.25.E16
-        // return Ok(-third!() * w2 * elliprj(c - one!(), c - m, c, c - w2)?
-        //     + ((c - one!()) * (c - m) / (n - one!()) / (one!() - w2)).sqrt()
-        //         * elliprc(c * (n - one!()) * (one!() - w2), (n - c) * (c - w2))?);
+        // return Ok(-third!() * w2 * elliprj(c - 1.0, c - m, c, c - w2)?
+        //     + ((c - 1.0) * (c - m) / (n - 1.0) / (1.0 - w2)).sqrt()
+        //         * elliprc(c * (n - 1.0) * (1.0 - w2), (n - c) * (c - w2))?);
     }
 
-    if m == zero!() {
+    if m == 0.0 {
         // A&S 17.7.20:
-        if n < one!() {
+        if n < 1.0 {
             let vcr = nc.sqrt();
             return Ok((vcr * phi.tan()).atan() / vcr);
         } else {
             // v > 1:
             let vcr = (-nc).sqrt();
             let arg = vcr * phi.tan();
-            return Ok((arg.ln_1p() - (-arg).ln_1p()) / (two!() * vcr));
+            return Ok((arg.ln_1p() - (-arg).ln_1p()) / (2.0 * vcr));
         }
     }
 
-    if n < zero!() && m <= one!() {
+    if n < 0.0 && m <= 1.0 {
         //
         // If we don't shift to 0 <= v <= 1 we get
         // cancellation errors later on.  Use
@@ -218,21 +211,21 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
         // Assuming[(k2 >= 0 && k2 <= 1) && n < 0, FullSimplify[Sqrt[1 / ((1 - n)*(1 - k2 / n))]]]
         // Result : Sqrt[n / ((k2 - n) (-1 + n))]
         //
-        let nn = (m - n) / (one!() - n);
-        let nm1 = (one!() - m) / (one!() - n);
+        let nn = (m - n) / (1.0 - n);
+        let nm1 = (1.0 - m) / (1.0 - n);
 
         if nn > m {
             result = if nn.abs() < n.abs() {
                 ellippiinc_vc(phi, nn, m, nm1)?
             } else {
-                let c = one!() / sp2;
-                nn / three!() * elliprj(c - one!(), c - m, c, c - nn)? + ellipf(phi, m)?
+                let c = 1.0 / sp2;
+                nn / 3.0 * elliprj(c - 1.0, c - m, c, c - nn)? + ellipf(phi, m)?
             };
-            result = result * n / (n - one!());
-            result = result * (m - one!()) / (n - m);
+            result = result * n / (n - 1.0);
+            result = result * (m - 1.0) / (n - m);
         }
 
-        if m != zero!() {
+        if m != 0.0 {
             let mut t = ellipf(phi, m)?;
             t = t * m / (m - n);
             result = result + t;
@@ -245,23 +238,23 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
             p2 = p2.sqrt();
         }
 
-        let delta = (one!() - m * sp2).sqrt();
-        let t = n / ((m - n) * (n - one!()));
+        let delta = (1.0 - m * sp2).sqrt();
+        let t = n / ((m - n) * (n - 1.0));
         if t > min_val!() {
-            result = result + ((p2 / two!()) * (two!() * phi).sin() / delta).atan() * t.sqrt();
+            result = result + ((p2 / 2.0) * (2.0 * phi).sin() / delta).atan() * t.sqrt();
         } else {
             result = result
-                + (((p2 / two!()) * (two!() * phi).sin() / delta).atan()
-                    * ((one!() / (m - n)).abs()).sqrt()
-                    * ((n / (n - one!()).abs()).sqrt()));
+                + (((p2 / 2.0) * (2.0 * phi).sin() / delta).atan()
+                    * ((1.0 / (m - n)).abs()).sqrt()
+                    * ((n / (n - 1.0).abs()).sqrt()));
         }
         return Ok(result);
     }
 
-    if m == one!() {
+    if m == 1.0 {
         // See http://functions.wolfram.com/08.06.03.0013.01
-        result = n.sqrt() * (n.sqrt() * phi.sin()).atanh() - (one!() / phi.cos() + phi.tan()).ln();
-        result = result / (n - one!());
+        result = n.sqrt() * (n.sqrt() * phi.sin()).atanh() - (1.0 / phi.cos() + phi.tan()).ln();
+        result = result / (n - 1.0);
         return Ok(result);
     }
     // disabled but retained for future reference: see below.
@@ -304,16 +297,12 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
     let cosp = phi.cos();
     let x = cosp * cosp;
     let t = sp2;
-    let y = one!() - m * t;
-    let z = one!();
+    let y = 1.0 - m * t;
+    let z = 1.0;
 
-    let p = if n * t < half!() {
-        one!() - n * t
-    } else {
-        x + nc * t
-    };
+    let p = if n * t < 0.5 { 1.0 - n * t } else { x + nc * t };
 
-    let result = sphi * (elliprf(x, y, z)? + n * t * elliprj(x, y, z, p)? / three!());
+    let result = sphi * (elliprf(x, y, z)? + n * t * elliprj(x, y, z, p)? / 3.0);
 
     Ok(result)
 }

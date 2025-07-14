@@ -70,19 +70,19 @@ use super::ellipk::ellipk_precise;
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 /// - The MathWorks, Inc. “ellipticF.” Accessed April 21, 2025. <https://www.mathworks.com/help/symbolic/sym.ellipticf.html>.
-///
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
-    let invert = if phi < zero!() { -one!() } else { one!() };
+    let invert = if phi < 0.0 { -1.0 } else { 1.0 };
     let phi = phi.abs();
 
     if phi >= max_val!() {
         return Ok(invert * inf!());
     }
 
-    if phi > one!() / epsilon!() {
+    if phi > 1.0 / epsilon!() {
         // Phi is so large that phi%pi is necessarily zero (or garbage),
         // just return the second part of the duplication formula:
-        return Ok(invert * two!() * phi * ellipk_precise(m)? / pi!());
+        return Ok(invert * 2.0 * phi * ellipk_precise(m)? / pi!());
     }
 
     // Carlson's algorithm works only for |phi| <= pi/2,
@@ -90,16 +90,16 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     let mut rphi = phi % pi_2!();
     let mut mm = ((phi - rphi) / pi_2!()).round();
 
-    let mut s = one!();
-    if mm % two!() > half!() {
-        mm = mm + one!();
-        s = -one!();
+    let mut s = 1.0;
+    if mm % 2.0 > 0.5 {
+        mm = mm + 1.0;
+        s = -1.0;
         rphi = pi_2!() - rphi;
     }
 
     let s2p = rphi.sin() * rphi.sin();
     let ms2p = m * s2p;
-    if ms2p >= one!() {
+    if ms2p >= 1.0 {
         return Err("ellipf: m sin²φ must be smaller than one.");
     }
 
@@ -110,12 +110,12 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         // c-1 simplifies to cot^2(rphi) which avoids cancellation.
         // Likewise c - k^2 is the same as (c - 1) + (1 - k^2).
         //
-        let c = one!() / s2p;
+        let c = 1.0 / s2p;
         let c_minus_one = c2p / s2p;
-        let arg2 = if m != zero!() {
+        let arg2 = if m != 0.0 {
             let cross = (c / m).abs();
-            if cross > num!(0.9) && cross < num!(1.1) {
-                c_minus_one + one!() - m
+            if cross > 0.9 && cross < 1.1 {
+                c_minus_one + 1.0 - m
             } else {
                 c - m
             }
@@ -126,7 +126,7 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     } else {
         result = s * rphi.sin();
     }
-    if mm != zero!() {
+    if mm != 0.0 {
         result = result + mm * ellipk_precise(m)?;
     }
 

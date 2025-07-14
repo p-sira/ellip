@@ -54,13 +54,13 @@ use super::BulirschConst;
 /// # References
 /// - Bulirsch, R. “Numerical Calculation of Elliptic Integrals and Elliptic Functions. III.” Numerische Mathematik 13, no. 4 (August 1, 1969): 305–15. <https://doi.org/10.1007/BF02165405>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-///
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
-    if kc == zero!() {
+    if kc == 0.0 {
         return Err("cel: kc cannot be zero.");
     }
 
-    if p == zero!() {
+    if p == 0.0 {
         return Err("cel: p cannot be zero.");
     }
 
@@ -70,15 +70,15 @@ pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, StrEr
     let mut b = b;
 
     let mut e = kc;
-    let mut m = one!();
+    let mut m = 1.0;
 
-    if p > zero!() {
+    if p > 0.0 {
         p = p.sqrt();
         b = b / p;
     } else {
         let mut f = kc * kc;
-        let mut q = one!() - f;
-        let g = one!() - p;
+        let mut q = 1.0 - f;
+        let g = 1.0 - p;
         f = f - p;
         q = (b - a * p) * q;
         p = (f / g).sqrt();
@@ -90,13 +90,13 @@ pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, StrEr
         let f = a;
         a = b / p + a;
         let g = e / p;
-        b = two!() * (f * g + b);
+        b = 2.0 * (f * g + b);
         p = g + p;
         let g = m;
         m = kc + m;
 
         if (g - kc).abs() > g * T::ca() {
-            kc = two!() * e.sqrt();
+            kc = 2.0 * e.sqrt();
             e = kc * m;
             continue;
         }
@@ -145,14 +145,14 @@ pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, StrEr
 /// # References
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-///
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, StrErr> {
-    if kc == zero!() {
+    if kc == 0.0 {
         return Err("cel1: kc cannot be zero.");
     }
 
     let mut kc = kc.abs();
-    let mut m = one!();
+    let mut m = 1.0;
 
     loop {
         let h = m;
@@ -160,7 +160,7 @@ pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, StrErr> {
 
         if (h - kc) > T::ca() * h {
             kc = (h * kc).sqrt();
-            m = m / two!();
+            m = m / 2.0;
             continue;
         }
 
@@ -211,9 +211,9 @@ pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, StrErr> {
 /// # References
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-///
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn cel2<T: Float + BulirschConst>(kc: T, a: T, b: T) -> Result<T, StrErr> {
-    if kc == zero!() {
+    if kc == 0.0 {
         return Err("cel2: kc cannot be zero.");
     }
 
@@ -221,26 +221,26 @@ pub fn cel2<T: Float + BulirschConst>(kc: T, a: T, b: T) -> Result<T, StrErr> {
     let mut a = a;
     let mut b = b;
 
-    let mut m = one!();
+    let mut m = 1.0;
     let mut c = a;
     a = b + a;
 
     loop {
-        b = (c * kc + b) * two!();
+        b = (c * kc + b) * 2.0;
         c = a;
         let m0 = m;
         m = kc + m;
         a = b / m + a;
 
         if (m0 - kc).abs() > T::ca() * m0 {
-            kc = (kc * m0).sqrt() * two!();
+            kc = (kc * m0).sqrt() * 2.0;
             continue;
         }
 
         break;
     }
 
-    Ok(pi!() / four!() * a / m)
+    Ok(pi!() / 4.0 * a / m)
 }
 
 #[cfg(test)]

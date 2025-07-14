@@ -51,13 +51,13 @@ use super::{cel1, cel2, BulirschConst};
 /// # References
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-///
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, StrErr> {
-    if x == zero!() {
-        return Ok(zero!());
+    if x == 0.0 {
+        return Ok(0.0);
     }
 
-    if kc == zero!() {
+    if kc == 0.0 {
         return Err("el1: kc cannot be zero.");
     }
 
@@ -66,9 +66,9 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, StrErr> {
         return cel1(kc);
     }
 
-    let mut y = (one!() / x).abs();
+    let mut y = (1.0 / x).abs();
     let mut kc = kc.abs();
-    let mut m = one!();
+    let mut m = 1.0;
     let mut l = 0;
 
     loop {
@@ -77,14 +77,14 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, StrErr> {
         m = kc + m;
         y = -e / y + y;
 
-        if y == zero!() {
+        if y == 0.0 {
             y = e.sqrt() * T::cb();
         }
 
         if (g - kc).abs() > T::ca() * g {
-            kc = e.sqrt() * two!();
+            kc = e.sqrt() * 2.0;
             l *= 2;
-            if y < zero!() {
+            if y < 0.0 {
                 l += 1;
             }
             continue;
@@ -93,12 +93,12 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, StrErr> {
         break;
     }
 
-    if y < zero!() {
+    if y < 0.0 {
         l += 1;
     }
 
-    let e = ((m / y).atan() + pi!() * num!(l)) / m;
-    Ok(if x < zero!() { -e } else { e })
+    let e = ((m / y).atan() + pi!() * T::from(l).unwrap()) / m;
+    Ok(if x < 0.0 { -e } else { e })
 }
 
 // Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
@@ -147,13 +147,13 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, StrErr> {
 /// # References
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-///
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
-    if x == zero!() {
-        return Ok(zero!());
+    if x == 0.0 {
+        return Ok(0.0);
     }
 
-    if kc == zero!() {
+    if kc == 0.0 {
         return Err("el2: kc cannot be zero.");
     }
 
@@ -164,18 +164,18 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, StrEr
 
     let mut b = b;
     let mut c = x * x;
-    let mut d = one!() + c;
-    let mut p = ((one!() + kc * kc * c) / d).sqrt();
+    let mut d = 1.0 + c;
+    let mut p = ((1.0 + kc * kc * c) / d).sqrt();
 
     d = x / d;
-    c = d / (p * two!());
+    c = d / (p * 2.0);
     let z = a - b;
     let mut i = a;
-    let mut a = (b + a) / two!();
-    let mut y = (one!() / x).abs();
-    let mut f = zero!();
+    let mut a = (b + a) / 2.0;
+    let mut y = (1.0 / x).abs();
+    let mut f = 0.0;
     let mut l = 0;
-    let mut m = one!();
+    let mut m = 1.0;
     let mut kc = kc.abs();
 
     loop {
@@ -186,20 +186,20 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, StrEr
         f = c;
         i = a;
         p = g + p;
-        c = (d / p + c) / two!();
+        c = (d / p + c) / 2.0;
         g = m;
         m = kc + m;
-        a = (b / m + a) / two!();
+        a = (b / m + a) / 2.0;
         y = -e / y + y;
 
-        if y == zero!() {
+        if y == 0.0 {
             y = e.sqrt() * T::cb();
         }
 
         if (g - kc).abs() > T::ca() * g {
-            kc = e.sqrt() * two!();
+            kc = e.sqrt() * 2.0;
             l *= 2;
-            if y < zero!() {
+            if y < 0.0 {
                 l += 1;
             }
             continue;
@@ -208,13 +208,13 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, StrEr
         break;
     }
 
-    if y < zero!() {
+    if y < 0.0 {
         l += 1;
     }
 
-    let mut e = ((m / y).atan() + pi!() * num!(l)) * a / m;
+    let mut e = ((m / y).atan() + pi!() * T::from(l).unwrap()) * a / m;
 
-    if x < zero!() {
+    if x < 0.0 {
         e = -e;
     }
 
@@ -267,38 +267,38 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, StrEr
 /// # References
 /// - Bulirsch, R. “Numerical Calculation of Elliptic Integrals and Elliptic Functions. III.” Numerische Mathematik 13, no. 4 (August 1, 1969): 305–15. <https://doi.org/10.1007/BF02165405>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-///
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
-    if kc == zero!() {
+    if kc == 0.0 {
         return Err("el3: kc must not be zero.");
     }
 
-    if x == zero!() {
-        return Ok(zero!());
+    if x == 0.0 {
+        return Ok(0.0);
     }
 
     // Handle special cases
     let phi = x.atan();
-    let m = one!() - kc * kc;
-    let n = one!() - p;
+    let m = 1.0 - kc * kc;
+    let n = 1.0 - p;
 
-    if kc == one!() {
+    if kc == 1.0 {
         // A&S 17.7.20:
-        if n < one!() {
+        if n < 1.0 {
             let vcr = p.sqrt();
             return Ok((vcr * phi.tan()).atan() / vcr);
         } else {
             // v > 1:
             let vcr = (-p).sqrt();
             let arg = vcr * phi.tan();
-            return Ok((arg.ln_1p() - (-arg).ln_1p()) / (two!() * vcr));
+            return Ok((arg.ln_1p() - (-arg).ln_1p()) / (2.0 * vcr));
         }
     }
 
     // Didn't improve the accuracy
-    // if n == zero!() {
+    // if n == 0.0 {
     //     // A&S 17.7.18 & 19
-    //     return if m == zero!() {
+    //     return if m == 0.0 {
     //         Ok(phi)
     //     } else {
     //         ellipf(phi, m)
@@ -306,22 +306,22 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
     // }
 
     // This cutpoint is empirical
-    if p.abs() <= num!(1e-10) {
-        if m == zero!() {
+    if p.abs() <= 1e-10 {
+        if m == 0.0 {
             return Ok(phi.tan());
         }
 
         // http://functions.wolfram.com/08.06.03.0008.01
         let sp2 = phi.sin() * phi.sin();
-        let mut result = (one!() - m * sp2).sqrt() * phi.tan() - ellipeinc(phi, m)?;
-        result = result / (one!() - m);
+        let mut result = (1.0 - m * sp2).sqrt() * phi.tan() - ellipeinc(phi, m)?;
+        result = result / (1.0 - m);
         result = result + ellipf(phi, m)?;
         return Ok(result);
     }
 
     // // https://dlmf.nist.gov/19.6.E11
-    // if phi == zero!() {
-    //     return Ok(zero!());
+    // if phi == 0.0 {
+    //     return Ok(0.0);
     // }
 
     // real
@@ -345,7 +345,7 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
     let mut v;
     let mut w;
     let mut y;
-    let mut ye = zero!();
+    let mut ye = 0.0;
     let mut z;
     let zd;
 
@@ -362,31 +362,31 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
 
     hh = x * x;
     f = p * hh;
-    s = if kc == zero!() {
-        T::ca() / (one!() + x.abs())
+    s = if kc == 0.0 {
+        T::ca() / (1.0 + x.abs())
     } else {
         kc
     };
     t = s * s;
-    pm = t * half!();
+    pm = t * 0.5;
     e = hh * t;
     z = f.abs();
     r = p.abs();
-    h = one!() + hh;
+    h = 1.0 + hh;
 
     // small
-    if e < tenth!() && z < tenth!() && t < one!() && r < one!() {
+    if e < 0.1 && z < 0.1 && t < 1.0 && r < 1.0 {
         let (rb, ra): (Vec<T>, Vec<T>) = (2..=nd)
             .map(|k| {
-                let rb_k = half!() / num!(k);
-                (rb_k, one!() - rb_k)
+                let rb_k = 0.5 / T::from(k).unwrap();
+                (rb_k, 1.0 - rb_k)
             })
             .unzip();
 
-        zd = half!() / (num!(nd) + one!());
+        zd = 0.5 / (T::from(nd).unwrap() + 1.0);
         s = p + pm;
 
-        let mut rr: Vec<T> = vec![zero!(); nd - 2];
+        let mut rr: Vec<T> = vec![0.0; nd - 2];
         for k in 0..nd - 2 {
             rr[k] = s;
             pm = pm * t * ra[k];
@@ -405,73 +405,73 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
         if bo {
             s = -s;
         }
-        u = half!() * (u + one!());
+        u = 0.5 * (u + 1.0);
         return Ok((u - s * h) * h.sqrt() * x + u * x.asinh());
     }
 
-    w = one!() + f;
-    if w == zero!() {
+    w = 1.0 + f;
+    if w == 0.0 {
         return Err("el3: 1 + px² cannot be zero.");
     }
 
-    let p1 = if p == zero!() { T::cb() / hh } else { p };
+    let p1 = if p == 0.0 { T::cb() / hh } else { p };
     s = s.abs();
     y = x.abs();
-    g = p1 - one!();
-    if g == zero!() {
+    g = p1 - 1.0;
+    if g == 0.0 {
         g = T::cb();
     }
     f = p1 - t;
-    if f == zero!() {
+    if f == 0.0 {
         f = T::cb() * t;
     }
-    let am = one!() - t;
-    let ap = one!() + e;
+    let am = 1.0 - t;
+    let ap = 1.0 + e;
     r = p1 * h;
     fa = g / (f * p1);
-    bo = fa > zero!();
+    bo = fa > 0.0;
     fa = fa.abs();
     pz = (g * f).abs();
     de = pz.sqrt();
     q = p1.abs().sqrt();
 
-    if pm > half!() {
-        pm = half!()
+    if pm > 0.5 {
+        pm = 0.5
     } else {
         pm = p1 - pm
     };
 
-    if pm >= zero!() {
+    if pm >= 0.0 {
         u = (r * ap).sqrt();
         v = y * de;
-        if g < zero!() {
+        if g < 0.0 {
             v = -v;
         }
-        d = one!() / q;
-        c = one!();
+        d = 1.0 / q;
+        c = 1.0;
     } else {
         u = (h * ap * pz).sqrt();
         ye = y * q;
         v = am * ye;
         q = -de / g;
         d = -am / de;
-        c = zero!();
+        c = 0.0;
         pz = ap - r;
     }
 
     if bo {
         r = v / u;
-        z = one!();
+        z = 1.0;
         k = 1;
-        if pm < zero!() {
+        if pm < 0.0 {
             h = y * (h / ap / fa).sqrt();
-            h = one!() / h - h;
+            h = 1.0 / h - h;
             z = h - r - r;
-            r = two!() + r * h;
-            if r == zero!() {
+            r = 2.0 + r * h;
+            if r == 0.0 {
                 r = T::cb();
             }
-            if z == zero!() {
+            if z == 0.0 {
                 z = h * T::cb();
             }
             z = r / z;
@@ -483,7 +483,7 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
     } else {
         t = u + v.abs();
         bk = true;
-        if p1 < zero!() {
+        if p1 < 0.0 {
             de = v / pz;
             ye = u * ye;
             ye = ye + ye;
@@ -494,28 +494,28 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
             ye = ye / t;
         } else {
             de = v / w;
-            ye = zero!();
+            ye = 0.0;
             u = (e + p1) / t;
             v = t / w;
-            z = one!();
+            z = 1.0;
         }
-        if s > one!() {
+        if s > 1.0 {
             h = u;
             u = v;
             v = h;
         }
     }
 
-    y = one!() / y;
+    y = 1.0 / y;
     e = s;
     n = 1;
-    t = one!();
+    t = 1.0;
     l = 0;
     m = 0;
 
     loop {
         y = y - e / y;
-        if y == zero!() {
+        if y == 0.0 {
             y = e.sqrt() * T::cb();
         }
         f = c;
@@ -529,13 +529,13 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
         n = n + n;
         m = m + m;
         if bo {
-            if z < zero!() {
+            if z < 0.0 {
                 m += k;
             }
-            k = if r < zero!() { -1 } else { 1 };
+            k = if r < 0.0 { -1 } else { 1 };
             h = e / (u * u + v * v);
-            u = u * (one!() + h);
-            v = v * (one!() - h);
+            u = u * (1.0 + h);
+            v = v * (1.0 - h);
         } else {
             r = u / v;
             h = z * r;
@@ -543,21 +543,21 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
             hh = e / v;
 
             de = de / u;
-            ye = ye * (h + one!() / h) + de * (one!() + r);
+            ye = ye * (h + 1.0 / h) + de * (1.0 + r);
             de = de * (u - hh);
-            bk = ye.abs() < one!();
+            bk = ye.abs() < 1.0;
 
             // Removed crack function
         }
         if (g - s).abs() > T::ca() * g {
             if bo {
-                g = (one!() / r - r) * half!();
+                g = (1.0 / r - r) * 0.5;
                 hh = u + v * g;
                 h = g * u - v;
-                if hh == zero!() {
+                if hh == 0.0 {
                     hh = u * T::cb();
                 }
-                if h == zero!() {
+                if h == 0.0 {
                     h = v * T::cb();
                 }
                 z = r * h;
@@ -570,7 +570,7 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
             s = s + s;
             e = s * t;
             l *= 2;
-            if y < zero!() {
+            if y < 0.0 {
                 l += 1;
             }
             continue;
@@ -579,34 +579,34 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
         break;
     }
 
-    if y < zero!() {
+    if y < 0.0 {
         l += 1;
     }
-    e = (t / y).atan() + pi!() * num!(l);
+    e = (t / y).atan() + pi!() * T::from(l).unwrap();
     e = e * (c * t + d) / (t * (t + q));
 
     if bo {
         h = v / (t + u);
-        z = one!() - r * h;
+        z = 1.0 - r * h;
         h = r + h;
-        if z == zero!() {
+        if z == 0.0 {
             z = T::cb();
         }
-        if z < zero!() {
-            m += if h < zero!() { -1 } else { 1 };
+        if z < 0.0 {
+            m += if h < 0.0 { -1 } else { 1 };
         }
-        s = (h / z).atan() + num!(m) * pi!();
+        s = (h / z).atan() + T::from(m).unwrap() * pi!();
     } else {
         s = if bk {
             ye.asinh()
         } else {
-            z.ln() + num!(m) * ln_2!()
+            z.ln() + T::from(m).unwrap() * ln_2!()
         };
-        s = s * half!();
+        s = s * 0.5;
     }
-    e = (e + fa.sqrt() * s) / num!(n);
+    e = (e + fa.sqrt() * s) / T::from(n).unwrap();
 
-    Ok(if x > zero!() { e } else { -e })
+    Ok(if x > 0.0 { e } else { -e })
 }
 
 #[cfg(test)]

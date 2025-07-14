@@ -66,31 +66,27 @@ use crate::{ellipe, elliprd, elliprf, StrErr};
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 /// - The MathWorks, Inc. “ellipticE.” Accessed April 21, 2025. <https://www.mathworks.com/help/symbolic/sym.elliptice.html>.
-///
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
-    if phi == zero!() {
-        return Ok(zero!());
+    if phi == 0.0 {
+        return Ok(0.0);
     }
 
-    if m == zero!() {
+    if m == 0.0 {
         return Ok(phi);
     }
 
-    let (phi, invert) = if phi < zero!() {
-        (-phi, -one!())
-    } else {
-        (phi, one!())
-    };
+    let (phi, invert) = if phi < 0.0 { (-phi, -1.0) } else { (phi, 1.0) };
 
     if phi >= max_val!() {
         return Ok(invert * inf!());
     }
 
-    if phi > one!() / epsilon!() {
-        return Ok(invert * two!() * phi * ellipe(m)? / pi!());
+    if phi > 1.0 / epsilon!() {
+        return Ok(invert * 2.0 * phi * ellipe(m)? / pi!());
     }
 
-    if m == one!() {
+    if m == 1.0 {
         // For k = 1 ellipse actually turns to a line and every pi/2 in phi is exactly 1 in arc length
         // Periodicity though is in pi, curve follows sin(pi) for 0 <= phi <= pi/2 and then
         // 2 - sin(pi- phi) = 2 + sin(phi - pi) for pi/2 <= phi <= pi, so general form is:
@@ -98,7 +94,7 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         // 2n + sin(phi - n * pi) ; |phi - n * pi| <= pi / 2
         let mm = (phi / pi!()).round();
         let remains = phi - mm * pi!();
-        return Ok(invert * (two!() * mm + remains.sin()));
+        return Ok(invert * (2.0 * mm + remains.sin()));
     }
 
     // Carlson's algorithm works only for |phi| <= pi/2,
@@ -109,30 +105,30 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     // so rewritten to use fmod instead:
     let mut rphi = phi % pi_2!();
     let mut mm = ((phi - rphi) / pi_2!()).round();
-    let mut s = one!();
-    if mm % two!() > half!() {
-        mm = mm + one!();
-        s = -one!();
+    let mut s = 1.0;
+    if mm % 2.0 > 0.5 {
+        mm = mm + 1.0;
+        s = -1.0;
         rphi = pi_2!() - rphi;
     }
 
-    let mut result = if m > zero!() && rphi.powi(3) * m / six!() < epsilon!() * rphi.abs() {
+    let mut result = if m > 0.0 && rphi.powi(3) * m / 6.0 < epsilon!() * rphi.abs() {
         // See http://functions.wolfram.com/EllipticIntegrals/EllipticE2/06/01/03/0001/
         s * rphi
     } else {
         let s2p = rphi.sin() * rphi.sin();
-        if m * s2p >= one!() {
+        if m * s2p >= 1.0 {
             return Err("ellipeinc: m sin²φ must be smaller than one.");
         }
         let c2p = rphi.cos() * rphi.cos();
-        let c = one!() / s2p;
+        let c = 1.0 / s2p;
         let cm1 = c2p / s2p;
-        s * ((one!() - m) * elliprf(cm1, c - m, c)?
-            + m * (one!() - m) * elliprd(cm1, c, c - m)? / three!()
+        s * ((1.0 - m) * elliprf(cm1, c - m, c)?
+            + m * (1.0 - m) * elliprd(cm1, c, c - m)? / 3.0
             + m * (cm1 / (c * (c - m))).sqrt())
     };
 
-    if mm != zero!() {
+    if mm != 0.0 {
         result = result + mm * ellipe(m)?;
     }
 

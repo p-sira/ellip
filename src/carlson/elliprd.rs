@@ -63,12 +63,12 @@ use crate::StrErr;
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-///
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
-    if x.min(y) < zero!() || x + y == zero!() {
+    if x.min(y) < 0.0 || x + y == 0.0 {
         return Err("elliprd: x and y must be non-negative, and at most one can be zero.");
     }
-    if z <= zero!() {
+    if z <= 0.0 {
         return Err("elliprd: z must be positive");
     }
 
@@ -82,46 +82,44 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
 
     if y == z {
         if x == y {
-            return Ok(one!() / (x * x.sqrt()));
+            return Ok(1.0 / (x * x.sqrt()));
         }
-        if x == zero!() {
-            return Ok(three!() * pi!() / (four!() * y * y.sqrt()));
+        if x == 0.0 {
+            return Ok(3.0 * pi!() / (4.0 * y * y.sqrt()));
         }
     }
 
-    if x == zero!() {
+    if x == 0.0 {
         let x0 = y.sqrt();
         let y0 = z.sqrt();
         let mut xn = x0;
         let mut yn = y0;
-        let mut sum = zero!();
-        let mut sum_pow = num!(0.25);
+        let mut sum = 0.0;
+        let mut sum_pow = 0.25;
 
-        while (xn - yn).abs() >= num!(2.7) * epsilon!() * xn.abs() {
+        while (xn - yn).abs() >= 2.7 * epsilon!() * xn.abs() {
             let t = (xn * yn).sqrt();
-            xn = (xn + yn) / two!();
+            xn = (xn + yn) / 2.0;
             yn = t;
-            sum_pow = sum_pow * two!();
+            sum_pow = sum_pow * 2.0;
             let temp = xn - yn;
             sum = sum + sum_pow * temp * temp;
         }
         let rf = pi!() / (xn + yn);
-        let pt = (x0 + three!() * y0) / (four!() * z * (x0 + y0)) - sum / (z * (y - z));
-        return Ok(pt * rf * three!());
+        let pt = (x0 + 3.0 * y0) / (4.0 * z * (x0 + y0)) - sum / (z * (y - z));
+        return Ok(pt * rf * 3.0);
     }
 
     let mut xn = x;
     let mut yn = y;
     let mut zn = z;
 
-    let mut an = (x + y + three!() * z) / five!();
+    let mut an = (x + y + 3.0 * z) / 5.0;
     let a0 = an;
-    let mut q = (epsilon!() / four!()).powf(-one!() / eight!())
-        * (an - x).max(an - y).max(an - z)
-        * num!(1.2);
+    let mut q = (epsilon!() / 4.0).powf(-1.0 / 8.0) * (an - x).max(an - y).max(an - z) * 1.2;
 
-    let mut fn_val = one!();
-    let mut rd_sum = zero!();
+    let mut fn_val = 1.0;
+    let mut rd_sum = 0.0;
 
     for _ in 0..N_MAX_ITERATIONS {
         let rx = xn.sqrt();
@@ -129,39 +127,37 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         let rz = zn.sqrt();
         let lambda = rx * ry + rx * rz + ry * rz;
         rd_sum = rd_sum + fn_val / (rz * (zn + lambda));
-        an = (an + lambda) / four!();
-        xn = (xn + lambda) / four!();
-        yn = (yn + lambda) / four!();
-        zn = (zn + lambda) / four!();
-        fn_val = fn_val / four!();
-        q = q / four!();
+        an = (an + lambda) / 4.0;
+        xn = (xn + lambda) / 4.0;
+        yn = (yn + lambda) / 4.0;
+        zn = (zn + lambda) / 4.0;
+        fn_val = fn_val / 4.0;
+        q = q / 4.0;
         if q < an {
             let x = fn_val * (a0 - x) / an;
             let y = fn_val * (a0 - y) / an;
-            let z = -(x + y) / three!();
+            let z = -(x + y) / 3.0;
             let xyz = x * y * z;
             let z2 = z * z;
             let z3 = z2 * z;
 
-            let e2 = x * y - six!() * z2;
-            let e3 = three!() * xyz - eight!() * z3;
-            let e4 = three!() * (xyz - z3) * z;
+            let e2 = x * y - 6.0 * z2;
+            let e3 = 3.0 * xyz - 8.0 * z3;
+            let e4 = 3.0 * (xyz - z3) * z;
             let e5 = xyz * z2;
 
             let result = fn_val
-                * an.powf(-num!(1.5))
-                * (one!() - three!() * e2 / num!(14.0)
-                    + e3 / six!()
-                    + nine!() * e2 * e2 / num!(88.0)
-                    - three!() * e4 / num!(22.0)
-                    - nine!() * e2 * e3 / num!(52.0)
-                    + three!() * e5 / num!(26.0)
-                    - e2 * e2 * e2 / num!(16.0)
-                    + three!() * e3 * e3 / num!(40.0)
-                    + three!() * e2 * e4 / num!(20.0)
-                    + num!(45.0) * e2 * e2 * e3 / num!(272.0)
-                    - nine!() * (e3 * e4 + e2 * e5) / num!(68.0))
-                + three!() * rd_sum;
+                * an.powf(-1.5)
+                * (1.0 - 3.0 * e2 / 14.0 + e3 / 6.0 + 9.0 * e2 * e2 / 88.0
+                    - 3.0 * e4 / 22.0
+                    - 9.0 * e2 * e3 / 52.0
+                    + 3.0 * e5 / 26.0
+                    - e2 * e2 * e2 / 16.0
+                    + 3.0 * e3 * e3 / 40.0
+                    + 3.0 * e2 * e4 / 20.0
+                    + 45.0 * e2 * e2 * e3 / 272.0
+                    - 9.0 * (e3 * e4 + e2 * e5) / 68.0)
+                + 3.0 * rd_sum;
 
             return Ok(result);
         }
