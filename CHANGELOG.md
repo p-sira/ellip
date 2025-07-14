@@ -1,5 +1,9 @@
 # Changelog
 ## 0.3
+### 0.3.3
+**Changes**
+- Use `numeric_literals` to parse floats within the functions to make the code more readable.
+
 ### 0.3.2
 **Improvements**
 - Reduce package size.

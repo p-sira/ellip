@@ -62,13 +62,13 @@ use crate::StrErr;
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 /// - The SciPy Community. “SciPy: Special Functions - Elliprc.” Accessed April 17, 2025. <https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.elliprc.html>.
-///
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, StrErr> {
-    if x < zero!() {
+    if x < 0.0 {
         return Err("elliprc: x must be non-negative.");
     }
 
-    if y == zero!() {
+    if y == 0.0 {
         return Err("elliprc: y must be non-zero.");
     }
 
@@ -76,18 +76,19 @@ pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, StrErr> {
 }
 
 #[inline]
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 fn _elliprc<T: Float>(x: T, y: T) -> T {
     let mut x = x;
     let mut y = y;
-    let mut prefix = one!();
+    let mut prefix = 1.0;
     // for y < 0, the integral is singular, return Cauchy principal value
-    if y < zero!() {
+    if y < 0.0 {
         prefix = (x / (x - y)).sqrt();
         x = x - y;
         y = -y;
     }
 
-    if x == zero!() {
+    if x == 0.0 {
         return prefix * pi_2!() / y.sqrt();
     }
 
@@ -99,9 +100,9 @@ fn _elliprc<T: Float>(x: T, y: T) -> T {
         return prefix * ((y - x) / x).sqrt().atan() / (y - x).sqrt();
     }
 
-    if y / x > half!() {
+    if y / x > 0.5 {
         let arg = ((x - y) / x).sqrt();
-        prefix * ((arg).ln_1p() - (-arg).ln_1p()) / (two!() * (x - y).sqrt())
+        prefix * ((arg).ln_1p() - (-arg).ln_1p()) / (2.0 * (x - y).sqrt())
     } else {
         prefix * ((x.sqrt() + (x - y).sqrt()) / y.sqrt()).ln() / (x - y).sqrt()
     }

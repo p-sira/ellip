@@ -75,8 +75,8 @@
 //!
 //! Unicode-style mathematical notation are created using [Diagon](https://github.com/ArthurSonzogni/Diagon).
 
-use num_lazy::declare_nums;
-declare_nums! {T}
+num_lazy::declare_nums! {@constant T}
+num_lazy::declare_nums! {@special T}
 
 /// Static error str
 pub type StrErr = &'static str;

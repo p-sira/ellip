@@ -67,12 +67,12 @@ use num_traits::Float;
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-///
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
-    if x.min(y).min(z) < zero!() || (y + z).min(x + y).min(x + z) == zero!() {
+    if x.min(y).min(z) < 0.0 || (y + z).min(x + y).min(x + z) == 0.0 {
         return Err("elliprj: x, y, and z must be non-negative, and at most one can be zero.");
     }
-    if p == zero!() {
+    if p == 0.0 {
         return Err("elliprj: p must be non-zero");
     }
 
@@ -81,7 +81,7 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
     let mut z = z;
 
     // for p < 0, the integral is singular, return Cauchy principal value
-    if p < zero!() {
+    if p < 0.0 {
         // We must ensure that x < y < z.
         // Since the integral is symmetrical in x, y and z
         // we can just permute the values:
@@ -98,9 +98,9 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
         let q = -p;
         let p = (z * (x + y + q) - x * y) / (z + q);
         let mut value = (p - z) * _elliprj(x, y, z, p)?;
-        value = value - three!() * elliprf(x, y, z)?;
-        value = value
-            + three!() * ((x * y * z) / (x * y + p * q)).sqrt() * elliprc(x * y + p * q, p * q)?;
+        value = value - 3.0 * elliprf(x, y, z)?;
+        value =
+            value + 3.0 * ((x * y * z) / (x * y + p * q)).sqrt() * elliprc(x * y + p * q, p * q)?;
         return Ok(value / (z + q));
     }
 
@@ -109,6 +109,7 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
 
 /// Calculate RC(1, 1 + x)
 #[inline]
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 fn elliprc1p<T: Float>(y: T) -> Result<T, StrErr> {
     // We can skip this check since the call from elliprj already did the check.
     // if y == -1.0 {
@@ -116,21 +117,22 @@ fn elliprc1p<T: Float>(y: T) -> Result<T, StrErr> {
     // }
 
     // for 1 + y < 0, the integral is singular, return Cauchy principal value
-    if y < -one!() {
-        Ok((one!() / -y).sqrt() * elliprc(-y, -one!() - y)?)
-    } else if y == zero!() {
-        Ok(one!())
-    } else if y > zero!() {
+    if y < -1.0 {
+        Ok((1.0 / -y).sqrt() * elliprc(-y, -1.0 - y)?)
+    } else if y == 0.0 {
+        Ok(1.0)
+    } else if y > 0.0 {
         Ok(y.sqrt().atan() / y.sqrt())
-    } else if y > num!(-0.5) {
+    } else if y > -0.5 {
         let arg = (-y).sqrt();
-        Ok((arg.ln_1p() - (-arg).ln_1p()) / (two!() * (-y).sqrt()))
+        Ok((arg.ln_1p() - (-arg).ln_1p()) / (2.0 * (-y).sqrt()))
     } else {
-        Ok(((one!() + (-y).sqrt()) / (one!() + y).sqrt()).ln() / (-y).sqrt())
+        Ok(((1.0 + (-y).sqrt()) / (1.0 + y).sqrt()).ln() / (-y).sqrt())
     }
 }
 
 #[inline]
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
     let mut x = x;
     let mut z = z;
@@ -140,10 +142,10 @@ fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
         if x == z {
             if x == p {
                 // RJ(x,x,x,x)
-                return Ok(one!() / (x * x.sqrt()));
+                return Ok(1.0 / (x * x.sqrt()));
             } else {
                 // RJ(x,x,x,p)
-                return Ok((three!() / (x - p)) * (elliprc(x, p)? - one!() / x.sqrt()));
+                return Ok((3.0 / (x - p)) * (elliprc(x, p)? - 1.0 / x.sqrt()));
             }
         } else {
             // RJ(x,x,z,p)
@@ -159,9 +161,9 @@ fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
             return elliprd(x, y, y);
         }
         // This prevents division by zero.
-        if p.max(y) / p.min(y) > num!(1.2) {
+        if p.max(y) / p.min(y) > 1.2 {
             // RJ(x,y,y,p)
-            return Ok((three!() / (p - y)) * (elliprc(x, y)? - elliprc(x, p)?));
+            return Ok((3.0 / (p - y)) * (elliprc(x, y)? - elliprc(x, p)?));
         }
     }
 
@@ -174,18 +176,18 @@ fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
     let mut yn = y;
     let mut zn = z;
     let mut pn = p;
-    let mut an = (x + y + z + two!() * p) / five!();
+    let mut an = (x + y + z + 2.0 * p) / 5.0;
     let a0 = an;
     let mut delta = (p - x) * (p - y) * (p - z);
-    let q = (epsilon!() / five!()).powf(-one!() / eight!())
+    let q = (epsilon!() / 5.0).powf(-1.0 / 8.0)
         * (an - x)
             .abs()
             .max((an - y).abs())
             .max((an - z).abs())
             .max((an - p).abs());
 
-    let mut fmn = one!();
-    let mut rc_sum = zero!();
+    let mut fmn = 1.0;
+    let mut rc_sum = 0.0;
 
     for _ in 0..N_MAX_ITERATION {
         let rx = xn.sqrt();
@@ -195,54 +197,52 @@ fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
         let dn = (rp + rx) * (rp + ry) * (rp + rz);
         let en = delta / (dn * dn);
 
-        if en < num!(-0.5) && en > num!(-1.5) {
-            let b = two!() * rp * (pn + rx * (ry + rz) + ry * rz) / dn;
-            rc_sum = rc_sum + fmn / dn * elliprc(one!(), b)?;
+        if en < -0.5 && en > -1.5 {
+            let b = 2.0 * rp * (pn + rx * (ry + rz) + ry * rz) / dn;
+            rc_sum = rc_sum + fmn / dn * elliprc(1.0, b)?;
         } else {
             rc_sum = rc_sum + fmn / dn * elliprc1p(en)?;
         }
 
         let lambda = rx * ry + rx * rz + ry * rz;
-        an = (an + lambda) / four!();
-        fmn = fmn / four!();
+        an = (an + lambda) / 4.0;
+        fmn = fmn / 4.0;
 
         if fmn * q < an {
             // Calculate and return
             let x = fmn * (a0 - x) / an;
             let y = fmn * (a0 - y) / an;
             let z = fmn * (a0 - z) / an;
-            let p = (-x - y - z) / two!();
+            let p = (-x - y - z) / 2.0;
             let xyz = x * y * z;
             let p2 = p * p;
             let p3 = p2 * p;
 
-            let e2 = x * y + x * z + y * z - three!() * p2;
-            let e3 = xyz + two!() * e2 * p + four!() * p3;
-            let e4 = (two!() * xyz + e2 * p + three!() * p3) * p;
+            let e2 = x * y + x * z + y * z - 3.0 * p2;
+            let e3 = xyz + 2.0 * e2 * p + 4.0 * p3;
+            let e4 = (2.0 * xyz + e2 * p + 3.0 * p3) * p;
             let e5 = xyz * p2;
 
             let result = fmn
-                * an.powf(-num!(1.5))
-                * (one!() - three!() * e2 / num!(14.0)
-                    + e3 / six!()
-                    + nine!() * e2 * e2 / num!(88.0)
-                    - three!() * e4 / num!(22.0)
-                    - nine!() * e2 * e3 / num!(52.0)
-                    + three!() * e5 / num!(26.0)
-                    - e2 * e2 * e2 / num!(16.0)
-                    + three!() * e3 * e3 / num!(40.0)
-                    + three!() * e2 * e4 / num!(20.0)
-                    + num!(45.0) * e2 * e2 * e3 / num!(272.0)
-                    - nine!() * (e3 * e4 + e2 * e5) / num!(68.0));
+                * an.powf(-1.5)
+                * (1.0 - 3.0 * e2 / 14.0 + e3 / 6.0 + 9.0 * e2 * e2 / 88.0
+                    - 3.0 * e4 / 22.0
+                    - 9.0 * e2 * e3 / 52.0
+                    + 3.0 * e5 / 26.0
+                    - e2 * e2 * e2 / 16.0
+                    + 3.0 * e3 * e3 / 40.0
+                    + 3.0 * e2 * e4 / 20.0
+                    + 45.0 * e2 * e2 * e3 / 272.0
+                    - 9.0 * (e3 * e4 + e2 * e5) / 68.0);
 
-            return Ok(result + six!() * rc_sum);
+            return Ok(result + 6.0 * rc_sum);
         }
 
-        xn = (xn + lambda) / four!();
-        yn = (yn + lambda) / four!();
-        zn = (zn + lambda) / four!();
-        pn = (pn + lambda) / four!();
-        delta = delta / num!(64.0);
+        xn = (xn + lambda) / 4.0;
+        yn = (yn + lambda) / 4.0;
+        zn = (zn + lambda) / 4.0;
+        pn = (pn + lambda) / 4.0;
+        delta = delta / 64.0;
     }
     Err("elliprj: Fail to converge")
 }

@@ -65,9 +65,9 @@ use crate::{elliprc, StrErr};
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-///
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
-    if x.min(y).min(z) < zero!() || (y + z).min(x + y).min(x + z) < zero!() {
+    if x.min(y).min(z) < 0.0 || (y + z).min(x + y).min(x + z) < 0.0 {
         return Err("elliprf: x, y, and z must be non-negative, and at most one can be zero.");
     }
 
@@ -75,13 +75,13 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
     if x == y {
         if x == z {
             // RF(x,x,x)
-            return Ok(one!() / x.sqrt());
+            return Ok(1.0 / x.sqrt());
         }
 
-        if z == zero!() {
+        if z == 0.0 {
             // RF(x,x,0)
             // RF(0,y,y)
-            return Ok(pi!() / (two!() * x.sqrt()));
+            return Ok(pi!() / (2.0 * x.sqrt()));
         }
 
         // RF(x,x,z)
@@ -90,10 +90,10 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
     }
 
     if x == z {
-        if y == zero!() {
+        if y == 0.0 {
             // RF(x,0,x)
             // RF(0,y,y)
-            return Ok(pi!() / (two!() * x.sqrt()));
+            return Ok(pi!() / (2.0 * x.sqrt()));
         }
 
         // RF(x,y,x)
@@ -102,9 +102,9 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
     }
 
     if y == z {
-        if x == zero!() {
+        if x == 0.0 {
             // RF(0,y,y)
-            return Ok(pi!() / (two!() * y.sqrt()));
+            return Ok(pi!() / (2.0 * y.sqrt()));
         }
 
         // RF(x,y,y)
@@ -115,34 +115,34 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
     let mut yn = y;
     let mut zn = z;
 
-    if xn == zero!() {
+    if xn == 0.0 {
         swap(&mut xn, &mut zn);
-    } else if yn == zero!() {
+    } else if yn == 0.0 {
         swap(&mut yn, &mut zn);
     }
 
-    if zn == zero!() {
+    if zn == 0.0 {
         let mut xn = xn.sqrt();
         let mut yn = yn.sqrt();
 
-        while (xn - yn).abs() >= num!(2.7) * epsilon!() * xn.abs() {
+        while (xn - yn).abs() >= 2.7 * epsilon!() * xn.abs() {
             let t = (xn * yn).sqrt();
-            xn = (xn + yn) / two!();
+            xn = (xn + yn) / 2.0;
             yn = t;
         }
         return Ok(pi!() / (xn + yn));
     }
 
-    let four = four!();
+    let four = 4.0;
 
-    let mut an = (xn + yn + zn) / three!();
+    let mut an = (xn + yn + zn) / 3.0;
     let a0 = an;
-    let mut q = (three!() * epsilon!()).powf(-one!() / eight!())
+    let mut q = (3.0 * epsilon!()).powf(-1.0 / 8.0)
         * an.abs()
             .max((an - xn).abs())
             .max((an - yn).abs())
             .max((an - zn).abs());
-    let mut fn_val = one!();
+    let mut fn_val = 1.0;
     for _ in 0..N_MAX_ITERATIONS {
         let root_x = xn.sqrt();
         let root_y = yn.sqrt();
@@ -166,12 +166,10 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
             let e2 = x * y - z * z;
             let e3 = x * y * z;
 
-            return Ok((one!()
-                + e3 * (num!(1.0 / 14.0) + three!() * e3 / num!(104.0))
-                + e2 * (num!(-0.1) + e2 / num!(24.0)
-                    - (three!() * e3) / num!(44.0)
-                    - five!() * e2 * e2 / num!(208.0)
-                    + e2 * e3 / num!(16.0)))
+            return Ok((1.0
+                + e3 * (1.0 / 14.0 + 3.0 * e3 / 104.0)
+                + e2 * (-0.1 + e2 / 24.0 - (3.0 * e3) / 44.0 - 5.0 * e2 * e2 / 208.0
+                    + e2 * e3 / 16.0))
                 / an.sqrt());
         }
     }

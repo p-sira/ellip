@@ -1,6 +1,6 @@
 [package]
 name = "ellip"
-version = "0.3.2"
+version = "0.3.3"
 authors = ["Sira Pornsiriprasert <code@psira.me>"]
 
 description = "Elliptic integrals for Rust"
@@ -28,8 +28,9 @@ exclude = [
 ]
 
 [dependencies]
-num-lazy = "~0.1"
+num-lazy = "0.2.0"
 num-traits = "~0.2"
+numeric_literals = "0.2.0"
 
 [dev-dependencies]
 criterion = "~0.5"
