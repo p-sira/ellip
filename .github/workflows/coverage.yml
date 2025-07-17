@@ -19,9 +19,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Cache cargo index
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
+
       - name: Generate code coverage
-        run: cargo +nightly tarpaulin --verbose --all-features --workspace --timeout 120 --out xml \
-             --tests --examples \
+        run: cargo +nightly tarpaulin --verbose --all-features --workspace --timeout 120 \
+             --out Xml --tests --examples \
              --exclude-files "benches/**/*" "examples/**/*"
 
       - name: Upload coverage to Codecov
