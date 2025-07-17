@@ -20,3 +20,19 @@ pub fn assert_close<T: Float + Debug>(actual: T, expected: T, rtol: T) {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic]
+    fn test_assert_close_panic() {
+        assert_close(1.0, 2.0, 1e-6);
+    }
+
+    #[test]
+    fn test_assert_close_success() {
+        assert_close(1.0, 1.0 + 1e-6, 1e-6);
+    }
+}
