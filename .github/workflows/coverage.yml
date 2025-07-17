@@ -6,8 +6,7 @@ permissions:
 on:
   workflow_run:
     workflows: ["Ellip CI"]
-    types:
-      - completed
+    types: [completed]
 
 jobs:
   coverage:
@@ -26,4 +25,5 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
+            token: ${{ secrets.CODECOV_TOKEN }}
             fail_ci_if_error: true
