@@ -1,10 +1,14 @@
 name: Ellip CI
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: [ "main", "dev" ]
   pull_request:
     branches: [ "main", "dev" ]
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
@@ -14,11 +18,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Check formatting
-      run: cargo fmt -- --check
     - name: Run clippy
       run: cargo clippy 
     - name: Test
       run: cargo test -- --show-output
     - name: Make docs
-      run: cargo doc
+      run: cargo doc --no-deps
+    - name: Format code
+      run: |
+        cargo fmt
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git add .
+        git diff --cached --quiet || (git commit -m "FMT: CI cargo fmt" && git push)
