@@ -21,7 +21,7 @@
 
 use num_traits::Float;
 
-use crate::{elliprf, StrErr};
+use crate::{crate_util::check_nan, elliprf, StrErr};
 
 use super::ellipk::ellipk_precise;
 
@@ -54,6 +54,14 @@ use super::ellipk::ellipk_precise;
 ///
 /// [Interactive 3D Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipf_plot_3d.html)
 ///
+/// ## Special Cases
+/// - F(0, m) = 0
+/// - F(φ, 0) = φ
+/// - F(π/2, m) = K(m)
+/// - F(φ, -∞) = 0
+/// - F(∞, m) = ∞
+/// - F(-∞, m) = -∞
+///
 /// # Related Functions
 /// With c = csc²φ,
 /// - [ellipf](crate::ellipf)(φ,m) = [elliprf](crate::elliprf)(c - 1, c - m, c)
@@ -72,6 +80,8 @@ use super::ellipk::ellipk_precise;
 /// - The MathWorks, Inc. “ellipticF.” Accessed April 21, 2025. <https://www.mathworks.com/help/symbolic/sym.ellipticf.html>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
+    check_nan!(ellipf, [phi, m]);
+
     let invert = if phi < 0.0 { -1.0 } else { 1.0 };
     let phi = phi.abs();
 
@@ -101,6 +111,10 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     let ms2p = m * s2p;
     if ms2p >= 1.0 {
         return Err("ellipf: m sin²φ must be smaller than one.");
+    }
+
+    if m == neg_inf!() {
+        return Ok(0.0);
     }
 
     let c2p = rphi.cos() * rphi.cos();
@@ -148,10 +162,27 @@ mod tests {
     }
 
     #[test]
-    fn test_ellipf_err() {
-        // m * sin^2(phi) >= 1
-        use std::f64::consts::FRAC_PI_2;
+    fn test_ellipf_special_cases() {
+        use std::f64::{consts::FRAC_PI_2, INFINITY, NAN, NEG_INFINITY};
+        // m * sin^2(phi) >= 1: should return Err
         assert!(ellipf(FRAC_PI_2, 1.0).is_err());
         assert!(ellipf(FRAC_PI_2, 2.0).is_err());
+        // phi = 0: F(0, m) = 0
+        assert_eq!(ellipf(0.0, 0.5).unwrap(), 0.0);
+        // phi = pi/2, m = 0: F(pi/2, 0) = pi/2
+        assert_eq!(ellipf(FRAC_PI_2, 0.0).unwrap(), FRAC_PI_2);
+        // m < 0: should be valid
+        assert!(ellipf(FRAC_PI_2, -1.0).unwrap().is_finite());
+        // phi = nan or m = nan: should return Err
+        assert!(ellipf(NAN, 0.5).is_err());
+        assert!(ellipf(0.5, NAN).is_err());
+        // phi = inf: F(inf, m) = inf
+        assert_eq!(ellipf(INFINITY, 0.5).unwrap(), INFINITY);
+        // phi = -inf: F(-inf, m) = -inf
+        assert_eq!(ellipf(NEG_INFINITY, 0.5).unwrap(), NEG_INFINITY);
+        // m = inf: should return Err
+        assert!(ellipf(0.5, INFINITY).is_err());
+        // m = -inf: F(phi, -inf) = 0.0
+        assert_eq!(ellipf(0.5, NEG_INFINITY).unwrap(), 0.0);
     }
 }
