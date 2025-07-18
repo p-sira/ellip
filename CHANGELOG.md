@@ -5,6 +5,8 @@
 - `ellippiinc`: Fix not returning error when n sin²φ = 1.
 
 **Improvements**
+- Handle special cases for `ellipk`, `ellipe`, `ellipf`.
+- Add special cases documentation.
 - Increase test coverage.
 - Report code coverage.
 
