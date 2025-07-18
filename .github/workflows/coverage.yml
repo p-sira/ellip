@@ -31,9 +31,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          ref: ${{ needs.prepare.outputs.commit }}
+          ref: ${{ needs.setup.outputs.commit }}
       - name: Set branch
-        run: echo "CODECOV_BRANCH=${{ needs.prepare.outputs.branch }}" >> $GITHUB_ENV
+        run: echo "CODECOV_BRANCH=${{ needs.setup.outputs.branch }}" >> $GITHUB_ENV
       - name: Cache cargo registry
         uses: actions/cache@v4
         with:
@@ -64,9 +64,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          ref: ${{ needs.prepare.outputs.commit }}
+          ref: ${{ needs.setup.outputs.commit }}
       - name: Set branch
-        run: echo "CODECOV_BRANCH=${{ needs.prepare.outputs.branch }}" >> $GITHUB_ENV
+        run: echo "CODECOV_BRANCH=${{ needs.setup.outputs.branch }}" >> $GITHUB_ENV
       - name: Cache cargo registry
         uses: actions/cache@v4
         with:
