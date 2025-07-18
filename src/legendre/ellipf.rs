@@ -144,6 +144,14 @@ mod tests {
 
     #[test]
     fn test_ellipf() {
-        compare_test_data_boost!("./tests/data/boost/ellipf_data.txt", ellipf_k, 5.1e-16);
+        compare_test_data_boost!("ellipf_data.txt", ellipf_k, 5.1e-16);
+    }
+
+    #[test]
+    fn test_ellipf_err() {
+        // m * sin^2(phi) >= 1
+        use std::f64::consts::FRAC_PI_2;
+        assert!(ellipf(FRAC_PI_2, 1.0).is_err());
+        assert!(ellipf(FRAC_PI_2, 2.0).is_err());
     }
 }

@@ -276,51 +276,40 @@ mod tests {
 
     #[test]
     fn test_elliprj() {
-        compare_test_data_boost!(
-            "./tests/data/boost/elliprj_data.txt",
-            _elliprj,
-            2.7e-14,
-            5e-25
-        );
+        compare_test_data_boost!("elliprj_data.txt", _elliprj, 2.7e-14, 5e-25);
     }
 
     #[test]
     fn test_elliprj_e2() {
-        compare_test_data_boost!(
-            "./tests/data/boost/elliprj_e2.txt",
-            _elliprj,
-            4.8e-14,
-            5e-25
-        );
+        compare_test_data_boost!("elliprj_e2.txt", _elliprj, 4.8e-14, 5e-25);
     }
 
     #[test]
     fn test_elliprj_e3() {
-        compare_test_data_boost!(
-            "./tests/data/boost/elliprj_e3.txt",
-            _elliprj,
-            3.1e-15,
-            5e-25
-        );
+        compare_test_data_boost!("elliprj_e3.txt", _elliprj, 3.1e-15, 5e-25);
     }
 
     #[test]
     fn test_elliprj_e4() {
-        compare_test_data_boost!(
-            "./tests/data/boost/elliprj_e4.txt",
-            _elliprj,
-            2.2e-16,
-            5e-25
-        );
+        compare_test_data_boost!("elliprj_e4.txt", _elliprj, 2.2e-16, 5e-25);
     }
 
     #[test]
     fn test_elliprj_zp() {
-        compare_test_data_boost!(
-            "./tests/data/boost/elliprj_zp.txt",
-            _elliprj,
-            3.5e-15,
-            5e-25
-        );
+        compare_test_data_boost!("elliprj_zp.txt", _elliprj, 3.5e-15, 5e-25);
+    }
+
+    #[test]
+    fn test_elliprj_err() {
+        // negative argument
+        assert!(elliprj(-1.0, 1.0, 1.0, 1.0).is_err());
+        assert!(elliprj(1.0, -1.0, 1.0, 1.0).is_err());
+        assert!(elliprj(1.0, 1.0, -1.0, 1.0).is_err());
+        // more than one zero among x, y, z
+        assert!(elliprj(0.0, 0.0, 1.0, 1.0).is_err());
+        assert!(elliprj(0.0, 1.0, 0.0, 1.0).is_err());
+        assert!(elliprj(1.0, 0.0, 0.0, 1.0).is_err());
+        // p == 0
+        assert!(elliprj(1.0, 1.0, 1.0, 0.0).is_err());
     }
 }

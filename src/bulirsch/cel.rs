@@ -329,4 +329,16 @@ mod tests {
         let linsp_pos = linspace(1e-3, 1.0, 100);
         linsp_pos.iter().for_each(|kc| test_kc(*kc));
     }
+
+    #[test]
+    fn test_cel1_err() {
+        // kc == 0
+        assert!(cel1(0.0).is_err());
+    }
+
+    #[test]
+    fn test_cel2_err() {
+        // kc == 0
+        assert!(cel2(0.0, 1.0, 1.0).is_err());
+    }
 }

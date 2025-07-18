@@ -147,10 +147,14 @@ mod tests {
 
     #[test]
     fn test_ellippi() {
-        compare_test_data_boost!(
-            "./tests/data/boost/ellippi2_data_f64.txt",
-            ellippi_k,
-            4.4e-16
-        );
+        compare_test_data_boost!("ellippi2_data_f64.txt", ellippi_k, 4.4e-16);
+    }
+
+    #[test]
+    fn test_ellippi_err() {
+        // m > 1
+        assert!(ellippi(0.5, 1.1).is_err());
+        // n == 1
+        assert!(ellippi(1.0, 0.5).is_err());
     }
 }

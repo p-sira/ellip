@@ -291,14 +291,35 @@ mod tests {
     use core::f64;
 
     use super::*;
-    use crate::compare_test_data_boost;
+    use crate::{compare_test_data_boost, compare_test_data_wolfram};
 
     fn ellipe_k(k: &[f64]) -> f64 {
         ellipe(k[0] * k[0]).unwrap()
     }
 
+    fn ellipe_m(m: &[f64]) -> f64 {
+        ellipe(m[0]).unwrap()
+    }
+
     #[test]
     fn test_ellipe() {
-        compare_test_data_boost!("./tests/data/boost/ellipe_data.txt", ellipe_k, f64::EPSILON);
+        compare_test_data_boost!("ellipe_data.txt", ellipe_k, f64::EPSILON);
+    }
+
+    #[test]
+    fn test_ellipe_wolfram() {
+        compare_test_data_wolfram!("ellipe_cov.csv", ellipe_m, 7e-16);
+    }
+
+    #[test]
+    fn test_ellipe_err() {
+        // m > 1
+        assert!(ellipe(1.1).is_err());
+    }
+
+    #[test]
+    fn test_ellipe_special_cases() {
+        // m = 1
+        assert_eq!(ellipe(1.0).unwrap(), 1.0);
     }
 }

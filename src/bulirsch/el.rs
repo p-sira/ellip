@@ -296,9 +296,9 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
     }
 
     // Didn't improve the accuracy
-    // if n == 0.0 {
+    // if n = 0.0 {
     //     // A&S 17.7.18 & 19
-    //     return if m == 0.0 {
+    //     return if m = 0.0 {
     //         Ok(phi)
     //     } else {
     //         ellipf(phi, m)
@@ -686,6 +686,12 @@ mod tests {
     }
 
     #[test]
+    fn test_el2_err() {
+        // kc == 0
+        assert!(el2(1.0, 0.0, 1.0, 1.0).is_err());
+    }
+
+    #[test]
     fn test_el3() {
         fn _test(x: f64, kc: f64, p: f64) {
             let m = 1.0 - kc * kc;
@@ -732,5 +738,11 @@ mod tests {
         test_reference(1.6, 1e10, 1.20, 2.3734774669772208e-9);
         test_reference(-1.6, 1e10, 1.20, -2.3734774669772208e-9);
         test_reference(1.0, 0.31, 9.90e-2, 1.0903577921777398);
+    }
+
+    #[test]
+    fn test_el3_err() {
+        // kc == 0
+        assert!(el3(1.0, 0.0, 1.0).is_err());
     }
 }
