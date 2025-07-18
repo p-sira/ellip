@@ -94,6 +94,10 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
         return Err("ellippiinc: m sin²φ must be smaller or equal to one.");
     }
 
+    if n * sp2 == 1.0 {
+        return Err("ellippiinc: n sin²φ must not equal one.");
+    }
+
     // Special cases first:
     if n == 0.0 {
         // A&S 17.7.18 & 19
