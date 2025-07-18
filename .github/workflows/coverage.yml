@@ -1,28 +1,9 @@
 name: Coverage
 
-permissions:
-  contents: read
-
-on:
-  workflow_run:
-    workflows: ["Ellip CI"]
-    types: [completed]
+on: [push, workflow_dispatch]
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      branch: ${{ steps.branch.outputs.branch }}
-      commit: ${{ steps.branch.outputs.commit }}
-    steps:
-      - name: Extract branch and commit
-        id: branch
-        run: |
-          echo "branch=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
-          echo "commit=${{ github.event.workflow_run.head_commit.id }}" >> $GITHUB_OUTPUT
   ptrace-coverage:
-    needs: setup
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
     runs-on: ubuntu-latest
     container:
         image: xd009642/tarpaulin:develop-nightly
@@ -30,10 +11,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-          ref: ${{ needs.setup.outputs.commit }}
-      - name: Set branch
-        run: echo "CODECOV_BRANCH=${{ needs.setup.outputs.branch }}" >> $GITHUB_ENV
       - name: Cache cargo registry
         uses: actions/cache@v4
         with:
@@ -54,8 +31,6 @@ jobs:
             fail_ci_if_error: true
   
   llvm-coverage:
-    needs: setup
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
     runs-on: ubuntu-latest
     container:
         image: xd009642/tarpaulin:develop-nightly
@@ -63,10 +38,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-          ref: ${{ needs.setup.outputs.commit }}
-      - name: Set branch
-        run: echo "CODECOV_BRANCH=${{ needs.setup.outputs.branch }}" >> $GITHUB_ENV
       - name: Cache cargo registry
         uses: actions/cache@v4
         with:
