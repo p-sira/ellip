@@ -30,7 +30,7 @@ jobs:
           key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
       - name: Generate code coverage
         run: | 
-          cargo +nightly tarpaulin --verbose --all-features --workspace --engine Ptrace --timeout 5m --out Xml --output-dir "./coverage-ptrace" --ignore-panics --line --tests --example generate_error_report --exclude-files "benches/**/*" "examples/**/*" "src/test_util.rs"
+          cargo +nightly tarpaulin --verbose --all-features --workspace --engine Ptrace --timeout 120 --out Xml --output-dir "./coverage-ptrace" --ignore-panics --line --tests --example generate_error_report --exclude-files "benches/**/*" "examples/**/*" "src/test_util.rs"
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
@@ -58,7 +58,7 @@ jobs:
           key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
       - name: Generate code coverage
         run: | 
-          cargo +nightly tarpaulin --verbose --all-features --workspace --engine Llvm --timeout 5m --out Xml --output-dir "./coverage-ptrace" --ignore-panics --line --tests --example generate_error_report --exclude-files "benches/**/*" "examples/**/*" "src/test_util.rs"
+          cargo +nightly tarpaulin --verbose --all-features --workspace --engine Llvm --timeout 120 --out Xml --output-dir "./coverage-ptrace" --ignore-panics --line --tests --example generate_error_report --exclude-files "benches/**/*" "examples/**/*" "src/test_util.rs"
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
