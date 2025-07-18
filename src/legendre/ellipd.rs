@@ -90,6 +90,12 @@ mod tests {
 
     #[test]
     fn test_ellipd() {
-        compare_test_data_boost!("./tests/data/boost/ellipd_data.txt", ellipd_k, 2.9e-16);
+        compare_test_data_boost!("ellipd_data.txt", ellipd_k, 2.9e-16);
+    }
+
+    #[test]
+    fn test_ellipd_err() {
+        // m > 1
+        assert!(ellipd(1.1).is_err());
     }
 }

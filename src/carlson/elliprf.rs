@@ -201,26 +201,36 @@ mod tests {
 
     #[test]
     fn test_elliprf() {
-        compare_test_data_boost!("./tests/data/boost/elliprf_data.txt", _elliprf, 4.5e-16);
+        compare_test_data_boost!("elliprf_data.txt", _elliprf, 4.5e-16);
     }
 
     #[test]
     fn test_elliprf_xxx() {
-        compare_test_data_boost!("./tests/data/boost/elliprf_xxx.txt", _elliprf, 2.3e-16);
+        compare_test_data_boost!("elliprf_xxx.txt", _elliprf, 2.3e-16);
     }
 
     #[test]
     fn test_elliprf_xy0() {
-        compare_test_data_boost!("./tests/data/boost/elliprf_xy0.txt", _elliprf, 4.2e-16);
+        compare_test_data_boost!("elliprf_xy0.txt", _elliprf, 4.2e-16);
     }
 
     #[test]
     fn test_elliprf_xyy() {
-        compare_test_data_boost!("./tests/data/boost/elliprf_xyy.txt", _elliprf, 5.3e-16);
+        compare_test_data_boost!("elliprf_xyy.txt", _elliprf, 5.3e-16);
     }
 
     #[test]
     fn test_elliprf_0yy() {
-        compare_test_data_boost!("./tests/data/boost/elliprf_0yy.txt", _elliprf, f64::EPSILON);
+        compare_test_data_boost!("elliprf_0yy.txt", _elliprf, f64::EPSILON);
+    }
+
+    #[test]
+    fn test_elliprf_err() {
+        // negative argument
+        assert!(elliprf(-1.0, 1.0, 1.0).is_err());
+        assert!(elliprf(1.0, -1.0, 1.0).is_err());
+        assert!(elliprf(1.0, 1.0, -1.0).is_err());
+        // more than one zero
+        assert!(elliprf(0.0, 0.0, 1.0).is_err());
     }
 }

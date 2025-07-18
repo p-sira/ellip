@@ -131,10 +131,13 @@ mod tests {
 
     #[test]
     fn test_ellipd() {
-        compare_test_data_boost!(
-            "./tests/data/boost/ellipdinc_data.txt",
-            ellipdinc_k,
-            6.4e-16
-        );
+        compare_test_data_boost!("ellipdinc_data.txt", ellipdinc_k, 6.4e-16);
+    }
+
+    #[test]
+    fn test_ellipdinc_err() {
+        use std::f64::consts::FRAC_PI_2;
+        // m sin²φ > 1
+        assert!(ellipdinc(FRAC_PI_2, 1.1).is_err());
     }
 }

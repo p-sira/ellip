@@ -147,10 +147,13 @@ mod tests {
 
     #[test]
     fn test_ellipeinc() {
-        compare_test_data_boost!(
-            "./tests/data/boost/ellipeinc_data.txt",
-            ellipeinc_k::<f64>,
-            5e-16
-        );
+        compare_test_data_boost!("ellipeinc_data.txt", ellipeinc_k::<f64>, 5e-16);
+    }
+
+    #[test]
+    fn test_ellipeinc_err() {
+        use std::f64::consts::FRAC_PI_2;
+        // m sin²φ > 1
+        assert!(ellipeinc(FRAC_PI_2, 1.1).is_err());
     }
 }

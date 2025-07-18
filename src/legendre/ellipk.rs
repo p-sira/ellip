@@ -304,15 +304,17 @@ mod tests {
 
     #[test]
     fn test_ellipk_boost() {
-        compare_test_data_boost!("./tests/data/boost/ellipk_data.txt", ellipk_k, f64::EPSILON);
+        compare_test_data_boost!("ellipk_data.txt", ellipk_k, f64::EPSILON);
     }
 
     #[test]
     fn test_ellipk_wolfram() {
-        compare_test_data_wolfram!(
-            "./tests/data/wolfram/ellipk_data.csv",
-            ellipk_m,
-            140.0 * f64::EPSILON
-        );
+        compare_test_data_wolfram!("ellipk_cov.csv", ellipk_m, 6e-15);
+    }
+
+    #[test]
+    fn test_ellipk_err() {
+        // m > 1
+        assert!(ellipk(1.1).is_err());
     }
 }

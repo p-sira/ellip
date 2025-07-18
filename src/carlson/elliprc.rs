@@ -119,10 +119,14 @@ mod tests {
 
     #[test]
     fn test_elliprc() {
-        compare_test_data_boost!(
-            "./tests/data/boost/elliprc_data.txt",
-            _elliprc,
-            f64::EPSILON
-        );
+        compare_test_data_boost!("elliprc_data.txt", _elliprc, f64::EPSILON);
+    }
+
+    #[test]
+    fn test_elliprc_err() {
+        // x < 0
+        assert!(elliprc(-1.0, 1.0).is_err());
+        // y == 0
+        assert!(elliprc(1.0, 0.0).is_err());
     }
 }

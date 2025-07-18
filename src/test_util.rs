@@ -90,16 +90,16 @@ macro_rules! compare_test_data {
 
 #[macro_export]
 macro_rules! compare_test_data_boost {
-    ($file_path:expr, $func:expr, $rtol:expr) => {
-        compare_test_data_boost!($file_path, $func, f64, $rtol, 0.0)
+    ($filename:expr, $func:expr, $rtol:expr) => {
+        compare_test_data_boost!($filename, $func, f64, $rtol, 0.0)
     };
-    ($file_path:expr, $func:expr, $t: ident, $rtol:expr) => {
-        compare_test_data_boost!($file_path, $func, f64, $rtol, 0.0)
+    ($filename:expr, $func:expr, $t: ident, $rtol:expr) => {
+        compare_test_data_boost!($filename, $func, f64, $rtol, 0.0)
     };
-    ($file_path:expr, $func:expr, $rtol:expr, $atol:expr) => {
-        compare_test_data_boost!($file_path, $func, f64, $rtol, $atol)
+    ($filename:expr, $func:expr, $rtol:expr, $atol:expr) => {
+        compare_test_data_boost!($filename, $func, f64, $rtol, $atol)
     };
-    ($file_path:expr, $func:expr, $t: ident, $rtol:expr, $atol:expr) => {
+    ($filename:expr, $func:expr, $t: ident, $rtol:expr, $atol:expr) => {
         {
             use crate::compare_test_data;
 
@@ -108,13 +108,16 @@ macro_rules! compare_test_data_boost {
             use std::path::Path;
             use std::str::FromStr;
 
-            let path = Path::new($file_path);
+            let path = Path::new("./tests/data/boost").join($filename);
             if !path.exists() {
-                eprintln!("Skipping test due to test data not found: {}\nDownload test data from: https://github.com/p-sira/ellip/tree/main/tests/data", $file_path);
+                eprintln!(
+                    "Skipping test due to test data not found: {}\nDownload test data from: https://github.com/p-sira/ellip/tree/main/tests/data",
+                    path.to_str().unwrap_or("{path not utf-8}")
+                );
                 return;
             }
 
-            let file = File::open($file_path).expect("Cannot open file");
+            let file = File::open(path).expect("Cannot open file");
             let reader = BufReader::new(file);
 
             let mut inputs: Vec<Vec<$t>> = Vec::new();
@@ -141,10 +144,10 @@ macro_rules! compare_test_data_boost {
 
 #[macro_export]
 macro_rules! compare_test_data_wolfram {
-    ($file_path:expr, $func:expr, $rtol:expr) => {
-        compare_test_data_wolfram!($file_path, $func, f64, $rtol, 0.0)
+    ($filename:expr, $func:expr, $rtol:expr) => {
+        compare_test_data_wolfram!($filename, $func, f64, $rtol, 0.0)
     };
-    ($file_path:expr, $func:expr, $t: ident, $rtol:expr, $atol:expr) => {{
+    ($filename:expr, $func:expr, $t: ident, $rtol:expr, $atol:expr) => {{
         {
             use crate::compare_test_data;
             use crate::test_util::WolframFloat;
@@ -154,9 +157,12 @@ macro_rules! compare_test_data_wolfram {
             use std::path::Path;
             use csv::ReaderBuilder;
 
-            let path = Path::new($file_path);
+            let path = Path::new("./tests/data/wolfram").join($filename);
             if !path.exists() {
-                eprintln!("Skipping test due to test data not found: {}\nDownload test data from: https://github.com/p-sira/ellip/tree/main/tests/data", $file_path);
+                eprintln!(
+                    "Skipping test due to test data not found: {}\nDownload test data from: https://github.com/p-sira/ellip/tree/main/tests/data",
+                    path.to_str().unwrap_or("{path not utf-8}")
+                );
                 return;
             }
 
