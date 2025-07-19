@@ -29,13 +29,13 @@ exclude = [
 
 [dependencies]
 num-lazy = "0.2.0"
-num-traits = "~0.2"
+num-traits = "0.2"
 numeric_literals = "0.2.0"
 
 [dev-dependencies]
-criterion = "~0.5"
+criterion = "0.5"
 csv = "1.3.1"
-itertools = "~0.14"
+itertools = "0.14"
 
 [[bench]]
 name = "bench"
