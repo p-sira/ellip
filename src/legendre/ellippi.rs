@@ -48,7 +48,7 @@ use crate::{crate_util::check_nan, ellipe, ellipk, elliprf, elliprj, StrErr};
 /// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellippi_plot.html)
 ///
 /// ## Special Cases
-/// - Π(0, 0) = π/(2
+/// - Π(0, 0) = π/2
 /// - Π(0, m) = K(m)
 /// - Π(n, 0) = π/(2 sqrt(1-n)) for n < 1
 /// - Π(n, 0) = 0 for n > 1
