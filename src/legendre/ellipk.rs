@@ -78,9 +78,9 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
     }
 
     // If T is f128
-    if max_val!() > T::from(f64::MAX).unwrap() {
-        return ellipk_precise(m);
-    }
+    // if max_val!() > T::from(f64::MAX).unwrap() {
+    //     return ellipk_precise(m);
+    // }
 
     match (m * 20.0).to_i32().unwrap() {
         0 | 1 => {
