@@ -7,7 +7,7 @@ use std::fmt::Debug;
 
 use ellip::*;
 use num_traits::Float;
-use tabled::{Table, Tabled, settings::Style};
+use tabled::{settings::Style, Table, Tabled};
 
 /// Calculates max relative error in unit of epsilon
 fn rel_err<T: Float>(a: T, b: T) -> f64 {
