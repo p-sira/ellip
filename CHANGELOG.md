@@ -1,5 +1,15 @@
 # Changelog
 ## 0.3
+### 0.3.4
+**Bug Fixes**
+- `ellippiinc`: Fix not returning error when n sin²φ = 1.
+
+**Improvements**
+- Handle special cases for `ellipk`, `ellipe`, `ellipf`.
+- Add special cases documentation.
+- Increase test coverage.
+- Report code coverage.
+
 ### 0.3.3
 **Changes**
 - Use `numeric_literals` to parse floats within the functions to make the code more readable.

@@ -78,6 +78,8 @@
 num_lazy::declare_nums! {@constant T}
 num_lazy::declare_nums! {@special T}
 
+mod crate_util;
+
 /// Static error str
 pub type StrErr = &'static str;
 

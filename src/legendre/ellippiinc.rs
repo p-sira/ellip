@@ -94,6 +94,10 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
         return Err("ellippiinc: m sin²φ must be smaller or equal to one.");
     }
 
+    if n * sp2 == 1.0 {
+        return Err("ellippiinc: n sin²φ must not equal one.");
+    }
+
     // Special cases first:
     if n == 0.0 {
         // A&S 17.7.18 & 19
@@ -319,19 +323,20 @@ mod tests {
 
     #[test]
     fn test_ellippi() {
-        compare_test_data_boost!(
-            "./tests/data/boost/ellippiinc_data.txt",
-            ellippiinc_k,
-            2.1e-15
-        );
+        compare_test_data_boost!("ellippiinc_data.txt", ellippiinc_k, 2.1e-15);
     }
 
     #[test]
     fn test_ellippi_large() {
-        compare_test_data_boost!(
-            "./tests/data/boost/ellippi3_large_data.txt",
-            ellippiinc_k,
-            6e-15
-        );
+        compare_test_data_boost!("ellippi3_large_data.txt", ellippiinc_k, 6e-15);
+    }
+
+    #[test]
+    fn test_ellippiinc_err() {
+        use std::f64::consts::FRAC_PI_2;
+        // m sin²φ > 1
+        assert!(ellippiinc(FRAC_PI_2, 0.5, 1.1).is_err());
+        // n sin²φ = 1
+        assert!(ellippiinc(FRAC_PI_2, 1.0, 0.5).is_err());
     }
 }

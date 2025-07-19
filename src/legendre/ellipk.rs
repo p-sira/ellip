@@ -21,7 +21,7 @@
 
 use num_traits::Float;
 
-use crate::{elliprf, polyeval, StrErr};
+use crate::{crate_util::check_nan, elliprf, polyeval, StrErr};
 
 /// Computes [complete elliptic integral of the first kind](https://dlmf.nist.gov/19.2.E8).
 /// ```text
@@ -46,6 +46,11 @@ use crate::{elliprf, polyeval, StrErr};
 ///
 /// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipk_plot.html)
 ///
+/// ## Special Cases
+/// - K(0) = π/2
+/// - K(1) = ∞
+/// - K(-∞) = 0
+///
 /// # Related Functions
 /// - [ellipk](crate::ellipk)(m) = [elliprf](crate::elliprf)(0, 1 - m, 1)
 /// - [ellipf](crate::ellipf)(π/2, m) = [ellipk](crate::ellipk)(m)
@@ -62,6 +67,16 @@ use crate::{elliprf, polyeval, StrErr};
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
+    check_nan!(ellipk, [m]);
+
+    if m > 1.0 {
+        return Err("ellipk: m must be less than 1.");
+    }
+
+    if m == neg_inf!() {
+        return Ok(0.0);
+    }
+
     // If T is f128
     if max_val!() > T::from(f64::MAX).unwrap() {
         return ellipk_precise(m);
@@ -276,10 +291,6 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub(crate) fn ellipk_precise<T: Float>(m: T) -> Result<T, StrErr> {
-    if m > 1.0 {
-        return Err("ellipk: m must be less than 1.");
-    }
-
     // Special cases: https://dlmf.nist.gov/19.6.E1
     if m == 1.0 {
         return Ok(inf!());
@@ -304,15 +315,30 @@ mod tests {
 
     #[test]
     fn test_ellipk_boost() {
-        compare_test_data_boost!("./tests/data/boost/ellipk_data.txt", ellipk_k, f64::EPSILON);
+        compare_test_data_boost!("ellipk_data.txt", ellipk_k, f64::EPSILON);
     }
 
     #[test]
     fn test_ellipk_wolfram() {
-        compare_test_data_wolfram!(
-            "./tests/data/wolfram/ellipk_data.csv",
-            ellipk_m,
-            140.0 * f64::EPSILON
-        );
+        compare_test_data_wolfram!("ellipk_cov.csv", ellipk_m, 6e-15);
+    }
+
+    #[test]
+    fn test_ellipk_special_cases() {
+        use std::f64::{consts::FRAC_PI_2, INFINITY, NAN, NEG_INFINITY};
+        // m = 0: K(0) = pi/2
+        assert_eq!(ellipk(0.0).unwrap(), FRAC_PI_2);
+        // m = 1: K(1) = inf
+        assert_eq!(ellipk(1.0).unwrap(), INFINITY);
+        // m < 0: should be valid, compare with reference value
+        assert!(ellipk(-1.0).unwrap().is_finite());
+        // m > 1: should return Err
+        assert!(ellipk(1.1).is_err());
+        // m = NaN: should return Err
+        assert!(ellipk(NAN).is_err());
+        // m = inf: should return Err
+        assert!(ellipk(INFINITY).is_err());
+        // m = -inf: K(-inf) = 0
+        assert_eq!(ellipk(NEG_INFINITY).unwrap(), 0.0);
     }
 }

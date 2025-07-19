@@ -21,7 +21,7 @@
 
 use num_traits::Float;
 
-use crate::{elliprg, polyeval, StrErr};
+use crate::{crate_util::check_nan, elliprg, polyeval, StrErr};
 
 /// Computes [complete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E8).
 ///
@@ -46,6 +46,11 @@ use crate::{elliprg, polyeval, StrErr};
 ///
 /// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipe_plot.html)
 ///
+/// ## Special Cases
+/// - E(0) = π/2
+/// - E(1) = 1
+/// - E(-∞) = ∞
+///
 /// # Related Functions
 /// - [ellipe](crate::ellipe)(m) = 2 [elliprg](crate::elliprg)(0, 1 - m, 1)
 /// - [ellipeinc](crate::ellipeinc)(π/2, m) = [ellipe](crate::ellipe)(m)
@@ -62,6 +67,16 @@ use crate::{elliprg, polyeval, StrErr};
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipe<T: Float>(m: T) -> Result<T, StrErr> {
+    check_nan!(ellipe, [m]);
+
+    if m > 1.0 {
+        return Err("ellipe: m must be less than 1.");
+    }
+
+    if m == neg_inf!() {
+        return Ok(inf!());
+    }
+
     // If T is f128
     if max_val!() > T::from(f64::MAX).unwrap() {
         return ellipe_precise(m);
@@ -274,10 +289,6 @@ fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 fn ellipe_precise<T: Float>(m: T) -> Result<T, StrErr> {
-    if m > 1.0 {
-        return Err("ellipe: m must be less than 1.");
-    }
-
     // Special cases: https://dlmf.nist.gov/19.6.E1
     if m == 1.0 {
         return Ok(1.0);
@@ -291,14 +302,42 @@ mod tests {
     use core::f64;
 
     use super::*;
-    use crate::compare_test_data_boost;
+    use crate::{compare_test_data_boost, compare_test_data_wolfram};
 
     fn ellipe_k(k: &[f64]) -> f64 {
         ellipe(k[0] * k[0]).unwrap()
     }
 
+    fn ellipe_m(m: &[f64]) -> f64 {
+        ellipe(m[0]).unwrap()
+    }
+
     #[test]
     fn test_ellipe() {
-        compare_test_data_boost!("./tests/data/boost/ellipe_data.txt", ellipe_k, f64::EPSILON);
+        compare_test_data_boost!("ellipe_data.txt", ellipe_k, f64::EPSILON);
+    }
+
+    #[test]
+    fn test_ellipe_wolfram() {
+        compare_test_data_wolfram!("ellipe_cov.csv", ellipe_m, 7e-16);
+    }
+
+    #[test]
+    fn test_ellipe_special_cases() {
+        use std::f64::{consts::FRAC_PI_2, INFINITY, NAN, NEG_INFINITY};
+        // m > 1: should return Err
+        assert!(ellipe(1.1).is_err());
+        // m = 0: E(0) = pi/2
+        assert_eq!(ellipe(0.0).unwrap(), FRAC_PI_2);
+        // m = 1: E(1) = 1
+        assert_eq!(ellipe(1.0).unwrap(), 1.0);
+        // m < 0: should be valid, compare with reference value
+        assert!(ellipe(-1.0).unwrap().is_finite());
+        // m = NaN: should return Err
+        assert!(ellipe(NAN).is_err());
+        // m = inf: should return Err
+        assert!(ellipe(INFINITY).is_err());
+        // m = -inf: E(-inf) = inf
+        assert_eq!(ellipe(NEG_INFINITY).unwrap(), INFINITY);
     }
 }

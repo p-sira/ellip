@@ -179,30 +179,42 @@ mod tests {
 
     #[test]
     fn test_elliprd() {
-        compare_test_data_boost!("./tests/data/boost/elliprd_data.txt", _elliprd, 4.8e-16);
+        compare_test_data_boost!("elliprd_data.txt", _elliprd, 4.8e-16);
     }
 
     #[test]
     fn test_elliprd_0xy() {
-        compare_test_data_boost!("./tests/data/boost/elliprd_0xy.txt", _elliprd, 5.9e-16);
+        compare_test_data_boost!("elliprd_0xy.txt", _elliprd, 5.9e-16);
     }
 
     #[test]
     fn test_elliprd_0yy() {
-        compare_test_data_boost!("./tests/data/boost/elliprd_0yy.txt", _elliprd, 2.6e-16);
+        compare_test_data_boost!("elliprd_0yy.txt", _elliprd, 2.6e-16);
     }
     #[test]
     fn test_elliprd_xxx() {
-        compare_test_data_boost!("./tests/data/boost/elliprd_xxx.txt", _elliprd, 2.3e-16);
+        compare_test_data_boost!("elliprd_xxx.txt", _elliprd, 2.3e-16);
     }
 
     #[test]
     fn test_elliprd_xxz() {
-        compare_test_data_boost!("./tests/data/boost/elliprd_xxz.txt", _elliprd, 7.9e-16);
+        compare_test_data_boost!("elliprd_xxz.txt", _elliprd, 7.9e-16);
     }
 
     #[test]
     fn test_elliprd_xyy() {
-        compare_test_data_boost!("./tests/data/boost/elliprd_xyy.txt", _elliprd, 3.7e-15);
+        compare_test_data_boost!("elliprd_xyy.txt", _elliprd, 3.7e-15);
+    }
+
+    #[test]
+    fn test_elliprd_err() {
+        // x < 0 or y < 0
+        assert!(elliprd(-1.0, 1.0, 1.0).is_err());
+        assert!(elliprd(1.0, -1.0, 1.0).is_err());
+        // z <= 0
+        assert!(elliprd(1.0, 1.0, 0.0).is_err());
+        assert!(elliprd(1.0, 1.0, -1.0).is_err());
+        // both x and y zero
+        assert!(elliprd(0.0, 0.0, 1.0).is_err());
     }
 }

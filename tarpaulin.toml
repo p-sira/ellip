@@ -1,0 +1,29 @@
+[ellip-llvm]
+name = "Ellip LLVM Coverage"
+all-features = true
+timeout = "5m"
+offline = true
+engine = "Llvm"
+line = true
+ignore-panics = true
+skip-clean = true
+tests = true
+example = ["generate_error_report"]
+exclude-files = ["benches/**/*", "examples/**/*", "src/test_util.rs"]
+out = ["Xml"]
+output-dir = "./coverage-llvm"
+
+[ellip-ptrace]
+name = "Ellip Ptrace Coverage"
+all-features = true
+timeout = "5m"
+offline = true
+engine = "Ptrace"
+line = true
+ignore-panics = true
+skip-clean = true
+tests = true
+example = ["generate_error_report"]
+exclude-files = ["benches/**/*", "examples/**/*", "src/test_util.rs"]
+out = ["Xml"]
+output-dir = "./coverage-ptrace"
