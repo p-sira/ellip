@@ -20,6 +20,7 @@
 
 use num_traits::Float;
 
+use crate::crate_util::check_nan;
 use crate::legendre::ellippi::ellippi_vc;
 
 use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj, StrErr};
@@ -53,12 +54,22 @@ use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj, StrErr};
 ///
 /// [Interactive 3D Plot](https://github.com/p-sira/ellip/blob/main/figures/ellippiinc_plot_3d.html)
 ///
+/// ## Special Cases
+/// - Π(0, n, m) = 0
+/// - Π(φ, 0, 0) = φ
+/// - Π(φ, 1, 0) = tan(φ)
+/// - Π(φ, 0, m) = F(φ, m)
+///
 /// ## Notes
 /// The [ellippiinc] (of the [crate]) is the circular or hyperbolic case of the elliptic integral
 /// of the third kind, since n and m are real. It is called circular if `n (n - m) (n - 1)` is
 /// negative and hyperbolic if it is positive.  
 ///
 /// # Related Functions
+/// - [ellippiinc](crate::ellippiinc)(φ, 0, m) = [ellipf](crate::ellipf)(φ, m)
+/// - [ellippiinc](crate::ellippiinc)(φ, 1, m) = [sqrt(1 - m sin²(φ)) tan(φ) - [ellipe](crate::ellipe)(φ, m)] / (1 - m) + [ellipf](crate::ellipf)(φ, m)
+/// - [ellippiinc](crate::ellippiinc)(φ, n, 1) = [sqrt(n) atanh(sqrt(n) sin(φ)) - log(sec(φ) + tan(φ))] / (n - 1)
+///
 /// With c = csc²φ,
 /// - [ellippiinc](crate::ellippiinc)(φ, n, m) = n / 3 * [elliprj](crate::elliprj)(c - 1, c - m, c, c - n) + [ellipf](crate::ellipf)(φ, m)
 ///
@@ -79,6 +90,8 @@ use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj, StrErr};
 /// - Wolfram Research. “EllipticPi,” 2022. <https://reference.wolfram.com/language/ref/EllipticPi.html>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellippiinc<T: Float>(phi: T, n: T, m: T) -> Result<T, StrErr> {
+    check_nan!(ellippiinc, [phi, n, m]);
+
     ellippiinc_vc(phi, n, m, 1.0 - n)
 }
 
@@ -338,5 +351,44 @@ mod tests {
         assert!(ellippiinc(FRAC_PI_2, 0.5, 1.1).is_err());
         // n sin²φ = 1
         assert!(ellippiinc(FRAC_PI_2, 1.0, 0.5).is_err());
+    }
+
+    #[test]
+    fn test_ellippiinc_special_cases() {
+        use std::f64::{consts::FRAC_PI_2, NAN};
+        // m * sin^2(phi) >= 1: should return Err
+        assert!(ellippiinc(FRAC_PI_2, 0.5, 1.1).is_err());
+        // n * sin^2(phi) = 1: should return Err
+        assert!(ellippiinc(FRAC_PI_2, 1.0, 0.5).is_err());
+        // Π(phi, 0, 0) = phi
+        assert_eq!(ellippiinc(0.4, 0.0, 0.0).unwrap(), 0.4);
+        // phi = 0: Π(0, n, m) = 0
+        assert_eq!(ellippiinc(0.0, 0.5, 0.5).unwrap(), 0.0);
+        // Π(phi, 1, 0) = tan(phi)
+        assert_eq!(ellippiinc(0.2, 1.0, 0.0).unwrap(), 0.2.tan());
+        // n = 0: Π(φ, 0, m) = F(φ, m)
+        assert_eq!(
+            ellippiinc(0.2, 0.0, 0.5).unwrap(),
+            ellipf(0.2, 0.5).unwrap()
+        );
+        // n = 1: Π(φ, 1, m) = [sqrt(1-m sin2(phi)) tan(phi) - E(phi,m)]/(1-m) + F(phi,m)
+        assert_eq!(
+            ellippiinc(0.2, 1.0, 0.5).unwrap(),
+            ((1.0 - 0.5 * 0.2.sin() * 0.2.sin()).sqrt() * 0.2.tan() - ellipeinc(0.2, 0.5).unwrap())
+                / 0.5
+                + ellipf(0.2, 0.5).unwrap()
+        );
+        // m = 1: Π(φ, n, 1) = [sqrt(n) atanh(sqrt(n) sin(φ)) - log(sec(φ)+tan(φ))]/(n-1)
+        assert_eq!(
+            ellippiinc(0.3, 1.5, 1.0).unwrap(),
+            ((1.5.sqrt() * (1.5.sqrt() * 0.3.sin()).atanh()
+                - (0.3.cos().recip() + 0.3.tan()).ln())
+                / (1.5 - 1.0))
+        );
+
+        // phi = nan or n = nan or m = nan: should return Err
+        assert!(ellippiinc(NAN, 0.5, 0.5).is_err());
+        assert!(ellippiinc(0.5, NAN, 0.5).is_err());
+        assert!(ellippiinc(0.5, 0.5, NAN).is_err());
     }
 }
