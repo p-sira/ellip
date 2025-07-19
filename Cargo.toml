@@ -43,5 +43,3 @@ tabled = "0.18.0"
 name = "bench"
 harness = false
 
-[workspace]
-members = [".", "examples/ellip-error-report"]
