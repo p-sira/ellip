@@ -52,12 +52,15 @@ use crate::{crate_util::check_nan, ellipe, ellipk, elliprf, elliprj, StrErr};
 /// - Π(0, m) = K(m)
 /// - Π(n, 0) = π/(2 sqrt(1-n)) for n < 1
 /// - Π(n, 0) = 0 for n > 1
+/// - Π(n, m) = ∞ for n -> 1-
 /// - Π(n, 1) = sign(1-n) ∞
 /// - Π(∞, m) = Π(-∞, m) = 0
 /// - Π(n, -∞) = 0
 ///
 /// # Related Functions
 /// - [ellippi](crate::ellippi)(n, m) = n / 3 * [elliprj](crate::elliprj)(0, 1 - m, 1, 1 - n) + [ellipk](crate::ellipk)(m)
+/// - [ellippi](crate::ellippi)(n, n) = [ellipe](crate::ellipe)(n) / (1-n) for n < 1
+/// - [ellippi](crate::ellippi)(n, m) = [ellipk](crate::ellipk)(m) - ([ellipe](crate::ellipe)(m) / (1-m)) for n -> 1+
 ///
 /// # Examples
 /// ```
@@ -117,14 +120,13 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
         return ellipk(m);
     }
 
-    if n < 0.0 {
-        // When m < 0, n < 0 and m == n, Boost implementation cancels out, resulting in inf.
-        // https://dlmf.nist.gov/19.6.E13 with phi = π/2
-        if m == n {
-            let mc = 1.0 - m;
-            return Ok(1.0 / mc * ellipe(m)?);
-        }
+    // https://dlmf.nist.gov/19.6.E1
+    if m == n {
+        let mc = 1.0 - m;
+        return Ok(1.0 / mc * ellipe(m)?);
+    }
 
+    if n < 0.0 {
         // Apply A&S 17.7.17
         let nn = (m - n) / (1.0 - n);
         let nm1 = (1.0 - m) / (1.0 - n);
@@ -177,7 +179,10 @@ mod tests {
 
     #[test]
     fn test_ellippi_special_cases() {
-        use std::f64::{consts::PI, INFINITY, NAN, NEG_INFINITY};
+        use std::f64::{
+            consts::{FRAC_PI_2, PI},
+            EPSILON, INFINITY, NAN, NEG_INFINITY,
+        };
         // m > 1: should return Err
         assert!(ellippi(0.5, 1.1).is_err());
         // n == 1: should return Err
@@ -192,6 +197,17 @@ mod tests {
         assert_eq!(ellippi(2.0, 1.0).unwrap(), NEG_INFINITY);
         assert_eq!(ellippi(0.5, 1.0).unwrap(), INFINITY);
         assert_eq!(ellippi(-2.0, 1.0).unwrap(), INFINITY);
+        // n -> 1-: Π(n, m) = inf
+        assert_eq!(ellippi(1.0 - EPSILON, 0.5).unwrap(), INFINITY);
+        // n -> 1+: Π(n, m) = K(m) - E(m) / (1-m)
+        assert_eq!(
+            ellippi(1.0 + EPSILON, 0.5).unwrap(),
+            ellipk(0.5).unwrap() - ellipe(0.5).unwrap() / 0.5
+        );
+        // Π(0, 0) = pi/2
+        assert_eq!(ellippi(0.0, 0.0).unwrap(), FRAC_PI_2);
+        // Π(n, n) = E(n) / (1-n) for n < 1
+        assert_eq!(ellippi(0.5, 0.5).unwrap(), ellipe(0.5).unwrap() / 0.5);
         // n = inf: Π(inf, m) = 0
         assert_eq!(ellippi(INFINITY, 0.5).unwrap(), 0.0);
         // n = -inf: Π(-inf, m) = 0
