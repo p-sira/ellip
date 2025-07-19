@@ -19,7 +19,7 @@
 
 use num_traits::Float;
 
-use crate::{ellipe, ellipk, elliprf, elliprj, StrErr};
+use crate::{crate_util::check_nan, ellipe, ellipk, elliprf, elliprj, StrErr};
 
 /// Computes [complete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E8).
 /// ```text
@@ -47,6 +47,15 @@ use crate::{ellipe, ellipk, elliprf, elliprj, StrErr};
 ///
 /// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellippi_plot.html)
 ///
+/// ## Special Cases
+/// - Π(0, 0) = π/(2
+/// - Π(0, m) = K(m)
+/// - Π(n, 0) = π/(2 sqrt(1-n)) for n < 1
+/// - Π(n, 0) = 0 for n > 1
+/// - Π(n, 1) = sign(1-n) ∞
+/// - Π(∞, m) = Π(-∞, m) = 0
+/// - Π(n, -∞) = 0
+///
 /// # Related Functions
 /// - [ellippi](crate::ellippi)(n, m) = n / 3 * [elliprj](crate::elliprj)(0, 1 - m, 1, 1 - n) + [ellipk](crate::ellipk)(m)
 ///
@@ -62,12 +71,20 @@ use crate::{ellipe, ellipk, elliprf, elliprj, StrErr};
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
+    check_nan!(ellippi, [n, m]);
+
     if m > 1.0 {
         return Err("ellippi: m must be less than 1.");
     }
 
     if n == 1.0 {
         return Err("ellippi: n cannot be 1.");
+    }
+
+    // n = -inf: Π(-inf, m) = 0
+    // m = -inf: Π(n, -inf) = 0
+    if n == neg_inf!() || m == neg_inf!() {
+        return Ok(0.0);
     }
 
     // m -> 1-
@@ -156,5 +173,35 @@ mod tests {
         assert!(ellippi(0.5, 1.1).is_err());
         // n == 1
         assert!(ellippi(1.0, 0.5).is_err());
+    }
+
+    #[test]
+    fn test_ellippi_special_cases() {
+        use std::f64::{consts::PI, INFINITY, NAN, NEG_INFINITY};
+        // m > 1: should return Err
+        assert!(ellippi(0.5, 1.1).is_err());
+        // n == 1: should return Err
+        assert!(ellippi(1.0, 0.5).is_err());
+        // n = 0: Π(0, m) = K(m)
+        assert_eq!(ellippi(0.0, 0.5).unwrap(), ellipk(0.5).unwrap());
+        // m = 0, n < 1: Π(n, 0) = pi/(2 sqrt(1-n))
+        assert_eq!(ellippi(0.5, 0.0).unwrap(), PI / (2.0 * 0.5.sqrt()));
+        // m = 0, n > 1: Π(n, 0) = 0
+        assert_eq!(ellippi(2.0, 0.0).unwrap(), 0.0);
+        // m = 1: Π(n, 1) = sign(1-n) inf
+        assert_eq!(ellippi(2.0, 1.0).unwrap(), NEG_INFINITY);
+        assert_eq!(ellippi(0.5, 1.0).unwrap(), INFINITY);
+        assert_eq!(ellippi(-2.0, 1.0).unwrap(), INFINITY);
+        // n = inf: Π(inf, m) = 0
+        assert_eq!(ellippi(INFINITY, 0.5).unwrap(), 0.0);
+        // n = -inf: Π(-inf, m) = 0
+        assert_eq!(ellippi(NEG_INFINITY, 0.5).unwrap(), 0.0);
+        // m = -inf: Π(n, -inf) = 0
+        assert_eq!(ellippi(0.5, NEG_INFINITY).unwrap(), 0.0);
+        // n = nan or m = nan: should return Err
+        assert!(ellippi(NAN, 0.5).is_err());
+        assert!(ellippi(0.5, NAN).is_err());
+        // m = inf: should return Err
+        assert!(ellippi(0.5, INFINITY).is_err());
     }
 }
