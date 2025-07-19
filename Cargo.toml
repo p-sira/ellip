@@ -40,3 +40,6 @@ itertools = "0.14"
 [[bench]]
 name = "bench"
 harness = false
+
+[workspace]
+members = [".", "examples/ellip-error-report"]
