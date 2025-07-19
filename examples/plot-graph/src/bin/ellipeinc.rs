@@ -5,19 +5,20 @@
 
 use std::f64::consts::{FRAC_PI_2, FRAC_PI_3, FRAC_PI_4};
 
-use ellip::ellipdinc;
+use ellip::ellipeinc;
+use ellip_plot_graph::figure_path;
 use plotly::{
+    ImageFormat, Layout, Plot, Scatter,
     color::NamedColor,
     common::{Line, Mode},
     layout::{Annotation, Axis},
-    ImageFormat, Layout, Plot, Scatter,
 };
 
 macro_rules! get_trace {
     ($phi: expr, $m: expr, $name: expr) => {{
         let value = $m
             .iter()
-            .map(|&mi| match ellipdinc($phi, mi) {
+            .map(|&mi| match ellipeinc($phi, mi) {
                 Ok(ans) => ans,
                 Err(_) => f64::NAN,
             })
@@ -47,19 +48,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     ]);
     plot.set_layout(
         Layout::new()
-            .title("Incomplete Elliptic Integral of the Legendre's Type (D)")
+            .title("Incomplete Elliptic Integral of the First Kind (E)")
             .x_axis(Axis::new().title("m").show_line(true))
             .y_axis(
                 Axis::new()
-                    .title("D(φ,m)")
+                    .title("E(φ,m)")
                     .show_line(true)
-                    .range(vec![0.0, 3.0]),
+                    .range(vec![0.0, 4.0]),
             )
             .annotations(vec![Annotation::new()
-            .text(format!(
-                "Generated using the function <a href=\"https://docs.rs/ellip/latest/ellip/legendre/fn.ellipdinc.html\" target=\"_blank\">ellipdinc</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",
-                env!("CARGO_PKG_VERSION")
-            ))
+                .text(format!(
+                    "Generated using the function <a href=\"https://docs.rs/ellip/latest/ellip/legendre/fn.ellipeinc.html\" target=\"_blank\">ellipeinc</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",
+                    env!("CARGO_PKG_VERSION")
+                ))
                 .x_ref("paper")
                 .y_ref("paper")
                 .y(-0.15)
@@ -67,9 +68,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .show_arrow(false)]),
     );
 
-    plot.show_html("figures/ellipdinc_plot.html");
+    plot.show_html(figure_path!("ellipeinc_plot.html"));
     plot.write_image(
-        "figures/ellipdinc_plot.svg",
+        figure_path!("ellipeinc_plot.svg"),
         ImageFormat::SVG,
         900,
         600,

@@ -4,11 +4,12 @@
  */
 
 use ellip::cel1;
+use ellip_plot_graph::figure_path;
 use plotly::{
+    ImageFormat, Layout, Plot, Scatter,
     color::NamedColor,
     common::{Line, Mode},
     layout::{Annotation, Axis},
-    ImageFormat, Layout, Plot, Scatter,
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -56,7 +57,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .show_arrow(false)]),
     );
 
-    plot.show_html("figures/cel1_plot.html");
-    plot.write_image("figures/cel1_plot.svg", ImageFormat::SVG, 900, 600, 1.0);
+    plot.show_html(figure_path!("cel1_plot.html"));
+    plot.write_image(
+        figure_path!("cel1_plot.svg"),
+        ImageFormat::SVG,
+        900,
+        600,
+        1.0,
+    );
     Ok(())
 }

@@ -3,19 +3,20 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-use ellip::elliprf;
+use ellip::elliprc;
+use ellip_plot_graph::figure_path;
 use plotly::{
+    ImageFormat, Layout, Plot, Scatter,
     color::NamedColor,
     common::{Line, Mode},
     layout::{Annotation, Axis},
-    ImageFormat, Layout, Plot, Scatter,
 };
 
 macro_rules! get_trace {
     ($x: expr, $y: expr, $name: expr) => {{
         let value = $x
             .iter()
-            .map(|&xi| match elliprf(xi, $y, 1.0) {
+            .map(|&xi| match elliprc(xi, $y) {
                 Ok(ans) => ans,
                 Err(_) => f64::NAN,
             })
@@ -39,24 +40,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut plot = Plot::new();
     plot.add_traces(vec![
-        get_trace!(&x, 0.0, "y=0", NamedColor::Red),
-        get_trace!(&x, 0.1, "y=0.1"),
-        get_trace!(&x, 0.5, "y=0.5"),
-        get_trace!(&x, 1.0, "y=1.0", NamedColor::Blue),
+        get_trace!(&x, 1.0, "y=1", NamedColor::Red),
+        get_trace!(&x, -1.0, "y=-1", NamedColor::Blue),
     ]);
     plot.set_layout(
         Layout::new()
-            .title("Symmetric Elliptic Integral of the First Kind (RF)")
+            .title("Degenerate Symmetric Elliptic Integral of RF (RC)")
             .x_axis(Axis::new().title("x").show_line(true))
             .y_axis(
                 Axis::new()
-                    .title("RF(x,y,1)")
+                    .title("RC(x,y)")
                     .show_line(true)
-                    .range(vec![0.0, 3.0]),
+                    .range(vec![0.0, 2.0]),
             )
             .annotations(vec![Annotation::new()
             .text(format!(
-                "Generated using the function <a href=\"https://docs.rs/ellip/latest/ellip/carlson/fn.elliprf.html\" target=\"_blank\">elliprf</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",
+                "Generated using the function <a href=\"https://docs.rs/ellip/latest/ellip/carlson/fn.elliprc.html\" target=\"_blank\">elliprc</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",
                 env!("CARGO_PKG_VERSION")
             ))
                 .x_ref("paper")
@@ -66,7 +65,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .show_arrow(false)]),
     );
 
-    plot.show_html("figures/elliprf_plot.html");
-    plot.write_image("figures/elliprf_plot.svg", ImageFormat::SVG, 900, 600, 1.0);
+    plot.show_html(figure_path!("elliprc_plot.html"));
+    plot.write_image(
+        figure_path!("elliprc_plot.svg"),
+        ImageFormat::SVG,
+        900,
+        600,
+        1.0,
+    );
     Ok(())
 }

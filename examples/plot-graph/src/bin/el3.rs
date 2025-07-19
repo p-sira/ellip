@@ -6,11 +6,12 @@
 use std::f64::consts::{FRAC_PI_2, FRAC_PI_3, FRAC_PI_4};
 
 use ellip::el3;
+use ellip_plot_graph::figure_path;
 use plotly::{
+    ImageFormat, Layout, Plot, Scatter,
     color::NamedColor,
     common::{Anchor, Line, Mode},
     layout::{Annotation, Axis, Legend},
-    ImageFormat, Layout, Plot, Scatter,
 };
 
 macro_rules! get_trace {
@@ -41,7 +42,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .map(|x| x as f64 / n_points as f64)
             .collect(),
         // Make the plot more dense near zero to improve the visual
-        (-1 * 5..1 * 5)
+        (-5..5)
             .map(|x| x as f64 / 500.0)
             .skip(1)
             .collect::<Vec<f64>>(),
@@ -72,7 +73,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .map(|x| x as f64 / n_points_neg as f64)
             .collect(),
         // Make the plot more dense near zero to improve the visual
-        (-1 * 5..1 * 5)
+        (-5..5)
             .map(|x| x as f64 / 500.0)
             .skip(1)
             .collect::<Vec<f64>>(),
@@ -129,7 +130,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                  .show_arrow(false)]),
      );
 
-    plot.show_html("figures/el3_plot.html");
-    plot.write_image("figures/el3_plot.svg", ImageFormat::SVG, 900, 600, 1.0);
+    plot.show_html(figure_path!("el3_plot.html"));
+    plot.write_image(
+        figure_path!("el3_plot.svg"),
+        ImageFormat::SVG,
+        900,
+        600,
+        1.0,
+    );
     Ok(())
 }

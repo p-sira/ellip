@@ -4,11 +4,12 @@
  */
 
 use ellip::elliprj;
+use ellip_plot_graph::figure_path;
 use plotly::{
+    ImageFormat, Layout, Plot, Scatter,
     color::NamedColor,
     common::{Anchor, Line, Mode},
     layout::{Annotation, Axis, Legend},
-    ImageFormat, Layout, Plot, Scatter,
 };
 
 macro_rules! get_trace {
@@ -81,7 +82,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .show_arrow(false)]),
     );
 
-    plot.show_html("figures/elliprj_plot.html");
-    plot.write_image("figures/elliprj_plot.svg", ImageFormat::SVG, 900, 600, 1.0);
+    plot.show_html(figure_path!("elliprj_plot.html"));
+    plot.write_image(
+        figure_path!("elliprj_plot.svg"),
+        ImageFormat::SVG,
+        900,
+        600,
+        1.0,
+    );
     Ok(())
 }

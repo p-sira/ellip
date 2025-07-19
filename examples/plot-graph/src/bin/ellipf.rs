@@ -6,11 +6,12 @@
 use std::f64::consts::{FRAC_PI_2, FRAC_PI_3, FRAC_PI_4};
 
 use ellip::ellipf;
+use ellip_plot_graph::figure_path;
 use plotly::{
+    ImageFormat, Layout, Plot, Scatter,
     color::NamedColor,
     common::{Line, Mode},
     layout::{Annotation, Axis},
-    ImageFormat, Layout, Plot, Scatter,
 };
 
 macro_rules! get_trace {
@@ -67,7 +68,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .show_arrow(false)]),
     );
 
-    plot.show_html("figures/ellipf_plot.html");
-    plot.write_image("figures/ellipf_plot.svg", ImageFormat::SVG, 900, 600, 1.0);
+    plot.show_html(figure_path!("ellipf_plot.html"));
+    plot.write_image(
+        figure_path!("ellipf_plot.svg"),
+        ImageFormat::SVG,
+        900,
+        600,
+        1.0,
+    );
     Ok(())
 }

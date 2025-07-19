@@ -4,11 +4,12 @@
  */
 
 use ellip::cel2;
+use ellip_plot_graph::figure_path;
 use plotly::{
+    ImageFormat, Layout, Plot, Scatter,
     color::NamedColor,
     common::{Line, Mode},
     layout::{Annotation, Axis},
-    ImageFormat, Layout, Plot, Scatter,
 };
 
 macro_rules! get_trace {
@@ -38,7 +39,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .map(|x| x as f64 / n_points as f64)
             .collect::<Vec<f64>>(),
         // Make the plot more dense near zero to improve the visual
-        (-1 * 10..1 * 10)
+        (-10..10)
             .map(|x| x as f64 / 1000.0)
             .skip(1)
             .collect::<Vec<f64>>(),
@@ -75,7 +76,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .show_arrow(false)]),
     );
 
-    plot.show_html("figures/cel2_plot.html");
-    plot.write_image("figures/cel2_plot.svg", ImageFormat::SVG, 900, 600, 1.0);
+    plot.show_html(figure_path!("cel2_plot.html"));
+    plot.write_image(
+        figure_path!("cel2_plot.svg"),
+        ImageFormat::SVG,
+        900,
+        600,
+        1.0,
+    );
     Ok(())
 }

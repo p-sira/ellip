@@ -1,0 +1,10 @@
+[package]
+name = "ellip-plot-graph"
+version = "0.1.0"
+edition = "2024"
+license = "BSD-3-Clause"
+description = "Generate plots for Ellip crate"
+
+[dependencies]
+ellip = "0.3.3"
+plotly = { version = "0.12.1", features = ["kaleido", "kaleido_download"] }

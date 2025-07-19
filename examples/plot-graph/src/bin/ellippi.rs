@@ -4,10 +4,11 @@
  */
 
 use ellip::ellippi;
+use ellip_plot_graph::figure_path;
 use plotly::{
+    Layout, Plot, Surface,
     common::{ColorScale, ColorScalePalette},
     layout::{Annotation, Axis, LayoutScene},
-    Layout, Plot, Surface,
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -109,9 +110,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .show_arrow(false)]),
     );
 
-    plot.show_html("figures/ellippi_plot.html");
+    plot.show_html(figure_path!("ellippi_plot.html"));
     // Current plotly.rs doesn't support exporting 3D plot as image.
     // The workaround is using the capture function in the html to save a png file.
-    // plot.write_image("figures/ellippi_plot.svg", ImageFormat::SVG, 900, 900, 0.2);
+    // plot.write_image(figure_path!("ellippi_plot.svg"), ImageFormat::SVG, 900, 900, 0.2);
     Ok(())
 }
