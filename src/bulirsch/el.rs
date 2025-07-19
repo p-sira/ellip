@@ -5,7 +5,7 @@
 
 use num_traits::Float;
 
-use crate::{ellipeinc, ellipf, StrErr};
+use crate::{crate_util::declare, ellipeinc, ellipf, StrErr};
 
 use super::{cel1, cel2, BulirschConst};
 
@@ -325,35 +325,12 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
     // }
 
     // real
-    let mut c;
-    let mut d;
-    let mut de;
-    let mut e;
-    let mut f;
-    let mut fa;
-    let mut g;
-    let mut h;
-    let mut hh;
-
-    let mut pm;
-    let mut pz;
-    let mut q;
-    let mut r;
-    let mut s;
-    let mut t;
-    let mut u;
-    let mut v;
-    let mut w;
-    let mut y;
-    let mut ye = 0.0;
-    let mut z;
+    declare!(mut [c, d, de, e, f, fa, g, h, hh]);
+    declare!(mut [pm, pz, q, r, s, t, u, v, w, y, ye = T::zero(), z]);
     let zd;
 
     // int
-    let mut k = 0;
-    let mut l;
-    let mut m;
-    let mut n;
+    declare!(mut [k = 0, l, m, n]);
     let nd = T::D as usize - 2;
 
     // bool

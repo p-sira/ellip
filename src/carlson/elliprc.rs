@@ -20,7 +20,7 @@
 
 use num_traits::Float;
 
-use crate::StrErr;
+use crate::{crate_util::let_mut, StrErr};
 
 /// Computes RC ([degenerate symmetric elliptic integral of RF](https://dlmf.nist.gov/19.16.E6)).
 /// ```text
@@ -78,8 +78,7 @@ pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, StrErr> {
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 fn _elliprc<T: Float>(x: T, y: T) -> T {
-    let mut x = x;
-    let mut y = y;
+    let_mut!(x, y);
     let mut prefix = 1.0;
     // for y < 0, the integral is singular, return Cauchy principal value
     if y < 0.0 {

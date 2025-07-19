@@ -20,7 +20,10 @@
 
 use std::mem::swap;
 
-use crate::{elliprc, elliprd, elliprf, StrErr};
+use crate::{
+    crate_util::{declare, let_mut},
+    elliprc, elliprd, elliprf, StrErr,
+};
 use num_traits::Float;
 
 /// Computes RJ ([symmetric elliptic integral of the third kind](https://dlmf.nist.gov/19.16.E2)).
@@ -76,10 +79,7 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
         return Err("elliprj: p must be non-zero");
     }
 
-    let mut x = x;
-    let mut y = y;
-    let mut z = z;
-
+    let_mut!(x, y, z);
     // for p < 0, the integral is singular, return Cauchy principal value
     if p < 0.0 {
         // We must ensure that x < y < z.
@@ -134,8 +134,7 @@ fn elliprc1p<T: Float>(y: T) -> Result<T, StrErr> {
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
-    let mut x = x;
-    let mut z = z;
+    let_mut!(x, z);
     // Special cases
     // https://dlmf.nist.gov/19.20#iii
     if x == y {
@@ -172,10 +171,7 @@ fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
         return elliprd(x, y, z);
     }
 
-    let mut xn = x;
-    let mut yn = y;
-    let mut zn = z;
-    let mut pn = p;
+    declare!(mut [xn = x, yn = y, zn = z, pn = p]);
     let mut an = (x + y + z + 2.0 * p) / 5.0;
     let a0 = an;
     let mut delta = (p - x) * (p - y) * (p - z);

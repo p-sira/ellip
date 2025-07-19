@@ -16,3 +16,20 @@ macro_rules! check_nan {
     };
 }
 pub(crate) use check_nan;
+
+macro_rules! declare {
+    (mut [$($var:ident $(= $value:expr)?),+ $(,)?]) => {
+        $(let mut $var $(= $value)?;)+
+    };
+    ([$($var:ident $(= $value:expr)?),+ $(,)?]) => {
+        $(let $var $(= $value)?;)+
+    };
+}
+pub(crate) use declare;
+
+macro_rules! let_mut {
+    ($($var:ident),+ $(,)?) => {
+        $(let mut $var = $var;)+
+    };
+}
+pub(crate) use let_mut;

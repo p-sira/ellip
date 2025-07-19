@@ -7,7 +7,7 @@
 use num_traits::Float;
 use std::mem::swap;
 
-use crate::{elliprc, elliprd, elliprf, StrErr};
+use crate::{crate_util::let_mut, elliprc, elliprd, elliprf, StrErr};
 
 // Original header from Boost Math
 //  Copyright (c) 2015 John Maddock
@@ -62,9 +62,7 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         return Err("elliprg: x, y, and z must be non-negative.");
     }
 
-    let mut x = x;
-    let mut y = y;
-    let mut z = z;
+    let_mut!(x, y, z);
     if x < y {
         swap(&mut x, &mut y);
     }

@@ -21,7 +21,7 @@ use std::mem::swap;
 
 use num_traits::Float;
 
-use crate::StrErr;
+use crate::{crate_util::let_mut, StrErr};
 
 /// Computes RD ([degenerate symmetric elliptic integral of the third kind](https://dlmf.nist.gov/19.16.E5)).
 /// ```text
@@ -72,8 +72,7 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         return Err("elliprd: z must be positive");
     }
 
-    let mut x = x;
-    let mut y = y;
+    let_mut!(x, y);
 
     // Special cases
     if x == z {
