@@ -7,7 +7,7 @@ use std::fmt::Debug;
 
 use ellip::*;
 use num_traits::Float;
-use tabled::{settings::Style, Table, Tabled};
+use tabled::{Table, Tabled, settings::Style};
 
 /// Calculates max relative error in unit of epsilon
 fn rel_err<T: Float>(a: T, b: T) -> f64 {
@@ -256,7 +256,7 @@ macro_rules! get_entry {
     ($file_name: expr, $name: expr, $func: expr, $arg_count: tt, $mu: expr) => {{
         func_wrapper!($func, $arg_count);
 
-        let file_path = ["./tests/data/", $file_name, ".csv"].concat();
+        let file_path = ["../../tests/data/", $file_name, ".csv"].concat();
 
         (
             $name,
@@ -291,7 +291,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .to_owned()
     };
 
-    let ellip_version = env!("CARGO_PKG_VERSION");
+    let ellip_version: String = {
+        let output = Command::new("cargo")
+            .args(["tree", "--invert", "--package", "ellip"])
+            .output()?
+            .stdout;
+        String::from_utf8_lossy(&output)
+            .lines()
+            .next()
+            .and_then(|line| line.strip_prefix("ellip v"))
+            .unwrap()
+            .to_owned()
+    };
 
     let lines = [
         "# Testing",
@@ -300,7 +311,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "The test data spans the domain of each function up to **μ** to avoid approaching the function's limit.",
         "The reference values are computed using [**Wolfram Engine**](https://www.wolfram.com/engine/).",
         "You can find the scripts in the directory [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/).",
-        &format!("This report is generated on {} rustc {} using ellip v{} at `f64` precision (ε≈2.22e-16).", platform, rust_version, ellip_version),
+        &format!(
+            "This report is generated on {} rustc {} using ellip v{} at `f64` precision (ε≈2.22e-16).",
+            platform, rust_version, ellip_version
+        ),
         "",
         "## Legendre's Complete Elliptic Integrals",
         &generate_error_table(&[
@@ -318,10 +332,28 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             get_entry!("wolfram/ellipf_data", "ellipf", ellipf, 2, 1),
             get_entry!("wolfram/ellipf_neg", "ellipf (Neg m)", ellipf, 2, 1),
             get_entry!("wolfram/ellipeinc_data", "ellipeinc", ellipeinc, 2, 1),
-            get_entry!("wolfram/ellipeinc_neg", "ellipeinc (Neg m)", ellipeinc, 2, 1),
+            get_entry!(
+                "wolfram/ellipeinc_neg",
+                "ellipeinc (Neg m)",
+                ellipeinc,
+                2,
+                1
+            ),
             get_entry!("wolfram/ellippiinc_data", "ellippiinc", ellippiinc, 3, 50),
-            get_entry!("wolfram/ellippiinc_neg", "ellippiinc (Neg m)", ellippiinc, 3, 50),
-            get_entry!("wolfram/ellippiinc_pv", "ellippiinc (p.v.)", ellippiinc, 3, 50),
+            get_entry!(
+                "wolfram/ellippiinc_neg",
+                "ellippiinc (Neg m)",
+                ellippiinc,
+                3,
+                50
+            ),
+            get_entry!(
+                "wolfram/ellippiinc_pv",
+                "ellippiinc (p.v.)",
+                ellippiinc,
+                3,
+                50
+            ),
         ]),
         "",
         "## Bulirsch's Elliptic Integrals",
@@ -360,7 +392,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ]),
     ];
 
-    let path = "tests/README.md";
+    let path = "../../tests/README.md";
     let mut file = File::create(path)?;
 
     lines
