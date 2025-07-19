@@ -47,3 +47,18 @@ mod el;
 
 pub use cel::{cel, cel1, cel2};
 pub use el::{el1, el2, el3};
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_bulirsch_const() {
+        assert_eq!(<f32 as BulirschConst>::D, 7);
+        assert_eq!(<f32 as BulirschConst>::ca(), 1e-3);
+        assert_eq!(<f32 as BulirschConst>::cb(), 1e-9);
+        assert_eq!(<f64 as BulirschConst>::D, 16);
+        assert_eq!(<f64 as BulirschConst>::ca(), 1e-8);
+        assert_eq!(<f64 as BulirschConst>::cb(), 1e-18);
+    }
+}
