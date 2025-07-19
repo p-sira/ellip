@@ -256,7 +256,7 @@ macro_rules! get_entry {
     ($file_name: expr, $name: expr, $func: expr, $arg_count: tt, $mu: expr) => {{
         func_wrapper!($func, $arg_count);
 
-        let file_path = ["../../tests/data/", $file_name, ".csv"].concat();
+        let file_path = ["tests/data/", $file_name, ".csv"].concat();
 
         (
             $name,
@@ -392,7 +392,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ]),
     ];
 
-    let path = "../../tests/README.md";
+    let path = "tests/README.md";
     let mut file = File::create(path)?;
 
     lines
