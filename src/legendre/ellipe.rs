@@ -78,9 +78,10 @@ pub fn ellipe<T: Float>(m: T) -> Result<T, StrErr> {
     }
 
     // If T is f128
-    if max_val!() > T::from(f64::MAX).unwrap() {
-        return ellipe_precise(m);
-    }
+    // Unused since num-traits doesn't support f128 yet.
+    // if max_val!() > T::from(f64::MAX).unwrap() {
+    //     return ellipe_precise(m);
+    // }
 
     // Note: this function allows both negative m and positive m less than 1.
     // Negative m: Abramowitz & Stegun, 1972
