@@ -9,6 +9,7 @@
 - Add special cases documentation.
 - Increase test coverage.
 - Report code coverage.
+- Move examples into separate crates, reducing dev dependencies and test time.
 
 ### 0.3.3
 **Changes**
