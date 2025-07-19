@@ -120,9 +120,9 @@ fn read_wolfram_data<T: Float>(file_path: &str) -> Result<Vec<Case<T>>, StrErr> 
 
     let path = Path::new(file_path);
     let file = File::open(path).map_err(|_| {
-        eprintln!("Test data not found: {file_path} Download from: https://github.com/p-sira/ellip/tree/main/tests/data");
-        "Test data not found."
-    })?;
+         eprintln!("Test data not found: {file_path} Download from: https://github.com/p-sira/ellip/tree/main/tests/data");
+         "Test data not found."
+     })?;
     let mut reader = ReaderBuilder::new().has_headers(false).from_reader(file);
 
     let mut results = Vec::new();
@@ -305,6 +305,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let lines = [
+<<<<<<< HEAD:examples/generate-error-report.rs
         "# Testing",
         "This report presents the accuracy of the ellip crate using [**symmetric relative error**](https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/relative_error.html)",
         "metric. Errors are expressed in units of machine epsilon (ε).",
@@ -391,6 +392,73 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             get_entry!("boost/elliprj_pv", "elliprj (p.v.)", elliprj, 4, 50),
         ]),
     ];
+=======
+         "# Testing",
+         "This report presents the accuracy of the ellip crate using [**symmetric relative error**](https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/relative_error.html)",
+         "metric. Errors are expressed in units of machine epsilon (ε).",
+         "The test data spans the domain of each function up to **μ** to avoid approaching the function's limit.",
+         "The reference values are computed using [**Wolfram Engine**](https://www.wolfram.com/engine/).",
+         "You can find the scripts in the directory [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/).",
+         &format!("This report is generated on {} rustc {} using ellip v{} at `f64` precision (ε≈2.22e-16).", platform, rust_version, ellip_version),
+         "",
+         "## Legendre's Complete Elliptic Integrals",
+         &generate_error_table(&[
+             get_entry!("wolfram/ellipk_data", "ellipk", ellipk, 1, 1),
+             get_entry!("wolfram/ellipk_neg", "ellipk (Neg m)", ellipk, 1, 1),
+             get_entry!("wolfram/ellipe_data", "ellipe", ellipe, 1, 1),
+             get_entry!("wolfram/ellipe_neg", "ellipe (Neg m)", ellipe, 1, 1),
+             get_entry!("wolfram/ellippi_data", "ellippi", ellippi, 2, 50),
+             get_entry!("wolfram/ellippi_neg", "ellippi (Neg m)", ellippi, 2, 50),
+             get_entry!("wolfram/ellippi_pv", "ellippi (p.v.)", ellippi, 2, 50),
+         ]),
+         "",
+         "## Legendre's Incomplete Elliptic Integrals",
+         &generate_error_table(&[
+             get_entry!("wolfram/ellipf_data", "ellipf", ellipf, 2, 1),
+             get_entry!("wolfram/ellipf_neg", "ellipf (Neg m)", ellipf, 2, 1),
+             get_entry!("wolfram/ellipeinc_data", "ellipeinc", ellipeinc, 2, 1),
+             get_entry!("wolfram/ellipeinc_neg", "ellipeinc (Neg m)", ellipeinc, 2, 1),
+             get_entry!("wolfram/ellippiinc_data", "ellippiinc", ellippiinc, 3, 50),
+             get_entry!("wolfram/ellippiinc_neg", "ellippiinc (Neg m)", ellippiinc, 3, 50),
+             get_entry!("wolfram/ellippiinc_pv", "ellippiinc (p.v.)", ellippiinc, 3, 50),
+         ]),
+         "",
+         "## Bulirsch's Elliptic Integrals",
+         "For Bulirsh's elliptic integrals, the reference values are generated using the function",
+         "submitted by Jan Mangaldan on [Wolfram Function Repository](https://resources.wolframcloud.com/FunctionRepository/).",
+         &generate_error_table(&[
+             get_entry!("wolfram/cel_data", "cel", cel, 4, 1),
+             get_entry!("wolfram/cel_pv", "cel (p.v.)", cel, 4, 1),
+             get_entry!("wolfram/el1_data", "el1", el1, 2, 1),
+             get_entry!("wolfram/el2_data", "el2", el2, 4, 1),
+             get_entry!("wolfram/el3_data", "el3", el3, 3, 50),
+             get_entry!("wolfram/el3_pv", "el3 (p.v.)", el3, 3, 50),
+         ]),
+         "",
+         "## Carlson's Symmetric Elliptic Integrals",
+         "",
+         &generate_error_table(&[
+             get_entry!("wolfram/elliprf_data", "elliprf", elliprf, 3, 1),
+             get_entry!("wolfram/elliprg_data", "elliprg", elliprg, 3, 50),
+             get_entry!("wolfram/elliprj_data", "elliprj", elliprj, 4, 50),
+             get_entry!("wolfram/elliprj_pv", "elliprj (p.v.)", elliprj, 4, 50),
+             get_entry!("wolfram/elliprc_data", "elliprc", elliprc, 2, 1),
+             get_entry!("wolfram/elliprc_pv", "elliprc (p.v.)", elliprc, 2, 1),
+             get_entry!("wolfram/elliprd_data", "elliprd", elliprd, 3, 50),
+         ]),
+         "",
+         "## Carlson's Symmetric Elliptic Integrals with Boost Math",
+         "For functions that require higher precision, the accuracy of `ellip` on f64 is tested against",
+         "the answers from Boost Math at double precision.",
+         "",
+         &generate_error_table(&[
+             get_entry!("boost/elliprf_data", "elliprf", elliprf, 3, 1),
+             get_entry!("boost/elliprg_data", "elliprg", elliprg, 3, 50),
+             get_entry!("boost/elliprj_data", "elliprj", elliprj, 4, 50),
+             get_entry!("boost/elliprj_pv", "elliprj (p.v.)", elliprj, 4, 50),
+         ]),
+     ];
+>>>>>>> ff07fc5882b3e8c6164ac82e514e1e59b031301b:examples/generate_error_report.rs
 
     let path = "tests/README.md";
     let mut file = File::create(path)?;
