@@ -241,12 +241,6 @@ fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
         delta = delta / 64.0;
     }
 
-    fail_to_converge()
-}
-
-#[cfg_attr(coverage_nightly, coverage(off))]
-#[inline]
-fn fail_to_converge<T: Float>() -> Result<T, StrErr> {
     Err("elliprj: Failed to converge.")
 }
 
