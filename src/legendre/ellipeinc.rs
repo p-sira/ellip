@@ -21,7 +21,7 @@
 
 use num_traits::Float;
 
-use crate::{ellipe, elliprd, elliprf, StrErr};
+use crate::{crate_util::check_nan, ellipe, elliprd, elliprf, StrErr};
 
 /// Computes [incomplete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E5).
 /// ```text
@@ -50,6 +50,15 @@ use crate::{ellipe, elliprd, elliprf, StrErr};
 ///
 /// [Interactive 3D Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipeinc_plot_3d.html)
 ///
+/// ## Special Cases
+/// - E(0, m) = 0
+/// - E(φ, 0) = φ
+/// - E(π/2, m) = E(m)
+/// - E(φ, 1) = sin(φ)
+/// - E(φ, -∞) = ∞
+/// - E(∞, m) = ∞
+/// - E(-∞, m) = -∞
+///
 /// # Related Functions
 /// With c = csc²φ,
 /// - [ellipeinc](crate::ellipeinc)(φ, m) = [elliprf](crate::elliprf)(c - 1, c - m, c) - m / 3 * [elliprd](crate::elliprd)(c - 1, c - m, c)
@@ -68,6 +77,8 @@ use crate::{ellipe, elliprd, elliprf, StrErr};
 /// - The MathWorks, Inc. “ellipticE.” Accessed April 21, 2025. <https://www.mathworks.com/help/symbolic/sym.elliptice.html>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
+    check_nan!(ellipeinc, [phi, m]);
+
     if phi == 0.0 {
         return Ok(0.0);
     }
@@ -84,6 +95,13 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 
     if phi > 1.0 / epsilon!() {
         return Ok(invert * 2.0 * phi * ellipe(m)? / pi!());
+    }
+
+    // m -> -inf, sqrt(1+m sin²θ) -> m sinθ
+    // E(phi, m) -> sqrt(-m) int(sin(theta)) d(theta), theta=[0,phi]
+    // E(phi, m) -> sqrt(-m) (1-cos(phi))
+    if m <= -T::max_value() {
+        return Ok((1.0 - phi.cos()) * (-m).sqrt());
     }
 
     if m == 1.0 {
@@ -151,9 +169,35 @@ mod tests {
     }
 
     #[test]
-    fn test_ellipeinc_err() {
-        use std::f64::consts::FRAC_PI_2;
-        // m sin²φ > 1
-        assert!(ellipeinc(FRAC_PI_2, 1.1).is_err());
+    fn test_ellipeinc_special_cases() {
+        use std::f64::{consts::FRAC_PI_2, INFINITY, MAX, NAN, NEG_INFINITY};
+        // phi = pi/2, m=1: E(pi/2, 1) = 1
+        assert_eq!(ellipeinc(FRAC_PI_2, 1.0).unwrap(), 1.0);
+        // m = 1: E(phi, 1) = sin(phi)
+        assert_eq!(ellipeinc(0.4, 1.0).unwrap(), 0.4.sin());
+        // m * sin^2(phi) >= 1: should return Err
+        assert!(ellipeinc(FRAC_PI_2, 2.0).is_err());
+        // phi = 0: E(0, m) = 0
+        assert_eq!(ellipeinc(0.0, 0.5).unwrap(), 0.0);
+        // phi = pi/2, m = 0: E(pi/2, 0) = pi/2
+        assert_eq!(ellipeinc(FRAC_PI_2, 0.0).unwrap(), FRAC_PI_2);
+        // m < 0: should be valid
+        assert!(ellipeinc(FRAC_PI_2, -1.0).unwrap().is_finite());
+        // phi = nan or m = nan: should return Err
+        assert!(ellipeinc(NAN, 0.5).is_err());
+        assert!(ellipeinc(0.5, NAN).is_err());
+        // phi = inf: E(inf, m) = inf
+        assert_eq!(ellipeinc(INFINITY, 0.5).unwrap(), INFINITY);
+        // phi = -inf: E(-inf, m) = -inf
+        assert_eq!(ellipeinc(NEG_INFINITY, 0.5).unwrap(), NEG_INFINITY);
+        // m = inf: should return Err
+        assert!(ellipeinc(0.5, INFINITY).is_err());
+        // m -> -inf: E(phi, m) = (1-cos(phi)) sqrt(-m)
+        assert_eq!(
+            ellipeinc(0.5, -MAX).unwrap(),
+            (1.0 - 0.5.cos()) * MAX.sqrt()
+        );
+        // m = -inf: E(phi, -inf) = inf
+        assert_eq!(ellipeinc(0.5, NEG_INFINITY).unwrap(), INFINITY);
     }
 }
