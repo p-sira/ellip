@@ -21,7 +21,7 @@
 
 use num_traits::Float;
 
-use crate::{elliprd, StrErr};
+use crate::{crate_util::check_nan, elliprd, StrErr};
 
 /// Computes [complete elliptic integral of Legendre's type](https://dlmf.nist.gov/19.2.E8).
 /// ```text
@@ -46,10 +46,16 @@ use crate::{elliprd, StrErr};
 ///
 /// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipd_plot.html)
 ///
+/// ## Special Cases
+/// - D(0) = π/4
+/// - D(1) = ∞
+/// - D(-∞) = 0
+///
 /// # Related Functions
 /// - [ellipd](crate::ellipd)(m) = ([ellipk](crate::ellipk)(m) - [ellipe](crate::ellipe)(m)) / m
 /// - [ellipd](crate::ellipd)(m) = [elliprd](crate::elliprd)(0, 1 - m, 1) / 3
 /// - [ellipdinc](crate::ellipdinc)(π/2, m) = [ellipd](crate::ellipd)(m)
+///
 /// # Examples
 /// ```
 /// use ellip::{ellipd, util::assert_close};
@@ -62,18 +68,25 @@ use crate::{elliprd, StrErr};
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipd<T: Float>(m: T) -> Result<T, StrErr> {
+    check_nan!(ellipd, [m]);
+
     if m > 1.0 {
         return Err("ellipd: m must be less than 1.");
     }
 
-    // https://dlmf.nist.gov/19.2.E8
-    // Using this relation, D evaluates to inf at m=1.
+    // D evaluates to inf at m=1.
     if m == 1.0 {
         return Ok(inf!());
     }
 
     if m.abs() <= epsilon!() {
         return Ok(pi!() / 4.0);
+    }
+
+    // m -> -inf, sqrt(1+m sin²θ) -> m sinθ, θ=[0,pi/2], given phi = pi/2
+    // then D(m) -> 1/sqrt(-m)
+    if m <= -T::max_value() {
+        return Ok(1.0 / (-m).sqrt());
     }
 
     Ok(elliprd(0.0, 1.0 - m, 1.0)? / 3.0)
@@ -94,8 +107,23 @@ mod tests {
     }
 
     #[test]
-    fn test_ellipd_err() {
-        // m > 1
+    fn test_ellipd_special_cases() {
+        use std::f64::{consts::FRAC_PI_4, INFINITY, MAX, NAN, NEG_INFINITY};
+        // m = 0: D(0) = pi/4
+        assert_eq!(ellipd(0.0).unwrap(), FRAC_PI_4);
+        // m = 1: D(1) = inf
+        assert_eq!(ellipd(1.0).unwrap(), INFINITY);
+        // m < 0: should be valid
+        assert!(ellipd(-1.0).unwrap().is_finite());
+        // m > 1: should return Err
         assert!(ellipd(1.1).is_err());
+        // m = NaN: should return Err
+        assert!(ellipd(NAN).is_err());
+        // m = inf: should return Err
+        assert!(ellipd(INFINITY).is_err());
+        // m -> -inf: D(m) = 1/sqrt(-m)
+        assert_eq!(ellipd(-MAX).unwrap(), 1.0 / MAX.sqrt());
+        // m = -inf: D(-inf) = 0
+        assert_eq!(ellipd(NEG_INFINITY).unwrap(), 0.0);
     }
 }

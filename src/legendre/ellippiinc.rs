@@ -46,7 +46,8 @@ use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj, StrErr};
 /// ## Domain
 /// - Returns error when:
 ///   - m sin²φ > 1,
-///   - or n sin²φ = 1.
+///   - n sin²φ = 1,
+///   - or m ≥ 1 and φ is not a multiple of π/2.
 /// - Returns the Cauchy principal value if n sin²φ > 1.
 ///
 /// ## Graph
@@ -91,7 +92,6 @@ use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj, StrErr};
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellippiinc<T: Float>(phi: T, n: T, m: T) -> Result<T, StrErr> {
     check_nan!(ellippiinc, [phi, n, m]);
-
     ellippiinc_vc(phi, n, m, 1.0 - n)
 }
 
@@ -355,7 +355,11 @@ mod tests {
 
     #[test]
     fn test_ellippiinc_special_cases() {
-        use std::f64::{consts::FRAC_PI_2, NAN};
+        use crate::ellippi;
+        use std::f64::{
+            consts::{FRAC_PI_2, PI},
+            INFINITY, NAN, NEG_INFINITY,
+        };
         // m * sin^2(phi) >= 1: should return Err
         assert!(ellippiinc(FRAC_PI_2, 0.5, 1.1).is_err());
         // n * sin^2(phi) = 1: should return Err
@@ -385,7 +389,16 @@ mod tests {
                 - (0.3.cos().recip() + 0.3.tan()).ln())
                 / (1.5 - 1.0))
         );
-
+        // phi > 1/epsilon: Π(φ, n, m) = 2 |phi| Π(n, m) / pi
+        let large_phi_ans = 2.0 * 1e16 * ellippi(0.2, 0.5).unwrap() / PI;
+        assert_eq!(ellippiinc(1e16, 0.2, 0.5).unwrap(), large_phi_ans);
+        assert_eq!(ellippiinc(-1e16, 0.2, 0.5).unwrap(), -large_phi_ans);
+        // phi = inf: Π(φ, n, m) = inf
+        assert_eq!(ellippiinc(INFINITY, 0.2, 0.5).unwrap(), INFINITY);
+        // phi = -inf: Π(φ, n, m) = -inf
+        assert_eq!(ellippiinc(NEG_INFINITY, 0.2, 0.5).unwrap(), -INFINITY);
+        // phi % pi/2 !=0, m >= 1: should return Err
+        assert!(ellippiinc(4.14159, 0.5, 1.0).is_err());
         // phi = nan or n = nan or m = nan: should return Err
         assert!(ellippiinc(NAN, 0.5, 0.5).is_err());
         assert!(ellippiinc(0.5, NAN, 0.5).is_err());
