@@ -57,7 +57,7 @@ use num_traits::Float;
 /// - D(φ, -∞) = 0
 /// - D(∞, m) = ∞
 /// - D(-∞, m) = -∞
-/// 
+///
 /// # Related Functions
 /// With c = csc²φ,
 /// - [ellipdinc](crate::ellipdinc)(φ, m) = ([ellipf](crate::ellipf)(φ, m) - [ellipeinc](crate::ellipeinc)(φ, m)) / m
@@ -152,7 +152,10 @@ mod tests {
 
     #[test]
     fn test_ellipdinc_special_cases() {
-        use std::f64::{consts::{FRAC_PI_2, FRAC_PI_4}, INFINITY, NAN, NEG_INFINITY};
+        use std::f64::{
+            consts::{FRAC_PI_2, FRAC_PI_4, PI},
+            INFINITY, NAN, NEG_INFINITY,
+        };
         // phi = pi/2, m = 1: D(pi/2, 1) = inf
         assert_eq!(ellipdinc(FRAC_PI_2, 1.0).unwrap(), INFINITY);
         // m * sin^2(phi) >= 1: should return Err
@@ -163,6 +166,11 @@ mod tests {
         assert_eq!(ellipdinc(FRAC_PI_2, 0.0).unwrap(), FRAC_PI_4);
         // m < 0: should be valid
         assert!(ellipdinc(FRAC_PI_2, -1.0).unwrap().is_finite());
+        // phi > 1/epsilon: D(phi, m) = 2 * phi * D(m) / pi
+        assert_eq!(
+            ellipdinc(1e16, 0.4).unwrap(),
+            2.0 * 1e16 * ellipd(0.4).unwrap() / PI
+        );
         // phi = nan or m = nan: should return Err
         assert!(ellipdinc(NAN, 0.5).is_err());
         assert!(ellipdinc(0.5, NAN).is_err());
