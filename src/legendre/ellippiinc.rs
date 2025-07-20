@@ -257,14 +257,20 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
 
         let delta = (1.0 - m * sp2).sqrt();
         let t = n / ((m - n) * (n - 1.0));
-        if t > min_val!() {
-            result = result + ((p2 / 2.0) * (2.0 * phi).sin() / delta).atan() * t.sqrt();
-        } else {
-            result = result
-                + (((p2 / 2.0) * (2.0 * phi).sin() / delta).atan()
-                    * ((1.0 / (m - n)).abs()).sqrt()
-                    * ((n / (n - 1.0).abs()).sqrt()));
-        }
+
+        debug_assert!(t > min_val!());
+        result = result + ((p2 / 2.0) * (2.0 * phi).sin() / delta).atan() * t.sqrt();
+
+        // It should not be possible for t to be less than MIN value.
+        // if t > min_val!() {
+        //     result = result + ((p2 / 2.0) * (2.0 * phi).sin() / delta).atan() * t.sqrt();
+        // } else {
+        //     result = result
+        //         + (((p2 / 2.0) * (2.0 * phi).sin() / delta).atan()
+        //             * ((1.0 / (m - n)).abs()).sqrt()
+        //             * ((n / (n - 1.0).abs()).sqrt()));
+        // }
+
         return Ok(result);
     }
 

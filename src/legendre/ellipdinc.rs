@@ -19,7 +19,7 @@
 //  that the code continues to work no matter how many digits
 //  type T has.
 
-use crate::{ellipd, elliprd, StrErr};
+use crate::{crate_util::check_nan, ellipd, elliprd, StrErr};
 use num_traits::Float;
 
 /// Computes [incomplete elliptic integral of Legendre's type](https://dlmf.nist.gov/19.2.E6).
@@ -50,6 +50,14 @@ use num_traits::Float;
 ///
 /// [Interactive 3D Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipdinc_plot_3d.html)
 ///
+/// ## Special Cases
+/// - D(0, m) = 0
+/// - D(φ, 0) = sin φ
+/// - D(π/2, m) = D(m)
+/// - D(φ, -∞) = 0
+/// - D(∞, m) = ∞
+/// - D(-∞, m) = -∞
+///
 /// # Related Functions
 /// With c = csc²φ,
 /// - [ellipdinc](crate::ellipdinc)(φ, m) = ([ellipf](crate::ellipf)(φ, m) - [ellipeinc](crate::ellipeinc)(φ, m)) / m
@@ -68,14 +76,22 @@ use num_traits::Float;
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
+    check_nan!(ellipdinc, [phi, m]);
+
     let sign = if phi < 0.0 { -1.0 } else { 1.0 };
 
-    let phi = phi.abs();
-
-    if phi >= max_val!() {
+    if phi.abs() >= max_val!() {
         // Need to handle infinity as a special case:
-        return Ok(inf!());
+        return Ok(phi.signum() * inf!());
     }
+
+    // m=-inf should be undefined but as m -> -inf
+    // D -> -inf
+    if m == neg_inf!() {
+        return Ok(neg_inf!());
+    }
+
+    let phi = phi.abs();
 
     if phi > 1.0 / epsilon!() {
         // Phi is so large that phi%pi is necessarily zero (or garbage),
@@ -130,14 +146,41 @@ mod tests {
     }
 
     #[test]
-    fn test_ellipd() {
+    fn test_ellipdinc() {
         compare_test_data_boost!("ellipdinc_data.txt", ellipdinc_k, 6.4e-16);
     }
 
     #[test]
-    fn test_ellipdinc_err() {
-        use std::f64::consts::FRAC_PI_2;
-        // m sin²φ > 1
-        assert!(ellipdinc(FRAC_PI_2, 1.1).is_err());
+    fn test_ellipdinc_special_cases() {
+        use std::f64::{
+            consts::{FRAC_PI_2, FRAC_PI_4, PI},
+            INFINITY, NAN, NEG_INFINITY,
+        };
+        // phi = pi/2, m = 1: D(pi/2, 1) = inf
+        assert_eq!(ellipdinc(FRAC_PI_2, 1.0).unwrap(), INFINITY);
+        // m * sin^2(phi) >= 1: should return Err
+        assert!(ellipdinc(FRAC_PI_2, 2.0).is_err());
+        // phi = 0: D(0, m) = 0
+        assert_eq!(ellipdinc(0.0, 0.5).unwrap(), 0.0);
+        // phi = pi/2, m = 0: D(pi/2, 0) = pi/4
+        assert_eq!(ellipdinc(FRAC_PI_2, 0.0).unwrap(), FRAC_PI_4);
+        // m < 0: should be valid
+        assert!(ellipdinc(FRAC_PI_2, -1.0).unwrap().is_finite());
+        // phi > 1/epsilon: D(phi, m) = 2 * phi * D(m) / pi
+        assert_eq!(
+            ellipdinc(1e16, 0.4).unwrap(),
+            2.0 * 1e16 * ellipd(0.4).unwrap() / PI
+        );
+        // phi = nan or m = nan: should return Err
+        assert!(ellipdinc(NAN, 0.5).is_err());
+        assert!(ellipdinc(0.5, NAN).is_err());
+        // phi = inf: D(inf, m) = inf
+        assert_eq!(ellipdinc(INFINITY, 0.5).unwrap(), INFINITY);
+        // phi = -inf: D(-inf, m) = -inf
+        assert_eq!(ellipdinc(NEG_INFINITY, 0.5).unwrap(), NEG_INFINITY);
+        // m = inf: should return Err
+        assert!(ellipdinc(0.5, INFINITY).is_err());
+        // m = -inf: D(phi, -inf) = -inf
+        assert_eq!(ellipdinc(0.5, NEG_INFINITY).unwrap(), NEG_INFINITY);
     }
 }
