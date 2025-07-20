@@ -5,8 +5,8 @@
 - `ellippiinc`: Fix not returning error when n sin²φ = 1.
 
 **Improvements**
-- Handle special cases and edge cases (infinity, nan, etc.) for all functions.
-- Add special cases documentation.
+- Handle special cases and edge cases (infinity, nan, etc.) for all `legendre` functions.
+- Add special cases documentation for `legendre` functions.
 - Increase test coverage.
 - Report code coverage.
 - Move examples into separate crates, reducing dev dependencies and test time.
