@@ -40,3 +40,45 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: lcov.info
           fail_ci_if_error: true
+
+  grcov-carlson-coverage-fix:
+    runs-on: ubuntu-latest
+    env:
+      CARGO_TERM_COLOR: always
+      LLVM_PROFILE_FILE: "coverage-%p-%m.profraw"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        run: rustup update stable
+
+      - name: Install grcov
+        run: cargo install grcov
+
+      - name: Run tests with coverage instrumentation
+        run: |
+          export RUSTFLAGS="-Zinstrument-coverage -Clink-dead-code"
+          export RUSTDOCFLAGS="-Cpanic=abort"
+          cargo build
+          cargo test
+          
+      - name: Generate coverage report with grcov
+        run: |
+          grcov . \
+            --binary-path ./target/debug/ \
+            --source-dir . \
+            --output-type lcov \
+            --output-path lcov.info \
+            --branch \
+            --ignore-not-existing \
+            --excl-line 'grcov-excl-line' \
+            --excl-start 'grcov-excl-start' \
+            --excl-stop 'grcov-excl-stop' \
+            --keep-only 'src/**'
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: lcov.info
+          fail_ci_if_error: true
