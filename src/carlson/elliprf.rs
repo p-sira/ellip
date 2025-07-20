@@ -177,8 +177,13 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
     Err("elliprf: Failed to converge.")
 }
 
+#[cfg(not(feature = "reduce-iteration"))]
 const N_MAX_ITERATIONS: usize = 11;
 
+#[cfg(feature = "reduce-iteration")]
+const N_MAX_ITERATIONS: usize = 1;
+
+#[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
 mod tests {
     use core::f64;
@@ -233,5 +238,16 @@ mod tests {
         assert!(elliprf(1.0, 1.0, -1.0).is_err());
         // more than one zero
         assert!(elliprf(0.0, 0.0, 1.0).is_err());
+    }
+}
+
+#[cfg(feature = "reduce-iteration")]
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn force_fail_to_converge() {
+        assert!(elliprf(0.2, 0.5, 1e300).is_err());
     }
 }

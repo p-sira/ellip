@@ -244,8 +244,13 @@ fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
     Err("elliprj: Failed to converge.")
 }
 
+#[cfg(not(feature = "reduce-iteration"))]
 const N_MAX_ITERATION: usize = 100;
 
+#[cfg(feature = "reduce-iteration")]
+const N_MAX_ITERATION: usize = 1;
+
+#[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
 mod tests {
     use itertools::Itertools;
@@ -308,5 +313,16 @@ mod tests {
         assert!(elliprj(1.0, 0.0, 0.0, 1.0).is_err());
         // p == 0
         assert!(elliprj(1.0, 1.0, 1.0, 0.0).is_err());
+    }
+}
+
+#[cfg(feature = "reduce-iteration")]
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn force_fail_to_converge() {
+        assert!(elliprj(0.2, 0.5, 1e300, 1.0).is_err());
     }
 }

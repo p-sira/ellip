@@ -162,11 +162,16 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         }
     }
 
-    Err("elliprd: Failed to converge.") // grcov-excl-line
+    Err("elliprd: Failed to converge.")
 }
 
+#[cfg(not(feature = "reduce-iteration"))]
 const N_MAX_ITERATIONS: usize = 50;
 
+#[cfg(feature = "reduce-iteration")]
+const N_MAX_ITERATIONS: usize = 1;
+
+#[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -215,5 +220,16 @@ mod tests {
         assert!(elliprd(1.0, 1.0, -1.0).is_err());
         // both x and y zero
         assert!(elliprd(0.0, 0.0, 1.0).is_err());
+    }
+}
+
+#[cfg(feature = "reduce-iteration")]
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn force_fail_to_converge() {
+        assert!(elliprd(0.2, 0.5, 1e300).is_err());
     }
 }

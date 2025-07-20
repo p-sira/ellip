@@ -85,7 +85,7 @@ pub fn ellipd<T: Float>(m: T) -> Result<T, StrErr> {
 
     // m -> -inf, sqrt(1+m sin²θ) -> m sinθ, θ=[0,pi/2], given phi = pi/2
     // then D(m) -> 1/sqrt(-m)
-    if m <= -T::max_value() {
+    if m <= min_val!() {
         return Ok(1.0 / (-m).sqrt());
     }
 

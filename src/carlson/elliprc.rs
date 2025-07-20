@@ -107,6 +107,7 @@ fn _elliprc<T: Float>(x: T, y: T) -> T {
     }
 }
 
+#[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
 mod tests {
     use super::*;

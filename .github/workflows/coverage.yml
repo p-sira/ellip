@@ -14,7 +14,7 @@ jobs:
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: Generate code coverage
-        run: cargo llvm-cov --all-features -p ellip --lcov --output-path lcov.info --ignore-filename-regex 'benches/.*|examples/.*|src/test_util\.rs'
+        run: cargo llvm-cov -p ellip --lcov --output-path lcov.info --ignore-filename-regex 'benches/.*|examples/.*|src/test_util\.rs'
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
@@ -41,41 +41,18 @@ jobs:
           files: lcov.info
           fail_ci_if_error: true
 
-  grcov-carlson-coverage-fix:
+  carlson-force-fail-coverage:
     runs-on: ubuntu-latest
     env:
       CARGO_TERM_COLOR: always
-      LLVM_PROFILE_FILE: "coverage-%p-%m.profraw"
     steps:
       - uses: actions/checkout@v4
-
       - name: Install Rust
         run: rustup update stable
-
-      - name: Install grcov
-        run: cargo install grcov
-
-      - name: Run tests with coverage instrumentation
-        run: |
-          export RUSTFLAGS="-Zinstrument-coverage -Clink-dead-code"
-          export RUSTDOCFLAGS="-Cpanic=abort"
-          cargo build
-          cargo test
-          
-      - name: Generate coverage report with grcov
-        run: |
-          grcov . \
-            --binary-path ./target/debug/ \
-            --source-dir . \
-            --output-type lcov \
-            --output-path lcov.info \
-            --branch \
-            --ignore-not-existing \
-            --excl-line 'grcov-excl-line' \
-            --excl-start 'grcov-excl-start' \
-            --excl-stop 'grcov-excl-stop' \
-            --keep-only 'src/**'
-
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
+      - name: Generate code coverage
+        run: cargo llvm-cov -p ellip --lcov --output-path lcov.info test carlson --features reduce-iteration
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
