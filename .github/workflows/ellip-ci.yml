@@ -26,6 +26,7 @@ jobs:
       run: cargo doc --no-deps
     - name: Format code
       run: |
+        BRANCH=$(echo "${{ github.ref }}" | sed 's|refs/heads/||')
         cargo fmt
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
