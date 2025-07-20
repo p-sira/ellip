@@ -3,8 +3,8 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-#![cfg_attr(coverage, feature(no_coverage))]
-#![allow(clippy::excessive_precision)]
+ #![cfg_attr(coverage_nightly, feature(coverage_attribute))]
+ #![allow(clippy::excessive_precision)]
 //! # ELLIP
 //! **Ellip** is an elliptic integral functions for Rust.
 //!
