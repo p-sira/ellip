@@ -57,7 +57,7 @@ use num_traits::Float;
 /// - D(φ, -∞) = 0
 /// - D(∞, m) = ∞
 /// - D(-∞, m) = -∞
-/// 
+///
 /// # Related Functions
 /// With c = csc²φ,
 /// - [ellipdinc](crate::ellipdinc)(φ, m) = ([ellipf](crate::ellipf)(φ, m) - [ellipeinc](crate::ellipeinc)(φ, m)) / m
@@ -152,7 +152,10 @@ mod tests {
 
     #[test]
     fn test_ellipdinc_special_cases() {
-        use std::f64::{consts::{FRAC_PI_2, FRAC_PI_4}, INFINITY, NAN, NEG_INFINITY};
+        use std::f64::{
+            consts::{FRAC_PI_2, FRAC_PI_4},
+            INFINITY, NAN, NEG_INFINITY,
+        };
         // phi = pi/2, m = 1: D(pi/2, 1) = inf
         assert_eq!(ellipdinc(FRAC_PI_2, 1.0).unwrap(), INFINITY);
         // m * sin^2(phi) >= 1: should return Err
