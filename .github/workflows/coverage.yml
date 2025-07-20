@@ -52,7 +52,7 @@ jobs:
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: Generate code coverage
-        run: cargo llvm-cov -p ellip --lcov --output-path lcov.info test carlson --features reduce-iteration
+        run: cargo llvm-cov -p ellip --lcov --output-path lcov.info test carlson --features reduce-iteration --ignore-filename-regex 'benches/.*|examples/.*|src/test_util\.rs'
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
