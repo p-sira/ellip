@@ -240,7 +240,7 @@ fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
         pn = (pn + lambda) / 4.0;
         delta = delta / 64.0;
     }
-    Err("elliprj: Fail to converge")
+    Err("elliprj: Failed to converge")
 }
 
 const N_MAX_ITERATION: usize = 100;
