@@ -122,6 +122,7 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
     )
 }
 
+#[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
 mod tests {
     use itertools::Itertools;

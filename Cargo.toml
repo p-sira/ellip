@@ -41,3 +41,8 @@ tabled = "0.20.0"
 [[bench]]
 name = "bench"
 harness = false
+
+[features]
+default = []
+# Used for generating code coverage report only
+reduce-iteration = []
