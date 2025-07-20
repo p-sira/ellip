@@ -42,3 +42,5 @@ tabled = "0.20.0"
 name = "bench"
 harness = false
 
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(coverage,coverage_nightly)'] }

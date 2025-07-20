@@ -162,6 +162,12 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         }
     }
 
+    fail_to_converge()
+}
+
+#[cfg_attr(coverage_nightly, coverage(off))]
+#[inline]
+fn fail_to_converge<T: Float>() -> Result<T, StrErr> {
     Err("elliprd: Failed to converge.")
 }
 

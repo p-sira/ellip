@@ -240,7 +240,14 @@ fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
         pn = (pn + lambda) / 4.0;
         delta = delta / 64.0;
     }
-    Err("elliprj: Failed to converge")
+
+    fail_to_converge()
+}
+
+#[cfg_attr(coverage_nightly, coverage(off))]
+#[inline]
+fn fail_to_converge<T: Float>() -> Result<T, StrErr> {
+    Err("elliprj: Failed to converge.")
 }
 
 const N_MAX_ITERATION: usize = 100;
