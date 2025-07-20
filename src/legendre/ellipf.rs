@@ -119,27 +119,49 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 
     let c2p = rphi.cos() * rphi.cos();
     let mut result;
-    if s2p > min_val!() {
-        // Use http://dlmf.nist.gov/19.25#E5, note that
-        // c-1 simplifies to cot^2(rphi) which avoids cancellation.
-        // Likewise c - k^2 is the same as (c - 1) + (1 - k^2).
-        //
-        let c = 1.0 / s2p;
-        let c_minus_one = c2p / s2p;
-        let arg2 = if m != 0.0 {
-            let cross = (c / m).abs();
-            if cross > 0.9 && cross < 1.1 {
-                c_minus_one + 1.0 - m
-            } else {
-                c - m
-            }
+
+    debug_assert!(s2p > min_val!());
+    // Use http://dlmf.nist.gov/19.25#E5, note that
+    // c-1 simplifies to cot^2(rphi) which avoids cancellation.
+    // Likewise c - k^2 is the same as (c - 1) + (1 - k^2).
+    //
+    let c = 1.0 / s2p;
+    let c_minus_one = c2p / s2p;
+    let arg2 = if m != 0.0 {
+        let cross = (c / m).abs();
+        if cross > 0.9 && cross < 1.1 {
+            c_minus_one + 1.0 - m
         } else {
-            c
-        };
-        result = s * elliprf(c_minus_one, arg2, c)?;
+            c - m
+        }
     } else {
-        result = s * rphi.sin();
-    }
+        c
+    };
+    result = s * elliprf(c_minus_one, arg2, c)?;
+
+    // It should not be possible for s2p to be less than MIN value.
+    // if s2p > min_val!() {
+    //     // Use http://dlmf.nist.gov/19.25#E5, note that
+    //     // c-1 simplifies to cot^2(rphi) which avoids cancellation.
+    //     // Likewise c - k^2 is the same as (c - 1) + (1 - k^2).
+    //     //
+    //     let c = 1.0 / s2p;
+    //     let c_minus_one = c2p / s2p;
+    //     let arg2 = if m != 0.0 {
+    //         let cross = (c / m).abs();
+    //         if cross > 0.9 && cross < 1.1 {
+    //             c_minus_one + 1.0 - m
+    //         } else {
+    //             c - m
+    //         }
+    //     } else {
+    //         c
+    //     };
+    //     result = s * elliprf(c_minus_one, arg2, c)?;
+    // } else {
+    //     result = s * rphi.sin();
+    // }
+
     if mm != 0.0 {
         result = result + mm * ellipk_precise(m)?;
     }
