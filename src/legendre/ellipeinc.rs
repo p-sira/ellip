@@ -170,7 +170,10 @@ mod tests {
 
     #[test]
     fn test_ellipeinc_special_cases() {
-        use std::f64::{consts::FRAC_PI_2, INFINITY, MAX, NAN, NEG_INFINITY};
+        use std::f64::{
+            consts::{FRAC_PI_2, PI},
+            INFINITY, MAX, MIN_POSITIVE, NAN, NEG_INFINITY,
+        };
         // phi = pi/2, m=1: E(pi/2, 1) = 1
         assert_eq!(ellipeinc(FRAC_PI_2, 1.0).unwrap(), 1.0);
         // m = 1: E(phi, 1) = sin(phi)
@@ -179,6 +182,8 @@ mod tests {
         assert!(ellipeinc(FRAC_PI_2, 2.0).is_err());
         // phi = 0: E(0, m) = 0
         assert_eq!(ellipeinc(0.0, 0.5).unwrap(), 0.0);
+        // phi -> 0, m > 0: E(phi, m) = phi
+        assert_eq!(ellipeinc(MIN_POSITIVE, 0.5).unwrap(), MIN_POSITIVE);
         // phi = pi/2, m = 0: E(pi/2, 0) = pi/2
         assert_eq!(ellipeinc(FRAC_PI_2, 0.0).unwrap(), FRAC_PI_2);
         // m < 0: should be valid
@@ -186,6 +191,11 @@ mod tests {
         // phi = nan or m = nan: should return Err
         assert!(ellipeinc(NAN, 0.5).is_err());
         assert!(ellipeinc(0.5, NAN).is_err());
+        // phi > 1/epsilon: E(phi, m) = 2 * phi * E(m) / pi
+        assert_eq!(
+            ellipeinc(1e16, 0.5).unwrap(),
+            2.0 * 1e16 * ellipe(0.5).unwrap() / PI
+        );
         // phi = inf: E(inf, m) = inf
         assert_eq!(ellipeinc(INFINITY, 0.5).unwrap(), INFINITY);
         // phi = -inf: E(-inf, m) = -inf
