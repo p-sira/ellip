@@ -164,7 +164,10 @@ mod tests {
     #[test]
     fn test_ellipf_special_cases() {
         use crate::ellipk;
-        use std::f64::{consts::{FRAC_PI_2, PI}, INFINITY, NAN, NEG_INFINITY};
+        use std::f64::{
+            consts::{FRAC_PI_2, PI},
+            INFINITY, NAN, NEG_INFINITY,
+        };
         // m * sin^2(phi) >= 1: should return Err
         assert!(ellipf(FRAC_PI_2, 1.0).is_err());
         assert!(ellipf(FRAC_PI_2, 2.0).is_err());
@@ -182,7 +185,10 @@ mod tests {
         // phi = -inf: F(-inf, m) = -inf
         assert_eq!(ellipf(NEG_INFINITY, 0.5).unwrap(), NEG_INFINITY);
         // phi > 1/epsilon: F(phi, m) = 2 * phi * K(m) / pi
-        assert_eq!(ellipf(1e16, 0.4).unwrap(), 2.0 * 1e16 * ellipk(0.4).unwrap() / PI);
+        assert_eq!(
+            ellipf(1e16, 0.4).unwrap(),
+            2.0 * 1e16 * ellipk(0.4).unwrap() / PI
+        );
         // |phi| -> 0: F(phi, m) = sin(phi)
         assert_eq!(ellipf(1e-100, 0.4).unwrap(), (1e-100).sin());
         assert_eq!(ellipf(-1e-100, 0.4).unwrap(), (-1e-100).sin());
