@@ -250,7 +250,6 @@ const N_MAX_ITERATION: usize = 100;
 #[cfg(feature = "reduce-iteration")]
 const N_MAX_ITERATION: usize = 1;
 
-
 #[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
 mod tests {
