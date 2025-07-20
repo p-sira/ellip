@@ -162,7 +162,7 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         }
     }
 
-    Err("elliprd: Failed to converge.") // grcov-excl-line
+    Err("elliprd: Failed to converge.")
 }
 
 const N_MAX_ITERATIONS: usize = 50;
