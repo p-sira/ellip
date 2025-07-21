@@ -6,7 +6,7 @@
 use num_traits::Float;
 
 use crate::{
-    crate_util::{check_nan, declare},
+    crate_util::{check, declare},
     ellipeinc, ellipf, ellippi, StrErr,
 };
 
@@ -61,7 +61,7 @@ use super::{cel1, cel2, BulirschConst};
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, StrErr> {
-    check_nan!(el1, [x, kc]);
+    check!(@nan, el1, [x, kc]);
 
     if x == 0.0 {
         return Ok(0.0);
@@ -167,7 +167,7 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, StrErr> {
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
-    check_nan!(el2, [x, kc, a, b]);
+    check!(@nan, el2, [x, kc, a, b]);
 
     if x == 0.0 {
         return Ok(0.0);
@@ -294,7 +294,7 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, StrEr
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
-    check_nan!(el3, [x, kc, p]);
+    check!(@nan, el3, [x, kc, p]);
 
     if kc == 0.0 {
         return Err("el3: kc must not be zero.");

@@ -13,7 +13,7 @@
 
 use num_traits::Float;
 
-use crate::{crate_util::check_nan, elliprf, StrErr};
+use crate::{crate_util::check, elliprf, StrErr};
 
 use super::ellipk::ellipk_precise;
 
@@ -71,7 +71,7 @@ use super::ellipk::ellipk_precise;
 /// - The MathWorks, Inc. “ellipticF.” Accessed April 21, 2025. <https://www.mathworks.com/help/symbolic/sym.ellipticf.html>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
-    check_nan!(ellipf, [phi, m]);
+    check!(@nan, ellipf, [phi, m]);
 
     let invert = if phi < 0.0 { -1.0 } else { 1.0 };
     let phi = phi.abs();

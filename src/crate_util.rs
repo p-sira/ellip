@@ -3,19 +3,19 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-macro_rules! check_nan {
-    ($fn_name:ident, [$first:ident]) => {
-        if $first.is_nan() {
-            return Err(concat![stringify!($fn_name), ": Arguments cannot be nan."])
-        }
+macro_rules! check {
+    ($fn_name:ident, $check_method:ident, $value_name:expr, [$($var:ident),* $(,)?] $(,)?) => {
+        $(
+            if $var.$check_method() {
+                return Err(concat![stringify!($fn_name), ": ", stringify!($var), " cannot be ", $value_name, "."])
+            }
+        )*
     };
-    ($fn_name:ident, [$first:ident, $($other:ident),* $(,)?] $(,)?) => {
-        if $first.is_nan() $(|| $other.is_nan())* {
-            return Err(concat![stringify!($fn_name), ": Arguments cannot be nan."])
-        }
+    (@nan, $fn_name:ident, [$($var:ident),* $(,)?] $(,)?) => {
+        check!($fn_name, is_nan, "nan", [$($var),*])
     };
 }
-pub(crate) use check_nan;
+pub(crate) use check;
 
 macro_rules! declare {
     (mut [$($var:ident $(= $value:expr)?),+ $(,)?]) => {

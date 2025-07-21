@@ -13,7 +13,7 @@
 
 use num_traits::Float;
 
-use crate::{crate_util::check_nan, elliprf, polyeval, StrErr};
+use crate::{crate_util::check, elliprf, polyeval, StrErr};
 
 /// Computes [complete elliptic integral of the first kind](https://dlmf.nist.gov/19.2.E8).
 /// ```text
@@ -59,7 +59,7 @@ use crate::{crate_util::check_nan, elliprf, polyeval, StrErr};
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
-    check_nan!(ellipk, [m]);
+    check!(@nan, ellipk, [m]);
 
     if m > 1.0 {
         return Err("ellipk: m must be less than 1.");

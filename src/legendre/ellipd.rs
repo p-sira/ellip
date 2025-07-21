@@ -13,7 +13,7 @@
 
 use num_traits::Float;
 
-use crate::{crate_util::check_nan, elliprd, StrErr};
+use crate::{crate_util::check, elliprd, StrErr};
 
 /// Computes [complete elliptic integral of Legendre's type](https://dlmf.nist.gov/19.2.E8).
 /// ```text
@@ -60,7 +60,7 @@ use crate::{crate_util::check_nan, elliprd, StrErr};
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipd<T: Float>(m: T) -> Result<T, StrErr> {
-    check_nan!(ellipd, [m]);
+    check!(@nan, ellipd, [m]);
 
     if m > 1.0 {
         return Err("ellipd: m must be less than 1.");
