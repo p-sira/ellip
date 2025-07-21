@@ -1,5 +1,12 @@
 # Changelog
 ## 0.3
+### 0.3.5
+**Improvements**
+- Handle special cases and edge cases (infinity, nan, etc.) for all `bulirsch` functions.
+- Add special cases documentation for `bulirsch` functions.
+- Increase test coverage.
+- Reduce package size.
+
 ### 0.3.4
 **Bug Fixes**
 - `ellippiinc`: Fix not returning error when n sin²φ = 1.
