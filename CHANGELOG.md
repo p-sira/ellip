@@ -93,7 +93,6 @@
 - Add Ellip logo
 - Add links to references in the documentations. 
 
-
 ## 0.1
 ### 0.1.2
 **Bug Fixes**
