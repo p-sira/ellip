@@ -305,7 +305,6 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
     }
 
     // Handle special cases
-    let phi = x.atan();
     let m = 1.0 - kc * kc;
     let n = 1.0 - p;
 
@@ -317,11 +316,11 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
         // A&S 17.7.20:
         if n < 1.0 {
             let vcr = p.sqrt();
-            return Ok((vcr * phi.tan()).atan() / vcr);
+            return Ok((vcr * x).atan() / vcr);
         } else {
             // v > 1:
             let vcr = (-p).sqrt();
-            let arg = vcr * phi.tan();
+            let arg = vcr * x;
             return Ok((arg.ln_1p() - (-arg).ln_1p()) / (2.0 * vcr));
         }
     }
@@ -337,14 +336,15 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
     // }
 
     // This cutpoint is empirical
+    let phi = x.atan();
     if p.abs() <= 1e-10 {
         if m == 0.0 {
-            return Ok(phi.tan());
+            return Ok(x);
         }
 
         // http://functions.wolfram.com/08.06.03.0008.01
         let sp2 = phi.sin() * phi.sin();
-        let mut result = (1.0 - m * sp2).sqrt() * phi.tan() - ellipeinc(phi, m)?;
+        let mut result = (1.0 - m * sp2).sqrt() * x - ellipeinc(phi, m)?;
         result = result / (1.0 - m);
         result = result + ellipf(phi, m)?;
         return Ok(result);
@@ -680,6 +680,8 @@ mod tests {
         assert_eq!(el1(INFINITY, 0.5).unwrap(), cel1(0.5).unwrap());
         // kc = inf: el1(x, inf) = 0
         assert_eq!(el1(0.5, INFINITY).unwrap(), 0.0);
+        // y = 0 branch in the loop
+        assert_close!(el1(1.0, 1.0).unwrap(), 0.7853981633974483, 1e-15);
         // x = nan or kc = nan: should return Err
         assert!(el1(NAN, 0.5).is_err());
         assert!(el1(0.5, NAN).is_err());
@@ -798,6 +800,11 @@ mod tests {
             el3(INFINITY, 0.5, 0.5).unwrap(),
             ellippi(0.5, 0.75).unwrap(),
             1e-15
+        );
+        // kc = 1, p > 0: el3(x, 1, p) = atan(sqrt(p) * x) / sqrt(p)
+        assert_eq!(
+            el3(4.0, 1.0, 0.5).unwrap(),
+            (0.5.sqrt() * 4.0).atan() / 0.5.sqrt()
         );
         // x = nan, kc = nan, or p = nan: should return Err
         assert!(el3(NAN, 0.5, 0.5).is_err());
