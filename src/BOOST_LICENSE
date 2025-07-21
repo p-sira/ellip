@@ -2,7 +2,7 @@ Ellip is licensed under The 3-Clause BSD, see LICENSE.
 Copyright 2025 Sira Pornsiriprasert <code@psira.me>
 
 Parts of Ellip are derivative work of Boost Math Library.
-Submodules that use Boost Math Library code are:
+Submodules that derive from Boost Math Library code are:
 
 Carlson Submodule
 - elliprc
