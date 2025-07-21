@@ -16,7 +16,6 @@ use num_traits::Float;
 use crate::{crate_util::check_nan, elliprg, polyeval, StrErr};
 
 /// Computes [complete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E8).
-///
 /// ```text
 ///           π/2
 ///          ⌠     ___________

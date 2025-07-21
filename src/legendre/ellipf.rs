@@ -18,7 +18,6 @@ use crate::{crate_util::check_nan, elliprf, StrErr};
 use super::ellipk::ellipk_precise;
 
 /// Computes [incomplete elliptic integral of the first kind](https://dlmf.nist.gov/19.2.E4).
-///
 /// ```text
 ///              φ
 ///             ⌠          dθ
