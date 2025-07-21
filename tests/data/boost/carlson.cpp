@@ -9,6 +9,11 @@
 #include <iomanip>
 #include <functional>
 
+/*
+ * Generate Boost Math test data of Carlson's elliptic integrals
+ * from wolfram data's arguments.
+ */
+
 // Helper to split a string by comma
 std::vector<std::string> split(const std::string& line) {
     std::vector<std::string> tokens;

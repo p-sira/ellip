@@ -1,6 +1,13 @@
 # Ellip is licensed under The 3-Clause BSD, see LICENSE.
 # Copyright 2025 Sira Pornsiriprasert <code@psira.me>
 
+"""
+A script to compare two test data files
+
+Take two files. Parse the files as CSV and extract the last value of each row.
+Compare those values using symmetric relative error. Report descriptive statistics. 
+"""
+
 import pandas as pd
 import numpy as np
 
