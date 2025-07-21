@@ -5,7 +5,10 @@
 
 use num_traits::Float;
 
-use crate::{crate_util::declare, ellipeinc, ellipf, StrErr};
+use crate::{
+    crate_util::{check_nan, declare},
+    ellipeinc, ellipf, ellippi, StrErr,
+};
 
 use super::{cel1, cel2, BulirschConst};
 
@@ -35,6 +38,11 @@ use super::{cel1, cel2, BulirschConst};
 ///
 /// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/el1_plot.html)
 ///
+/// ## Special Cases
+/// - el1(0, kc) = 0
+/// - el1(∞, kc) = cel1(kc)
+/// - el1(x, ∞) = 0
+///
 /// # Related Functions
 /// With x = tan φ and kc² = 1 - m,
 /// - [ellipf](crate::ellipf)(φ, m) = [el1](crate::el1)(x, kc) = [el2](crate::el2)(x, kc, 1, 1)
@@ -53,12 +61,18 @@ use super::{cel1, cel2, BulirschConst};
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, StrErr> {
+    check_nan!(el1, [x, kc]);
+
     if x == 0.0 {
         return Ok(0.0);
     }
 
     if kc == 0.0 {
         return Err("el1: kc cannot be zero.");
+    }
+
+    if kc == inf!() {
+        return Ok(0.0);
     }
 
     // phi = π/2
@@ -101,7 +115,6 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, StrErr> {
     Ok(if x < 0.0 { -e } else { e })
 }
 
-// Reference: Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
 /// Computes [incomplete elliptic integral of the second kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E12).
 /// ```text
 ///                       arctan(x)                                                   
@@ -130,11 +143,16 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, StrErr> {
 ///
 /// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/el2_plot.html)
 ///
+/// ## Special Cases
+/// - el2(0, kc, a, b) = 0
+/// - el2(x, kc, 0, 0) = 0
+/// - el2(∞, kc, a, b) = cel2(kc, a, b)
+///
 /// # Related Functions
 /// With x = tan φ and kc² = 1 - m,
 /// - [ellipf](crate::ellipf)(φ, m) = [el1](crate::el1)(x, kc) = [el2](crate::el2)(x, kc, 1, 1)
 /// - [ellipeinc](crate::ellipeinc)(φ, m) = [el2](crate::el2)(x, kc, 1, kc²)
-/// - [el2](crate::el2)(∞, kc, a, b) = [cel1](crate::cel2)(kc, a, b)
+/// - [el2](crate::el2)(∞, kc, a, b) = [cel2](crate::cel2)(kc, a, b)
 ///
 /// # Examples
 /// ```
@@ -149,6 +167,8 @@ pub fn el1<T: Float + BulirschConst>(x: T, kc: T) -> Result<T, StrErr> {
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
+    check_nan!(el2, [x, kc, a, b]);
+
     if x == 0.0 {
         return Ok(0.0);
     }
@@ -252,9 +272,14 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, StrEr
 ///
 /// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/el3_plot.html)
 ///
+/// ## Special Cases
+/// - el3(0, kc, p) = 0
+/// - el3(∞, kc, p) = cel(kc, p, 1, 1) = Π(1-p, 1-kc²)
+///
 /// # Related Functions
-/// With x = tan φ, p = 1 - n, and kc² = 1 - m,
+/// With x = tan φ, kc² = 1 - m, and p = 1 - n,
 /// - [ellippiinc](crate::ellippiinc)(φ, n, m) = [el3](crate::el3)(x, kc, p)
+/// - [el3](crate::el3)(∞, kc, p) = [cel](crate::cel)(kc, p, 1, 1) = [ellippi](crate::ellippi)(n, m)
 ///
 /// # Examples
 /// ```
@@ -269,6 +294,8 @@ pub fn el2<T: Float + BulirschConst>(x: T, kc: T, a: T, b: T) -> Result<T, StrEr
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
+    check_nan!(el3, [x, kc, p]);
+
     if kc == 0.0 {
         return Err("el3: kc must not be zero.");
     }
@@ -281,6 +308,10 @@ pub fn el3<T: Float + BulirschConst>(x: T, kc: T, p: T) -> Result<T, StrErr> {
     let phi = x.atan();
     let m = 1.0 - kc * kc;
     let n = 1.0 - p;
+
+    if x == inf!() {
+        return ellippi(n, m);
+    }
 
     if kc == 1.0 {
         // A&S 17.7.20:
@@ -638,6 +669,23 @@ mod tests {
     }
 
     #[test]
+    fn test_el1_special_cases() {
+        use crate::bulirsch::cel1;
+        use std::f64::{INFINITY, NAN};
+        // x = 0: el1(0, kc) = 0
+        assert_eq!(el1(0.0, 0.5).unwrap(), 0.0);
+        // kc = 0: should return Err
+        assert!(el1(0.5, 0.0).is_err());
+        // x = inf: el1(inf, kc) = cel1(kc)
+        assert_eq!(el1(INFINITY, 0.5).unwrap(), cel1(0.5).unwrap());
+        // kc = inf: el1(x, inf) = 0
+        assert_eq!(el1(0.5, INFINITY).unwrap(), 0.0);
+        // x = nan or kc = nan: should return Err
+        assert!(el1(NAN, 0.5).is_err());
+        assert!(el1(0.5, NAN).is_err());
+    }
+
+    #[test]
     fn test_el2() {
         fn test_special_cases(x: f64, kc: f64) {
             let m = 1.0 - kc * kc;
@@ -663,9 +711,23 @@ mod tests {
     }
 
     #[test]
-    fn test_el2_err() {
-        // kc == 0
-        assert!(el2(1.0, 0.0, 1.0, 1.0).is_err());
+    fn test_el2_special_cases() {
+        use crate::bulirsch::cel2;
+        use std::f64::{INFINITY, NAN};
+        // x = 0: el2(0, kc, a, b) = 0
+        assert_eq!(el2(0.0, 0.5, 1.0, 1.0).unwrap(), 0.0);
+        // kc = 0: should return Err
+        assert!(el2(0.5, 0.0, 1.0, 1.0).is_err());
+        // a = 0, b = 0: el2(x, kc, 0, 0) = 0
+        assert_eq!(el2(0.5, 0.5, 0.0, 0.0).unwrap(), 0.0);
+        // x = inf: el2(inf, kc, a, b) = cel2(kc, a, b)
+        assert_eq!(
+            el2(INFINITY, 0.5, 1.0, 1.0).unwrap(),
+            cel2(0.5, 1.0, 1.0).unwrap()
+        );
+        // x = nan or kc = nan: should return Err
+        assert!(el2(NAN, 0.5, 1.0, 1.0).is_err());
+        assert!(el2(0.5, NAN, 1.0, 1.0).is_err());
     }
 
     #[test]
@@ -718,8 +780,28 @@ mod tests {
     }
 
     #[test]
-    fn test_el3_err() {
-        // kc == 0
-        assert!(el3(1.0, 0.0, 1.0).is_err());
+    fn test_el3_special_cases() {
+        use crate::cel;
+        use std::f64::{INFINITY, NAN};
+        // x = 0: el3(0, kc, p) = 0
+        assert_eq!(el3(0.0, 0.5, 0.5).unwrap(), 0.0);
+        // kc = 0: should return Err
+        assert!(el3(0.5, 0.0, 0.5).is_err());
+        // x = inf: el3(inf, kc, p) = cel(kc, p, 1, 1)
+        assert_close!(
+            el3(INFINITY, 0.5, 0.5).unwrap(),
+            cel(0.5, 0.5, 1.0, 1.0).unwrap(),
+            1e-15
+        );
+        // x = inf: el3(inf, kc, p) = Π(n, m)
+        assert_close!(
+            el3(INFINITY, 0.5, 0.5).unwrap(),
+            ellippi(0.5, 0.75).unwrap(),
+            1e-15
+        );
+        // x = nan, kc = nan, or p = nan: should return Err
+        assert!(el3(NAN, 0.5, 0.5).is_err());
+        assert!(el3(0.5, NAN, 0.5).is_err());
+        assert!(el3(0.5, 0.5, NAN).is_err());
     }
 }
