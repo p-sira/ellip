@@ -76,11 +76,11 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     let invert = if phi < 0.0 { -1.0 } else { 1.0 };
     let phi = phi.abs();
 
-    if phi >= max_val!() {
-        return Ok(invert * inf!());
-    }
-
+    // Large phis
     if phi > 1.0 / epsilon!() {
+        if phi >= max_val!() {
+            return Ok(invert * inf!());
+        }
         // Phi is so large that phi%pi is necessarily zero (or garbage),
         // just return the second part of the duplication formula:
         return Ok(invert * 2.0 * phi * ellipk_precise(m)? / pi!());
@@ -99,8 +99,7 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     }
 
     let s2p = rphi.sin() * rphi.sin();
-    let ms2p = m * s2p;
-    if ms2p >= 1.0 {
+    if m * s2p >= 1.0 {
         return Err("ellipf: m sin²φ must be smaller than one.");
     }
 
