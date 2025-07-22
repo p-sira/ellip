@@ -11,7 +11,7 @@ use crate::{
     ellipeinc, ellipf, ellippi, StrErr,
 };
 
-use super::{cel1, cel2, _BulirschConst};
+use super::{_BulirschConst, cel1, cel2};
 
 /// Computes [incomplete elliptic integral of the first kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E11_5).
 /// ```text
