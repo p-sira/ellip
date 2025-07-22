@@ -1,6 +1,9 @@
 # Changelog
 ## 0.3
 ### 0.3.5
+**Deprecations**
+- Deprecate `BulirschConst`: The trait signature will be changed and the trait will be relocated under `unstable` flag.
+
 **Improvements**
 - Handle special cases and edge cases (infinity, nan, etc.) for all `bulirsch` functions.
 - Add special cases documentation for `bulirsch` functions.
