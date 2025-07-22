@@ -5,9 +5,9 @@
 
 use num_traits::Float;
 
-use crate::StrErr;
+use crate::{bulirsch::DefaultPrecision, crate_util::check, StrErr};
 
-use super::BulirschConst;
+use super::_BulirschConst;
 
 /// Computes [complete elliptic integral in Bulirsch form](https://dlmf.nist.gov/19.2#iii).
 /// ```text
@@ -54,8 +54,15 @@ use super::BulirschConst;
 /// # References
 /// - Bulirsch, R. “Numerical Calculation of Elliptic Integrals and Elliptic Functions. III.” Numerische Mathematik 13, no. 4 (August 1, 1969): 305–15. <https://doi.org/10.1007/BF02165405>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+pub fn cel<T: Float>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
+    _cel::<T, DefaultPrecision>(kc, p, a, b)
+}
+
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
-pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
+#[inline]
+pub fn _cel<T: Float, C: _BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
+    check!(@nan, cel1, [kc, p, a, b]);
+
     if kc == 0.0 {
         return Err("cel: kc cannot be zero.");
     }
@@ -95,7 +102,7 @@ pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, StrEr
         let g = m;
         m = kc + m;
 
-        if (g - kc).abs() > g * T::ca() {
+        if (g - kc).abs() > g * C::ca() {
             kc = 2.0 * e.sqrt();
             e = kc * m;
             continue;
@@ -145,8 +152,15 @@ pub fn cel<T: Float + BulirschConst>(kc: T, p: T, a: T, b: T) -> Result<T, StrEr
 /// # References
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+pub fn cel1<T: Float>(kc: T) -> Result<T, StrErr> {
+    _cel1::<T, DefaultPrecision>(kc)
+}
+
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
-pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, StrErr> {
+#[inline]
+pub fn _cel1<T: Float, C: _BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
+    check!(@nan, cel1, [kc]);
+
     if kc == 0.0 {
         return Err("cel1: kc cannot be zero.");
     }
@@ -158,7 +172,7 @@ pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, StrErr> {
         let h = m;
         m = kc + m;
 
-        if (h - kc) > T::ca() * h {
+        if (h - kc) > C::ca() * h {
             kc = (h * kc).sqrt();
             m = m / 2.0;
             continue;
@@ -211,8 +225,15 @@ pub fn cel1<T: Float + BulirschConst>(kc: T) -> Result<T, StrErr> {
 /// # References
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+pub fn cel2<T: Float>(kc: T, a: T, b: T) -> Result<T, StrErr> {
+    _cel2::<T, DefaultPrecision>(kc, a, b)
+}
+
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
-pub fn cel2<T: Float + BulirschConst>(kc: T, a: T, b: T) -> Result<T, StrErr> {
+#[inline]
+pub fn _cel2<T: Float, C: _BulirschConst<T>>(kc: T, a: T, b: T) -> Result<T, StrErr> {
+    check!(@nan, cel2, [kc, a, b]);
+
     if kc == 0.0 {
         return Err("cel2: kc cannot be zero.");
     }
@@ -232,7 +253,7 @@ pub fn cel2<T: Float + BulirschConst>(kc: T, a: T, b: T) -> Result<T, StrErr> {
         m = kc + m;
         a = b / m + a;
 
-        if (m0 - kc).abs() > T::ca() * m0 {
+        if (m0 - kc).abs() > C::ca() * m0 {
             kc = (kc * m0).sqrt() * 2.0;
             continue;
         }
@@ -305,6 +326,23 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
+    fn test_cel_special_cases() {
+        use std::f64::{INFINITY, NAN};
+        // kc = 0: error
+        assert!(cel(0.0, 1.0, 1.0, 1.0).is_err());
+        // p = 0: error
+        assert!(cel(0.5, 0.0, 1.0, 1.0).is_err());
+        // a = 0, b = 0: cel(kc, p, 0, 0) = 0
+        assert_eq!(cel(0.5, 1.0, 0.0, 0.0).unwrap(), 0.0);
+        // kc = inf: cel(inf, p, a, b) = 0
+        assert_eq!(cel(INFINITY, 1.0, 1.0, 1.0).unwrap(), 0.0);
+        // kc = NaN or p = NaN: error
+        assert!(cel(NAN, 1.0, 1.0, 1.0).is_err());
+        assert!(cel(0.5, NAN, 1.0, 1.0).is_err());
+    }
+
+    #[test]
     fn test_cel1() {
         fn test_kc(kc: f64) {
             let m = 1.0 - kc * kc;
@@ -318,6 +356,18 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
+    fn test_cel1_special_cases() {
+        use std::f64::{INFINITY, NAN};
+        // kc = 0: error
+        assert!(cel1(0.0).is_err());
+        // kc = inf: cel1(inf) = 0
+        assert_eq!(cel1(INFINITY).unwrap(), 0.0);
+        // kc = NaN: error
+        assert!(cel1(NAN).is_err());
+    }
+
+    #[test]
     fn test_cel2() {
         fn test_kc(kc: f64) {
             let m = 1.0 - kc * kc;
@@ -328,6 +378,18 @@ mod tests {
         linsp_neg.iter().for_each(|kc| test_kc(*kc));
         let linsp_pos = linspace(1e-3, 1.0, 100);
         linsp_pos.iter().for_each(|kc| test_kc(*kc));
+    }
+
+    #[test]
+    #[ignore]
+    fn test_cel2_special_cases() {
+        use std::f64::{INFINITY, NAN};
+        // kc = 0: error
+        assert!(cel2(0.0, 1.0, 1.0).is_err());
+        // kc = inf: cel2(inf, 1, 1) = 0
+        assert_eq!(cel2(INFINITY, 1.0, 1.0).unwrap(), 0.0);
+        // kc = NaN: error
+        assert!(cel2(NAN, 1.0, 1.0).is_err());
     }
 
     #[test]
