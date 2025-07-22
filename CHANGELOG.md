@@ -2,13 +2,19 @@
 ## 0.3
 ### 0.3.5
 **Deprecations**
-- Deprecate `BulirschConst`: The trait signature will be changed and the trait will be relocated under `unstable` flag.
+- Deprecate `BulirschConst`: The trait signature will be changed from `BulirschConst` to `BulirschConst<T>` and the trait will be relocated under `unstable` flag.
+
+**Bug Fixes**
+- `el3`: Fix incorrect values in `pm > 0.5` branch.
 
 **Improvements**
+- Loosen the bounds of the `bulirsch` functions.
+- Improve the performance of the `bulirsch` functions.
 - Handle special cases and edge cases (infinity, nan, etc.) for all `bulirsch` functions.
 - Add special cases documentation for `bulirsch` functions.
 - Increase test coverage.
 - Reduce package size.
+- Include `bulirsch` functions in the benchmark module.
 
 ### 0.3.4
 **Bug Fixes**
