@@ -4,7 +4,7 @@
  */
 
 use ellip::ellipd;
-use ellip_plot_graph::figure_path;
+use ellip_plot_graph::*;
 use plotly::{
     ImageFormat, Layout, Plot, Scatter,
     color::NamedColor,
@@ -51,7 +51,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .show_arrow(false)]),
     );
 
-    plot.show_html(figure_path!("ellipd_plot.html"));
+    make_html!("ellipd_plot.html");
     plot.write_image(
         figure_path!("ellipd_plot.svg"),
         ImageFormat::SVG,

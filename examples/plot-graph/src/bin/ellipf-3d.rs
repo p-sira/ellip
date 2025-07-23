@@ -4,7 +4,7 @@
  */
 
 use ellip::ellipf;
-use ellip_plot_graph::figure_path;
+use ellip_plot_graph::*;
 use plotly::{
     Layout, Plot, Surface,
     common::{ColorScale, ColorScalePalette},
@@ -96,7 +96,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .show_arrow(false)]),
     );
 
-    plot.show_html(figure_path!("ellipf_plot_3d.html"));
+    make_html!("ellipf_plot_3d.html");
     // Current plotly.rs doesn't support exporting 3D plot as image.
     // The workaround is using the capture function in the html to save a png file.
     // plot.write_image(figure_path!("ellipf_plot_3d.svg"), ImageFormat::SVG, 900, 900, 0.2);

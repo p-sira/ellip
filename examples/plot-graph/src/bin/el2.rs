@@ -6,7 +6,7 @@
 use std::f64::consts::{FRAC_PI_2, FRAC_PI_3, FRAC_PI_4};
 
 use ellip::el2;
-use ellip_plot_graph::figure_path;
+use ellip_plot_graph::*;
 use plotly::{
     ImageFormat, Layout, Plot, Scatter,
     color::NamedColor,
@@ -79,7 +79,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                  .show_arrow(false)]),
      );
 
-    plot.show_html(figure_path!("el2_plot.html"));
+    make_html!("el2_plot.html");
     plot.write_image(
         figure_path!("el2_plot.svg"),
         ImageFormat::SVG,
