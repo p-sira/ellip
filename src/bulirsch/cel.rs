@@ -36,7 +36,7 @@ use super::_BulirschConst;
 /// ## Domain
 /// - Returns error if kc = 0 or p = 0.
 /// - Returns the Cauchy principal value for p < 0.
-/// - Returns error if multiple arguments are infinite.
+/// - Returns error if more than one arguments are infinite.
 ///
 /// ## Graph
 /// ![General Complete Elliptic Integral](https://github.com/p-sira/ellip/blob/main/figures/cel_plot.svg?raw=true)
@@ -234,6 +234,7 @@ pub fn _cel1<T: Float, C: _BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
 ///
 /// ## Domain
 /// - Returns error if kc = 0.
+/// - Returns error if more than one arguments are infinite.
 ///
 /// ## Graph
 /// ![Bulirsch's Complete Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/cel2_plot.svg?raw=true)
