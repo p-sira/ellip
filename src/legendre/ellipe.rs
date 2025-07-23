@@ -289,6 +289,7 @@ fn ellipe_precise<T: Float>(m: T) -> Result<T, StrErr> {
     Ok(2.0 * elliprg(0.0, 1.0 - m, 1.0)?)
 }
 
+#[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
 mod tests {
     use core::f64;

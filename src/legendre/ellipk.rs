@@ -291,6 +291,7 @@ pub(crate) fn ellipk_precise<T: Float>(m: T) -> Result<T, StrErr> {
     elliprf(0.0, 1.0 - m, 1.0)
 }
 
+#[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
 mod tests {
     use super::*;

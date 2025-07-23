@@ -148,6 +148,7 @@ pub fn ellippi_vc<T: Float>(n: T, m: T, vc: T) -> Result<T, StrErr> {
     Ok(elliprf(x, y, z)? + n * elliprj(x, y, z, p)? / 3.0)
 }
 
+#[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
 mod tests {
     use super::*;

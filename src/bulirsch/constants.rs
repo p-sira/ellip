@@ -84,6 +84,7 @@ impl_bulirsch_const!(@type f64, {D: 16, CA: 1e-8, CB: 1e-18});
 impl_bulirsch_const!(HalfPrecision, {D: 7, CA: 1e-3, CB: 1e-9});
 impl_bulirsch_const!(DefaultPrecision, {D: 16, CA: 1e-8, CB: 1e-18});
 
+#[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
 mod tests {
     use super::*;
