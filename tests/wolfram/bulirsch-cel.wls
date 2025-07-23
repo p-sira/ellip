@@ -7,13 +7,19 @@
 
 epsilon = 2.22*^-16;
 
-mu = 1 * epsilon;
+muCel = 1 * epsilon;
 
-kcRange = Union[Subdivide[-2, -mu, 5], Subdivide[mu, 2, 5]];
+muCel1 = 1 * epsilon;
 
-pRange = Subdivide[mu, 1, 5];
+muCel2 = 1 * epsilon;
 
-pRangePV = Subdivide[-1, -mu, 5];
+(* Bulirsch's General Complete Elliptic integrals *)
+
+kcRange = Union[Subdivide[-2, -muCel, 5], Subdivide[muCel, 2, 5]];
+
+pRange = Subdivide[muCel, 1, 5];
+
+pRangePV = Subdivide[-1, -muCel, 5];
 
 aRange = Subdivide[-2, 2, 4];
 
@@ -30,3 +36,22 @@ celPV = Select[Flatten[Table[{kc, p, a, b, ResourceFunction["BulirschCEL"
 Export["../data/wolfram/cel_data.csv", N[cel], "CSV"];
 
 Export["../data/wolfram/cel_pv.csv", N[celPV], "CSV"];
+
+(* Bulirsch's Complete Elliptic integrals of the First Kind *)
+
+kcRange = Union[Subdivide[-2, -muCel1, 50], Subdivide[muCel1, 2, 50]];
+
+cel1 = Select[Table[{kc, EllipticK[1 - kc * kc]}, {kc, kcRange}], Element[
+    #[[2]], Reals]&];
+
+Export["../data/wolfram/cel1_data.csv", N[cel1], "CSV"];
+
+(* Bulirsch's Complete Elliptic integrals of the Second Kind *)
+
+kcRange = Union[Subdivide[-2, -muCel2, 10], Subdivide[muCel2, 2, 10]];
+
+cel2 = Select[Flatten[Table[{kc, a, b, ResourceFunction["BulirschCEL"
+    ][kc * kc, 1, a, b]}, {kc, kcRange}, {a, aRange}, {b, bRange}], 2], Element[
+    #[[4]], Reals]&];
+
+Export["../data/wolfram/cel2_data.csv", N[cel2], "CSV"];
