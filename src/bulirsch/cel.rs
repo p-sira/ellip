@@ -191,7 +191,7 @@ pub fn _cel1<T: Float, C: _BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
         let h = m;
         m = kc + m;
 
-        if (h - kc) > C::ca() * h {
+        if (h - kc).abs() > C::ca() * h {
             kc = (h * kc).sqrt();
             m = m / 2.0;
             continue;
