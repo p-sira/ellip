@@ -51,7 +51,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .show_arrow(false)]),
     );
 
-    make_html!("ellipk_plot.html");
+    make_html!(plot, "ellipk_plot.html");
     plot.write_image(
         figure_path!("ellipk_plot.svg"),
         ImageFormat::SVG,

@@ -68,7 +68,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .show_arrow(false)]),
     );
 
-    make_html!("ellipdinc_plot.html");
+    make_html!(plot, "ellipdinc_plot.html");
     plot.write_image(
         figure_path!("ellipdinc_plot.svg"),
         ImageFormat::SVG,

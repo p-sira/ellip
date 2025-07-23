@@ -51,7 +51,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .show_arrow(false)]),
     );
 
-    make_html!("ellipe_plot.html");
+    make_html!(plot, "ellipe_plot.html");
     plot.write_image(
         figure_path!("ellipe_plot.svg"),
         ImageFormat::SVG,

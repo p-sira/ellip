@@ -67,7 +67,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .show_arrow(false)]),
     );
 
-    make_html!("elliprf_plot.html");
+    make_html!(plot, "elliprf_plot.html");
     plot.write_image(
         figure_path!("elliprf_plot.svg"),
         ImageFormat::SVG,

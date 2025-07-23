@@ -79,7 +79,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                  .show_arrow(false)]),
      );
 
-    make_html!("el1_plot.html");
+    make_html!(plot, "el1_plot.html");
     plot.write_image(
         figure_path!("el1_plot.svg"),
         ImageFormat::SVG,

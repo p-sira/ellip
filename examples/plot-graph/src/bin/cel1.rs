@@ -57,7 +57,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .show_arrow(false)]),
     );
 
-    make_html!("cel1_plot.html");
+    make_html!(plot, "cel1_plot.html");
     plot.write_image(
         figure_path!("cel1_plot.svg"),
         ImageFormat::SVG,
