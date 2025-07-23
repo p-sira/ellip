@@ -27,6 +27,22 @@ macro_rules! check {
 }
 pub(crate) use check;
 
+macro_rules! case {
+    ($predicate:expr, $res:expr) => {
+        if $predicate {
+            return Ok($res);
+        }
+    };
+    (@any [$($var:expr),+] == $value:expr, $res:expr) =>{
+        $(
+            if $var == $value {
+                return Ok($res)
+            }
+        )+
+    }
+}
+pub(crate) use case;
+
 macro_rules! declare {
     (mut [$($var:ident $(= $value:expr)?),+ $(,)?]) => {
         $(let mut $var $(= $value)?;)+
