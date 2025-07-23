@@ -8,19 +8,11 @@
 //  Copyright (c) 2006 Xiaogang Zhang
 //  Copyright (c) 2006 John Maddock
 //  Use, modification and distribution are subject to the
-//  Boost Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
-//  History:
-//  XZ wrote the original of this file as part of the Google
-//  Summer of Code 2006.  JM modified it to fit into the
-//  Boost.Math conceptual framework better, and to correctly
-//  handle the various corner cases.
-//
+//  Boost Software License, Version 1.0.
 
 use num_traits::Float;
 
-use crate::crate_util::check_nan;
+use crate::crate_util::check;
 use crate::legendre::ellippi::ellippi_vc;
 
 use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj, StrErr};
@@ -91,7 +83,7 @@ use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj, StrErr};
 /// - Wolfram Research. “EllipticPi,” 2022. <https://reference.wolfram.com/language/ref/EllipticPi.html>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellippiinc<T: Float>(phi: T, n: T, m: T) -> Result<T, StrErr> {
-    check_nan!(ellippiinc, [phi, n, m]);
+    check!(@nan, ellippiinc, [phi, n, m]);
     ellippiinc_vc(phi, n, m, 1.0 - n)
 }
 
@@ -330,6 +322,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
     Ok(result)
 }
 
+#[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
 mod tests {
     use crate::compare_test_data_boost;

@@ -9,24 +9,15 @@
 //  Copyright (c) 2006 John Maddock
 //  Copyright (c) 2024 Matt Borland
 //  Use, modification and distribution are subject to the
-//  Boost Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
-//  History:
-//  XZ wrote the original of this file as part of the Google
-//  Summer of Code 2006.  JM modified it to fit into the
-//  Boost.Math conceptual framework better, and to ensure
-//  that the code continues to work no matter how many digits
-//  type T has.
+//  Boost Software License, Version 1.0.
 
 use num_traits::Float;
 
-use crate::{crate_util::check_nan, elliprf, StrErr};
+use crate::{crate_util::check, elliprf, StrErr};
 
 use super::ellipk::ellipk_precise;
 
 /// Computes [incomplete elliptic integral of the first kind](https://dlmf.nist.gov/19.2.E4).
-///
 /// ```text
 ///              φ
 ///             ⌠          dθ
@@ -80,16 +71,16 @@ use super::ellipk::ellipk_precise;
 /// - The MathWorks, Inc. “ellipticF.” Accessed April 21, 2025. <https://www.mathworks.com/help/symbolic/sym.ellipticf.html>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
-    check_nan!(ellipf, [phi, m]);
+    check!(@nan, ellipf, [phi, m]);
 
     let invert = if phi < 0.0 { -1.0 } else { 1.0 };
     let phi = phi.abs();
 
-    if phi >= max_val!() {
-        return Ok(invert * inf!());
-    }
-
+    // Large phis
     if phi > 1.0 / epsilon!() {
+        if phi >= max_val!() {
+            return Ok(invert * inf!());
+        }
         // Phi is so large that phi%pi is necessarily zero (or garbage),
         // just return the second part of the duplication formula:
         return Ok(invert * 2.0 * phi * ellipk_precise(m)? / pi!());
@@ -108,8 +99,7 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     }
 
     let s2p = rphi.sin() * rphi.sin();
-    let ms2p = m * s2p;
-    if ms2p >= 1.0 {
+    if m * s2p >= 1.0 {
         return Err("ellipf: m sin²φ must be smaller than one.");
     }
 
@@ -169,6 +159,7 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     Ok(invert * result)
 }
 
+#[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
 mod tests {
     use super::*;

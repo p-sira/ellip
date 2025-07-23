@@ -6,14 +6,64 @@
 use criterion::{
     criterion_group, criterion_main, measurement::Measurement, BenchmarkGroup, Criterion,
 };
-use std::{
-    fs::File,
-    io::{BufRead, BufReader},
-    path::Path,
-    str::FromStr,
-};
 
-fn params_from_file(file_path: &str) -> Vec<Vec<f64>> {
+// Reuse from generate_error_report
+mod parser {
+    use ellip::StrErr;
+    use num_traits::Float;
+
+    fn parse_wolfram_str<T: Float>(s: &str) -> Result<T, StrErr> {
+        Ok(match s.trim() {
+            "Infinity" => T::infinity(),
+            "-Infinity" => T::neg_infinity(),
+            "ComplexInfinity" => T::infinity(),
+            "Indeterminate" => T::nan(),
+            "NaN" => T::nan(),
+            _ => T::from(s.parse::<f64>().map_err(|_| "Cannot parse float")?)
+                .expect("Cannot parse float"),
+        })
+    }
+
+    /// Reads wolfram data from file and returns a vector of Cases
+    pub fn read_wolfram_data<T: Float>(file_path: &str) -> Result<Vec<Vec<T>>, StrErr> {
+        use csv::ReaderBuilder;
+        use std::fs::File;
+        use std::path::Path;
+
+        let path = Path::new(file_path);
+        let file = File::open(path).map_err(|_| {
+         eprintln!("Test data not found: {file_path} Download from: https://github.com/p-sira/ellip/tree/main/tests/data");
+         "Test data not found."
+     })?;
+        let mut reader = ReaderBuilder::new().has_headers(false).from_reader(file);
+
+        let mut results = Vec::new();
+
+        for record in reader.records() {
+            let row = record.expect("Cannot read row");
+            let len = row.len();
+
+            let inputs = row
+                .iter()
+                .take(len - 1)
+                .map(|s| parse_wolfram_str(s).expect(&format!("Cannot parse data {s}")))
+                .collect();
+
+            results.push(inputs);
+        }
+
+        Ok(results)
+    }
+}
+
+fn params_from_boost_file(file_path: &str) -> Vec<Vec<f64>> {
+    use std::{
+        fs::File,
+        io::{BufRead, BufReader},
+        path::Path,
+        str::FromStr,
+    };
+
     let path = Path::new(file_path);
     if !path.exists() {
         panic!("Test data not found: {}", file_path);
@@ -48,12 +98,47 @@ fn bench_cases<M: Measurement>(
     });
 }
 
+macro_rules! wrap_functions {
+    ($($func:ident : $n_args:tt),* $(,)?) => {
+        $(
+            fn $func(inp: &[f64]) -> f64 {
+                wrap_functions!(@call $func, inp, $n_args)
+            }
+        )*
+    };
+
+    (@m: $($func:ident : $n_args:tt),* $(,)?) => {
+        $(
+            fn $func(inp: &[f64]) -> f64 {
+                wrap_functions!(@call_m $func, inp, $n_args)
+            }
+        )*
+    };
+
+    (@call $func:ident, $inp:ident, 1) => { ellip::$func($inp[0]).unwrap() };
+    (@call $func:ident, $inp:ident, 2) => { ellip::$func($inp[0], $inp[1]).unwrap() };
+    (@call $func:ident, $inp:ident, 3) => { ellip::$func($inp[0], $inp[1], $inp[2]).unwrap() };
+    (@call $func:ident, $inp:ident, 4) => { ellip::$func($inp[0], $inp[1], $inp[2], $inp[3]).unwrap() };
+
+    // Convert k to m
+    (@call_m $func:ident, $inp:ident, 1) => { ellip::$func($inp[0] * $inp[0]).unwrap() };
+    (@call_m $func:ident, $inp:ident, 2) => { ellip::$func($inp[0], $inp[1] * $inp[1]).unwrap() };
+    (@call_m $func:ident, $inp:ident, 3) => { ellip::$func($inp[0], $inp[1], $inp[2] * $inp[2]).unwrap() };
+    (@call_m $func:ident, $inp:ident, 4) => { ellip::$func($inp[0], $inp[1], $inp[2], $inp[3] * $inp[3]).unwrap() };
+}
+
 macro_rules! generate_benchmarks {
-    ($name:ident, $category:expr, $($func:ident),*) => {
-        pub fn $name(c: &mut Criterion) {
+    (@params boost, $func:ident) => {
+        params_from_boost_file(concat!("tests/data/boost/", stringify!($func), "_data.txt"))
+    };
+    (@params wolfram, $func:ident) => {
+        parser::read_wolfram_data(concat!("tests/data/wolfram/", stringify!($func), "_data.csv")).unwrap()
+    };
+    ($bench_name:ident, [$($func:ident),*], $test_data:ident) => {
+        pub fn $bench_name(c: &mut Criterion) {
             $(
-                let mut group = c.benchmark_group($category);
-                let cases = params_from_file(concat!("tests/data/boost/", stringify!($func), "_data.txt"));
+                let mut group = c.benchmark_group(stringify!($bench_name));
+                let cases = generate_benchmarks!(@params $test_data, $func);
 
                 bench_cases(&mut group, stringify!($func), &|inp| {
                     $func(inp)
@@ -63,72 +148,19 @@ macro_rules! generate_benchmarks {
             )*
         }
     };
+    (legendre, [$($func:ident : $n_args:tt),* $(,)?], $test_data:ident $(,)?) => {
+        wrap_functions! {@m: $($func : $n_args),*}
+        generate_benchmarks! {legendre, [$($func),*], $test_data}
+    };
+    ($bench_name:ident, [$($func:ident : $n_args:tt),* $(,)?], $test_data:ident $(,)?) => {
+        wrap_functions! {$($func : $n_args),*}
+        generate_benchmarks! {$bench_name, [$($func),*], $test_data}
+    };
 }
 
-fn ellipk(inp: &[f64]) -> f64 {
-    ellip::ellipk(inp[0] * inp[0]).unwrap()
-}
+generate_benchmarks! {legendre, [ellipk:1, ellipe:1, ellipf:2, ellipeinc:2, ellippi:2, ellippiinc:3], boost}
+generate_benchmarks! {carlson, [elliprf:3, elliprg:3, elliprj:4, elliprc:2, elliprd:3], boost}
+generate_benchmarks! {bulirsch, [cel:4, el1:2, el2:4, el3:3], wolfram} // cel1:1, cel2:3
 
-fn ellipe(inp: &[f64]) -> f64 {
-    ellip::ellipe(inp[0] * inp[0]).unwrap()
-}
-
-fn ellipf(inp: &[f64]) -> f64 {
-    ellip::ellipf(inp[0], inp[1] * inp[1]).unwrap()
-}
-
-fn ellipeinc(inp: &[f64]) -> f64 {
-    ellip::ellipeinc(inp[0], inp[1] * inp[1]).unwrap()
-}
-
-fn ellippi(inp: &[f64]) -> f64 {
-    ellip::ellippi(inp[0], inp[1] * inp[1]).unwrap()
-}
-
-fn ellippiinc(inp: &[f64]) -> f64 {
-    ellip::ellippiinc(inp[1], inp[0], inp[2] * inp[2]).unwrap()
-}
-
-fn elliprf(inp: &[f64]) -> f64 {
-    ellip::elliprf(inp[0], inp[1], inp[2]).unwrap()
-}
-
-fn elliprg(inp: &[f64]) -> f64 {
-    ellip::elliprg(inp[0], inp[1], inp[2]).unwrap()
-}
-
-fn elliprj(inp: &[f64]) -> f64 {
-    ellip::elliprj(inp[0], inp[1], inp[2], inp[3]).unwrap()
-}
-
-fn elliprc(inp: &[f64]) -> f64 {
-    ellip::elliprc(inp[0], inp[1]).unwrap()
-}
-
-fn elliprd(inp: &[f64]) -> f64 {
-    ellip::elliprd(inp[0], inp[1], inp[2]).unwrap()
-}
-
-generate_benchmarks!(
-    bench_legendre,
-    "legendre",
-    ellipk,
-    ellipe,
-    ellipf,
-    ellipeinc,
-    ellippi,
-    ellippiinc
-);
-
-generate_benchmarks!(
-    bench_carlson,
-    "carlson",
-    elliprf,
-    elliprg,
-    elliprj,
-    elliprc,
-    elliprd
-);
-
-criterion_group!(benches, bench_legendre, bench_carlson);
+criterion_group!(benches, legendre, carlson, bulirsch);
 criterion_main!(benches);

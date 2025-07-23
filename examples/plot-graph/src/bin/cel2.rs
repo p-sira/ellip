@@ -4,7 +4,7 @@
  */
 
 use ellip::cel2;
-use ellip_plot_graph::figure_path;
+use ellip_plot_graph::*;
 use plotly::{
     ImageFormat, Layout, Plot, Scatter,
     color::NamedColor,
@@ -76,7 +76,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .show_arrow(false)]),
     );
 
-    plot.show_html(figure_path!("cel2_plot.html"));
+    make_html!(plot, "cel2_plot.html");
     plot.write_image(
         figure_path!("cel2_plot.svg"),
         ImageFormat::SVG,

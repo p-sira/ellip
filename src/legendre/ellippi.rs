@@ -8,18 +8,11 @@
 //  Copyright (c) 2006 Xiaogang Zhang
 //  Copyright (c) 2006 John Maddock
 //  Use, modification and distribution are subject to the
-//  Boost Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
-//  History:
-//  XZ wrote the original of this file as part of the Google
-//  Summer of Code 2006.  JM modified it to fit into the
-//  Boost.Math conceptual framework better, and to correctly
-//  handle the various corner cases.
+//  Boost Software License, Version 1.0.
 
 use num_traits::Float;
 
-use crate::{crate_util::check_nan, ellipe, ellipk, elliprf, elliprj, StrErr};
+use crate::{crate_util::check, ellipe, ellipk, elliprf, elliprj, StrErr};
 
 /// Computes [complete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E8).
 /// ```text
@@ -74,7 +67,7 @@ use crate::{crate_util::check_nan, ellipe, ellipk, elliprf, elliprj, StrErr};
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
-    check_nan!(ellippi, [n, m]);
+    check!(@nan, ellippi, [n, m]);
 
     if m > 1.0 {
         return Err("ellippi: m must be less than 1.");
@@ -155,6 +148,7 @@ pub fn ellippi_vc<T: Float>(n: T, m: T, vc: T) -> Result<T, StrErr> {
     Ok(elliprf(x, y, z)? + n * elliprj(x, y, z, p)? / 3.0)
 }
 
+#[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
 mod tests {
     use super::*;

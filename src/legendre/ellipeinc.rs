@@ -9,19 +9,11 @@
 //  Copyright (c) 2006 John Maddock
 //  Copyright (c) 2024 Matt Borland
 //  Use, modification and distribution are subject to the
-//  Boost Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
-//  History:
-//  XZ wrote the original of this file as part of the Google
-//  Summer of Code 2006.  JM modified it to fit into the
-//  Boost.Math conceptual framework better, and to ensure
-//  that the code continues to work no matter how many digits
-//  type T has.
+//  Boost Software License, Version 1.0.
 
 use num_traits::Float;
 
-use crate::{crate_util::check_nan, ellipe, elliprd, elliprf, StrErr};
+use crate::{crate_util::check, ellipe, elliprd, elliprf, StrErr};
 
 /// Computes [incomplete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E5).
 /// ```text
@@ -77,7 +69,7 @@ use crate::{crate_util::check_nan, ellipe, elliprd, elliprf, StrErr};
 /// - The MathWorks, Inc. “ellipticE.” Accessed April 21, 2025. <https://www.mathworks.com/help/symbolic/sym.elliptice.html>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
-    check_nan!(ellipeinc, [phi, m]);
+    check!(@nan, ellipeinc, [phi, m]);
 
     if phi == 0.0 {
         return Ok(0.0);
@@ -153,6 +145,7 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     Ok(invert * result)
 }
 
+#[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
 mod tests {
     use crate::compare_test_data_boost;

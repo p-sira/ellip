@@ -197,7 +197,7 @@ macro_rules! compare_test_data_wolfram {
 macro_rules! assert_close {
     ($expected: expr, $actual: expr, $rtol: expr) => {
         let relative = ($actual - $expected).abs() / $expected;
-        if relative > $rtol {
+        if relative > $rtol || $actual.is_nan() {
             panic!(
                 "Assertion failed: expected = {:?}, got = {:?}, relative = {:?}, rtol = {:?}",
                 $expected, $actual, relative, $rtol

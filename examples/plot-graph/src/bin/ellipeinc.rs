@@ -6,7 +6,7 @@
 use std::f64::consts::{FRAC_PI_2, FRAC_PI_3, FRAC_PI_4};
 
 use ellip::ellipeinc;
-use ellip_plot_graph::figure_path;
+use ellip_plot_graph::*;
 use plotly::{
     ImageFormat, Layout, Plot, Scatter,
     color::NamedColor,
@@ -68,7 +68,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .show_arrow(false)]),
     );
 
-    plot.show_html(figure_path!("ellipeinc_plot.html"));
+    make_html!(plot, "ellipeinc_plot.html");
     plot.write_image(
         figure_path!("ellipeinc_plot.svg"),
         ImageFormat::SVG,

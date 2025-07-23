@@ -16,16 +16,16 @@
 //! [astrophysics](https://dx.doi.org/10.1088/0004-637X/696/2/1616), and [string theory](https://dx.doi.org/10.1088/1126-6708/2004/03/004).
 //!
 //! ## Example
+//! Computing the circumference of an ellipse.
 //! ```
 //! use ellip::*;
-//! use ellip::util::*;
 //!
 //! fn ellipse_length(a: f64, b: f64) -> Result<f64, StrErr> {
 //!     Ok(8.0 * elliprg(0.0, a * a, b * b)?)
 //! }
 //!
 //! let ans = ellipse_length(5.0, 3.0).unwrap();
-//! assert_close(ans, 25.526998863398124, 1e-15);
+//! ellip::util::assert_close(ans, 25.526998863398124, 1e-15);
 //! ```
 //!
 //! # Features

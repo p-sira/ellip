@@ -1,0 +1,31 @@
+name: Plot Graphs for Ellip
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  plot:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        bin: [cel, cel1, cel2, el1, el2, el3, ellipd, ellipdinc, ellipe, ellipeinc, ellipf, ellipk, ellippi, ellippiinc, elliprc, elliprd, elliprf, elliprg, elliprj]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Plot ${{ matrix.bin }}
+        run: |
+          cd examples/plot-graph
+          cargo run --bin ${{ matrix.bin }}
+      - name: Commit & Push
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add .
+          git diff --cached --quiet || (git commit -m "DOC: CI Plot 2D Graphs" && git push)
