@@ -31,4 +31,6 @@ jobs:
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
         git add .
-        git diff --cached --quiet || (git commit -m "FMT: CI cargo fmt" && git push)
+        git diff --cached --quiet || git commit -m "FMT: CI cargo fmt"
+        git pull --rebase origin "$BRANCH"
+        git push
