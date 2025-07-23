@@ -11,9 +11,19 @@ macro_rules! check {
             }
         )*
     };
+    ($fn_name:ident, ($predicate:expr), $value_name:expr, [$($var:ident),* $(,)?] $(,)?) => {
+        $(
+            if $predicate {
+                return Err(concat![stringify!($fn_name), ": ", stringify!($var), " cannot be ", $value_name, "."])
+            }
+        )*
+    };
     (@nan, $fn_name:ident, [$($var:ident),* $(,)?] $(,)?) => {
         check!($fn_name, is_nan, "nan", [$($var),*])
     };
+    (@zero, $fn_name:ident, [$($var:ident),* $(,)?] $(,)?) => {
+        check!($fn_name, ($var == T::zero()), "zero", [$($var),*])
+    }
 }
 pub(crate) use check;
 
