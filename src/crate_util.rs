@@ -3,18 +3,22 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
+/// Macro to conditionally return error.
 macro_rules! check {
+    (@return Err, $fn_name:ident, $var:ident, $value_name:expr) => {
+        return Err(concat![stringify!($fn_name), ": ", stringify!($var), " cannot be ", $value_name, "."])
+    };
     ($fn_name:ident, $check_method:ident, $value_name:expr, [$($var:ident),* $(,)?] $(,)?) => {
         $(
             if $var.$check_method() {
-                return Err(concat![stringify!($fn_name), ": ", stringify!($var), " cannot be ", $value_name, "."])
+                check!(@return Err, $fn_name, $var, $value_name);
             }
         )*
     };
     ($fn_name:ident, ($predicate:expr), $value_name:expr, [$($var:ident),* $(,)?] $(,)?) => {
         $(
             if $predicate {
-                return Err(concat![stringify!($fn_name), ": ", stringify!($var), " cannot be ", $value_name, "."])
+                check!(@return Err, $fn_name, $var, $value_name);
             }
         )*
     };
@@ -23,7 +27,29 @@ macro_rules! check {
     };
     (@zero, $fn_name:ident, [$($var:ident),* $(,)?] $(,)?) => {
         check!($fn_name, is_zero, "zero", [$($var),*])
-    }
+    };
+    (@multi, $fn_name:ident, $value_name:expr, $check_method:ident, [$first:ident, $($var:ident),* $(,)?] $(,)?) => {{
+        // Check if more than one var leads to true and return error.
+        let var_array = [$first, $($var),*];
+        let mut count = 0;
+        for var in var_array {
+            if var.$check_method() {
+                count += 1;
+            }
+            if count >= 2 {
+                return Err(
+                    concat![
+                        stringify!($fn_name),
+                        ": Multiple arguments in ",
+                        stringify!($first), $(" ,", stringify!($var), )*
+                        " cannot be ",
+                        $value_name,
+                        "."
+                    ]
+                )
+            }
+        }
+    }};
 }
 pub(crate) use check;
 
@@ -50,7 +76,6 @@ macro_rules! return_if_valid_else {
             return Ok($ans);
         } else {
             $($else)+
-            unreachable!()
         }
     };
 }
