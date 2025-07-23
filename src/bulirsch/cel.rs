@@ -3,9 +3,14 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
+#![allow(deprecated)]
 use num_traits::Float;
 
-use crate::{bulirsch::DefaultPrecision, crate_util::check, StrErr};
+use crate::{
+    bulirsch::DefaultPrecision,
+    crate_util::{case, check, declare, return_if_valid_else},
+    StrErr,
+};
 
 use super::_BulirschConst;
 
@@ -31,11 +36,20 @@ use super::_BulirschConst;
 /// ## Domain
 /// - Returns error if kc = 0 or p = 0.
 /// - Returns the Cauchy principal value for p < 0.
+/// - Returns error if multiple arguments are infinite.
 ///
 /// ## Graph
 /// ![General Complete Elliptic Integral](https://github.com/p-sira/ellip/blob/main/figures/cel_plot.svg?raw=true)
 ///
 /// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/cel_plot.html)
+///
+/// ## Special Cases
+/// - cel(kc, p, 0, 0) = 0
+/// - cel(kc, p, a, b) = 0 for |kc| = ∞
+/// - cel(kc, p, a, b) = 0 for |p| = ∞
+/// - cel(kc, p, 0, 0) = 0
+/// - cel(kc, p, a, b) = sign(a) ∞ for |a| = ∞
+/// - cel(kc, p, a, b) = sign(b) ∞ for |b| = ∞
 ///
 /// # Related Functions
 /// With kc² = 1 - m and p = 1 - n,
@@ -61,44 +75,40 @@ pub fn cel<T: Float>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn _cel<T: Float, C: _BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
-    check!(@nan, cel1, [kc, p, a, b]);
-
-    if kc == 0.0 {
-        return Err("cel: kc cannot be zero.");
-    }
-
-    if p == 0.0 {
-        return Err("cel: p cannot be zero.");
-    }
+    check!(@zero, cel, [kc, p]);
 
     let mut kc = kc.abs();
-    let mut p = p;
-    let mut a = a;
-    let mut b = b;
+    if kc == inf!() {
+        return Ok(0.0);
+    }
+
+    declare!(mut [pp = p, aa = a, bb = b]);
 
     let mut e = kc;
     let mut m = 1.0;
 
-    if p > 0.0 {
-        p = p.sqrt();
-        b = b / p;
+    if pp > 0.0 {
+        pp = pp.sqrt();
+        bb = bb / pp;
     } else {
         let mut f = kc * kc;
         let mut q = 1.0 - f;
-        let g = 1.0 - p;
-        f = f - p;
-        q = (b - a * p) * q;
-        p = (f / g).sqrt();
-        a = (a - b) / g;
-        b = -q / (g * g * p) + a * p;
+        let g = 1.0 - pp;
+        f = f - pp;
+        q = (bb - aa * pp) * q;
+        pp = (f / g).sqrt();
+        aa = (aa - bb) / g;
+        bb = -q / (g * g * pp) + aa * pp;
     }
 
-    loop {
-        let f = a;
-        a = b / p + a;
-        let g = e / p;
-        b = 2.0 * (f * g + b);
-        p = g + p;
+    const MAX_ITERATION: i16 = 10;
+    let mut ans = T::nan();
+    for _ in 0..MAX_ITERATION {
+        let f = aa;
+        aa = bb / pp + aa;
+        let g = e / pp;
+        bb = 2.0 * (f * g + bb);
+        pp = g + pp;
         let g = m;
         m = kc + m;
 
@@ -108,10 +118,22 @@ pub fn _cel<T: Float, C: _BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T
             continue;
         }
 
+        ans = pi_2!() * (aa * m + bb) / (m * (m + pp));
         break;
     }
 
-    Ok(pi_2!() * (a * m + b) / (m * (m + p)))
+    return_if_valid_else!(ans, {
+        check!(@nan, cel, [kc, p, a, b]);
+        check!(@multi, cel, "infinite", is_infinite, [kc, p, a, b]);
+        case!(@any [kc.abs(), p.abs()] == inf!(), T::zero());
+        if a.is_infinite() {
+            return Ok(a.signum() * inf!());
+        }
+        if b.is_infinite() {
+            return Ok(b.signum() * inf!());
+        }
+        return Err("cel: Failed to converge.");
+    });
 }
 
 /// Computes [complete elliptic integral of the first kind in Bulirsch's form](https://link.springer.com/article/10.1007/bf01397975).
@@ -138,6 +160,9 @@ pub fn _cel<T: Float, C: _BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T
 ///
 /// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/cel1_plot.html)
 ///
+/// ## Special Cases
+/// - cel1(kc) = 0 for |kc| = ∞
+///
 /// # Related Functions
 /// With kc² = 1 - m,
 /// - [ellipk](crate::ellipk)(m) = [cel](crate::cel)(kc, 1, 1, 1) = [cel1](crate::cel1)(kc)
@@ -159,16 +184,12 @@ pub fn cel1<T: Float>(kc: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn _cel1<T: Float, C: _BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
-    check!(@nan, cel1, [kc]);
-
-    if kc == 0.0 {
-        return Err("cel1: kc cannot be zero.");
-    }
-
     let mut kc = kc.abs();
     let mut m = 1.0;
 
-    loop {
+    const MAX_ITERATION: i16 = 10;
+    let mut ans = T::nan();
+    for _ in 0..MAX_ITERATION {
         let h = m;
         m = kc + m;
 
@@ -178,10 +199,18 @@ pub fn _cel1<T: Float, C: _BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
             continue;
         }
 
+        ans = pi!() / m;
         break;
     }
 
-    Ok(pi!() / m)
+    return_if_valid_else!(ans, {
+        check!(@nan, cel1, [kc]);
+        check!(@zero, cel1, [kc]);
+        if kc.is_infinite() {
+            return Ok(0.0);
+        }
+        return Err("cel1: Failed to converge.");
+    });
 }
 
 /// Computes [complete elliptic integral of the second kind in Bulirsch's form](https://link.springer.com/article/10.1007/bf01397975).
@@ -211,6 +240,12 @@ pub fn _cel1<T: Float, C: _BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
 ///
 /// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/cel2_plot.html)
 ///
+/// ## Special Cases
+/// - cel2(kc, 0, 0) = 0
+/// - cel(kc, a, b) = 0 for |kc| = ∞
+/// - cel(kc, a, b) = sign(a) ∞ for |a| = ∞
+/// - cel(kc, a, b) = sign(b) ∞ for |b| = ∞
+/// 
 /// # Related Functions
 /// With kc² = 1 - m,
 /// - [ellipe](crate::ellipe)(m) = [cel](crate::cel)(kc, 1, 1, kc²) = [cel2](crate::cel2)(kc, 1, kc²)
@@ -232,36 +267,49 @@ pub fn cel2<T: Float>(kc: T, a: T, b: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn _cel2<T: Float, C: _BulirschConst<T>>(kc: T, a: T, b: T) -> Result<T, StrErr> {
-    check!(@nan, cel2, [kc, a, b]);
-
     if kc == 0.0 {
         return Err("cel2: kc cannot be zero.");
     }
 
     let mut kc = kc.abs();
-    let mut a = a;
-    let mut b = b;
+    declare!(mut [aa = a, bb = b]);
 
     let mut m = 1.0;
-    let mut c = a;
-    a = b + a;
+    let mut c = aa;
+    aa = bb + aa;
 
-    loop {
-        b = (c * kc + b) * 2.0;
-        c = a;
+    const MAX_ITERATION: i16 = 10;
+    let mut ans = T::nan();
+    for _ in 0..MAX_ITERATION {
+        bb = (c * kc + bb) * 2.0;
+        c = aa;
         let m0 = m;
         m = kc + m;
-        a = b / m + a;
+        aa = bb / m + aa;
 
         if (m0 - kc).abs() > C::ca() * m0 {
             kc = (kc * m0).sqrt() * 2.0;
             continue;
         }
 
+        ans = pi!() / 4.0 * aa / m;
         break;
     }
 
-    Ok(pi!() / 4.0 * a / m)
+    return_if_valid_else!(ans, {
+        check!(@nan, cel2, [kc, a, b]);
+        check!(@multi, cel2, "infinite", is_infinite, [kc, a, b]);
+        if kc.is_infinite() {
+            return Ok(0.0);
+        }
+        if a.is_infinite() {
+            return Ok(a.signum() * inf!());
+        }
+        if b.is_infinite() {
+            return Ok(b.signum() * inf!());
+        }
+        return Err("cel2: Failed to converge.");
+    });
 }
 
 #[cfg(test)]
@@ -326,20 +374,35 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn test_cel_special_cases() {
-        use std::f64::{INFINITY, NAN};
-        // kc = 0: error
+        use std::f64::{INFINITY, NAN, NEG_INFINITY};
+        // kc = 0: should return Err
         assert!(cel(0.0, 1.0, 1.0, 1.0).is_err());
-        // p = 0: error
+        // p = 0: should return Err
         assert!(cel(0.5, 0.0, 1.0, 1.0).is_err());
         // a = 0, b = 0: cel(kc, p, 0, 0) = 0
         assert_eq!(cel(0.5, 1.0, 0.0, 0.0).unwrap(), 0.0);
         // kc = inf: cel(inf, p, a, b) = 0
-        assert_eq!(cel(INFINITY, 1.0, 1.0, 1.0).unwrap(), 0.0);
-        // kc = NaN or p = NaN: error
+        assert_eq!(cel(INFINITY, 0.5, 1.0, 1.0).unwrap(), 0.0);
+        // kc = -inf: cel(-inf, kc, 1.0, 1.0) = 0
+        assert_eq!(cel(NEG_INFINITY, 0.5, 1.0, 1.0).unwrap(), 0.0);
+        // p = inf: cel(kc, inf, a, b) = 0
+        assert_eq!(cel(0.5, INFINITY, 1.0, 1.0).unwrap(), 0.0);
+        // p = -inf: cel(kc, -inf, a, b) = 0
+        assert_eq!(cel(0.5, NEG_INFINITY, 1.0, 1.0).unwrap(), 0.0);
+        // a = inf: cel(kc, p, inf, b) = inf
+        assert_eq!(cel(0.5, 1.0, INFINITY, 1.0).unwrap(), INFINITY);
+        // b = inf: cel(kc, p, a, inf) = inf
+        assert_eq!(cel(0.5, 1.0, 1.0, INFINITY).unwrap(), INFINITY);
+        // a = inf: cel(kc, p, -inf, b) = -inf
+        assert_eq!(cel(0.5, 1.0, NEG_INFINITY, 1.0).unwrap(), NEG_INFINITY);
+        // b = inf: cel(kc, p, a, -inf) = -inf
+        assert_eq!(cel(0.5, 1.0, 1.0, NEG_INFINITY).unwrap(), NEG_INFINITY);
+        // NANs: should return Err
         assert!(cel(NAN, 1.0, 1.0, 1.0).is_err());
         assert!(cel(0.5, NAN, 1.0, 1.0).is_err());
+        assert!(cel(0.5, 1.0, NAN, 1.0).is_err());
+        assert!(cel(0.5, 1.0, 1.0, NAN).is_err());
     }
 
     #[test]
@@ -356,14 +419,15 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn test_cel1_special_cases() {
-        use std::f64::{INFINITY, NAN};
-        // kc = 0: error
+        use std::f64::{INFINITY, NAN, NEG_INFINITY};
+        // kc = 0: should return Err
         assert!(cel1(0.0).is_err());
         // kc = inf: cel1(inf) = 0
         assert_eq!(cel1(INFINITY).unwrap(), 0.0);
-        // kc = NaN: error
+        // kc = -inf: cel1(-inf) = 0
+        assert_eq!(cel1(NEG_INFINITY).unwrap(), 0.0);
+        // kc = NaN: should return Err
         assert!(cel1(NAN).is_err());
     }
 
@@ -381,26 +445,27 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn test_cel2_special_cases() {
-        use std::f64::{INFINITY, NAN};
-        // kc = 0: error
+        use std::f64::{INFINITY, NAN, NEG_INFINITY};
+        // kc = 0: should return Err
         assert!(cel2(0.0, 1.0, 1.0).is_err());
         // kc = inf: cel2(inf, 1, 1) = 0
         assert_eq!(cel2(INFINITY, 1.0, 1.0).unwrap(), 0.0);
-        // kc = NaN: error
+        // kc = -inf: cel2(-inf, 1, 1) = 0
+        assert_eq!(cel2(NEG_INFINITY, 1.0, 1.0).unwrap(), 0.0);
+        // a = 0 and b = 0: cel2(kc, a, b) = 0
+        assert_eq!(cel2(0.5, 0.0, 0.0).unwrap(), 0.0);
+        // a = inf: cel2(kc, inf, b) = inf
+        assert_eq!(cel2(0.5, INFINITY, 1.0).unwrap(), INFINITY);
+        // b = inf: cel2(kc, a, inf) = inf
+        assert_eq!(cel2(0.5, 1.0, INFINITY).unwrap(), INFINITY);
+        // a = inf: cel2(kc, -inf, b) = -inf
+        assert_eq!(cel2(0.5, NEG_INFINITY, 1.0).unwrap(), NEG_INFINITY);
+        // b = inf: cel2(kc, a, -inf) = -inf
+        assert_eq!(cel2(0.5, 1.0, NEG_INFINITY).unwrap(), NEG_INFINITY);
+        // NANs: should return Err
         assert!(cel2(NAN, 1.0, 1.0).is_err());
-    }
-
-    #[test]
-    fn test_cel1_err() {
-        // kc == 0
-        assert!(cel1(0.0).is_err());
-    }
-
-    #[test]
-    fn test_cel2_err() {
-        // kc == 0
-        assert!(cel2(0.0, 1.0, 1.0).is_err());
+        assert!(cel2(0.5, NAN, 1.0).is_err());
+        assert!(cel2(0.5, 1.0, NAN).is_err());
     }
 }
