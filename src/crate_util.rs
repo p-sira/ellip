@@ -22,7 +22,7 @@ macro_rules! check {
         check!($fn_name, is_nan, "nan", [$($var),*])
     };
     (@zero, $fn_name:ident, [$($var:ident),* $(,)?] $(,)?) => {
-        check!($fn_name, ($var == T::zero()), "zero", [$($var),*])
+        check!($fn_name, is_zero, "zero", [$($var),*])
     }
 }
 pub(crate) use check;
@@ -42,6 +42,19 @@ macro_rules! case {
     }
 }
 pub(crate) use case;
+
+/// ans is considered valid when ans is finite and not nan.
+macro_rules! return_if_valid_else {
+    ($ans:expr, {$($else:tt)+}) => {
+        if $ans.is_finite() && !$ans.is_nan() {
+            return Ok($ans);
+        } else {
+            $($else)+
+            unreachable!()
+        }
+    };
+}
+pub(crate) use return_if_valid_else;
 
 macro_rules! declare {
     (mut [$($var:ident $(= $value:expr)?),+ $(,)?]) => {
