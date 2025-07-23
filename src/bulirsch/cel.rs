@@ -101,7 +101,6 @@ pub fn _cel<T: Float, C: _BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T
         bb = -q / (g * g * pp) + aa * pp;
     }
 
-    const MAX_ITERATION: i16 = 10;
     let mut ans = T::nan();
     for _ in 0..MAX_ITERATION {
         let f = aa;
@@ -187,7 +186,6 @@ pub fn _cel1<T: Float, C: _BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
     let mut kc = kc.abs();
     let mut m = 1.0;
 
-    const MAX_ITERATION: i16 = 10;
     let mut ans = T::nan();
     for _ in 0..MAX_ITERATION {
         let h = m;
@@ -279,7 +277,6 @@ pub fn _cel2<T: Float, C: _BulirschConst<T>>(kc: T, a: T, b: T) -> Result<T, Str
     let mut c = aa;
     aa = bb + aa;
 
-    const MAX_ITERATION: i16 = 10;
     let mut ans = T::nan();
     for _ in 0..MAX_ITERATION {
         bb = (c * kc + bb) * 2.0;
@@ -313,6 +310,12 @@ pub fn _cel2<T: Float, C: _BulirschConst<T>>(kc: T, a: T, b: T) -> Result<T, Str
     });
 }
 
+#[cfg(not(feature = "reduce-iteration"))]
+const MAX_ITERATION: i16 = 10;
+#[cfg(feature = "reduce-iteration")]
+const MAX_ITERATION: i16 = 1;
+
+#[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
 mod tests {
     use itertools::iproduct;
@@ -468,5 +471,18 @@ mod tests {
         assert!(cel2(NAN, 1.0, 1.0).is_err());
         assert!(cel2(0.5, NAN, 1.0).is_err());
         assert!(cel2(0.5, 1.0, NAN).is_err());
+    }
+}
+
+#[cfg(feature = "reduce-iteration")]
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn force_fail_to_converge() {
+        assert!(cel(1e300, 0.2, 0.5, 0.5).is_err());
+        assert!(cel1(1e300).is_err());
+        assert!(cel2(1e300, 0.5, 0.5).is_err());
     }
 }
