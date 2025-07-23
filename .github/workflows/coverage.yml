@@ -41,7 +41,7 @@ jobs:
           files: lcov.info
           fail_ci_if_error: true
 
-  carlson-force-fail-coverage:
+  force-fail-coverage:
     runs-on: ubuntu-latest
     env:
       CARGO_TERM_COLOR: always
@@ -52,7 +52,7 @@ jobs:
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: Generate code coverage
-        run: cargo llvm-cov -p ellip --lcov --output-path lcov.info test carlson --features reduce-iteration --ignore-filename-regex 'benches/.*|examples/.*|src/test_util\.rs'
+        run: cargo llvm-cov -p ellip --lcov --output-path lcov.info test --tests --features reduce-iteration --no-default-features --ignore-filename-regex 'benches/.*|examples/.*|src/test_util\.rs'
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
