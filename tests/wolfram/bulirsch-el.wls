@@ -19,8 +19,8 @@ xRange = Subdivide[-2, 2, 30];
 
 kcRange = Union[Subdivide[-2, -muEL1, 15], Subdivide[muEL1, 2, 15]];
 
-el1 = Flatten[Table[{x, kc, ResourceFunction["BulirschEL1"][x, kc * kc
-  ]}, {x, xRange}, {kc, kcRange}], 1];
+el1 = Flatten[Table[{x, kc, EllipticF[ArcTan[x], 1 - kc * kc]}, {x, xRange
+  }, {kc, kcRange}], 1];
 
 Export["../data/wolfram/el1_data.csv", N[el1], "CSV"];
 
@@ -65,7 +65,7 @@ el3 =
   Select[
     Table[
       With[{x = data[[1]], kc = data[[2]], p = data[[3]]},
-        {x, kc, p, ResourceFunction["BulirschEL3"][x, kc * kc, p]}
+        {x, kc, p, EllipticPi[1 - p, ArcTan[x], 1 - kc * kc]}
       ]
       ,
       {data, validKcPX}
