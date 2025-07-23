@@ -245,7 +245,7 @@ pub fn _cel1<T: Float, C: _BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
 /// - cel(kc, a, b) = 0 for |kc| = ∞
 /// - cel(kc, a, b) = sign(a) ∞ for |a| = ∞
 /// - cel(kc, a, b) = sign(b) ∞ for |b| = ∞
-/// 
+///
 /// # Related Functions
 /// With kc² = 1 - m,
 /// - [ellipe](crate::ellipe)(m) = [cel](crate::cel)(kc, 1, 1, kc²) = [cel2](crate::cel2)(kc, 1, kc²)
