@@ -3,6 +3,7 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
+#![allow(deprecated)]
 use num_traits::Float;
 
 use crate::{
