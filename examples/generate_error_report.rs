@@ -85,7 +85,11 @@ impl Stats {
         let p99_pos = count as f64 * 0.99;
         let p99_pos_low = p99_pos as usize;
         let p99_frac = p99_pos - p99_pos_low as f64;
-        let p99 = valids[p99_pos_low] * (1.0 - p99_frac) + valids[p99_pos_low + 1] * p99_frac;
+        let p99 = if p99_pos_low + 1 < count {
+            valids[p99_pos_low] * (1.0 - p99_frac) + valids[p99_pos_low + 1] * p99_frac
+        } else {
+            valids[p99_pos_low]
+        };
 
         // Calculate variance
         let variance = valids
@@ -266,14 +270,15 @@ macro_rules! get_entry {
     }};
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn get_env() -> [String; 3] {
     use std::process::Command;
 
-    use std::fs::File;
-    use std::io::Write;
-
     let rust_version = {
-        let output = Command::new("rustc").arg("--version").output()?.stdout;
+        let output = Command::new("rustc")
+            .arg("--version")
+            .output()
+            .unwrap()
+            .stdout;
         String::from_utf8_lossy(&output)
             .split_whitespace()
             .collect::<Vec<&str>>()[1]
@@ -281,7 +286,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let platform = {
-        let output = Command::new("rustc").arg("-vV").output()?.stdout;
+        let output = Command::new("rustc").arg("-vV").output().unwrap().stdout;
         String::from_utf8_lossy(&output)
             .lines()
             .find(|line| line.starts_with("host:"))
@@ -294,7 +299,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let ellip_version: String = {
         let output = Command::new("cargo")
             .args(["tree", "--invert", "--package", "ellip"])
-            .output()?
+            .output()
+            .unwrap()
             .stdout;
         String::from_utf8_lossy(&output)
             .lines()
@@ -303,6 +309,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .unwrap()
             .to_owned()
     };
+
+    [rust_version, platform, ellip_version]
+}
+
+fn main() {
+    let [rust_version, platform, ellip_version] = get_env();
 
     let lines = [
          "# Testing",
@@ -336,11 +348,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
          ]),
          "",
          "## Bulirsch's Elliptic Integrals",
-         "For Bulirsh's elliptic integrals, the reference values are generated using the function",
+         "Bulirsh's elliptic integrals are not natively implemented in Wolfram Engine.",
+         "Nevertheless, some of the integrals can be converted to their Legendre's counterpart,",
+         "which are available on Wolfram Engine. However, for `cel` and `el2`, their values cannot",
+         "be mapped simply. Hence, the reference values are generated using the functions",
          "submitted by Jan Mangaldan on [Wolfram Function Repository](https://resources.wolframcloud.com/FunctionRepository/).",
+         "As for `cel2`, it is mapped to `cel` with p=1.",
          &generate_error_table(&[
              get_entry!("wolfram/cel_data", "cel", cel, 4, 1),
              get_entry!("wolfram/cel_pv", "cel (p.v.)", cel, 4, 1),
+             get_entry!("wolfram/cel1_data", "cel1", cel1, 1, 1),
+             get_entry!("wolfram/cel2_data", "cel2", cel2, 3, 1),
              get_entry!("wolfram/el1_data", "el1", el1, 2, 1),
              get_entry!("wolfram/el2_data", "el2", el2, 4, 1),
              get_entry!("wolfram/el3_data", "el3", el3, 3, 50),
@@ -371,14 +389,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
          ]),
      ];
 
+    use std::fs::File;
+    use std::io::Write;
     let path = "tests/README.md";
-    let mut file = File::create(path)?;
+    let mut file = File::create(path).unwrap();
 
     lines
         .iter()
         .for_each(|line| writeln!(file, "{}", line).expect("Cannot write line"));
 
     println!("Error report generated: {path}");
-
-    Ok(())
 }
