@@ -330,9 +330,7 @@ checksum = "1c7a8fb8a9fbf66c1f703fe16184d10ca0ee9d23be5b4436400408ba54a95005"
 
 [[package]]
 name = "ellip"
-version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "44d179dae1c8e83cc77a450bb975ef7bc11d533887d738f88b312a8ce58ecac6"
+version = "0.3.5"
 dependencies = [
  "num-lazy",
  "num-traits",
@@ -341,7 +339,7 @@ dependencies = [
 
 [[package]]
 name = "ellip-plot-graph"
-version = "0.1.0"
+version = "0.3.5"
 dependencies = [
  "ellip",
  "plotly",
