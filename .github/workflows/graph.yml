@@ -26,7 +26,7 @@ jobs:
           MAX_ATTEMPTS=3
           until [ $ATTEMPTS -ge $MAX_ATTEMPTS ]
           do
-            if timeout 180s cargo run --bin ${{ matrix.bin }}; then
+            if timeout 180s cargo run --bin ${{ matrix.bin }} --features save-to-bin; then
               echo "Plot succeeded"
               break
             else
@@ -42,7 +42,7 @@ jobs:
       - name: Move plots to bin-specific directory
         run: |
           mkdir -p figures/${{ matrix.bin }}
-          mv figures/* figures/${{ matrix.bin }}/ || true
+          mv figures/bin/* figures/${{ matrix.bin }}/ || true
         working-directory: examples/plot-graph
       - name: Save plots
         uses: actions/upload-artifact@v4

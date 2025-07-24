@@ -12,3 +12,5 @@ plotly = { version = "0.12.1", features = ["kaleido", "kaleido_download"] }
 [features]
 # Open the generated HTML
 open-html = []
+# Save figure to figures/bin
+save-to-bin = []
