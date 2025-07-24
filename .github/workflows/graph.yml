@@ -27,7 +27,6 @@ jobs:
       - name: Save plots
         uses: actions/upload-artifact@v4
         with:
-          name: plot-${{ matrix.bin }}
           path: figures/*
 
   commit:
