@@ -13,9 +13,29 @@ macro_rules! figure_path {
 #[macro_export]
 macro_rules! make_html {
     ($plot:ident, $filename:literal) => {
-        #[cfg(feature="open-html")]
+        #[cfg(feature = "open-html")]
         $plot.show_html(figure_path!($filename));
-        #[cfg(not(feature="open-html"))]
+        #[cfg(not(feature = "open-html"))]
         $plot.write_html(figure_path!($filename));
     };
+}
+
+pub fn ellip_version() -> String {
+    use std::process::Command;
+
+    let output = Command::new("cargo")
+        .args(["tree", "--invert", "--package", "ellip"])
+        .output()
+        .unwrap()
+        .stdout;
+
+    String::from_utf8_lossy(&output)
+        .lines()
+        .next()
+        .and_then(|line| line.strip_prefix("ellip v"))
+        .unwrap()
+        .split_whitespace()
+        .next()
+        .unwrap()
+        .to_owned()
 }

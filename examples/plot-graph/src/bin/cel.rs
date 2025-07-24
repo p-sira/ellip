@@ -69,7 +69,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .annotations(vec![Annotation::new()
             .text(format!(
                 "Generated using the function <a href=\"https://docs.rs/ellip/latest/ellip/bulirsch/fn.cel.html\" target=\"_blank\">cel</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",
-                env!("CARGO_PKG_VERSION")
+                ellip_version()
             ))
                 .x_ref("paper")
                 .y_ref("paper")
@@ -78,7 +78,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .show_arrow(false)]),
     );
 
-    plot.write_html(figure_path!("cel_plot.html"));
     make_html!(plot, "cel_plot.html");
     plot.write_image(
         figure_path!("cel_plot.svg"),
