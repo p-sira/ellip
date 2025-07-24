@@ -51,6 +51,7 @@ jobs:
         working-directory: examples/plot-graph
       - name: Move plots to bin-specific directory
         run: |
+          cd ../..
           mkdir -p figures/${{ matrix.bin }}
           mv figures/bin/* figures/${{ matrix.bin }}/ || true
         working-directory: examples/plot-graph
