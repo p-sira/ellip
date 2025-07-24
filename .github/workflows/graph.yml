@@ -16,13 +16,31 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        bin: [cel, cel1, cel2, el1, el2, el3, ellipd, ellipdinc, ellipe, ellipeinc, ellipf, ellipk, ellippi, ellippiinc, elliprc, elliprd, elliprf, elliprg, elliprj]
+        bin: [cel, cel1, cel2, el1, el2, el3, ellipd, ellipdinc, ellipe, ellipeinc, ellipf, ellipk, ellippi, elliprc, elliprd, elliprf, elliprg, elliprj]
     steps:
       - uses: actions/checkout@v4
       - name: Plot ${{ matrix.bin }}
         run: |
           cd examples/plot-graph
           cargo run --bin ${{ matrix.bin }}
+      - uses: actions/checkout@v4
+      - name: Save plots
+        uses: actions/upload-artifact@v4
+        with:
+          name: plot-${{ matrix.bin }}
+          path: figures/*
+
+  commit:
+    runs-on: ubuntu-latest
+    needs: plot
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Download all plots
+        uses: actions/download-artifact@v4
+        with:
+          path: figures/
       - name: Commit & Push
         run: |
           git config --global user.name 'github-actions'
