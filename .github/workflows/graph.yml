@@ -19,10 +19,26 @@ jobs:
         bin: [cel, cel1, cel2, el1, el2, el3, ellipd, ellipdinc, ellipe, ellipeinc, ellipf, ellipk, elliprc, elliprd, elliprf, elliprg, elliprj]
     steps:
       - uses: actions/checkout@v4
-      - name: Plot ${{ matrix.bin }}
+      - name: Plot ${{ matrix.bin }} with retries
         run: |
-          cd examples/plot-graph
-          cargo run --bin ${{ matrix.bin }}
+          set -e
+          ATTEMPTS=0
+          MAX_ATTEMPTS=3
+          until [ $ATTEMPTS -ge $MAX_ATTEMPTS ]
+          do
+            if timeout 180s cargo run --bin ${{ matrix.bin }}; then
+              echo "Plot succeeded"
+              break
+            else
+              ATTEMPTS=$((ATTEMPTS+1))
+              echo "Attempt $ATTEMPTS failed. Retrying..."
+              if [ $ATTEMPTS -eq $MAX_ATTEMPTS ]; then
+                echo "All $MAX_ATTEMPTS attempts failed. Exiting."
+                exit 1
+              fi
+            fi
+          done
+        working-directory: examples/plot-graph
       - name: Save plots
         uses: actions/upload-artifact@v4
         with:
