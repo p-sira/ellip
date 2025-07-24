@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        bin: [cel, cel1, cel2, el1, el2, el3, ellipd, ellipdinc, ellipe, ellipeinc, ellipf, ellipk, ellippi, elliprc, elliprd, elliprf, elliprg, elliprj]
+        bin: [cel, cel1, cel2, el1, el2, el3, ellipd, ellipdinc, ellipe, ellipeinc, ellipf, ellipk, elliprc, elliprd, elliprf, elliprg, elliprj]
     steps:
       - uses: actions/checkout@v4
       - name: Plot ${{ matrix.bin }}
