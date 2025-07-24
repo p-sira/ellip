@@ -39,11 +39,16 @@ jobs:
             fi
           done
         working-directory: examples/plot-graph
+      - name: Move plots to bin-specific directory
+        run: |
+          mkdir -p figures/${{ matrix.bin }}
+          mv figures/* figures/${{ matrix.bin }}/ || true
+        working-directory: examples/plot-graph
       - name: Save plots
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.bin }}-plots
-          path: figures/*
+          path: figures/${{ matrix.bin }}/*
 
   commit:
     runs-on: ubuntu-latest
@@ -56,8 +61,12 @@ jobs:
       - name: Download all plots
         uses: actions/download-artifact@v4
         with:
-          path: figures/
+          path: all_figures/
           merge-multiple: true
+      - name: Move all plots to figures
+        run: |
+          mkdir -p figures
+          find all_figures -type f -exec mv {} figures/ \;
       - name: Commit & Push
         run: |
           git config --global user.name 'github-actions'
