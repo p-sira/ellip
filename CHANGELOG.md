@@ -13,7 +13,7 @@
 - Improve the performance of the `bulirsch` functions.
 - Handle special cases and edge cases (infinity, nan, etc.) for all `bulirsch` functions.
 - Add special cases documentation for `bulirsch` functions.
-- Improve documentation.
+- Improve and fix documentation.
 
 **Tests**
 - Increase test coverage.

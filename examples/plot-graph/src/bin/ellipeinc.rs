@@ -69,12 +69,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     make_html!(plot, "ellipeinc_plot.html");
-    plot.write_image(
-        figure_path!("ellipeinc_plot.svg"),
-        ImageFormat::SVG,
-        900,
-        600,
-        1.0,
-    );
+    write_svg!(plot, "ellipeinc_plot.svg", 900, 600, 1.0);
+    println!("Done");
     Ok(())
 }

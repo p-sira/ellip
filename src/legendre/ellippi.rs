@@ -36,9 +36,9 @@ use crate::{crate_util::check, ellipe, ellipk, elliprf, elliprj, StrErr};
 /// - Returns the Cauchy principal value if n > 1.
 ///
 /// ## Graph
-/// ![Complete Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/ellippi_plot.svg?raw=true)
+/// ![Complete Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/ellippi_plot_3d.png?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellippi_plot.html)
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellippi_plot_3d.html)
 ///
 /// ## Special Cases
 /// - Π(0, 0) = π/2

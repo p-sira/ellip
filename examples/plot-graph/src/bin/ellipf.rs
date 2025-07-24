@@ -69,12 +69,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     make_html!(plot, "ellipf_plot.html");
-    plot.write_image(
-        figure_path!("ellipf_plot.svg"),
-        ImageFormat::SVG,
-        900,
-        600,
-        1.0,
-    );
+    write_svg!(plot, "ellipf_plot.svg", 900, 600, 1.0);
+    println!("Done");
     Ok(())
 }

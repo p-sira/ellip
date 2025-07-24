@@ -5,7 +5,8 @@ BINARIES=(
     "ellipdinc-3d"
     "ellipeinc-3d"
     "ellipf-3d"
-    "ellippiinc"
+    "ellippiinc-3d"
+    "ellippi-3d"
 )
 
 # Build and run each binary, waiting for user input
