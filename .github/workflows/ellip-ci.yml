@@ -25,6 +25,7 @@ jobs:
     - name: Make docs
       run: cargo doc --no-deps
     - name: Format code
+      if: github.event_name == 'push'
       run: |
         BRANCH=$(echo "${{ github.ref }}" | sed 's|refs/heads/||')
         cargo fmt
