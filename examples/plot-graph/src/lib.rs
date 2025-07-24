@@ -13,10 +13,25 @@ macro_rules! figure_path {
 #[macro_export]
 macro_rules! make_html {
     ($plot:ident, $filename:literal) => {
+        println!("Making HTML for {}", $filename);
         #[cfg(feature = "open-html")]
         $plot.show_html(figure_path!($filename));
         #[cfg(not(feature = "open-html"))]
         $plot.write_html(figure_path!($filename));
+    };
+}
+
+#[macro_export]
+macro_rules! write_svg {
+    ($plot:ident, $filename:literal, $width:expr, $height:expr, $scale:expr) => {
+        println!("Writing image to {}", $filename);
+        $plot.write_image(
+            figure_path!($filename),
+            ImageFormat::SVG,
+            $width,
+            $height,
+            $scale,
+        );
     };
 }
 

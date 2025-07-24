@@ -80,12 +80,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
      );
 
     make_html!(plot, "el2_plot.html");
-    plot.write_image(
-        figure_path!("el2_plot.svg"),
-        ImageFormat::SVG,
-        900,
-        600,
-        1.0,
-    );
+    write_svg!(plot, "el2_plot.svg", 900, 600, 1.0);
+    println!("Done");
     Ok(())
 }
