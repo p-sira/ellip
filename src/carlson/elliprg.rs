@@ -8,7 +8,7 @@ use num_traits::Float;
 use std::mem::swap;
 
 use crate::{
-    crate_util::{check, let_mut, return_if_valid_else},
+    crate_util::{check, let_mut},
     elliprc, elliprd, elliprf, StrErr,
 };
 
@@ -126,16 +126,11 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         return Ok(((x0 + y0) * (x0 + y0) / 4.0 - sum) * rf / 2.0);
     }
 
-    let ans = (z * elliprf(x, y, z)? - (x - z) * (y - z) * elliprd(x, y, z)? / 3.0
-        + (x * y / z).sqrt())
-        / 2.0;
-    #[cfg(feature = "reduce-iteration")]
-    let ans = nan!();
-
-    return_if_valid_else!(ans, {
-        check!(@nan, elliprg, [x, y, z]);
-        Err("elliprg: Unexpected error.")
-    })
+    // NANs are checked by elliprf and elliprd
+    Ok(
+        (z * elliprf(x, y, z)? - (x - z) * (y - z) * elliprd(x, y, z)? / 3.0 + (x * y / z).sqrt())
+            / 2.0,
+    )
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
