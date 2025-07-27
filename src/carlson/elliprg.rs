@@ -7,7 +7,10 @@
 use num_traits::Float;
 use std::mem::swap;
 
-use crate::{crate_util::let_mut, elliprc, elliprd, elliprf, StrErr};
+use crate::{
+    crate_util::{check, let_mut, return_if_valid_else},
+    elliprc, elliprd, elliprf, StrErr,
+};
 
 // Original header from Boost Math
 //  Copyright (c) 2015 John Maddock
@@ -34,12 +37,18 @@ use crate::{crate_util::let_mut, elliprc, elliprd, elliprf, StrErr};
 /// At most one of them can be zero.
 ///
 /// ## Domain
-/// - Returns error if any of x, y, or z is negative, or more than one of them are zero.
+/// - Returns error if any of x, y, or z is negative, infinite, or more than one of them are zero.
 ///
 /// ## Graph
 /// ![Symmetric Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprg_plot.svg?raw=true)
 ///
 /// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprg_plot.html)
+///
+/// ## Special Cases
+/// - RG(x, x, x) = sqrt(x)
+/// - RG(0, y, y) = π/4 * sqrt(y)
+/// - RG(x, y, y) = (y * RC(x, y) + sqrt(x))/2
+/// - RG(0, 0, z) = sqrt(z)/2
 ///
 /// # Related Functions
 /// With c = csc²φ, r = 1/x², and kc² = 1 - m,
@@ -61,6 +70,7 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
     if x < 0.0 || y < 0.0 || z < 0.0 {
         return Err("elliprg: x, y, and z must be non-negative.");
     }
+    check!(@inf, elliprg, [x, y, z]);
 
     let_mut!(x, y, z);
     if x < y {
@@ -116,10 +126,16 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         return Ok(((x0 + y0) * (x0 + y0) / 4.0 - sum) * rf / 2.0);
     }
 
-    Ok(
-        (z * elliprf(x, y, z)? - (x - z) * (y - z) * elliprd(x, y, z)? / 3.0 + (x * y / z).sqrt())
-            / 2.0,
-    )
+    let ans = (z * elliprf(x, y, z)? - (x - z) * (y - z) * elliprd(x, y, z)? / 3.0
+        + (x * y / z).sqrt())
+        / 2.0;
+    #[cfg(feature = "reduce-iteration")]
+    let ans = nan!();
+
+    return_if_valid_else!(ans, {
+        check!(@nan, elliprg, [x, y, z]);
+        unreachable!();
+    })
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
@@ -168,10 +184,29 @@ mod tests {
     }
 
     #[test]
-    fn test_elliprg_err() {
-        // negative argument
+    fn test_elliprg_special_cases() {
+        use std::f64::{INFINITY, NAN};
+        // Negative arguments: should return Err
         assert!(elliprg(-1.0, 1.0, 1.0).is_err());
         assert!(elliprg(1.0, -1.0, 1.0).is_err());
         assert!(elliprg(1.0, 1.0, -1.0).is_err());
+        // NANs: should return Err
+        assert!(elliprg(NAN, 1.0, 1.0).is_err());
+        assert!(elliprg(1.0, NAN, 1.0).is_err());
+        assert!(elliprg(1.0, 1.0, NAN).is_err());
+        // Infinity arguments should return Err
+        assert!(elliprg(INFINITY, 1.0, 1.0).is_err());
+        assert!(elliprg(1.0, INFINITY, 1.0).is_err());
+        assert!(elliprg(1.0, 1.0, INFINITY).is_err());
+    }
+}
+
+#[cfg(feature = "reduce-iteration")]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn force_unreachable() {
+        assert!(elliprg(3.0, 2.0, 1.0).is_err());
     }
 }
