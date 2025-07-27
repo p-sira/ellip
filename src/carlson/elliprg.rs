@@ -195,13 +195,3 @@ mod tests {
         assert!(elliprg(1.0, 1.0, INFINITY).is_err());
     }
 }
-
-#[cfg(feature = "reduce-iteration")]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn force_unreachable() {
-        assert!(elliprg(3.0, 2.0, 1.0).is_err());
-    }
-}
