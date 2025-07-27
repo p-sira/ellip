@@ -28,6 +28,9 @@ macro_rules! check {
     (@zero, $fn_name:ident, [$($var:ident),* $(,)?] $(,)?) => {
         check!($fn_name, is_zero, "zero", [$($var),*])
     };
+    (@inf, $fn_name:ident, [$($var:ident),* $(,)?] $(,)?)=> {
+        check!($fn_name, is_infinite, "infinite", [$($var),*])
+    };
     (@multi, $fn_name:ident, $value_name:expr, $check_method:ident, [$first:ident, $($var:ident),* $(,)?] $(,)?) => {{
         // Check if more than one var leads to true and return error.
         let var_array = [$first, $($var),*];
