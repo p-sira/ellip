@@ -12,7 +12,10 @@
 
 use num_traits::Float;
 
-use crate::{crate_util::let_mut, StrErr};
+use crate::{
+    crate_util::{case, check, declare, let_mut, return_if_valid_else},
+    StrErr,
+};
 
 /// Computes RC ([degenerate symmetric elliptic integral of RF](https://dlmf.nist.gov/19.16.E6)).
 /// ```text
@@ -37,6 +40,13 @@ use crate::{crate_util::let_mut, StrErr};
 ///
 /// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprc_plot.html)
 ///
+/// ## Special Cases
+/// - RC(x, x) = 1/sqrt(x)
+/// - RC(0, y) = π/(2*sqrt(y))
+/// - RC(x, y) = atan(sqrt(y-x)/x) / sqrt(y-x) for y > x
+/// - RC(x, y) = ln(sqrt(x) + sqrt(x-y)) / sqrt(x-y) for y < x
+/// - RC(x, y) = 0 for x = ∞ or y = ∞
+/// 
 /// ## Notes
 /// RC is a degenerate case of the RF. It is an elementary function rather than an elliptic integral.
 ///
@@ -64,12 +74,13 @@ pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, StrErr> {
         return Err("elliprc: y must be non-zero.");
     }
 
-    Ok(_elliprc(x, y))
+    _elliprc(x, y)
 }
 
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
-fn _elliprc<T: Float>(x: T, y: T) -> T {
+fn _elliprc<T: Float>(x: T, y: T) -> Result<T, StrErr> {
+    declare!([_x = x, _y = y]);
     let_mut!(x, y);
     let mut prefix = 1.0;
     // for y < 0, the integral is singular, return Cauchy principal value
@@ -80,23 +91,29 @@ fn _elliprc<T: Float>(x: T, y: T) -> T {
     }
 
     if x == 0.0 {
-        return prefix * pi_2!() / y.sqrt();
+        return Ok(prefix * pi_2!() / y.sqrt());
     }
 
     if x == y {
-        return prefix / x.sqrt();
+        return Ok(prefix / x.sqrt());
     }
 
     if y > x {
-        return prefix * ((y - x) / x).sqrt().atan() / (y - x).sqrt();
+        return Ok(prefix * ((y - x) / x).sqrt().atan() / (y - x).sqrt());
     }
 
-    if y / x > 0.5 {
+    let ans = if y / x > 0.5 {
         let arg = ((x - y) / x).sqrt();
         prefix * ((arg).ln_1p() - (-arg).ln_1p()) / (2.0 * (x - y).sqrt())
     } else {
         prefix * ((x.sqrt() + (x - y).sqrt()) / y.sqrt()).ln() / (x - y).sqrt()
-    }
+    };
+
+    return_if_valid_else!(ans, {
+        check!(@nan, elliprc, [_x, _y]);
+        case!(@any [_x, _y] == inf!(), T::zero());
+        unreachable!()
+    })
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
@@ -115,10 +132,41 @@ mod tests {
     }
 
     #[test]
-    fn test_elliprc_err() {
-        // x < 0
+    fn test_elliprc_special_cases() {
+        use std::f64::{consts::PI, INFINITY, NAN};
+        // x < 0: should return Err
         assert!(elliprc(-1.0, 1.0).is_err());
-        // y == 0
+        // y == 0: should return Err
         assert!(elliprc(1.0, 0.0).is_err());
+        // RC(x, x) = 1/sqrt(x)
+        assert_eq!(elliprc(1.0, 1.0).unwrap(), 1.0);
+        assert_eq!(elliprc(4.0, 4.0).unwrap(), 0.5);
+        // RC(0, y) = π/(2*sqrt(y))
+        assert_eq!(elliprc(0.0, 1.0).unwrap(), PI / 2.0);
+        assert_eq!(elliprc(0.0, 4.0).unwrap(), PI / 4.0);
+        // RC(x, y) = atan(sqrt(y-x)/x) / sqrt(y-x) for y > x
+        assert_eq!(
+            elliprc(1.0, 4.0).unwrap(),
+            (3.0.sqrt().atan() / 3.0.sqrt())
+        );
+        assert_eq!(
+            elliprc(1.0, 9.0).unwrap(),
+            (8.0.sqrt().atan() / 8.0.sqrt())
+        );
+        // RC(x, y) = ln(sqrt(x) + sqrt(x-y)) / sqrt(x-y) for y < x
+        assert_eq!(
+            elliprc(4.0, 1.0).unwrap(),
+            ((2.0 + 3.0.sqrt()).ln() / 3.0.sqrt())
+        );
+        assert_eq!(
+            elliprc(9.0, 1.0).unwrap(),
+            ((3.0 + 8.0.sqrt()).ln() / 8.0.sqrt())
+        );
+        // NANs: should return Err
+        assert!(elliprc(NAN, 1.0).is_err());
+        assert!(elliprc(1.0, NAN).is_err());
+        // Infs: should return 0
+        assert_eq!(elliprc(INFINITY, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprc(1.0, INFINITY).unwrap(), 0.0);
     }
 }
