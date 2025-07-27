@@ -49,6 +49,7 @@ use crate::{
 /// - RF(x, x, x) = 1/sqrt(x)
 /// - RF(x, y, y) = RC(x, y)
 /// - RF(0, y, y) = π/(2 sqrt(y))
+/// - RF(x, y, z) = 0 for x = ∞ or y = ∞ or z = ∞
 ///
 /// # Related Functions
 /// With c = csc²φ, r = 1/x², and kc² = 1 - m,
