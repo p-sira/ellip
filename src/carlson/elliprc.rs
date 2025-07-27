@@ -46,7 +46,7 @@ use crate::{
 /// - RC(x, y) = atan(sqrt(y-x)/x) / sqrt(y-x) for y > x
 /// - RC(x, y) = ln(sqrt(x) + sqrt(x-y)) / sqrt(x-y) for y < x
 /// - RC(x, y) = 0 for x = ∞ or y = ∞
-/// 
+///
 /// ## Notes
 /// RC is a degenerate case of the RF. It is an elementary function rather than an elliptic integral.
 ///
@@ -145,14 +145,8 @@ mod tests {
         assert_eq!(elliprc(0.0, 1.0).unwrap(), PI / 2.0);
         assert_eq!(elliprc(0.0, 4.0).unwrap(), PI / 4.0);
         // RC(x, y) = atan(sqrt(y-x)/x) / sqrt(y-x) for y > x
-        assert_eq!(
-            elliprc(1.0, 4.0).unwrap(),
-            (3.0.sqrt().atan() / 3.0.sqrt())
-        );
-        assert_eq!(
-            elliprc(1.0, 9.0).unwrap(),
-            (8.0.sqrt().atan() / 8.0.sqrt())
-        );
+        assert_eq!(elliprc(1.0, 4.0).unwrap(), (3.0.sqrt().atan() / 3.0.sqrt()));
+        assert_eq!(elliprc(1.0, 9.0).unwrap(), (8.0.sqrt().atan() / 8.0.sqrt()));
         // RC(x, y) = ln(sqrt(x) + sqrt(x-y)) / sqrt(x-y) for y < x
         assert_eq!(
             elliprc(4.0, 1.0).unwrap(),
