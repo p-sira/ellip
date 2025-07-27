@@ -193,5 +193,7 @@ mod tests {
         assert!(elliprg(INFINITY, 1.0, 1.0).is_err());
         assert!(elliprg(1.0, INFINITY, 1.0).is_err());
         assert!(elliprg(1.0, 1.0, INFINITY).is_err());
+        // Cover missing special case RG(0,y,0)
+        assert_eq!(elliprg(0.0, 1.0, 0.0).unwrap(), 0.5);
     }
 }
