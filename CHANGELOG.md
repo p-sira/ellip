@@ -1,5 +1,10 @@
 # Changelog
 ## 0.3
+### 0.3.6
+**Improvements**
+- Handle special cases and edge cases (infinity, nan, etc.) for all `carlson` functions.
+- Increase test coverage.
+
 ### 0.3.5
 **Deprecations**
 - Deprecate `BulirschConst`: The trait signature will be changed from `BulirschConst` to `BulirschConst<T>` and the trait will be relocated under `unstable` flag.
@@ -14,10 +19,10 @@
 - Handle special cases and edge cases (infinity, nan, etc.) for all `bulirsch` functions.
 - Add special cases documentation for `bulirsch` functions.
 - Improve and fix documentation.
+- Reduce package size.
 
 **Tests**
 - Increase test coverage.
-- Reduce package size.
 - Include `bulirsch` functions in the benchmark module.
 - Use native Wolfram functions to generate test data for `cel1`, `el1`, and `el3`.
 - Add error report for `cel1` and `cel2`.  
