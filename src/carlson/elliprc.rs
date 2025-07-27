@@ -115,7 +115,7 @@ fn _elliprc<T: Float>(x: T, y: T) -> Result<T, StrErr> {
     return_if_valid_else!(ans, {
         check!(@nan, elliprc, [_x, _y]);
         case!(@any [_x, _y] == inf!(), T::zero());
-        unreachable!()
+        Err("elliprc: Unexpected error.")
     })
 }
 
@@ -173,9 +173,7 @@ mod tests {
     use super::*;
 
     #[test]
-    #[should_panic]
     fn force_unreachable() {
-        let ans = elliprc(2.0, 1.0).unwrap();
-        println!("{}", ans);
+        assert!(elliprc(2.0, 1.0).is_err());
     }
 }
