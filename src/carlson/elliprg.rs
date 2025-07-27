@@ -134,7 +134,7 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
 
     return_if_valid_else!(ans, {
         check!(@nan, elliprg, [x, y, z]);
-        unreachable!();
+        Err("elliprg: Unexpected error.")
     })
 }
 
