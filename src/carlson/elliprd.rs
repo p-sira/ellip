@@ -14,7 +14,10 @@ use std::mem::swap;
 
 use num_traits::Float;
 
-use crate::{crate_util::let_mut, StrErr};
+use crate::{
+    crate_util::{case, check, let_mut, return_if_valid_else},
+    StrErr,
+};
 
 /// Computes RD ([degenerate symmetric elliptic integral of the third kind](https://dlmf.nist.gov/19.16.E5)).
 /// ```text
@@ -41,6 +44,13 @@ use crate::{crate_util::let_mut, StrErr};
 /// ![Degenerate Symmetric Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprd_plot.svg?raw=true)
 ///
 /// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprd_plot.html)
+///
+/// ## Special Cases
+/// - RD(x, x, x) = 1/(x sqrt(x))
+/// - RD(0, y, y) = 3/4 * π / (y sqrt(y))
+/// - RD(x, y, y) = 3/(2(y-x)) * (RC(x, y) - sqrt(x)/y) for x ≠ y
+/// - RD(x, x, z) = 3/(z-x) * (RC(z, x) - 1/sqrt(z)) for x ≠ z
+/// - RD(x, y, z) = 0 for x = ∞ or y = ∞ or z = ∞
 ///
 /// # Related Functions
 /// With c = csc²φ,
@@ -113,6 +123,7 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
     let mut fn_val = 1.0;
     let mut rd_sum = 0.0;
 
+    let mut ans = nan!();
     for _ in 0..N_MAX_ITERATIONS {
         let rx = xn.sqrt();
         let ry = yn.sqrt();
@@ -138,7 +149,7 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
             let e4 = 3.0 * (xyz - z3) * z;
             let e5 = xyz * z2;
 
-            let result = fn_val
+            ans = fn_val
                 * an.powf(-1.5)
                 * (1.0 - 3.0 * e2 / 14.0 + e3 / 6.0 + 9.0 * e2 * e2 / 88.0
                     - 3.0 * e4 / 22.0
@@ -150,12 +161,15 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
                     + 45.0 * e2 * e2 * e3 / 272.0
                     - 9.0 * (e3 * e4 + e2 * e5) / 68.0)
                 + 3.0 * rd_sum;
-
-            return Ok(result);
+            break;
         }
     }
 
-    Err("elliprd: Failed to converge.")
+    return_if_valid_else!(ans, {
+        check!(@nan, elliprd, [x, y, z]);
+        case!(@any [x, y, z] == inf!(), T::zero());
+        Err("elliprd: Failed to converge.")
+    })
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
@@ -204,15 +218,24 @@ mod tests {
     }
 
     #[test]
-    fn test_elliprd_err() {
-        // x < 0 or y < 0
+    fn test_elliprd_special_cases() {
+        use std::f64::{INFINITY, NAN};
+        // x < 0 or y < 0: should return Err
         assert!(elliprd(-1.0, 1.0, 1.0).is_err());
         assert!(elliprd(1.0, -1.0, 1.0).is_err());
-        // z <= 0
+        // z <= 0: should return Err
         assert!(elliprd(1.0, 1.0, 0.0).is_err());
         assert!(elliprd(1.0, 1.0, -1.0).is_err());
-        // both x and y zero
+        // both x and y zero: should return Err
         assert!(elliprd(0.0, 0.0, 1.0).is_err());
+        // NANs: should return Err
+        assert!(elliprd(NAN, 1.0, 1.0).is_err());
+        assert!(elliprd(1.0, NAN, 1.0).is_err());
+        assert!(elliprd(1.0, 1.0, NAN).is_err());
+        // Infs: should return zero
+        assert_eq!(elliprd(INFINITY, 1.0, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprd(1.0, INFINITY, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprd(1.0, 1.0, INFINITY).unwrap(), 0.0);
     }
 }
 
