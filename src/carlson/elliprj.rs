@@ -111,21 +111,17 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 fn elliprc1p<T: Float>(y: T) -> Result<T, StrErr> {
-    // We can skip this check since the call from elliprj already did the check.
-    // if y == -1.0 {
-    //     return Err("elliprc1p: y cannot be -1.0.");
-    // }
-
+    // We can skip y = -1 check since the call from elliprj already did the check.
     // for 1 + y < 0, the integral is singular, return Cauchy principal value
-    if y < -1.0 {
-        Ok((1.0 / -y).sqrt() * elliprc(-y, -1.0 - y)?)
-    } else if y == 0.0 {
-        Ok(1.0)
-    } else if y > 0.0 {
+    if y > 0.0 {
         Ok(y.sqrt().atan() / y.sqrt())
     } else if y > -0.5 {
         let arg = (-y).sqrt();
         Ok((arg.ln_1p() - (-arg).ln_1p()) / (2.0 * (-y).sqrt()))
+    } else if y == 0.0 {
+        Ok(1.0)
+    } else if y < -1.0 {
+        Ok((1.0 / -y).sqrt() * elliprc(-y, -1.0 - y)?)
     } else {
         Ok(((1.0 + (-y).sqrt()) / (1.0 + y).sqrt()).ln() / (-y).sqrt())
     }
@@ -328,6 +324,14 @@ mod tests {
         assert_eq!(elliprj(1.0, INFINITY, 1.0, 1.0).unwrap(), 0.0);
         assert_eq!(elliprj(1.0, 1.0, INFINITY, 1.0).unwrap(), 0.0);
         assert_eq!(elliprj(1.0, 1.0, 1.0, INFINITY).unwrap(), 0.0);
+    }
+
+    #[test]
+    fn cover_deadcode() {
+        // else branch
+        assert!(elliprc1p(-0.6).unwrap().is_finite());
+        // y < -1
+        assert!(elliprc1p(-1.1).unwrap().is_finite());
     }
 }
 
