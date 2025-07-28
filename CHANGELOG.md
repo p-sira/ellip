@@ -1,7 +1,11 @@
 # Changelog
 ## 0.3
 ### 0.3.6
+**Bug Fixes**
+- `ellipdinc`: Fix incorrect result when m = -inf.
+
 **Improvements**
+- Improve performance of `legendre` functions.
 - Handle special cases and edge cases (infinity, nan, etc.) for all `carlson` functions.
 - Increase test coverage.
 
