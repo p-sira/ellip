@@ -63,13 +63,12 @@ use crate::{
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipd<T: Float>(m: T) -> Result<T, StrErr> {
-    if m > 1.0 {
+    if m >= 1.0 {
+        // D evaluates to inf at m=1.
+        if m == 1.0 {
+            return Ok(inf!());
+        }
         return Err("ellipd: m must be less than 1.");
-    }
-
-    // D evaluates to inf at m=1.
-    if m == 1.0 {
-        return Ok(inf!());
     }
 
     if m.abs() <= epsilon!() {
