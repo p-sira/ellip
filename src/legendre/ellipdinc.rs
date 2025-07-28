@@ -68,22 +68,17 @@ use num_traits::Float;
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
-    check!(@nan, ellipdinc, [phi, m]);
-
-    let sign = if phi < 0.0 { -1.0 } else { 1.0 };
-
-    if phi.abs() >= max_val!() {
-        // Need to handle infinity as a special case:
-        return Ok(phi.signum() * inf!());
-    }
-
     if m < -1e306 {
         return Ok(0.0);
     }
 
+    let sign = phi.signum();
     let phi = phi.abs();
-
     if phi > 1.0 / epsilon!() {
+        if phi >= max_val!() {
+            // Need to handle infinity as a special case:
+            return Ok(sign * inf!());
+        }
         // Phi is so large that phi%pi is necessarily zero (or garbage),
         // just return the second part of the duplication formula:
         return Ok(sign * 2.0 * phi * ellipd(m)? / pi!());
@@ -120,7 +115,16 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         result = result + mm * ellipd(m)?;
     }
 
-    Ok(sign * result)
+    let ans = sign * result;
+    #[cfg(feature = "reduce-iteration")]
+    let ans = nan!();
+
+    if ans.is_nan() {
+        check!(@nan, ellipdinc, [phi, m]);
+        Err("ellipdinc: Unexpected error.")
+    } else {
+        Ok(ans)
+    }
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
@@ -172,5 +176,15 @@ mod tests {
         assert!(ellipdinc(0.5, INFINITY).is_err());
         // m = -inf: D(phi, -inf) = 0.0
         assert_eq!(ellipdinc(0.5, NEG_INFINITY).unwrap(), 0.0);
+    }
+}
+
+#[cfg(feature = "reduce-iteration")]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn force_unreachable() {
+        assert!(ellipdinc(0.5, 0.5).is_err());
     }
 }
