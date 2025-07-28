@@ -56,6 +56,8 @@ use crate::{crate_util::check, elliprg, polyeval, StrErr};
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+/// - Abramowitz, Milton, and Irene A. Stegun. Handbook of Mathematical Functions: With Formulas, Graphs and Mathematical Tables. Unabridged, Unaltered and corr. Republ. of the 1964 ed. With Conference on mathematical tables, National science foundation, and Massachusetts institute of technology. Dover Books on Advanced Mathematics. Dover publ, 1972.
+/// - The SciPy community. “Scipy.Special.Ellipe — SciPy v1.16.0 Manual.” Accessed July 28, 2025. <https://docs.scipy.org/doc/scipy-1.16.0/reference/generated/scipy.special.ellipe.html>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipe<T: Float>(m: T) -> Result<T, StrErr> {
     let mut m = m;
