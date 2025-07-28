@@ -58,27 +58,13 @@ use crate::{crate_util::check, elliprg, polyeval, StrErr};
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipe<T: Float>(m: T) -> Result<T, StrErr> {
-    check!(@nan, ellipe, [m]);
-
-    if m > 1.0 {
-        return Err("ellipe: m must be less than 1.");
-    }
-
-    if m == neg_inf!() {
-        return Ok(inf!());
-    }
-
-    // If T is f128
-    // Unused since num-traits doesn't support f128 yet.
-    // if max_val!() > T::from(f64::MAX).unwrap() {
-    //     return ellipe_precise(m);
-    // }
-
-    // Note: this function allows both negative m and positive m less than 1.
-    // Negative m: Abramowitz & Stegun, 1972
     let mut m = m;
     let mut c = 1.0;
-    while m < 0.0 {
+    if m < 0.0 {
+        if m == neg_inf!() {
+            return Ok(inf!());
+        }
+        // Negative m: Abramowitz & Stegun, 1972
         c = c * (1.0 - m).sqrt();
         m = m / (m - 1.0);
     }
@@ -89,8 +75,8 @@ pub fn ellipe<T: Float>(m: T) -> Result<T, StrErr> {
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
-    match (m * 20.0).to_i32().unwrap() {
-        0 | 1 => {
+    match (m * 20.0).to_i8() {
+        Some(0) | Some(1) => {
             let coeffs = [
                 1.550973351780472328,
                 -0.400301020103198524,
@@ -106,7 +92,7 @@ fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.05, &coeffs))
         }
-        2 | 3 => {
+        Some(2) | Some(3) => {
             let coeffs = [
                 1.510121832092819728,
                 -0.417116333905867549,
@@ -122,7 +108,7 @@ fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.15, &coeffs))
         }
-        4 | 5 => {
+        Some(4) | Some(5) => {
             let coeffs = [
                 1.467462209339427155,
                 -0.436576290946337775,
@@ -138,7 +124,7 @@ fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.25, &coeffs))
         }
-        6 | 7 => {
+        Some(6) | Some(7) => {
             let coeffs = [
                 1.422691133490879171,
                 -0.459513519621048674,
@@ -155,7 +141,7 @@ fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.35, &coeffs))
         }
-        8 | 9 => {
+        Some(8) | Some(9) => {
             let coeffs = [
                 1.375401971871116291,
                 -0.487202183273184837,
@@ -173,7 +159,7 @@ fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.45, &coeffs))
         }
-        10 | 11 => {
+        Some(10) | Some(11) => {
             let coeffs = [
                 1.325024497958230082,
                 -0.521727647557566767,
@@ -191,7 +177,7 @@ fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.55, &coeffs))
         }
-        12 | 13 => {
+        Some(12) | Some(13) => {
             let coeffs = [
                 1.270707479650149744,
                 -0.566839168287866583,
@@ -211,7 +197,7 @@ fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.65, &coeffs))
         }
-        14 | 15 => {
+        Some(14) | Some(15) => {
             let coeffs = [
                 1.211056027568459525,
                 -0.630306413287455807,
@@ -233,7 +219,7 @@ fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.75, &coeffs))
         }
-        16 => {
+        Some(16) => {
             let coeffs = [
                 1.161307152196282836,
                 -0.701100284555289548,
@@ -252,7 +238,7 @@ fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.825, &coeffs))
         }
-        17 => {
+        Some(17) => {
             let coeffs = [
                 1.124617325119752213,
                 -0.770845056360909542,
@@ -274,7 +260,16 @@ fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.875, &coeffs))
         }
-        _ => ellipe_precise(m),
+        Some(_) => ellipe_precise(m),
+        None => {
+            check!(@nan, ellipe, [m]);
+
+            if m > 1.0 {
+                return Err("ellipe: m must be less than 1.");
+            }
+
+            Err("ellipe: Unexpected error.")
+        }
     }
 }
 
@@ -282,8 +277,11 @@ fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 fn ellipe_precise<T: Float>(m: T) -> Result<T, StrErr> {
     // Special cases: https://dlmf.nist.gov/19.6.E1
-    if m == 1.0 {
-        return Ok(1.0);
+    if m >= 1.0 {
+        if m == 1.0 {
+            return Ok(1.0);
+        }
+        return Err("ellipe: m must be less than 1.");
     }
 
     Ok(2.0 * elliprg(0.0, 1.0 - m, 1.0)?)
