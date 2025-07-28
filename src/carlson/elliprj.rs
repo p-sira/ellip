@@ -13,7 +13,7 @@
 use std::mem::swap;
 
 use crate::{
-    crate_util::{declare, let_mut},
+    crate_util::{case, check, declare, let_mut, return_if_valid_else},
     elliprc, elliprd, elliprf, StrErr,
 };
 use num_traits::Float;
@@ -42,6 +42,14 @@ use num_traits::Float;
 ///   - any of x, y, or z is negative, or more than one of them are zero,
 ///   - or p = 0.
 /// - Returns the Cauchy principal value if p < 0.
+///
+/// ## Special Cases
+/// - RJ(x, x, x, x) = 1/(x sqrt(x))
+/// - RJ(x, y, z, z) = RD(x, y, z)
+/// - RJ(x, x, x, p) = 3/(x-p) * (RC(x, p) - 1/sqrt(x)) for x ≠ p and xp ≠ 0
+/// - RJ(x, y, y, y) = RD(x, y, y)
+/// - RJ(x, y, y, p) = 3/(p-y) * (RC(x, y) - RC(x, p)) for y ≠ p
+/// - RJ(x, y, z, p) = 0 for x = ∞ or y = ∞ or z = ∞ or p = ∞
 ///
 /// ## Graph
 /// ![Symmetric Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprj_plot.svg?raw=true)
@@ -176,7 +184,7 @@ fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
 
     let mut fmn = 1.0;
     let mut rc_sum = 0.0;
-
+    let mut ans = nan!();
     for _ in 0..N_MAX_ITERATION {
         let rx = xn.sqrt();
         let ry = yn.sqrt();
@@ -195,7 +203,6 @@ fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
         let lambda = rx * ry + rx * rz + ry * rz;
         an = (an + lambda) / 4.0;
         fmn = fmn / 4.0;
-
         if fmn * q < an {
             // Calculate and return
             let x = fmn * (a0 - x) / an;
@@ -223,7 +230,8 @@ fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
                     + 45.0 * e2 * e2 * e3 / 272.0
                     - 9.0 * (e3 * e4 + e2 * e5) / 68.0);
 
-            return Ok(result + 6.0 * rc_sum);
+            ans = result + 6.0 * rc_sum;
+            break;
         }
 
         xn = (xn + lambda) / 4.0;
@@ -233,7 +241,11 @@ fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
         delta = delta / 64.0;
     }
 
-    Err("elliprj: Failed to converge.")
+    return_if_valid_else!(ans, {
+        check!(@nan, elliprj, [x, y, z, p]);
+        case!(@any [x, y, z, p] == inf!(), T::zero());
+        Err("elliprj: Failed to converge.")
+    })
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
@@ -294,17 +306,28 @@ mod tests {
     }
 
     #[test]
-    fn test_elliprj_err() {
-        // negative argument
+    fn test_elliprj_special_cases() {
+        use std::f64::{INFINITY, NAN};
+        // Negative arguments: should return Err
         assert!(elliprj(-1.0, 1.0, 1.0, 1.0).is_err());
         assert!(elliprj(1.0, -1.0, 1.0, 1.0).is_err());
         assert!(elliprj(1.0, 1.0, -1.0, 1.0).is_err());
-        // more than one zero among x, y, z
+        // More than one zero among x, y, z: should return Err
         assert!(elliprj(0.0, 0.0, 1.0, 1.0).is_err());
         assert!(elliprj(0.0, 1.0, 0.0, 1.0).is_err());
         assert!(elliprj(1.0, 0.0, 0.0, 1.0).is_err());
-        // p == 0
+        // p = 0: should return Err
         assert!(elliprj(1.0, 1.0, 1.0, 0.0).is_err());
+        // NANs: should return Err
+        assert!(elliprj(NAN, 1.0, 1.0, 1.0).is_err());
+        assert!(elliprj(1.0, NAN, 1.0, 1.0).is_err());
+        assert!(elliprj(1.0, 1.0, NAN, 1.0).is_err());
+        assert!(elliprj(1.0, 1.0, 1.0, NAN).is_err());
+        // Infs: should return zero
+        assert_eq!(elliprj(INFINITY, 1.0, 1.0, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprj(1.0, INFINITY, 1.0, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprj(1.0, 1.0, INFINITY, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprj(1.0, 1.0, 1.0, INFINITY).unwrap(), 0.0);
     }
 }
 
