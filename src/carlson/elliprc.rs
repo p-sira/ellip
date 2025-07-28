@@ -169,11 +169,6 @@ mod tests {
 }
 
 #[cfg(feature = "reduce-iteration")]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn force_unreachable() {
-        assert!(elliprc(2.0, 1.0).is_err());
-    }
+crate::test_force_unreachable! {
+    assert!(elliprc(2.0, 1.0).is_err());
 }

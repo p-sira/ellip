@@ -337,11 +337,6 @@ mod tests {
 }
 
 #[cfg(feature = "reduce-iteration")]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn force_unreachable() {
-        assert!(ellipk(f64::INFINITY).is_err());
-    }
+crate::test_force_unreachable! {
+    assert!(ellipk(f64::INFINITY).is_err());
 }
