@@ -73,7 +73,7 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         );
     }
     if (x + y + z).is_infinite() {
-        return Err("elliprg: The arguments must be finite.");
+        return Err("elliprg: Arguments must be finite.");
     }
 
     let_mut!(x, y, z);
