@@ -77,10 +77,8 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         return Ok(phi.signum() * inf!());
     }
 
-    // m=-inf should be undefined but as m -> -inf
-    // D -> -inf
-    if m == neg_inf!() {
-        return Ok(neg_inf!());
+    if m < -1e306 {
+        return Ok(0.0);
     }
 
     let phi = phi.abs();
@@ -93,7 +91,6 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 
     // Carlson's algorithm works only for |phi| <= pi/2,
     // use the integrand's periodicity to normalize phi
-    //
     let mut rphi = phi % pi_2!();
     let mut mm = ((phi - rphi) / pi_2!()).round();
     let mut s = 1.0;
@@ -173,7 +170,7 @@ mod tests {
         assert_eq!(ellipdinc(NEG_INFINITY, 0.5).unwrap(), NEG_INFINITY);
         // m = inf: should return Err
         assert!(ellipdinc(0.5, INFINITY).is_err());
-        // m = -inf: D(phi, -inf) = -inf
-        assert_eq!(ellipdinc(0.5, NEG_INFINITY).unwrap(), NEG_INFINITY);
+        // m = -inf: D(phi, -inf) = 0.0
+        assert_eq!(ellipdinc(0.5, NEG_INFINITY).unwrap(), 0.0);
     }
 }
