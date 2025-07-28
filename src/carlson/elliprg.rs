@@ -7,10 +7,7 @@
 use num_traits::Float;
 use std::mem::swap;
 
-use crate::{
-    crate_util::let_mut,
-    elliprc, elliprd, elliprf, StrErr,
-};
+use crate::{crate_util::let_mut, elliprc, elliprd, elliprf, StrErr};
 
 // Original header from Boost Math
 //  Copyright (c) 2015 John Maddock
