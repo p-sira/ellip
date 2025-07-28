@@ -8,7 +8,7 @@ use num_traits::Float;
 use std::mem::swap;
 
 use crate::{
-    crate_util::{check, let_mut},
+    crate_util::let_mut,
     elliprc, elliprd, elliprf, StrErr,
 };
 
@@ -67,10 +67,14 @@ use crate::{
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
-    if x < 0.0 || y < 0.0 || z < 0.0 {
-        return Err("elliprg: x, y, and z must be non-negative.");
+    if x.min(y).min(z) < 0.0 || (y + z).min(x + y).min(x + z) < 0.0 {
+        return Err(
+            "elliprg: x, y, and z must be non-negative and at most one of them can be zero.",
+        );
     }
-    check!(@inf, elliprg, [x, y, z]);
+    if (x + y + z).is_infinite() {
+        return Err("elliprg: The arguments must be finite.");
+    }
 
     let_mut!(x, y, z);
     if x < y {
@@ -90,10 +94,6 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
 
         if y == 0.0 {
             return Ok(pi!() * x.sqrt() / 4.0);
-        }
-
-        if x == 0.0 {
-            return Ok(y.sqrt() / 2.0);
         }
 
         return Ok((x * elliprc(y, x)? + y.sqrt()) / 2.0);
@@ -193,7 +193,5 @@ mod tests {
         assert!(elliprg(INFINITY, 1.0, 1.0).is_err());
         assert!(elliprg(1.0, INFINITY, 1.0).is_err());
         assert!(elliprg(1.0, 1.0, INFINITY).is_err());
-        // Cover missing special case RG(0,y,0)
-        assert_eq!(elliprg(0.0, 1.0, 0.0).unwrap(), 0.5);
     }
 }
