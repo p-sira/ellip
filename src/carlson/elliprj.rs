@@ -115,11 +115,11 @@ fn elliprc1p<T: Float>(y: T) -> Result<T, StrErr> {
     // for 1 + y < 0, the integral is singular, return Cauchy principal value
     if y > 0.0 {
         Ok(y.sqrt().atan() / y.sqrt())
+    } else if y == 0.0 {
+        Ok(1.0)
     } else if y > -0.5 {
         let arg = (-y).sqrt();
         Ok((arg.ln_1p() - (-arg).ln_1p()) / (2.0 * (-y).sqrt()))
-    } else if y == 0.0 {
-        Ok(1.0)
     } else if y < -1.0 {
         Ok((1.0 / -y).sqrt() * elliprc(-y, -1.0 - y)?)
     } else {
@@ -240,6 +240,13 @@ fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
     return_if_valid_else!(ans, {
         check!(@nan, elliprj, [x, y, z, p]);
         case!(@any [x, y, z, p] == inf!(), T::zero());
+        eprintln!(
+            "{}, {}, {}, {}",
+            x.to_f64().unwrap(),
+            y.to_f64().unwrap(),
+            z.to_f64().unwrap(),
+            p.to_f64().unwrap()
+        );
         Err("elliprj: Failed to converge.")
     })
 }
@@ -332,6 +339,17 @@ mod tests {
         assert!(elliprc1p(-0.6).unwrap().is_finite());
         // y < -1
         assert!(elliprc1p(-1.1).unwrap().is_finite());
+    }
+
+    #[test]
+    fn my() {
+        assert!(elliprj(
+            27.09539794921875,
+            25.397361755371094,
+            25.397361755371094,
+            27.09539794921875
+        )
+        .is_ok())
     }
 }
 
