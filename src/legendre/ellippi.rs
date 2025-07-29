@@ -67,59 +67,46 @@ use crate::{crate_util::check, ellipe, ellipk, elliprf, elliprj, StrErr};
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
-    check!(@nan, ellippi, [n, m]);
-
-    if m > 1.0 {
-        return Err("ellippi: m must be less than 1.");
-    }
-
-    if n == 1.0 {
-        return Err("ellippi: n cannot be 1.");
-    }
-
     // n = -inf: Π(-inf, m) = 0
     // m = -inf: Π(n, -inf) = 0
-    if n == neg_inf!() || m == neg_inf!() {
+    if n < -1e306 || m < -1e306 {
         return Ok(0.0);
     }
 
-    // m -> 1-
-    if 1.0 - m <= epsilon!() {
+    if m > 1.0 - epsilon!() {
+        if m > 1.0 {
+            return Err("ellippi: m must be less than 1.");
+        }
+        // m -> 1-
         let sign = (1.0 - n).signum();
         return Ok(sign * inf!());
     }
 
-    if n > 1.0 {
-        // n -> 1+
-        // https://dlmf.nist.gov/19.6.E6
-        if n - 1.0 <= epsilon!() {
-            return Ok(ellipk(m)? - ellipe(m)? / (1.0 - m));
+    if n > 1.0 - epsilon!() {
+        if n > 1.0 {
+            // n -> 1+
+            // https://dlmf.nist.gov/19.6.E6
+            if n <= 1.0 + epsilon!() {
+                return Ok(ellipk(m)? - ellipe(m)? / (1.0 - m));
+            }
+
+            // Use Cauchy principal value
+            // https://dlmf.nist.gov/19.25.E4
+            return Ok(-1.0 / 3.0 * m / n * elliprj(0.0, 1.0 - m, 1.0, 1.0 - m / n)?);
         }
-
-        // Use Cauchy principal value
-        // https://dlmf.nist.gov/19.25.E4
-        return Ok(-1.0 / 3.0 * m / n * elliprj(0.0, 1.0 - m, 1.0, 1.0 - m / n)?);
-    }
-
-    // n < 1 and n -> 1-
-    if 1.0 - n <= epsilon!() {
+        if n == 1.0 {
+            return Err("ellippi: n cannot be 1.");
+        }
         return Ok(inf!());
     }
 
-    if n == 0.0 {
-        if m == 0.0 {
-            return Ok(pi_2!());
+    if n <= 0.0 {
+        if n == 0.0 {
+            if m == 0.0 {
+                return Ok(pi_2!());
+            }
+            return ellipk(m);
         }
-        return ellipk(m);
-    }
-
-    // https://dlmf.nist.gov/19.6.E1
-    if m == n {
-        let mc = 1.0 - m;
-        return Ok(1.0 / mc * ellipe(m)?);
-    }
-
-    if n < 0.0 {
         // Apply A&S 17.7.17
         let nn = (m - n) / (1.0 - n);
         let nm1 = (1.0 - m) / (1.0 - n);
@@ -132,9 +119,19 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
         return Ok(result);
     }
 
+    // https://dlmf.nist.gov/19.6.E1
+    if m == n {
+        let mc = 1.0 - m;
+        return Ok(1.0 / mc * ellipe(m)?);
+    }
+
     // Compute vc = 1-n without cancellation errors
     let vc = 1.0 - n;
-    ellippi_vc(n, m, vc)
+    let ans = ellippi_vc(n, m, vc);
+    if ans.is_err() {
+        check!(@nan, ellippi, [n, m]);
+    }
+    ans
 }
 
 #[inline]
@@ -164,14 +161,6 @@ mod tests {
     }
 
     #[test]
-    fn test_ellippi_err() {
-        // m > 1
-        assert!(ellippi(0.5, 1.1).is_err());
-        // n == 1
-        assert!(ellippi(1.0, 0.5).is_err());
-    }
-
-    #[test]
     fn test_ellippi_special_cases() {
         use std::f64::{
             consts::{FRAC_PI_2, PI},
@@ -192,7 +181,7 @@ mod tests {
         assert_eq!(ellippi(0.5, 1.0).unwrap(), INFINITY);
         assert_eq!(ellippi(-2.0, 1.0).unwrap(), INFINITY);
         // n -> 1-: Π(n, m) = inf
-        assert_eq!(ellippi(1.0 - EPSILON, 0.5).unwrap(), INFINITY);
+        assert_eq!(ellippi(1.0 - 0.5 * EPSILON, 0.5).unwrap(), INFINITY);
         // n -> 1+: Π(n, m) = K(m) - E(m) / (1-m)
         assert_eq!(
             ellippi(1.0 + EPSILON, 0.5).unwrap(),

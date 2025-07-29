@@ -13,7 +13,10 @@
 
 use num_traits::Float;
 
-use crate::{crate_util::check, elliprf, StrErr};
+use crate::{
+    crate_util::{check, return_if_valid_else},
+    elliprf, StrErr,
+};
 
 use super::ellipk::ellipk_precise;
 
@@ -50,8 +53,7 @@ use super::ellipk::ellipk_precise;
 /// - F(φ, 0) = φ
 /// - F(π/2, m) = K(m)
 /// - F(φ, -∞) = 0
-/// - F(∞, m) = ∞
-/// - F(-∞, m) = -∞
+/// - F(φ, m) = sign(φ) ∞ for |φ| = ∞
 ///
 /// # Related Functions
 /// With c = csc²φ,
@@ -71,19 +73,17 @@ use super::ellipk::ellipk_precise;
 /// - The MathWorks, Inc. “ellipticF.” Accessed April 21, 2025. <https://www.mathworks.com/help/symbolic/sym.ellipticf.html>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
-    check!(@nan, ellipf, [phi, m]);
-
-    let invert = if phi < 0.0 { -1.0 } else { 1.0 };
+    let sign = phi.signum();
     let phi = phi.abs();
 
     // Large phis
     if phi > 1.0 / epsilon!() {
         if phi >= max_val!() {
-            return Ok(invert * inf!());
+            return Ok(sign * inf!());
         }
         // Phi is so large that phi%pi is necessarily zero (or garbage),
         // just return the second part of the duplication formula:
-        return Ok(invert * 2.0 * phi * ellipk_precise(m)? / pi!());
+        return Ok(sign * 2.0 * phi * ellipk_precise(m)? / pi!());
     }
 
     // Carlson's algorithm works only for |phi| <= pi/2,
@@ -103,14 +103,10 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         return Err("ellipf: m sin²φ must be smaller than one.");
     }
 
-    if m == neg_inf!() {
-        return Ok(0.0);
-    }
-
     let c2p = rphi.cos() * rphi.cos();
     let mut result;
 
-    debug_assert!(s2p > min_val!());
+    debug_assert!(s2p > min_val!() || !s2p.is_normal());
     // Use http://dlmf.nist.gov/19.25#E5, note that
     // c-1 simplifies to cot^2(rphi) which avoids cancellation.
     // Likewise c - k^2 is the same as (c - 1) + (1 - k^2).
@@ -156,7 +152,14 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         result = result + mm * ellipk_precise(m)?;
     }
 
-    Ok(invert * result)
+    let ans = sign * result;
+    return_if_valid_else!(ans, {
+        check!(@nan, ellipf, [phi, m]);
+        if m == neg_inf!() {
+            return Ok(0.0);
+        }
+        Err("ellipf: Unexpected error.")
+    })
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
