@@ -265,11 +265,6 @@ fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
         Some(_) => ellipe_precise(m),
         None => {
             check!(@nan, ellipe, [m]);
-
-            if m > 1.0 {
-                return Err("ellipe: m must be less than 1.");
-            }
-
             Err("ellipe: Unexpected error.")
         }
     }
