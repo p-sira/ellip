@@ -354,12 +354,6 @@ mod tests {
 }
 
 #[cfg(feature = "reduce-iteration")]
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn force_fail_to_converge() {
-        assert!(elliprj(0.2, 0.5, 1e300, 1.0).is_err());
-    }
+crate::test_force_unreachable! {
+    assert!(elliprj(0.2, 0.5, 1e300, 1.0).is_err());
 }

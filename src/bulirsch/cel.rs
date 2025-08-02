@@ -477,14 +477,8 @@ mod tests {
 }
 
 #[cfg(feature = "reduce-iteration")]
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn force_fail_to_converge() {
-        assert!(cel(1e300, 0.2, 0.5, 0.5).is_err());
-        assert!(cel1(1e300).is_err());
-        assert!(cel2(1e300, 0.5, 0.5).is_err());
-    }
+crate::test_force_unreachable! {
+    assert!(cel(1e300, 0.2, 0.5, 0.5).is_err());
+    assert!(cel1(1e300).is_err());
+    assert!(cel2(1e300, 0.5, 0.5).is_err());
 }
