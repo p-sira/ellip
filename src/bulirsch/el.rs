@@ -354,7 +354,7 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
 
     // This cutpoint is empirical
     let phi = x.atan();
-    if p.abs() <= 1e-10 {
+    if p.abs() <= 1e-10 && m != 1.0 {
         if m == 0.0 {
             return Ok(x);
         }
@@ -796,12 +796,6 @@ mod tests {
         test_reference(1.6, 1e10, 1.20, 2.3734774669772208e-9);
         test_reference(-1.6, 1e10, 1.20, -2.3734774669772208e-9);
         test_reference(1.0, 0.31, 9.90e-2, 1.0903577921777398);
-    }
-
-    #[test]
-    fn my() {
-        let ans = el3(1.3e-10, 1.0e-10, 1.0e-10).unwrap();
-        println!("{ans}");
     }
 
     #[test]
