@@ -8,8 +8,8 @@ use num_traits::Float;
 
 use crate::{
     bulirsch::DefaultPrecision,
-    crate_util::{check, declare},
-    ellipeinc, ellipf, ellippi, StrErr,
+    crate_util::{check, declare, return_if_valid_else},
+    ellipeinc, ellipf, ellippi, ellippiinc, StrErr,
 };
 
 use super::{_BulirschConst, cel1, cel2};
@@ -311,9 +311,7 @@ pub fn el3<T: Float>(x: T, kc: T, p: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrErr> {
-    check!(@nan, el3, [x, kc, p]);
-
-    if kc == 0.0 {
+    if kc.abs() < epsilon!() {
         return Err("el3: kc must not be zero.");
     }
 
@@ -367,10 +365,9 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
         return Ok(result);
     }
 
-    // // https://dlmf.nist.gov/19.6.E11
-    // if phi == 0.0 {
-    //     return Ok(0.0);
-    // }
+    if x.abs() == 1.0 {
+        return ellippiinc(phi, n, m);
+    }
 
     // real
     declare!(mut [c, d, de, e, f, fa, g, h, hh]);
@@ -534,7 +531,8 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
     l = 0;
     m = 0;
 
-    loop {
+    let mut ans = nan!();
+    for _ in 0..N_MAX_ITERATIONS {
         y = y - e / y;
         if y == 0.0 {
             y = e.sqrt() * C::cb();
@@ -597,38 +595,47 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
             continue;
         }
 
+        if y < 0.0 {
+            l += 1;
+        }
+        e = (t / y).atan() + pi!() * T::from(l).unwrap();
+        e = e * (c * t + d) / (t * (t + q));
+
+        if bo {
+            h = v / (t + u);
+            z = 1.0 - r * h;
+            h = r + h;
+            if z == 0.0 {
+                z = C::cb();
+            }
+            if z < 0.0 {
+                m += if h < 0.0 { -1 } else { 1 };
+            }
+            s = (h / z).atan() + T::from(m).unwrap() * pi!();
+        } else {
+            s = if bk {
+                ye.asinh()
+            } else {
+                z.ln() + T::from(m).unwrap() * ln_2!()
+            };
+            s = s * 0.5;
+        }
+        e = (e + fa.sqrt() * s) / T::from(n).unwrap();
+
+        ans = if x > 0.0 { e } else { -e };
         break;
     }
-
-    if y < 0.0 {
-        l += 1;
-    }
-    e = (t / y).atan() + pi!() * T::from(l).unwrap();
-    e = e * (c * t + d) / (t * (t + q));
-
-    if bo {
-        h = v / (t + u);
-        z = 1.0 - r * h;
-        h = r + h;
-        if z == 0.0 {
-            z = C::cb();
-        }
-        if z < 0.0 {
-            m += if h < 0.0 { -1 } else { 1 };
-        }
-        s = (h / z).atan() + T::from(m).unwrap() * pi!();
-    } else {
-        s = if bk {
-            ye.asinh()
-        } else {
-            z.ln() + T::from(m).unwrap() * ln_2!()
-        };
-        s = s * 0.5;
-    }
-    e = (e + fa.sqrt() * s) / T::from(n).unwrap();
-
-    Ok(if x > 0.0 { e } else { -e })
+    return_if_valid_else!(ans, {
+        check!(@nan, el3, [x, kc, p]);
+        Err("el3: Failed to converge.")
+    })
 }
+
+#[cfg(not(feature = "reduce-iteration"))]
+const N_MAX_ITERATIONS: usize = 10;
+
+#[cfg(feature = "reduce-iteration")]
+const N_MAX_ITERATIONS: usize = 1;
 
 #[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
@@ -834,4 +841,9 @@ mod tests {
         assert!(el3(0.5, NAN, 0.5).is_err());
         assert!(el3(0.5, 0.5, NAN).is_err());
     }
+}
+
+#[cfg(feature = "reduce-iteration")]
+crate::test_force_unreachable! {
+    assert!(el3(0.5, 0.5, 0.5).is_err());
 }
