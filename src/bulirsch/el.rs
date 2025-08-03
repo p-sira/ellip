@@ -366,7 +366,8 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
         return Ok(result);
     }
 
-    if x.abs() == 1.0 {
+    let x_abs = x.abs();
+    if x_abs == 1.0 {
         return ellippiinc(phi, n, m);
     }
 
@@ -385,7 +386,7 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
     hh = x * x;
     f = p * hh;
     s = if kc == 0.0 {
-        C::ca() / (1.0 + x.abs())
+        C::ca() / (1.0 + x_abs)
     } else {
         kc
     };
@@ -398,17 +399,19 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
 
     // small
     if e < 0.1 && z < 0.1 && t < 1.0 && r < 1.0 {
-        let (rb, ra): (Vec<T>, Vec<T>) = (2..=C::ND)
-            .map(|k| {
-                let rb_k = 0.5 / T::from(k).unwrap();
-                (rb_k, 1.0 - rb_k)
-            })
-            .unzip();
+        let mut rb: [T; MAX_ND] = [T::zero(); MAX_ND];
+        let mut ra: [T; MAX_ND] = [T::zero(); MAX_ND];
+        let mut rr: [T; MAX_ND] = [T::zero(); MAX_ND];
+
+        for k in 2..=C::ND {
+            let k_float = T::from(k).unwrap();
+            rb[k - 2] = 0.5 / k_float;
+            ra[k - 2] = 1.0 - rb[k - 2];
+        }
 
         zd = 0.5 / (T::from(C::ND).unwrap() + 1.0);
         s = p + pm;
 
-        let mut rr: Vec<T> = vec![0.0; C::ND - 2];
         for k in 0..C::ND - 2 {
             rr[k] = s;
             pm = pm * t * ra[k];
@@ -438,11 +441,8 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
 
     let p1 = if p == 0.0 { C::cb() / hh } else { p };
     s = s.abs();
-    y = x.abs();
-    g = p1 - 1.0;
-    if g == 0.0 {
-        g = C::cb();
-    }
+    y = x_abs;
+    g = if p == 1.0 { C::cb() } else { p1 - 1.0 };
     f = p1 - t;
     if f == 0.0 {
         f = C::cb() * t;
@@ -631,6 +631,8 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
         Err("el3: Failed to converge.")
     })
 }
+
+const MAX_ND: usize = 50;
 
 #[cfg(not(feature = "reduce-iteration"))]
 const N_MAX_ITERATIONS: usize = 10;
