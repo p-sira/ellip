@@ -4,7 +4,7 @@ metric. Errors are expressed in units of machine epsilon (ε).
 The test data spans the domain of each function up to **μ** to avoid approaching the function's limit.
 The reference values are computed using [**Wolfram Engine**](https://www.wolfram.com/engine/).
 You can find the scripts in the directory [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/).
-This report is generated on x86_64-unknown-linux-gnu rustc 1.88.0 using ellip v0.3.5 (/home/runner/work/ellip/ellip) at `f64` precision (ε≈2.22e-16).
+This report is generated on x86_64-unknown-linux-gnu rustc 1.88.0 using ellip v0.3.6 at `f64` precision (ε≈2.22e-16).
 
 ## Legendre's Complete Elliptic Integrals
 | Function        | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
@@ -35,16 +35,16 @@ which are available on Wolfram Engine. However, for `cel` and `el2`, their value
 be mapped simply. Hence, the reference values are generated using the functions
 submitted by Jan Mangaldan on [Wolfram Function Repository](https://resources.wolframcloud.com/FunctionRepository/).
 As for `cel2`, it is mapped to `cel` with p=1.
-| Function   | Mean (ε) | Median (ε) | P99 (ε)  | Max (ε) | Variance (ε²) | μ (ε²) |
-|------------|----------|------------|----------|---------|---------------|--------|
-| cel        | 0.62     | 0.51       | 3.55     | 37.90   | 3.58          | 1      |
-| cel (p.v.) | 1.17     | 0.53       | 20.06    | 37.64   | 15.72         | 1      |
-| cel1       | 0.50     | 0.00       | 8.68     | 8.68    | 1.61          | 1      |
-| cel2       | 0.36     | 0.00       | 1.59     | 1.59    | 0.18          | 1      |
-| el1        | 0.76     | 0.69       | 2.70     | 3.32    | 0.49          | 1      |
-| el2        | 2.10     | 0.97       | 23.19    | 68.50   | 21.70         | 1      |
-| el3        | 1128.60  | 0.67       | 11587.30 | 1.55e5  | 1.45e8        | 50     |
-| el3 (p.v.) | 24.78    | 15.03      | 260.03   | 295.19  | 1407.09       | 50     |
+| Function   | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
+|------------|----------|------------|---------|---------|---------------|--------|
+| cel        | 0.62     | 0.51       | 3.55    | 37.90   | 3.58          | 1      |
+| cel (p.v.) | 1.17     | 0.53       | 20.06   | 37.64   | 15.72         | 1      |
+| cel1       | 0.50     | 0.00       | 8.68    | 8.68    | 1.61          | 1      |
+| cel2       | 0.36     | 0.00       | 1.59    | 1.59    | 0.18          | 1      |
+| el1        | 0.76     | 0.69       | 2.70    | 3.32    | 0.49          | 1      |
+| el2        | 2.10     | 0.97       | 23.19   | 68.50   | 21.70         | 1      |
+| el3        | 1119.33  | 0.68       | 9941.79 | 1.55e5  | 1.44e8        | 50     |
+| el3 (p.v.) | 24.78    | 15.03      | 260.03  | 295.19  | 1407.09       | 50     |
 
 ## Carlson's Symmetric Elliptic Integrals
 
