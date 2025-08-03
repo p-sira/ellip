@@ -8,8 +8,8 @@ use num_traits::Float;
 
 use crate::{
     bulirsch::DefaultPrecision,
-    crate_util::{check, declare, return_if_valid_else},
-    ellipeinc, ellipf, ellippi, ellippiinc, StrErr,
+    crate_util::{check, declare},
+    ellipeinc, ellipf, ellippi, StrErr,
 };
 
 use super::{_BulirschConst, cel1, cel2};
