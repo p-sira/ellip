@@ -3,9 +3,10 @@
 ### 0.3.6
 **Bug Fixes**
 - `ellipdinc`: Fix incorrect result when m = -inf.
+- `el3`: Fix NAN when p is small and kc = 0.
 
 **Improvements**
-- Improve performance of `legendre` functions.
+- Improve performance of `legendre` functions and `el3`.
 - Handle special cases and edge cases (infinity, nan, etc.) for all `carlson` functions.
 - Increase test coverage.
 
