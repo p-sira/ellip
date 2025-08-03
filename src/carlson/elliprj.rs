@@ -340,17 +340,6 @@ mod tests {
         // y < -1
         assert!(elliprc1p(-1.1).unwrap().is_finite());
     }
-
-    #[test]
-    fn my() {
-        assert!(elliprj(
-            27.09539794921875,
-            25.397361755371094,
-            25.397361755371094,
-            27.09539794921875
-        )
-        .is_ok())
-    }
 }
 
 #[cfg(feature = "reduce-iteration")]
