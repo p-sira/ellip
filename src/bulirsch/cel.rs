@@ -131,8 +131,8 @@ pub fn _cel<T: Float, C: _BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T
         if b.is_infinite() {
             return Ok(b.signum() * inf!());
         }
-        return Err("cel: Failed to converge.");
-    });
+        Err("cel: Failed to converge.")
+    })
 }
 
 /// Computes [complete elliptic integral of the first kind in Bulirsch's form](https://link.springer.com/article/10.1007/bf01397975).
@@ -207,8 +207,8 @@ pub fn _cel1<T: Float, C: _BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
         if kc.is_infinite() {
             return Ok(0.0);
         }
-        return Err("cel1: Failed to converge.");
-    });
+        Err("cel1: Failed to converge.")
+    })
 }
 
 /// Computes [complete elliptic integral of the second kind in Bulirsch's form](https://link.springer.com/article/10.1007/bf01397975).
@@ -247,6 +247,7 @@ pub fn _cel1<T: Float, C: _BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
 ///
 /// # Related Functions
 /// - [cel2](crate::cel2)(kc, a, b) = [cel](crate::cel)(kc, 1, a, b)
+///
 /// With kc² = 1 - m,
 /// - [ellipe](crate::ellipe)(m) = [cel](crate::cel)(kc, 1, 1, kc²) = [cel2](crate::cel2)(kc, 1, kc²)
 ///
@@ -307,8 +308,8 @@ pub fn _cel2<T: Float, C: _BulirschConst<T>>(kc: T, a: T, b: T) -> Result<T, Str
         if b.is_infinite() {
             return Ok(b.signum() * inf!());
         }
-        return Err("cel2: Failed to converge.");
-    });
+        Err("cel2: Failed to converge.")
+    })
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
@@ -476,14 +477,8 @@ mod tests {
 }
 
 #[cfg(feature = "reduce-iteration")]
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn force_fail_to_converge() {
-        assert!(cel(1e300, 0.2, 0.5, 0.5).is_err());
-        assert!(cel1(1e300).is_err());
-        assert!(cel2(1e300, 0.5, 0.5).is_err());
-    }
+crate::test_force_unreachable! {
+    assert!(cel(1e300, 0.2, 0.5, 0.5).is_err());
+    assert!(cel1(1e300).is_err());
+    assert!(cel2(1e300, 0.5, 0.5).is_err());
 }

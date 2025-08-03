@@ -34,12 +34,18 @@ use crate::{crate_util::let_mut, elliprc, elliprd, elliprf, StrErr};
 /// At most one of them can be zero.
 ///
 /// ## Domain
-/// - Returns error if any of x, y, or z is negative, or more than one of them are zero.
+/// - Returns error if any of x, y, or z is negative, infinite, or more than one of them are zero.
 ///
 /// ## Graph
 /// ![Symmetric Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprg_plot.svg?raw=true)
 ///
 /// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprg_plot.html)
+///
+/// ## Special Cases
+/// - RG(x, x, x) = sqrt(x)
+/// - RG(0, y, y) = π/4 * sqrt(y)
+/// - RG(x, y, y) = (y * RC(x, y) + sqrt(x))/2
+/// - RG(0, 0, z) = sqrt(z)/2
 ///
 /// # Related Functions
 /// With c = csc²φ, r = 1/x², and kc² = 1 - m,
@@ -58,8 +64,13 @@ use crate::{crate_util::let_mut, elliprc, elliprd, elliprf, StrErr};
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
-    if x < 0.0 || y < 0.0 || z < 0.0 {
-        return Err("elliprg: x, y, and z must be non-negative.");
+    if x.min(y).min(z) < 0.0 || (y + z).min(x + y).min(x + z) < 0.0 {
+        return Err(
+            "elliprg: x, y, and z must be non-negative and at most one of them can be zero.",
+        );
+    }
+    if (x + y + z).is_infinite() {
+        return Err("elliprg: Arguments must be finite.");
     }
 
     let_mut!(x, y, z);
@@ -80,10 +91,6 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
 
         if y == 0.0 {
             return Ok(pi!() * x.sqrt() / 4.0);
-        }
-
-        if x == 0.0 {
-            return Ok(y.sqrt() / 2.0);
         }
 
         return Ok((x * elliprc(y, x)? + y.sqrt()) / 2.0);
@@ -116,6 +123,7 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         return Ok(((x0 + y0) * (x0 + y0) / 4.0 - sum) * rf / 2.0);
     }
 
+    // NANs are checked by elliprf and elliprd
     Ok(
         (z * elliprf(x, y, z)? - (x - z) * (y - z) * elliprd(x, y, z)? / 3.0 + (x * y / z).sqrt())
             / 2.0,
@@ -168,10 +176,19 @@ mod tests {
     }
 
     #[test]
-    fn test_elliprg_err() {
-        // negative argument
+    fn test_elliprg_special_cases() {
+        use std::f64::{INFINITY, NAN};
+        // Negative arguments: should return Err
         assert!(elliprg(-1.0, 1.0, 1.0).is_err());
         assert!(elliprg(1.0, -1.0, 1.0).is_err());
         assert!(elliprg(1.0, 1.0, -1.0).is_err());
+        // NANs: should return Err
+        assert!(elliprg(NAN, 1.0, 1.0).is_err());
+        assert!(elliprg(1.0, NAN, 1.0).is_err());
+        assert!(elliprg(1.0, 1.0, NAN).is_err());
+        // Infinity arguments should return Err
+        assert!(elliprg(INFINITY, 1.0, 1.0).is_err());
+        assert!(elliprg(1.0, INFINITY, 1.0).is_err());
+        assert!(elliprg(1.0, 1.0, INFINITY).is_err());
     }
 }

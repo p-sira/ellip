@@ -15,8 +15,7 @@ pub fn assert_close<T: Float + Debug>(actual: T, expected: T, rtol: T) {
     let relative = (actual - expected).abs() / expected;
     if relative > rtol {
         panic!(
-            "Assertion failed: expected = {:?}, got = {:?}, relative = {:?}, rtol = {:?}",
-            expected, actual, relative, rtol
+            "Assertion failed: expected = {expected:?}, got = {actual:?}, relative = {relative:?}, rtol = {rtol:?}",
         )
     }
 }

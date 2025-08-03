@@ -13,7 +13,10 @@
 
 use num_traits::Float;
 
-use crate::{crate_util::check, elliprd, StrErr};
+use crate::{
+    crate_util::{check, return_if_valid_else},
+    elliprd, StrErr,
+};
 
 /// Computes [complete elliptic integral of Legendre's type](https://dlmf.nist.gov/19.2.E8).
 /// ```text
@@ -60,15 +63,12 @@ use crate::{crate_util::check, elliprd, StrErr};
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipd<T: Float>(m: T) -> Result<T, StrErr> {
-    check!(@nan, ellipd, [m]);
-
-    if m > 1.0 {
+    if m >= 1.0 {
+        // D evaluates to inf at m=1.
+        if m == 1.0 {
+            return Ok(inf!());
+        }
         return Err("ellipd: m must be less than 1.");
-    }
-
-    // D evaluates to inf at m=1.
-    if m == 1.0 {
-        return Ok(inf!());
     }
 
     if m.abs() <= epsilon!() {
@@ -81,7 +81,14 @@ pub fn ellipd<T: Float>(m: T) -> Result<T, StrErr> {
         return Ok(1.0 / (-m).sqrt());
     }
 
-    Ok(elliprd(0.0, 1.0 - m, 1.0)? / 3.0)
+    let ans = elliprd(0.0, 1.0 - m, 1.0)? / 3.0;
+    #[cfg(feature = "reduce-iteration")]
+    let ans = nan!();
+
+    return_if_valid_else!(ans, {
+        check!(@nan, ellipd, [m]);
+        Err("ellipd: Unexpected error.")
+    })
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
@@ -119,4 +126,9 @@ mod tests {
         // m = -inf: D(-inf) = 0
         assert_eq!(ellipd(NEG_INFINITY).unwrap(), 0.0);
     }
+}
+
+#[cfg(feature = "reduce-iteration")]
+crate::test_force_unreachable! {
+    assert!(ellipd(0.5).is_err());
 }

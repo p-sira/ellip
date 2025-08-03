@@ -59,23 +59,8 @@ use crate::{crate_util::check, elliprf, polyeval, StrErr};
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
-    check!(@nan, ellipk, [m]);
-
-    if m > 1.0 {
-        return Err("ellipk: m must be less than 1.");
-    }
-
-    if m == neg_inf!() {
-        return Ok(0.0);
-    }
-
-    // If T is f128
-    // if max_val!() > T::from(f64::MAX).unwrap() {
-    //     return ellipk_precise(m);
-    // }
-
-    match (m * 20.0).to_i32().unwrap() {
-        0 | 1 => {
+    match (m * 20.0).to_i8() {
+        Some(0) | Some(1) => {
             let coeffs = [
                 1.591003453790792180,
                 0.416000743991786912,
@@ -92,7 +77,7 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.05, &coeffs))
         }
-        2 | 3 => {
+        Some(2) | Some(3) => {
             let coeffs = [
                 1.635256732264579992,
                 0.471190626148732291,
@@ -109,7 +94,7 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.15, &coeffs))
         }
-        4 | 5 => {
+        Some(4) | Some(5) => {
             let coeffs = [
                 1.685750354812596043,
                 0.541731848613280329,
@@ -126,7 +111,7 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.25, &coeffs))
         }
-        6 | 7 => {
+        Some(6) | Some(7) => {
             let coeffs = [
                 1.744350597225613243,
                 0.634864275371935304,
@@ -144,7 +129,7 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.35, &coeffs))
         }
-        8 | 9 => {
+        Some(8) | Some(9) => {
             let coeffs = [
                 1.813883936816982644,
                 0.763163245700557246,
@@ -163,7 +148,7 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.45, &coeffs))
         }
-        10 | 11 => {
+        Some(10) | Some(11) => {
             let coeffs = [
                 1.898924910271553526,
                 0.950521794618244435,
@@ -183,7 +168,7 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.55, &coeffs))
         }
-        12 | 13 => {
+        Some(12) | Some(13) => {
             let coeffs = [
                 2.007598398424376302,
                 1.248457231212347337,
@@ -205,7 +190,7 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.65, &coeffs))
         }
-        14 | 15 => {
+        Some(14) | Some(15) => {
             let coeffs = [
                 2.156515647499643235,
                 1.791805641849463243,
@@ -230,7 +215,7 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.75, &coeffs))
         }
-        16 => {
+        Some(16) => {
             let coeffs = [
                 2.318122621712510589,
                 2.616920150291232841,
@@ -251,7 +236,7 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.825, &coeffs))
         }
-        17 => {
+        Some(17) => {
             let coeffs = [
                 2.473596173751343912,
                 3.727624244118099310,
@@ -276,7 +261,19 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
             ];
             Ok(polyeval(m - 0.875, &coeffs))
         }
-        _ => ellipk_precise(m),
+        Some(_) => ellipk_precise(m),
+        None => {
+            check!(@nan, ellipk, [m]);
+            if m == neg_inf!() {
+                return Ok(0.0);
+            }
+            // Handles inf
+            #[cfg(not(feature = "reduce-iteration"))]
+            if m > 1.0 {
+                return Err("ellipk: m must be less than 1.");
+            }
+            Err("ellipk: Unexpected error.")
+        }
     }
 }
 
@@ -284,8 +281,11 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub(crate) fn ellipk_precise<T: Float>(m: T) -> Result<T, StrErr> {
     // Special cases: https://dlmf.nist.gov/19.6.E1
-    if m == 1.0 {
-        return Ok(inf!());
+    if m >= 1.0 {
+        if m == 1.0 {
+            return Ok(inf!());
+        }
+        return Err("ellipk: m must be less than 1.");
     }
 
     elliprf(0.0, 1.0 - m, 1.0)
@@ -334,4 +334,9 @@ mod tests {
         // m = -inf: K(-inf) = 0
         assert_eq!(ellipk(NEG_INFINITY).unwrap(), 0.0);
     }
+}
+
+#[cfg(feature = "reduce-iteration")]
+crate::test_force_unreachable! {
+    assert!(ellipk(f64::INFINITY).is_err());
 }

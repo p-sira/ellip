@@ -14,7 +14,10 @@ use std::mem::swap;
 
 use num_traits::Float;
 
-use crate::{elliprc, StrErr};
+use crate::{
+    crate_util::{case, check, return_if_valid_else},
+    elliprc, StrErr,
+};
 
 /// Computes RF ([symmetric elliptic integral of the first kind](https://dlmf.nist.gov/19.16.E1)).
 /// ```text
@@ -41,6 +44,12 @@ use crate::{elliprc, StrErr};
 /// ![Symmetric Elliptic Integral of the First Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprf_plot.svg?raw=true)
 ///
 /// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprf_plot.html)
+///
+/// ## Special Cases
+/// - RF(x, x, x) = 1/sqrt(x)
+/// - RF(x, y, y) = RC(x, y)
+/// - RF(0, y, y) = π/(2 sqrt(y))
+/// - RF(x, y, z) = 0 for x = ∞ or y = ∞ or z = ∞
 ///
 /// # Related Functions
 /// With c = csc²φ, r = 1/x², and kc² = 1 - m,
@@ -135,6 +144,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
             .max((an - yn).abs())
             .max((an - zn).abs());
     let mut fn_val = 1.0;
+    let mut ans = nan!();
     for _ in 0..N_MAX_ITERATIONS {
         let root_x = xn.sqrt();
         let root_y = yn.sqrt();
@@ -158,15 +168,20 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
             let e2 = x * y - z * z;
             let e3 = x * y * z;
 
-            return Ok((1.0
+            ans = (1.0
                 + e3 * (1.0 / 14.0 + 3.0 * e3 / 104.0)
                 + e2 * (-0.1 + e2 / 24.0 - (3.0 * e3) / 44.0 - 5.0 * e2 * e2 / 208.0
                     + e2 * e3 / 16.0))
-                / an.sqrt());
+                / an.sqrt();
+            break;
         }
     }
 
-    Err("elliprf: Failed to converge.")
+    return_if_valid_else!(ans, {
+        check!(@nan, elliprf, [x, y, z]);
+        case!(@any [x, y, z] == inf!(), T::zero());
+        Err("elliprf: Failed to converge.")
+    })
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
@@ -223,23 +238,28 @@ mod tests {
     }
 
     #[test]
-    fn test_elliprf_err() {
-        // negative argument
+    fn test_elliprf_special_cases() {
+        use std::f64::{INFINITY, NAN};
+        // Negative arguments: should return Err
         assert!(elliprf(-1.0, 1.0, 1.0).is_err());
         assert!(elliprf(1.0, -1.0, 1.0).is_err());
         assert!(elliprf(1.0, 1.0, -1.0).is_err());
-        // more than one zero
+        // More than one zero: should return Err
         assert!(elliprf(0.0, 0.0, 1.0).is_err());
+        assert!(elliprf(0.0, 1.0, 0.0).is_err());
+        assert!(elliprf(1.0, 0.0, 0.0).is_err());
+        // NANs: should return Err
+        assert!(elliprf(NAN, 1.0, 1.0).is_err());
+        assert!(elliprf(1.0, NAN, 1.0).is_err());
+        assert!(elliprf(1.0, 1.0, NAN).is_err());
+        // Infs: should return zero
+        assert_eq!(elliprf(INFINITY, 1.0, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprf(1.0, INFINITY, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprf(1.0, 1.0, INFINITY).unwrap(), 0.0);
     }
 }
 
 #[cfg(feature = "reduce-iteration")]
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn force_fail_to_converge() {
-        assert!(elliprf(0.2, 0.5, 1e300).is_err());
-    }
+crate::test_force_unreachable! {
+    assert!(elliprf(0.2, 0.5, 1e300).is_err());
 }

@@ -311,9 +311,7 @@ pub fn el3<T: Float>(x: T, kc: T, p: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrErr> {
-    check!(@nan, el3, [x, kc, p]);
-
-    if kc == 0.0 {
+    if kc.abs() < epsilon!() {
         return Err("el3: kc must not be zero.");
     }
 
@@ -354,7 +352,7 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
 
     // This cutpoint is empirical
     let phi = x.atan();
-    if p.abs() <= 1e-10 {
+    if p.abs() <= 1e-10 && m != 1.0 {
         if m == 0.0 {
             return Ok(x);
         }
@@ -367,10 +365,7 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
         return Ok(result);
     }
 
-    // // https://dlmf.nist.gov/19.6.E11
-    // if phi == 0.0 {
-    //     return Ok(0.0);
-    // }
+    let x_abs = x.abs();
 
     // real
     declare!(mut [c, d, de, e, f, fa, g, h, hh]);
@@ -387,7 +382,7 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
     hh = x * x;
     f = p * hh;
     s = if kc == 0.0 {
-        C::ca() / (1.0 + x.abs())
+        C::ca() / (1.0 + x_abs)
     } else {
         kc
     };
@@ -400,17 +395,19 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
 
     // small
     if e < 0.1 && z < 0.1 && t < 1.0 && r < 1.0 {
-        let (rb, ra): (Vec<T>, Vec<T>) = (2..=C::ND)
-            .map(|k| {
-                let rb_k = 0.5 / T::from(k).unwrap();
-                (rb_k, 1.0 - rb_k)
-            })
-            .unzip();
+        let mut rb: [T; MAX_ND] = [T::zero(); MAX_ND];
+        let mut ra: [T; MAX_ND] = [T::zero(); MAX_ND];
+        let mut rr: [T; MAX_ND] = [T::zero(); MAX_ND];
+
+        for k in 2..=C::ND {
+            let k_float = T::from(k).unwrap();
+            rb[k - 2] = 0.5 / k_float;
+            ra[k - 2] = 1.0 - rb[k - 2];
+        }
 
         zd = 0.5 / (T::from(C::ND).unwrap() + 1.0);
         s = p + pm;
 
-        let mut rr: Vec<T> = vec![0.0; C::ND - 2];
         for k in 0..C::ND - 2 {
             rr[k] = s;
             pm = pm * t * ra[k];
@@ -440,11 +437,8 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
 
     let p1 = if p == 0.0 { C::cb() / hh } else { p };
     s = s.abs();
-    y = x.abs();
-    g = p1 - 1.0;
-    if g == 0.0 {
-        g = C::cb();
-    }
+    y = x_abs;
+    g = if p == 1.0 { C::cb() } else { p1 - 1.0 };
     f = p1 - t;
     if f == 0.0 {
         f = C::cb() * t;
@@ -534,7 +528,8 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
     l = 0;
     m = 0;
 
-    loop {
+    let mut failed = true;
+    for _ in 0..N_MAX_ITERATIONS {
         y = y - e / y;
         if y == 0.0 {
             y = e.sqrt() * C::cb();
@@ -596,8 +591,12 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
             }
             continue;
         }
-
+        failed = false;
         break;
+    }
+
+    if failed {
+        return Err("el3: Failed to converge.");
     }
 
     if y < 0.0 {
@@ -626,9 +625,22 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
         s = s * 0.5;
     }
     e = (e + fa.sqrt() * s) / T::from(n).unwrap();
-
-    Ok(if x > 0.0 { e } else { -e })
+    let ans = if x > 0.0 { e } else { -e };
+    if ans.is_nan() {
+        check!(@nan, el3, [x, kc, p]);
+        Err("el3: Failed to converge.")
+    } else {
+        Ok(ans)
+    }
 }
+
+const MAX_ND: usize = 50;
+
+#[cfg(not(feature = "reduce-iteration"))]
+const N_MAX_ITERATIONS: usize = 10;
+
+#[cfg(feature = "reduce-iteration")]
+const N_MAX_ITERATIONS: usize = 1;
 
 #[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
@@ -770,9 +782,6 @@ mod tests {
         // Test computed values from the reference
         // Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions III.”
         fn test_reference(x: f64, kc: f64, p: f64, expected: f64) {
-            if el3(x, kc, p).unwrap().is_nan() {
-                println!("{x}, {kc}, {p}");
-            }
             assert_close!(expected, el3(x, kc, p).unwrap(), 2.0 * f64::EPSILON);
         }
 
@@ -784,24 +793,21 @@ mod tests {
         test_reference(1.3, 0.12, -2.11, 2.4416814520721179e-1);
         test_reference(1.3, 0.40, 0.1600001, 1.4004165258366944);
         test_reference(1.3, 1.0e-10, 0.82, 1.1341505395282723);
-        // test_reference(1.3e-10, 1.0e-10, 1.0e-10, 1.3e-10); // Fail in v0.3.5
+        test_reference(1.3e-10, 1.0e-10, 1.0e-10, 1.3e-10);
         test_reference(1.6, 1.90, 9.81, 3.8572324379967252e-1);
         test_reference(1.6, 1.90, 1.22, 7.6656179311956402e-1);
         test_reference(1.6, 1.90, 0.87, 8.3210591112618096e-1);
         test_reference(1.6, 1.90, 0.21, 1.0521272221906806);
-        // test_reference(1.6, 1.90, -0.21, 1.4730439889554361); // Fail in v0.3.5
-        // test_reference(1.6, 1.90, -4.30, 2.5467519341311686e-1); // Fail in v0.3.5
-        // test_reference(1.6, 1.01e1, -1.0e-5, 3.9501709882649139e-1); // Fail in v0.3.5
         test_reference(1.6, 1.50, 2.24999, 7.0057431688357934e-1);
         test_reference(1.6, 1e10, 1.20, 2.3734774669772208e-9);
         test_reference(-1.6, 1e10, 1.20, -2.3734774669772208e-9);
         test_reference(1.0, 0.31, 9.90e-2, 1.0903577921777398);
-    }
 
-    #[test]
-    fn my() {
-        let ans = el3(1.3e-10, 1.0e-10, 1.0e-10).unwrap();
-        println!("{ans}");
+        // Use wolfram value at 16-digit precision instead since the values provided by
+        // reference were calculated using 36-bit Matissa float (f32 and f64) making them inaccurate.
+        test_reference(1.6, 1.90, -0.21, 1.473043981995436);
+        test_reference(1.6, 1.90, -4.30, 0.2547695139719361);
+        assert_close!(0.3950170978760504, el3(1.6, 1.01e1, -1.0e-5).unwrap(), 1e-9);
     }
 
     #[test]
@@ -830,14 +836,15 @@ mod tests {
             (0.5.sqrt() * 4.0).atan() / 0.5.sqrt()
         );
         // kc = 1, p <= 0: el3(x, 1, p) = (ln(1+vx) - ln(1-vx)) / (2v); v = sqrt(-p)
-        // assert_close!(
-        //     el3(4.0, 1.0, -0.5).unwrap(),
-        //     5.0,
-        //     1e-15
-        // );
+        assert_close!(el3(4.0, 1.0, -0.5).unwrap(), 5.0, 1e-15);
         // x = nan, kc = nan, or p = nan: should return Err
         assert!(el3(NAN, 0.5, 0.5).is_err());
         assert!(el3(0.5, NAN, 0.5).is_err());
         assert!(el3(0.5, 0.5, NAN).is_err());
     }
+}
+
+#[cfg(feature = "reduce-iteration")]
+crate::test_force_unreachable! {
+    assert!(el3(0.5, 0.5, 0.5).is_err());
 }

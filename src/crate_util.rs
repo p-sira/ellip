@@ -22,11 +22,20 @@ macro_rules! check {
             }
         )*
     };
-    (@nan, $fn_name:ident, [$($var:ident),* $(,)?] $(,)?) => {
-        check!($fn_name, is_nan, "nan", [$($var),*])
-    };
+    (@nan, $fn_name:ident, [$($var:ident),* $(,)?] $(,)?) => {{
+        let mut sum_var = T::zero();
+        $(
+            sum_var = sum_var + $var;
+        )*
+        if sum_var.is_nan() {
+            return Err(concat![stringify!($fn_name), ": Arguments cannot be NAN."])
+        }
+    }};
     (@zero, $fn_name:ident, [$($var:ident),* $(,)?] $(,)?) => {
         check!($fn_name, is_zero, "zero", [$($var),*])
+    };
+    (@inf, $fn_name:ident, [$($var:ident),* $(,)?] $(,)?)=> {
+        check!($fn_name, is_infinite, "infinite", [$($var),*])
     };
     (@multi, $fn_name:ident, $value_name:expr, $check_method:ident, [$first:ident, $($var:ident),* $(,)?] $(,)?) => {{
         // Check if more than one var leads to true and return error.

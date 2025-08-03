@@ -206,6 +206,21 @@ macro_rules! assert_close {
     };
 }
 
+#[cfg(feature = "reduce-iteration")]
+#[macro_export]
+macro_rules! test_force_unreachable {
+    ($($inner:tt)*) => {
+        mod tests {
+            use super::*;
+
+            #[test]
+            fn force_unreachable() {
+                $($inner)*
+            }
+        }
+    };
+}
+
 pub fn linspace(start: f64, end: f64, num: usize) -> Vec<f64> {
     if num < 2 {
         return vec![start];

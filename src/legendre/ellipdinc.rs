@@ -68,24 +68,17 @@ use num_traits::Float;
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
-    check!(@nan, ellipdinc, [phi, m]);
-
-    let sign = if phi < 0.0 { -1.0 } else { 1.0 };
-
-    if phi.abs() >= max_val!() {
-        // Need to handle infinity as a special case:
-        return Ok(phi.signum() * inf!());
+    if m < -1e306 {
+        return Ok(0.0);
     }
 
-    // m=-inf should be undefined but as m -> -inf
-    // D -> -inf
-    if m == neg_inf!() {
-        return Ok(neg_inf!());
-    }
-
+    let sign = phi.signum();
     let phi = phi.abs();
-
     if phi > 1.0 / epsilon!() {
+        if phi >= max_val!() {
+            // Need to handle infinity as a special case:
+            return Ok(sign * inf!());
+        }
         // Phi is so large that phi%pi is necessarily zero (or garbage),
         // just return the second part of the duplication formula:
         return Ok(sign * 2.0 * phi * ellipd(m)? / pi!());
@@ -93,7 +86,6 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 
     // Carlson's algorithm works only for |phi| <= pi/2,
     // use the integrand's periodicity to normalize phi
-    //
     let mut rphi = phi % pi_2!();
     let mut mm = ((phi - rphi) / pi_2!()).round();
     let mut s = 1.0;
@@ -123,7 +115,16 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         result = result + mm * ellipd(m)?;
     }
 
-    Ok(sign * result)
+    let ans = sign * result;
+    #[cfg(feature = "reduce-iteration")]
+    let ans = nan!();
+
+    if ans.is_nan() {
+        check!(@nan, ellipdinc, [phi, m]);
+        Err("ellipdinc: Unexpected error.")
+    } else {
+        Ok(ans)
+    }
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
@@ -173,7 +174,12 @@ mod tests {
         assert_eq!(ellipdinc(NEG_INFINITY, 0.5).unwrap(), NEG_INFINITY);
         // m = inf: should return Err
         assert!(ellipdinc(0.5, INFINITY).is_err());
-        // m = -inf: D(phi, -inf) = -inf
-        assert_eq!(ellipdinc(0.5, NEG_INFINITY).unwrap(), NEG_INFINITY);
+        // m = -inf: D(phi, -inf) = 0.0
+        assert_eq!(ellipdinc(0.5, NEG_INFINITY).unwrap(), 0.0);
     }
+}
+
+#[cfg(feature = "reduce-iteration")]
+crate::test_force_unreachable! {
+    assert!(ellipdinc(0.5, 0.5).is_err());
 }

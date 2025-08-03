@@ -307,6 +307,9 @@ fn get_env() -> [String; 3] {
             .next()
             .and_then(|line| line.strip_prefix("ellip v"))
             .unwrap()
+            .split_whitespace()
+            .next()
+            .unwrap()
             .to_owned()
     };
 

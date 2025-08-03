@@ -13,7 +13,10 @@
 
 use num_traits::Float;
 
-use crate::{crate_util::check, ellipe, elliprd, elliprf, StrErr};
+use crate::{
+    crate_util::{check, return_if_valid_else},
+    ellipe, elliprd, elliprf, StrErr,
+};
 
 /// Computes [incomplete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E5).
 /// ```text
@@ -69,8 +72,6 @@ use crate::{crate_util::check, ellipe, elliprd, elliprf, StrErr};
 /// - The MathWorks, Inc. “ellipticE.” Accessed April 21, 2025. <https://www.mathworks.com/help/symbolic/sym.elliptice.html>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
-    check!(@nan, ellipeinc, [phi, m]);
-
     if phi == 0.0 {
         return Ok(0.0);
     }
@@ -81,18 +82,17 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 
     let (phi, invert) = if phi < 0.0 { (-phi, -1.0) } else { (phi, 1.0) };
 
-    if phi >= max_val!() {
-        return Ok(invert * inf!());
-    }
-
     if phi > 1.0 / epsilon!() {
+        if phi >= max_val!() {
+            return Ok(invert * inf!());
+        }
         return Ok(invert * 2.0 * phi * ellipe(m)? / pi!());
     }
 
     // m -> -inf, sqrt(1+m sin²θ) -> m sinθ
     // E(phi, m) -> sqrt(-m) int(sin(theta)) d(theta), theta=[0,phi]
     // E(phi, m) -> sqrt(-m) (1-cos(phi))
-    if m <= -T::max_value() {
+    if m <= -max_val!() {
         return Ok((1.0 - phi.cos()) * (-m).sqrt());
     }
 
@@ -109,10 +109,6 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 
     // Carlson's algorithm works only for |phi| <= pi/2,
     // use the integrand's periodicity to normalize phi
-    //
-    // Xiaogang's original code used a cast to long long here
-    // but that fails if T has more digits than a long long,
-    // so rewritten to use fmod instead:
     let mut rphi = phi % pi_2!();
     let mut mm = ((phi - rphi) / pi_2!()).round();
     let mut s = 1.0;
@@ -142,7 +138,13 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         result = result + mm * ellipe(m)?;
     }
 
-    Ok(invert * result)
+    let ans = invert * result;
+    #[cfg(feature = "reduce-iteration")]
+    let ans = nan!();
+    return_if_valid_else!(ans, {
+        check!(@nan, ellipeinc, [phi, m]);
+        Err("ellipeinc: Unexpected error.")
+    })
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
@@ -203,4 +205,9 @@ mod tests {
         // m = -inf: E(phi, -inf) = inf
         assert_eq!(ellipeinc(0.5, NEG_INFINITY).unwrap(), INFINITY);
     }
+}
+
+#[cfg(feature = "reduce-iteration")]
+crate::test_force_unreachable! {
+    assert!(ellipeinc(0.5, 0.2).is_err());
 }

@@ -83,8 +83,11 @@ use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj, StrErr};
 /// - Wolfram Research. “EllipticPi,” 2022. <https://reference.wolfram.com/language/ref/EllipticPi.html>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellippiinc<T: Float>(phi: T, n: T, m: T) -> Result<T, StrErr> {
-    check!(@nan, ellippiinc, [phi, n, m]);
-    ellippiinc_vc(phi, n, m, 1.0 - n)
+    let ans = ellippiinc_vc(phi, n, m, 1.0 - n);
+    if ans.is_err() {
+        check!(@nan, ellippiinc, [phi, n, m]);
+    }
+    ans
 }
 
 #[inline]
@@ -103,7 +106,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
         return Err("ellippiinc: n sin²φ must not equal one.");
     }
 
-    // Special cases first:
+    // Special cases:
     if n == 0.0 {
         // A&S 17.7.18 & 19
         return if m == 0.0 { Ok(phi) } else { ellipf(phi, m) };
@@ -121,24 +124,18 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
         return Ok(result);
     }
 
-    if phi == pi_2!() {
-        // Have to filter this case out before the next
-        // special case, otherwise we might get an infinity from
-        // tan(phi).
-        // Also note that since we can't represent PI/2 exactly
-        // this is a bit of a guess as to the users true intent...
-        return ellippi_vc(n, m, nc);
-    }
+    if phi >= pi_2!() || phi <= 0.0 {
+        if phi == pi_2!() {
+            return ellippi_vc(n, m, nc);
+        }
 
-    // https://dlmf.nist.gov/19.6.E11
-    if phi == 0.0 {
-        return Ok(0.0);
-    }
+        // https://dlmf.nist.gov/19.6.E11
+        if phi == 0.0 {
+            return Ok(0.0);
+        }
 
-    if phi > pi_2!() || phi < 0.0 {
         // Carlson's algorithm works only for |phi| <= pi/2,
         // use the integrand's periodicity to normalize phi
-
         if phi.abs() > 1.0 / epsilon!() {
             // Invalid for v > 1, this case is caught above since v > 1 implies 1/v < sin^2(phi)
             debug_assert!(n <= 1.0);
@@ -201,25 +198,9 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
     }
 
     if n < 0.0 && m <= 1.0 {
-        //
         // If we don't shift to 0 <= v <= 1 we get
         // cancellation errors later on.  Use
         // A&S 17.7.15/16 to shift to v > 0.
-        //
-        // Mathematica simplifies the expressions
-        // given in A&S as follows (with thanks to
-        // Rocco Romeo for figuring these out!):
-        //
-        // V = (k2 - n)/(1 - n)
-        // Assuming[(k2 >= 0 && k2 <= 1) && n < 0, FullSimplify[Sqrt[(1 - V)*(1 - k2 / V)] / Sqrt[((1 - n)*(1 - k2 / n))]]]
-        // Result: ((-1 + k2) n) / ((-1 + n) (-k2 + n))
-        //
-        // Assuming[(k2 >= 0 && k2 <= 1) && n < 0, FullSimplify[k2 / (Sqrt[-n*(k2 - n) / (1 - n)] * Sqrt[(1 - n)*(1 - k2 / n)])]]
-        // Result : k2 / (k2 - n)
-        //
-        // Assuming[(k2 >= 0 && k2 <= 1) && n < 0, FullSimplify[Sqrt[1 / ((1 - n)*(1 - k2 / n))]]]
-        // Result : Sqrt[n / ((k2 - n) (-1 + n))]
-        //
         let nn = (m - n) / (1.0 - n);
         let nm1 = (1.0 - m) / (1.0 - n);
 
@@ -304,11 +285,9 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
     //       return result;
     //    }
 
-    //
     // Carlson's algorithm works only for |phi| <= pi/2,
     // by the time we get here phi should already have been
     // normalised above.
-    //
     let cosp = phi.cos();
     let x = cosp * cosp;
     let t = sp2;
