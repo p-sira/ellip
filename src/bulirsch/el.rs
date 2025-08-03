@@ -32,7 +32,6 @@ use super::{_BulirschConst, cel1, cel2};
 /// The precision of the function can be adjusted by overwriting the trait [super::BulirschConst].
 /// The default is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405) for [f64] and [f32].
 ///
-/// About 40% faster than ellippiinc, albeit less accurate.
 /// ## Domain
 /// - Returns error if kc = 0.
 ///
@@ -367,9 +366,6 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
     }
 
     let x_abs = x.abs();
-    if x_abs == 1.0 {
-        return ellippiinc(phi, n, m);
-    }
 
     // real
     declare!(mut [c, d, de, e, f, fa, g, h, hh]);
@@ -532,7 +528,7 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
     l = 0;
     m = 0;
 
-    let mut ans = nan!();
+    let mut failed = true;
     for _ in 0..N_MAX_ITERATIONS {
         y = y - e / y;
         if y == 0.0 {
@@ -595,41 +591,47 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
             }
             continue;
         }
-
-        if y < 0.0 {
-            l += 1;
-        }
-        e = (t / y).atan() + pi!() * T::from(l).unwrap();
-        e = e * (c * t + d) / (t * (t + q));
-
-        if bo {
-            h = v / (t + u);
-            z = 1.0 - r * h;
-            h = r + h;
-            if z == 0.0 {
-                z = C::cb();
-            }
-            if z < 0.0 {
-                m += if h < 0.0 { -1 } else { 1 };
-            }
-            s = (h / z).atan() + T::from(m).unwrap() * pi!();
-        } else {
-            s = if bk {
-                ye.asinh()
-            } else {
-                z.ln() + T::from(m).unwrap() * ln_2!()
-            };
-            s = s * 0.5;
-        }
-        e = (e + fa.sqrt() * s) / T::from(n).unwrap();
-
-        ans = if x > 0.0 { e } else { -e };
+        failed = false;
         break;
     }
-    return_if_valid_else!(ans, {
+
+    if failed {
+        return Err("el3: Failed to converge.");
+    }
+
+    if y < 0.0 {
+        l += 1;
+    }
+    e = (t / y).atan() + pi!() * T::from(l).unwrap();
+    e = e * (c * t + d) / (t * (t + q));
+
+    if bo {
+        h = v / (t + u);
+        z = 1.0 - r * h;
+        h = r + h;
+        if z == 0.0 {
+            z = C::cb();
+        }
+        if z < 0.0 {
+            m += if h < 0.0 { -1 } else { 1 };
+        }
+        s = (h / z).atan() + T::from(m).unwrap() * pi!();
+    } else {
+        s = if bk {
+            ye.asinh()
+        } else {
+            z.ln() + T::from(m).unwrap() * ln_2!()
+        };
+        s = s * 0.5;
+    }
+    e = (e + fa.sqrt() * s) / T::from(n).unwrap();
+    let ans = if x > 0.0 { e } else { -e };
+    if ans.is_nan() {
         check!(@nan, el3, [x, kc, p]);
         Err("el3: Failed to converge.")
-    })
+    } else {
+        Ok(ans)
+    }
 }
 
 const MAX_ND: usize = 50;
