@@ -49,8 +49,8 @@ macro_rules! check {
                 return Err(
                     concat![
                         stringify!($fn_name),
-                        ": Multiple arguments in ",
-                        stringify!($first), $(" ,", stringify!($var), )*
+                        ": More than one argument in ",
+                        stringify!($first), $(", ", stringify!($var), )*
                         " cannot be ",
                         $value_name,
                         "."
@@ -80,7 +80,7 @@ pub(crate) use case;
 
 /// ans is considered valid when ans is finite and not nan.
 macro_rules! return_if_valid_else {
-    ($ans:expr, {$($else:tt)+}) => {
+    ($ans:ident, {$($else:tt)+}) => {
         if $ans.is_finite() && !$ans.is_nan() {
             return Ok($ans);
         } else {
