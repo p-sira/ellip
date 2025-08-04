@@ -257,7 +257,7 @@ mod tests {
         use std::f64::{INFINITY, NAN};
         // Negative arguments: should return Err
         assert_eq!(
-            elliprf(-1.0, 1.0, 1.0),
+            elliprf(-1.0, 1.0, 2.0),
             Err("elliprf: Arguments must be non-negative.")
         );
         assert_eq!(
