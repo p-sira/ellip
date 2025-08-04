@@ -7,7 +7,11 @@
 use num_traits::Float;
 use std::mem::swap;
 
-use crate::{crate_util::let_mut, elliprc, elliprd, elliprf, StrErr};
+use crate::{
+    carlson::{elliprc_unchecked, elliprd_unchecked},
+    crate_util::{check, let_mut},
+    elliprf, StrErr,
+};
 
 // Original header from Boost Math
 //  Copyright (c) 2015 John Maddock
@@ -31,10 +35,9 @@ use crate::{crate_util::let_mut, elliprc, elliprd, elliprf, StrErr};
 /// - z ∈ ℝ, z ≥ 0
 ///
 /// The parameters x, y, and z are symmetric. This means swapping them does not change the value of the function.
-/// At most one of them can be zero.
 ///
 /// ## Domain
-/// - Returns error if any of x, y, or z is negative, infinite, or more than one of them are zero.
+/// - Returns error if any of x, y, or z is negative or infinite.
 ///
 /// ## Graph
 /// ![Symmetric Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprg_plot.svg?raw=true)
@@ -64,12 +67,11 @@ use crate::{crate_util::let_mut, elliprc, elliprd, elliprf, StrErr};
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
-    if x.min(y).min(z) < 0.0 || (y + z).min(x + y).min(x + z) < 0.0 {
-        return Err(
-            "elliprg: x, y, and z must be non-negative and at most one of them can be zero.",
-        );
+    if x.min(y).min(z) < 0.0 {
+        return Err("elliprg: Arguments must be non-negative.");
     }
-    if (x + y + z).is_infinite() {
+    if !(x + y + z).is_finite() {
+        check!(@nan, elliprg, [x, y, z]);
         return Err("elliprg: Arguments must be finite.");
     }
 
@@ -93,7 +95,7 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
             return Ok(pi!() * x.sqrt() / 4.0);
         }
 
-        return Ok((x * elliprc(y, x)? + y.sqrt()) / 2.0);
+        return Ok((x * elliprc_unchecked(y, x) + y.sqrt()) / 2.0);
     }
 
     if y == z {
@@ -101,7 +103,7 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
             return Ok(x.sqrt() / 2.0);
         }
 
-        return Ok((y * elliprc(x, y)? + x.sqrt()) / 2.0);
+        return Ok((y * elliprc_unchecked(x, y) + x.sqrt()) / 2.0);
     }
 
     if y == 0.0 {
@@ -123,9 +125,9 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         return Ok(((x0 + y0) * (x0 + y0) / 4.0 - sum) * rf / 2.0);
     }
 
-    // NANs are checked by elliprf and elliprd
     Ok(
-        (z * elliprf(x, y, z)? - (x - z) * (y - z) * elliprd(x, y, z)? / 3.0 + (x * y / z).sqrt())
+        (z * elliprf(x, y, z)? - (x - z) * (y - z) * elliprd_unchecked(x, y, z) / 3.0
+            + (x * y / z).sqrt())
             / 2.0,
     )
 }
@@ -179,16 +181,43 @@ mod tests {
     fn test_elliprg_special_cases() {
         use std::f64::{INFINITY, NAN};
         // Negative arguments: should return Err
-        assert!(elliprg(-1.0, 1.0, 1.0).is_err());
-        assert!(elliprg(1.0, -1.0, 1.0).is_err());
-        assert!(elliprg(1.0, 1.0, -1.0).is_err());
+        assert_eq!(
+            elliprg(-1.0, 1.0, 1.0),
+            Err("elliprg: Arguments must be non-negative.")
+        );
+        assert_eq!(
+            elliprg(1.0, -1.0, 1.0),
+            Err("elliprg: Arguments must be non-negative.")
+        );
+        assert_eq!(
+            elliprg(1.0, 1.0, -1.0),
+            Err("elliprg: Arguments must be non-negative.")
+        );
         // NANs: should return Err
-        assert!(elliprg(NAN, 1.0, 1.0).is_err());
-        assert!(elliprg(1.0, NAN, 1.0).is_err());
-        assert!(elliprg(1.0, 1.0, NAN).is_err());
+        assert_eq!(
+            elliprg(NAN, 1.0, 1.0),
+            Err("elliprg: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            elliprg(1.0, NAN, 1.0),
+            Err("elliprg: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            elliprg(1.0, 1.0, NAN),
+            Err("elliprg: Arguments cannot be NAN.")
+        );
         // Infinity arguments should return Err
-        assert!(elliprg(INFINITY, 1.0, 1.0).is_err());
-        assert!(elliprg(1.0, INFINITY, 1.0).is_err());
-        assert!(elliprg(1.0, 1.0, INFINITY).is_err());
+        assert_eq!(
+            elliprg(INFINITY, 1.0, 1.0),
+            Err("elliprg: Arguments must be finite.")
+        );
+        assert_eq!(
+            elliprg(1.0, INFINITY, 1.0),
+            Err("elliprg: Arguments must be finite.")
+        );
+        assert_eq!(
+            elliprg(1.0, 1.0, INFINITY),
+            Err("elliprg: Arguments must be finite.")
+        );
     }
 }

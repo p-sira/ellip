@@ -16,7 +16,7 @@ use num_traits::Float;
 
 use crate::{
     crate_util::{case, check, return_if_valid_else},
-    elliprc, StrErr,
+    carlson::elliprc_unchecked, StrErr,
 };
 
 /// Computes RF ([symmetric elliptic integral of the first kind](https://dlmf.nist.gov/19.16.E1)).
@@ -68,10 +68,6 @@ use crate::{
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
-    if x.min(y).min(z) < 0.0 || (y + z).min(x + y).min(x + z) < 0.0 {
-        return Err("elliprf: x, y, and z must be non-negative, and at most one can be zero.");
-    }
-
     // Special cases from http://dlmf.nist.gov/19.20#i
     if x == y {
         if x == z {
@@ -87,7 +83,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
 
         // RF(x,x,z)
         // RF(x,y,y)
-        return elliprc(z, x);
+        return elliprc_wrapper(z, x);
     }
 
     if x == z {
@@ -99,7 +95,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
 
         // RF(x,y,x)
         // RF(x,y,y)
-        return elliprc(y, x);
+        return elliprc_wrapper(y, x);
     }
 
     if y == z {
@@ -109,7 +105,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         }
 
         // RF(x,y,y)
-        return elliprc(x, y);
+        return elliprc_wrapper(x, y);
     }
 
     let mut xn = x;
@@ -179,9 +175,27 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
 
     return_if_valid_else!(ans, {
         check!(@nan, elliprf, [x, y, z]);
+        if x.min(y).min(z) < 0.0 {
+            return Err("elliprf: Arguments must be non-negative.");
+        }
         case!(@any [x, y, z] == inf!(), T::zero());
         Err("elliprf: Failed to converge.")
     })
+}
+
+/// Wrapper for [elliprc_unchecked](crate::carlson::elliprc_unchecked) to check for arguments in the context of [elliprf](crate::elliprf).
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[inline]
+fn elliprc_wrapper<T: Float>(x: T, y: T) -> Result<T, StrErr> {
+    check!(@nan, elliprf, [x, y]);
+    if x.min(y) < 0.0 {
+        return Err("elliprf: Arguments must be non-negative.");
+    }
+    if x == 0.0 || y == 0.0 {
+        return Err("elliprf: At most one argument can be zero.");
+    }
+    case!(@any [x, y] == inf!(), T::zero());
+    Ok(elliprc_unchecked(x, y))
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
@@ -241,17 +255,44 @@ mod tests {
     fn test_elliprf_special_cases() {
         use std::f64::{INFINITY, NAN};
         // Negative arguments: should return Err
-        assert!(elliprf(-1.0, 1.0, 1.0).is_err());
-        assert!(elliprf(1.0, -1.0, 1.0).is_err());
-        assert!(elliprf(1.0, 1.0, -1.0).is_err());
+        assert_eq!(
+            elliprf(-1.0, 1.0, 1.0),
+            Err("elliprf: Arguments must be non-negative.")
+        );
+        assert_eq!(
+            elliprf(1.0, -1.0, 1.0),
+            Err("elliprf: Arguments must be non-negative.")
+        );
+        assert_eq!(
+            elliprf(1.0, 1.0, -1.0),
+            Err("elliprf: Arguments must be non-negative.")
+        );
         // More than one zero: should return Err
-        assert!(elliprf(0.0, 0.0, 1.0).is_err());
-        assert!(elliprf(0.0, 1.0, 0.0).is_err());
-        assert!(elliprf(1.0, 0.0, 0.0).is_err());
+        assert_eq!(
+            elliprf(0.0, 0.0, 1.0),
+            Err("elliprf: At most one argument can be zero.")
+        );
+        assert_eq!(
+            elliprf(0.0, 1.0, 0.0),
+            Err("elliprf: At most one argument can be zero.")
+        );
+        assert_eq!(
+            elliprf(1.0, 0.0, 0.0),
+            Err("elliprf: At most one argument can be zero.")
+        );
         // NANs: should return Err
-        assert!(elliprf(NAN, 1.0, 1.0).is_err());
-        assert!(elliprf(1.0, NAN, 1.0).is_err());
-        assert!(elliprf(1.0, 1.0, NAN).is_err());
+        assert_eq!(
+            elliprf(NAN, 1.0, 1.0),
+            Err("elliprf: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            elliprf(1.0, NAN, 1.0),
+            Err("elliprf: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            elliprf(1.0, 1.0, NAN),
+            Err("elliprf: Arguments cannot be NAN.")
+        );
         // Infs: should return zero
         assert_eq!(elliprf(INFINITY, 1.0, 1.0).unwrap(), 0.0);
         assert_eq!(elliprf(1.0, INFINITY, 1.0).unwrap(), 0.0);
@@ -261,5 +302,5 @@ mod tests {
 
 #[cfg(feature = "reduce-iteration")]
 crate::test_force_unreachable! {
-    assert!(elliprf(0.2, 0.5, 1e300).is_err());
+    assert_eq!(elliprf(0.2, 0.5, 1e300), Err("elliprf: Failed to converge."));
 }

@@ -16,3 +16,6 @@ pub use elliprd::elliprd;
 pub use elliprf::elliprf;
 pub use elliprg::elliprg;
 pub use elliprj::elliprj;
+
+pub(crate) use elliprc::elliprc_unchecked;
+pub(crate) use elliprd::elliprd_unchecked;
