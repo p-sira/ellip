@@ -1,5 +1,10 @@
 # Changelog
 ## 0.3
+### 0.3.7
+**Improvements**
+- Slightly improve performance across all functions.
+- Improve and fix error messages.
+
 ### 0.3.6
 **Bug Fixes**
 - `ellipdinc`: Fix incorrect result when m = -inf.
