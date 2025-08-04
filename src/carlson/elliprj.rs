@@ -44,6 +44,11 @@ use num_traits::Float;
 ///   - or p = 0.
 /// - Returns the Cauchy principal value if p < 0.
 ///
+/// ## Graph
+/// ![Symmetric Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprj_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprj_plot.html)
+///
 /// ## Special Cases
 /// - RJ(x, x, x, x) = 1/(x sqrt(x))
 /// - RJ(x, y, z, z) = RD(x, y, z)
@@ -51,11 +56,6 @@ use num_traits::Float;
 /// - RJ(x, y, y, y) = RD(x, y, y)
 /// - RJ(x, y, y, p) = 3/(p-y) * (RC(x, y) - RC(x, p)) for y ≠ p
 /// - RJ(x, y, z, p) = 0 for x = ∞ or y = ∞ or z = ∞ or p = ∞
-///
-/// ## Graph
-/// ![Symmetric Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprj_plot.svg?raw=true)
-///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprj_plot.html)
 ///
 /// # Related Functions
 /// With c = csc²φ and kc² = 1 - m,
