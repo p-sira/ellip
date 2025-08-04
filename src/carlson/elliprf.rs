@@ -15,8 +15,9 @@ use std::mem::swap;
 use num_traits::Float;
 
 use crate::{
+    carlson::elliprc_unchecked,
     crate_util::{case, check, return_if_valid_else},
-    carlson::elliprc_unchecked, StrErr,
+    StrErr,
 };
 
 /// Computes RF ([symmetric elliptic integral of the first kind](https://dlmf.nist.gov/19.16.E1)).
