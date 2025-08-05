@@ -158,9 +158,9 @@ macro_rules! generate_benchmarks {
     };
 }
 
-generate_benchmarks! {legendre, [ellipk:1, ellipe:1, ellipf:2, ellipeinc:2, ellippi:2, ellippiinc:3], boost}
+generate_benchmarks! {legendre, [ellipk:1, ellipe:1, ellipf:2, ellipeinc:2, ellippi:2, ellippiinc:3, ellipd:1, ellipdinc: 2], boost}
 generate_benchmarks! {carlson, [elliprf:3, elliprg:3, elliprj:4, elliprc:2, elliprd:3], boost}
-generate_benchmarks! {bulirsch, [cel:4, el1:2, el2:4, el3:3], wolfram} // cel1:1, cel2:3
+generate_benchmarks! {bulirsch, [cel:4, cel1:1, cel2:3, el1:2, el2:4, el3:3], wolfram}
 
 criterion_group!(benches, legendre, carlson, bulirsch);
 criterion_main!(benches);
