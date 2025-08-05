@@ -23,20 +23,33 @@ macro_rules! check {
         )*
     };
     (@nan, $fn_name:ident, [$($var:ident),* $(,)?] $(,)?) => {{
-        let mut sum_var = T::zero();
         $(
-            sum_var = sum_var + $var;
+            if $var.is_nan() {
+                return Err(concat![stringify!($fn_name), ": Arguments cannot be NAN."])
+            }
         )*
-        if sum_var.is_nan() {
-            return Err(concat![stringify!($fn_name), ": Arguments cannot be NAN."])
-        }
+
     }};
     (@zero, $fn_name:ident, [$($var:ident),* $(,)?] $(,)?) => {
         check!($fn_name, is_zero, "zero", [$($var),*])
     };
-    (@inf, $fn_name:ident, [$($var:ident),* $(,)?] $(,)?)=> {
+    (@inf, $fn_name:ident, [$($var:ident),* $(,)?] $(,)?) => {
         check!($fn_name, is_infinite, "infinite", [$($var),*])
     };
+    (@neg, $fn_name:ident, [$first:ident, $($var:ident),* $(,)?] $(,)?) => {
+        if $first$(.min($var))* < T::zero() {
+            return Err(concat![stringify!($fn_name), ": Arguments must be non-negative."]);
+        }
+    };
+    (@multi_zero, $fn_name:ident, [$($var:ident),* $(,)?] $(,)?) => {{
+        let mut count: u8 = 0;
+        $(
+            count += $var.is_zero() as u8;
+        )*
+        if count > 1 {
+            return Err(concat![stringify!($fn_name), ": At most one argument can be zero."]);
+        }
+    }};
     (@multi, $fn_name:ident, $value_name:expr, $check_method:ident, [$first:ident, $($var:ident),* $(,)?] $(,)?) => {{
         // Check if more than one var leads to true and return error.
         let var_array = [$first, $($var),*];
@@ -81,7 +94,7 @@ pub(crate) use case;
 /// ans is considered valid when ans is finite and not nan.
 macro_rules! return_if_valid_else {
     ($ans:ident, {$($else:tt)+}) => {
-        if $ans.is_finite() && !$ans.is_nan() {
+        if $ans.is_finite() {
             return Ok($ans);
         } else {
             $($else)+
