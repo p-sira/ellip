@@ -67,7 +67,6 @@ use crate::{
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
     let ans = elliprf_unchecked(x, y, z);
     if ans.is_finite() {
