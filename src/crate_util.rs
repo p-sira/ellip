@@ -36,10 +36,13 @@ macro_rules! check {
     (@inf, $fn_name:ident, [$($var:ident),* $(,)?] $(,)?) => {
         check!($fn_name, is_infinite, "infinite", [$($var),*])
     };
-    (@neg, $fn_name:ident, [$first:ident, $($var:ident),* $(,)?] $(,)?) => {
+    (@neg, $fn_name:ident, $msg:expr, [$first:ident, $($var:ident),* $(,)?] $(,)?) => {
         if $first$(.min($var))* < T::zero() {
-            return Err(concat![stringify!($fn_name), ": Arguments must be non-negative."]);
+            return Err(concat![stringify!($fn_name), ": ", $msg]);
         }
+    };
+    (@neg, $fn_name:ident, [$first:ident, $($var:ident),* $(,)?] $(,)?) => {
+        check!(@neg, $fn_name, "Arguments must be non-negative.", [$first, $($var),*])
     };
     (@multi_zero, $fn_name:ident, [$($var:ident),* $(,)?] $(,)?) => {{
         let mut count: u8 = 0;
