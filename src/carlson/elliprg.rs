@@ -65,9 +65,8 @@ use crate::{
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
-    if x.min(y).min(z) < 0.0 {
+    if x.min(y).min(z) < T::zero() {
         return Err("elliprg: Arguments must be non-negative.");
     }
     if !(x + y + z).is_finite() {
@@ -75,6 +74,12 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         return Err("elliprg: Arguments must be finite.");
     }
 
+    Ok(elliprg_unchecked(x, y, z))
+}
+
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[inline]
+pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
     let_mut!(x, y, z);
     if x < y {
         swap(&mut x, &mut y);
@@ -88,22 +93,22 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
 
     if x == z {
         if y == z {
-            return Ok(x.sqrt());
+            return x.sqrt();
         }
 
         if y == 0.0 {
-            return Ok(pi!() * x.sqrt() / 4.0);
+            return pi!() * x.sqrt() / 4.0;
         }
 
-        return Ok((x * elliprc_unchecked(y, x) + y.sqrt()) / 2.0);
+        return (x * elliprc_unchecked(y, x) + y.sqrt()) / 2.0;
     }
 
     if y == z {
         if y == 0.0 {
-            return Ok(x.sqrt() / 2.0);
+            return x.sqrt() / 2.0;
         }
 
-        return Ok((y * elliprc_unchecked(x, y) + x.sqrt()) / 2.0);
+        return (y * elliprc_unchecked(x, y) + x.sqrt()) / 2.0;
     }
 
     if y == 0.0 {
@@ -122,14 +127,12 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
             sum = sum + sum_pow * (xn - yn) * (xn - yn);
         }
         let rf = pi!() / (xn + yn);
-        return Ok(((x0 + y0) * (x0 + y0) / 4.0 - sum) * rf / 2.0);
+        return ((x0 + y0) * (x0 + y0) / 4.0 - sum) * rf / 2.0;
     }
 
-    Ok(
-        (z * elliprf(x, y, z)? - (x - z) * (y - z) * elliprd_unchecked(x, y, z) / 3.0
-            + (x * y / z).sqrt())
-            / 2.0,
-    )
+    (z * elliprf(x, y, z).unwrap() - (x - z) * (y - z) * elliprd_unchecked(x, y, z) / 3.0
+        + (x * y / z).sqrt())
+        / 2.0
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
