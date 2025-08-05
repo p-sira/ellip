@@ -13,10 +13,7 @@
 
 use num_traits::Float;
 
-use crate::{
-    crate_util::{check, return_if_valid_else},
-    elliprd, StrErr,
-};
+use crate::{carlson::elliprd_unchecked, crate_util::check, StrErr};
 
 /// Computes [complete elliptic integral of Legendre's type](https://dlmf.nist.gov/19.2.E8).
 /// ```text
@@ -81,14 +78,8 @@ pub fn ellipd<T: Float>(m: T) -> Result<T, StrErr> {
         return Ok(1.0 / (-m).sqrt());
     }
 
-    let ans = elliprd(0.0, 1.0 - m, 1.0)? / 3.0;
-    #[cfg(feature = "reduce-iteration")]
-    let ans = nan!();
-
-    return_if_valid_else!(ans, {
-        check!(@nan, ellipd, [m]);
-        Err("ellipd: Unexpected error.")
-    })
+    check!(@nan, ellipd, [m]);
+    Ok(elliprd_unchecked(0.0, 1.0 - m, 1.0) / 3.0)
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
@@ -116,11 +107,11 @@ mod tests {
         // m < 0: should be valid
         assert!(ellipd(-1.0).unwrap().is_finite());
         // m > 1: should return Err
-        assert!(ellipd(1.1).is_err());
+        assert_eq!(ellipd(1.1), Err("ellipd: m must be less than 1."));
         // m = NaN: should return Err
-        assert!(ellipd(NAN).is_err());
+        assert_eq!(ellipd(NAN), Err("ellipd: Arguments cannot be NAN."));
         // m = inf: should return Err
-        assert!(ellipd(INFINITY).is_err());
+        assert_eq!(ellipd(INFINITY), Err("ellipd: m must be less than 1."));
         // m -> -inf: D(m) = 1/sqrt(-m)
         assert_eq!(ellipd(-MAX).unwrap(), 1.0 / MAX.sqrt());
         // m = -inf: D(-inf) = 0
@@ -130,5 +121,5 @@ mod tests {
 
 #[cfg(feature = "reduce-iteration")]
 crate::test_force_unreachable! {
-    assert!(ellipd(0.5).is_err());
+            assert_eq!(ellipd(0.5), Err("ellipd: m must be less than 1."));
 }

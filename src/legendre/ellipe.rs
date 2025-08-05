@@ -13,7 +13,7 @@
 
 use num_traits::Float;
 
-use crate::{crate_util::check, elliprg, polyeval, StrErr};
+use crate::{carlson::elliprg_unchecked, crate_util::check, polyeval, StrErr};
 
 /// Computes [complete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E8).
 /// ```text
@@ -265,6 +265,10 @@ fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
         Some(_) => ellipe_precise(m),
         None => {
             check!(@nan, ellipe, [m]);
+            if m > 1.0 {
+                // Infinity cases
+                return Err("ellipe: m must be less than 1.");
+            }
             Err("ellipe: Unexpected error.")
         }
     }
@@ -281,7 +285,7 @@ fn ellipe_precise<T: Float>(m: T) -> Result<T, StrErr> {
         return Err("ellipe: m must be less than 1.");
     }
 
-    Ok(2.0 * elliprg(0.0, 1.0 - m, 1.0)?)
+    Ok(2.0 * elliprg_unchecked(0.0, 1.0 - m, 1.0))
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
@@ -314,7 +318,7 @@ mod tests {
     fn test_ellipe_special_cases() {
         use std::f64::{consts::FRAC_PI_2, INFINITY, NAN, NEG_INFINITY};
         // m > 1: should return Err
-        assert!(ellipe(1.1).is_err());
+        assert_eq!(ellipe(1.1), Err("ellipe: m must be less than 1."));
         // m = 0: E(0) = pi/2
         assert_eq!(ellipe(0.0).unwrap(), FRAC_PI_2);
         // m = 1: E(1) = 1
@@ -322,9 +326,9 @@ mod tests {
         // m < 0: should be valid, compare with reference value
         assert!(ellipe(-1.0).unwrap().is_finite());
         // m = NaN: should return Err
-        assert!(ellipe(NAN).is_err());
+        assert_eq!(ellipe(NAN), Err("ellipe: Arguments cannot be NAN."));
         // m = inf: should return Err
-        assert!(ellipe(INFINITY).is_err());
+        assert_eq!(ellipe(INFINITY), Err("ellipe: m must be less than 1."));
         // m = -inf: E(-inf) = inf
         assert_eq!(ellipe(NEG_INFINITY).unwrap(), INFINITY);
     }

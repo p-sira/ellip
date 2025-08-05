@@ -119,12 +119,12 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     #[cfg(feature = "reduce-iteration")]
     let ans = nan!();
 
-    if ans.is_nan() {
+    if !ans.is_finite() {
         check!(@nan, ellipdinc, [phi, m]);
-        Err("ellipdinc: Unexpected error.")
-    } else {
-        Ok(ans)
+        return Err("ellipdinc: Unexpected error.");
     }
+
+    Ok(ans)
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
@@ -153,7 +153,10 @@ mod tests {
         // phi = pi/2, m = 1: D(pi/2, 1) = inf
         assert_eq!(ellipdinc(FRAC_PI_2, 1.0).unwrap(), INFINITY);
         // m * sin^2(phi) >= 1: should return Err
-        assert!(ellipdinc(FRAC_PI_2, 2.0).is_err());
+        assert_eq!(
+            ellipdinc(FRAC_PI_2, 2.0),
+            Err("ellipdinc: m sin²φ must be smaller than one.")
+        );
         // phi = 0: D(0, m) = 0
         assert_eq!(ellipdinc(0.0, 0.5).unwrap(), 0.0);
         // phi = pi/2, m = 0: D(pi/2, 0) = pi/4
@@ -166,14 +169,23 @@ mod tests {
             2.0 * 1e16 * ellipd(0.4).unwrap() / PI
         );
         // phi = nan or m = nan: should return Err
-        assert!(ellipdinc(NAN, 0.5).is_err());
-        assert!(ellipdinc(0.5, NAN).is_err());
+        assert_eq!(
+            ellipdinc(NAN, 0.5),
+            Err("ellipdinc: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            ellipdinc(0.5, NAN),
+            Err("ellipdinc: Arguments cannot be NAN.")
+        );
         // phi = inf: D(inf, m) = inf
         assert_eq!(ellipdinc(INFINITY, 0.5).unwrap(), INFINITY);
         // phi = -inf: D(-inf, m) = -inf
         assert_eq!(ellipdinc(NEG_INFINITY, 0.5).unwrap(), NEG_INFINITY);
         // m = inf: should return Err
-        assert!(ellipdinc(0.5, INFINITY).is_err());
+        assert_eq!(
+            ellipdinc(0.5, INFINITY),
+            Err("ellipdinc: Arguments cannot be NAN.")
+        );
         // m = -inf: D(phi, -inf) = 0.0
         assert_eq!(ellipdinc(0.5, NEG_INFINITY).unwrap(), 0.0);
     }
@@ -181,5 +193,5 @@ mod tests {
 
 #[cfg(feature = "reduce-iteration")]
 crate::test_force_unreachable! {
-    assert!(ellipdinc(0.5, 0.5).is_err());
+    assert_eq!(ellipdinc(0.5, 0.5), Err("ellipdinc: Unexpected error."));
 }
