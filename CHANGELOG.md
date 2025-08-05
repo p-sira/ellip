@@ -2,7 +2,7 @@
 ## 0.3
 ### 0.3.7
 **Improvements**
-- Slightly improve performance across all functions.
+- Improve performance across all functions by removing unnecessary checks.
 - Improve and fix error messages.
 
 ### 0.3.6
@@ -11,7 +11,7 @@
 - `el3`: Fix NAN when p is small and kc = 0.
 
 **Improvements**
-- Improve performance of `legendre` functions and `el3`.
+- Improve performance of `legendre` functions by lazy checking and `el3` by using array instead of Vec.
 - Handle special cases and edge cases (infinity, nan, etc.) for all `carlson` functions.
 - Increase test coverage.
 
@@ -25,7 +25,7 @@
 
 **Improvements**
 - Loosen the bounds of the `bulirsch` functions.
-- Improve the performance of the `bulirsch` functions.
+- Improve the performance of the `bulirsch` functions by lazy checking.
 - Handle special cases and edge cases (infinity, nan, etc.) for all `bulirsch` functions.
 - Add special cases documentation for `bulirsch` functions.
 - Improve and fix documentation.
