@@ -16,7 +16,7 @@ use num_traits::Float;
 
 use crate::{
     carlson::elliprc_unchecked,
-    crate_util::{case, check, return_if_valid_else},
+    crate_util::{case, check},
     StrErr,
 };
 
@@ -69,44 +69,55 @@ use crate::{
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
+    let validate = |ans: T| -> Result<T, StrErr> {
+        if ans.is_finite() {
+            return Ok(ans);
+        }
+        check!(@nan, elliprf, [x, y, z]);
+        check!(@neg, elliprf, [x, y, z]);
+        check!(@multi_zero, elliprf, [x, y, z]);
+        case!(@any [x, y, z] == inf!(), T::zero());
+        Err("elliprf: Failed to converge.")
+    };
+
     // Special cases from http://dlmf.nist.gov/19.20#i
     if x == y {
         if x == z {
             // RF(x,x,x)
-            return Ok(1.0 / x.sqrt());
+            return validate(1.0 / x.sqrt());
         }
 
         if z == 0.0 {
             // RF(x,x,0)
             // RF(0,y,y)
-            return Ok(pi!() / (2.0 * x.sqrt()));
+            return validate(pi!() / (2.0 * x.sqrt()));
         }
 
         // RF(x,x,z)
         // RF(x,y,y)
-        return elliprc_wrapper(z, x);
+        return validate(elliprc_unchecked(z, x));
     }
 
     if x == z {
         if y == 0.0 {
             // RF(x,0,x)
             // RF(0,y,y)
-            return Ok(pi!() / (2.0 * x.sqrt()));
+            return validate(pi!() / (2.0 * x.sqrt()));
         }
 
         // RF(x,y,x)
         // RF(x,y,y)
-        return elliprc_wrapper(y, x);
+        return validate(elliprc_unchecked(y, x));
     }
 
     if y == z {
         if x == 0.0 {
             // RF(0,y,y)
-            return Ok(pi!() / (2.0 * y.sqrt()));
+            return validate(pi!() / (2.0 * y.sqrt()));
         }
 
         // RF(x,y,y)
-        return elliprc_wrapper(x, y);
+        return validate(elliprc_unchecked(x, y));
     }
 
     let mut xn = x;
@@ -128,7 +139,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
             xn = (xn + yn) / 2.0;
             yn = t;
         }
-        return Ok(pi!() / (xn + yn));
+        return validate(pi!() / (xn + yn));
     }
 
     let four = 4.0;
@@ -174,29 +185,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         }
     }
 
-    return_if_valid_else!(ans, {
-        check!(@nan, elliprf, [x, y, z]);
-        if x.min(y).min(z) < 0.0 {
-            return Err("elliprf: Arguments must be non-negative.");
-        }
-        case!(@any [x, y, z] == inf!(), T::zero());
-        Err("elliprf: Failed to converge.")
-    })
-}
-
-/// Wrapper for [elliprc_unchecked](crate::carlson::elliprc_unchecked) to check for arguments in the context of [elliprf](crate::elliprf).
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
-#[inline]
-fn elliprc_wrapper<T: Float>(x: T, y: T) -> Result<T, StrErr> {
-    check!(@nan, elliprf, [x, y]);
-    if x.min(y) < 0.0 {
-        return Err("elliprf: Arguments must be non-negative.");
-    }
-    if x == 0.0 || y == 0.0 {
-        return Err("elliprf: At most one argument can be zero.");
-    }
-    case!(@any [x, y] == inf!(), T::zero());
-    Ok(elliprc_unchecked(x, y))
+    validate(ans)
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
