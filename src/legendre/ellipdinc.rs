@@ -11,7 +11,7 @@
 //  Use, modification and distribution are subject to the
 //  Boost Software License, Version 1.0.
 
-use crate::{crate_util::check, ellipd, elliprd, StrErr};
+use crate::{carlson::elliprd_unchecked, crate_util::check, ellipd, StrErr};
 use num_traits::Float;
 
 /// Computes [incomplete elliptic integral of Legendre's type](https://dlmf.nist.gov/19.2.E6).
@@ -109,7 +109,7 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 
     let mut result = 0.0;
     if rphi != 0.0 {
-        result = s * elliprd(cm1, c - m, c)? / 3.0;
+        result = s * elliprd_unchecked(cm1, c - m, c) / 3.0;
     }
     if mm != 0.0 {
         result = result + mm * ellipd(m)?;
@@ -119,12 +119,12 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     #[cfg(feature = "reduce-iteration")]
     let ans = nan!();
 
-    if !ans.is_finite() {
-        check!(@nan, ellipdinc, [phi, m]);
-        return Err("ellipdinc: Unexpected error.");
+    if !ans.is_nan() {
+        // Infinites should be handled properly by ellipd
+        return Ok(ans);
     }
-
-    Ok(ans)
+    check!(@nan, ellipdinc, [phi, m]);
+    Err("ellipdinc: Unexpected error.")
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
@@ -184,7 +184,7 @@ mod tests {
         // m = inf: should return Err
         assert_eq!(
             ellipdinc(0.5, INFINITY),
-            Err("ellipdinc: Arguments cannot be NAN.")
+            Err("ellipdinc: m sin²φ must be smaller than one.")
         );
         // m = -inf: D(phi, -inf) = 0.0
         assert_eq!(ellipdinc(0.5, NEG_INFINITY).unwrap(), 0.0);
