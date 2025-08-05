@@ -15,7 +15,7 @@ use std::mem::swap;
 use num_traits::Float;
 
 use crate::{
-    crate_util::{case, check, let_mut, return_if_valid_else},
+    crate_util::{case, check, let_mut},
     StrErr,
 };
 
@@ -79,11 +79,12 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
     }
 
     let ans = elliprd_unchecked(x, y, z);
-    return_if_valid_else!(ans, {
-        check!(@nan, elliprd, [x, y, z]);
-        case!(@any [x, y, z] == inf!(), T::zero());
-        Err("elliprd: Failed to converge.")
-    })
+    if ans.is_finite() {
+        return Ok(ans);
+    }
+    check!(@nan, elliprd, [x, y, z]);
+    case!(@any [x, y, z] == inf!(), T::zero());
+    Err("elliprd: Failed to converge.")
 }
 
 /// Unsafe version of [elliprd](crate::elliprd).

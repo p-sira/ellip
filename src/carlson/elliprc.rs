@@ -13,7 +13,7 @@
 use num_traits::Float;
 
 use crate::{
-    crate_util::{case, check, let_mut, return_if_valid_else},
+    crate_util::{case, check, let_mut},
     StrErr,
 };
 
@@ -75,11 +75,12 @@ pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, StrErr> {
     }
 
     let ans = elliprc_unchecked(x, y);
-    return_if_valid_else!(ans, {
-        check!(@nan, elliprc, [x, y]);
-        case!(@any [x, y] == inf!(), T::zero());
-        Err("elliprc: Unexpected error.")
-    })
+    if ans.is_finite() {
+        return Ok(ans);
+    }
+    check!(@nan, elliprc, [x, y]);
+    case!(@any [x, y] == inf!(), T::zero());
+    Err("elliprc: Unexpected error.")
 }
 
 /// Unsafe version of [elliprc](crate::elliprc).

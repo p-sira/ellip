@@ -69,55 +69,58 @@ use crate::{
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
-    let validate = |ans: T| -> Result<T, StrErr> {
-        if ans.is_finite() {
-            return Ok(ans);
-        }
-        check!(@nan, elliprf, [x, y, z]);
-        check!(@neg, elliprf, [x, y, z]);
-        check!(@multi_zero, elliprf, [x, y, z]);
-        case!(@any [x, y, z] == inf!(), T::zero());
-        Err("elliprf: Failed to converge.")
-    };
+    let ans = elliprf_unchecked(x, y, z);
+    if ans.is_finite() {
+        return Ok(ans);
+    }
+    check!(@nan, elliprf, [x, y, z]);
+    check!(@neg, elliprf, [x, y, z]);
+    check!(@multi_zero, elliprf, [x, y, z]);
+    case!(@any [x, y, z] == inf!(), T::zero());
+    Err("elliprf: Failed to converge.")
+}
 
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[inline]
+pub fn elliprf_unchecked<T: Float>(x: T, y: T, z: T) -> T {
     // Special cases from http://dlmf.nist.gov/19.20#i
     if x == y {
         if x == z {
             // RF(x,x,x)
-            return validate(1.0 / x.sqrt());
+            return 1.0 / x.sqrt();
         }
 
         if z == 0.0 {
             // RF(x,x,0)
             // RF(0,y,y)
-            return validate(pi!() / (2.0 * x.sqrt()));
+            return pi!() / (2.0 * x.sqrt());
         }
 
         // RF(x,x,z)
         // RF(x,y,y)
-        return validate(elliprc_unchecked(z, x));
+        return elliprc_unchecked(z, x);
     }
 
     if x == z {
         if y == 0.0 {
             // RF(x,0,x)
             // RF(0,y,y)
-            return validate(pi!() / (2.0 * x.sqrt()));
+            return pi!() / (2.0 * x.sqrt());
         }
 
         // RF(x,y,x)
         // RF(x,y,y)
-        return validate(elliprc_unchecked(y, x));
+        return elliprc_unchecked(y, x);
     }
 
     if y == z {
         if x == 0.0 {
             // RF(0,y,y)
-            return validate(pi!() / (2.0 * y.sqrt()));
+            return pi!() / (2.0 * y.sqrt());
         }
 
         // RF(x,y,y)
-        return validate(elliprc_unchecked(x, y));
+        return elliprc_unchecked(x, y);
     }
 
     let mut xn = x;
@@ -139,7 +142,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
             xn = (xn + yn) / 2.0;
             yn = t;
         }
-        return validate(pi!() / (xn + yn));
+        return pi!() / (xn + yn);
     }
 
     let four = 4.0;
@@ -185,7 +188,7 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         }
     }
 
-    validate(ans)
+    ans
 }
 
 #[cfg(not(feature = "reduce-iteration"))]

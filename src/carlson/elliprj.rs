@@ -13,9 +13,9 @@
 use std::mem::swap;
 
 use crate::{
-    carlson::{elliprc_unchecked, elliprd_unchecked},
+    carlson::{elliprc_unchecked, elliprd_unchecked, elliprf_unchecked},
     crate_util::{case, check, declare, let_mut},
-    elliprf, StrErr,
+    StrErr,
 };
 use num_traits::Float;
 
@@ -73,12 +73,8 @@ use num_traits::Float;
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
-    if x.min(y).min(z) < 0.0 {
-        return Err("elliprj: Arguments must be non-negative.");
-    }
-    if (x == 0.0) as u8 + (y == 0.0) as u8 + (z == 0.0) as u8 > 1 {
-        return Err("elliprj: At most one argument can be zero.");
-    }
+    check!(@neg, elliprj, "x, y, and z must be non-negative.", [x, y, z]);
+    check!(@multi_zero, elliprj, [x, y, z]);
 
     let_mut!(x, y, z);
     // for p < 0, the integral is singular, return Cauchy principal value
@@ -102,15 +98,15 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
 
         let q = -p;
         let p = (z * (x + y + q) - x * y) / (z + q);
-        let mut value = (p - z) * _elliprj(x, y, z, p);
-        value = value - 3.0 * elliprf(x, y, z)?;
+        let mut value = (p - z) * elliprj_unchecked(x, y, z, p);
+        value = value - 3.0 * elliprf_unchecked(x, y, z);
         value = value
             + 3.0
                 * ((x * y * z) / (x * y + p * q)).sqrt()
                 * elliprc_unchecked(x * y + p * q, p * q);
         value / (z + q)
     } else {
-        _elliprj(x, y, z, p)
+        elliprj_unchecked(x, y, z, p)
     };
 
     if ans.is_finite() {
@@ -143,7 +139,7 @@ fn elliprc1p<T: Float>(y: T) -> T {
 
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
-fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> T {
+pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
     let_mut!(x, z);
     // Special cases
     // https://dlmf.nist.gov/19.20#iii
@@ -317,15 +313,15 @@ mod tests {
         // Negative arguments: should return Err
         assert_eq!(
             elliprj(-1.0, 1.0, 1.0, 1.0),
-            Err("elliprj: Arguments must be non-negative.")
+            Err("elliprj: x, y, and z must be non-negative.")
         );
         assert_eq!(
             elliprj(1.0, -1.0, 1.0, 1.0),
-            Err("elliprj: Arguments must be non-negative.")
+            Err("elliprj: x, y, and z must be non-negative.")
         );
         assert_eq!(
             elliprj(1.0, 1.0, -1.0, 1.0),
-            Err("elliprj: Arguments must be non-negative.")
+            Err("elliprj: x, y, and z must be non-negative.")
         );
         // More than one zero among x, y, z: should return Err
         assert_eq!(

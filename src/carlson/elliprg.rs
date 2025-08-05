@@ -8,9 +8,9 @@ use num_traits::Float;
 use std::mem::swap;
 
 use crate::{
-    carlson::{elliprc_unchecked, elliprd_unchecked},
+    carlson::{elliprc_unchecked, elliprd_unchecked, elliprf_unchecked},
     crate_util::{check, let_mut},
-    elliprf, StrErr,
+    StrErr,
 };
 
 // Original header from Boost Math
@@ -66,15 +66,14 @@ use crate::{
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
-    if x.min(y).min(z) < T::zero() {
-        return Err("elliprg: Arguments must be non-negative.");
-    }
-    if !(x + y + z).is_finite() {
-        check!(@nan, elliprg, [x, y, z]);
-        return Err("elliprg: Arguments must be finite.");
-    }
+    check!(@neg, elliprg, [x, y, z]);
 
-    Ok(elliprg_unchecked(x, y, z))
+    let ans = elliprg_unchecked(x, y, z);
+    if ans.is_finite() {
+        return Ok(ans);
+    }
+    check!(@nan, elliprg, [x, y, z]);
+    return Err("elliprg: Arguments must be finite.");
 }
 
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
@@ -130,7 +129,7 @@ pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
         return ((x0 + y0) * (x0 + y0) / 4.0 - sum) * rf / 2.0;
     }
 
-    (z * elliprf(x, y, z).unwrap() - (x - z) * (y - z) * elliprd_unchecked(x, y, z) / 3.0
+    (z * elliprf_unchecked(x, y, z) - (x - z) * (y - z) * elliprd_unchecked(x, y, z) / 3.0
         + (x * y / z).sqrt())
         / 2.0
 }
