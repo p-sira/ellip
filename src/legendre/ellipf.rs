@@ -14,11 +14,11 @@
 use num_traits::Float;
 
 use crate::{
-    crate_util::{check, return_if_valid_else},
-    elliprf, StrErr,
+    carlson::elliprf_unchecked,
+    crate_util::{case, check},
+    legendre::ellipk::ellipk_precise_unchecked,
+    StrErr,
 };
-
-use super::ellipk::ellipk_precise;
 
 /// Computes [incomplete elliptic integral of the first kind](https://dlmf.nist.gov/19.2.E4).
 /// ```text
@@ -83,7 +83,7 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         }
         // Phi is so large that phi%pi is necessarily zero (or garbage),
         // just return the second part of the duplication formula:
-        return Ok(sign * 2.0 * phi * ellipk_precise(m)? / pi!());
+        return Ok(sign * 2.0 * phi * ellipk_precise_unchecked(m) / pi!());
     }
 
     // Carlson's algorithm works only for |phi| <= pi/2,
@@ -98,20 +98,21 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         rphi = pi_2!() - rphi;
     }
 
-    let s2p = rphi.sin() * rphi.sin();
+    let sphi = rphi.sin();
+    let s2p = sphi * sphi;
     if m * s2p >= 1.0 {
         return Err("ellipf: m sin²φ must be smaller than one.");
     }
-
-    let c2p = rphi.cos() * rphi.cos();
-    let mut result;
+    let cphi = rphi.cos();
+    let c2p = cphi * cphi;
+    let mut ans;
 
     debug_assert!(s2p > min_val!() || !s2p.is_normal());
     // Use http://dlmf.nist.gov/19.25#E5, note that
     // c-1 simplifies to cot^2(rphi) which avoids cancellation.
     // Likewise c - k^2 is the same as (c - 1) + (1 - k^2).
     //
-    let c = 1.0 / s2p;
+    let c = s2p.recip();
     let c_minus_one = c2p / s2p;
     let arg2 = if m != 0.0 {
         let cross = (c / m).abs();
@@ -123,7 +124,7 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     } else {
         c
     };
-    result = s * elliprf(c_minus_one, arg2, c)?;
+    ans = s * elliprf_unchecked(c_minus_one, arg2, c);
 
     // It should not be possible for s2p to be less than MIN value.
     // if s2p > min_val!() {
@@ -149,17 +150,16 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     // }
 
     if mm != 0.0 {
-        result = result + mm * ellipk_precise(m)?;
+        ans = ans + mm * ellipk_precise_unchecked(m);
     }
 
-    let ans = sign * result;
-    return_if_valid_else!(ans, {
-        check!(@nan, ellipf, [phi, m]);
-        if m == neg_inf!() {
-            return Ok(0.0);
-        }
-        Err("ellipf: Unexpected error.")
-    })
+    ans = sign * ans;
+    if ans.is_finite() {
+        return Ok(ans);
+    }
+    check!(@nan, ellipf, [phi, m]);
+    case!(m == neg_inf!(), T::zero());
+    Err("ellipf: Unexpected error.")
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
@@ -185,8 +185,14 @@ mod tests {
             INFINITY, NAN, NEG_INFINITY,
         };
         // m * sin^2(phi) >= 1: should return Err
-        assert!(ellipf(FRAC_PI_2, 1.0).is_err());
-        assert!(ellipf(FRAC_PI_2, 2.0).is_err());
+        assert_eq!(
+            ellipf(FRAC_PI_2, 1.0),
+            Err("ellipf: m sin²φ must be smaller than one.")
+        );
+        assert_eq!(
+            ellipf(FRAC_PI_2, 2.0),
+            Err("ellipf: m sin²φ must be smaller than one.")
+        );
         // phi = 0: F(0, m) = 0
         assert_eq!(ellipf(0.0, 0.5).unwrap(), 0.0);
         // phi = pi/2, m = 0: F(pi/2, 0) = pi/2
@@ -194,8 +200,8 @@ mod tests {
         // m < 0: should be valid
         assert!(ellipf(FRAC_PI_2, -1.0).unwrap().is_finite());
         // phi = nan or m = nan: should return Err
-        assert!(ellipf(NAN, 0.5).is_err());
-        assert!(ellipf(0.5, NAN).is_err());
+        assert_eq!(ellipf(NAN, 0.5), Err("ellipf: Arguments cannot be NAN."));
+        assert_eq!(ellipf(0.5, NAN), Err("ellipf: Arguments cannot be NAN."));
         // phi = inf: F(inf, m) = inf
         assert_eq!(ellipf(INFINITY, 0.5).unwrap(), INFINITY);
         // phi = -inf: F(-inf, m) = -inf
@@ -209,7 +215,10 @@ mod tests {
         assert_eq!(ellipf(1e-100, 0.4).unwrap(), (1e-100).sin());
         assert_eq!(ellipf(-1e-100, 0.4).unwrap(), (-1e-100).sin());
         // m = inf: should return Err
-        assert!(ellipf(0.5, INFINITY).is_err());
+        assert_eq!(
+            ellipf(0.5, INFINITY),
+            Err("ellipf: m sin²φ must be smaller than one.")
+        );
         // m = -inf: F(phi, -inf) = 0.0
         assert_eq!(ellipf(0.5, NEG_INFINITY).unwrap(), 0.0);
     }
