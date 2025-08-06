@@ -509,7 +509,6 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
     l = 0;
     m = 0;
 
-    let mut failed = true;
     for _ in 0..N_MAX_ITERATIONS {
         y = y - e / y;
         if y == 0.0 {
@@ -572,45 +571,39 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
             }
             continue;
         }
-        failed = false;
+        if y < 0.0 {
+            l += 1;
+        }
+        e = (t / y).atan() + pi!() * T::from(l).unwrap();
+        e = e * (c * t + d) / (t * (t + q));
+
+        if bo {
+            h = v / (t + u);
+            z = 1.0 - r * h;
+            h = r + h;
+            if z == 0.0 {
+                z = C::cb();
+            }
+            if z < 0.0 {
+                m += if h < 0.0 { -1 } else { 1 };
+            }
+            s = (h / z).atan() + T::from(m).unwrap() * pi!();
+        } else {
+            s = if bk {
+                ye.asinh()
+            } else {
+                z.ln() + T::from(m).unwrap() * ln_2!()
+            };
+            s = s * 0.5;
+        }
+        e = (e + fa.sqrt() * s) / T::from(n).unwrap();
+        let ans = x.signum() * e;
+        if ans.is_finite() {
+            return Ok(ans);
+        }
+        check!(@nan, el3, [x, kc, p]);
         break;
     }
-
-    if failed {
-        return Err("el3: Failed to converge.");
-    }
-
-    if y < 0.0 {
-        l += 1;
-    }
-    e = (t / y).atan() + pi!() * T::from(l).unwrap();
-    e = e * (c * t + d) / (t * (t + q));
-
-    if bo {
-        h = v / (t + u);
-        z = 1.0 - r * h;
-        h = r + h;
-        if z == 0.0 {
-            z = C::cb();
-        }
-        if z < 0.0 {
-            m += if h < 0.0 { -1 } else { 1 };
-        }
-        s = (h / z).atan() + T::from(m).unwrap() * pi!();
-    } else {
-        s = if bk {
-            ye.asinh()
-        } else {
-            z.ln() + T::from(m).unwrap() * ln_2!()
-        };
-        s = s * 0.5;
-    }
-    e = (e + fa.sqrt() * s) / T::from(n).unwrap();
-    let ans = x.signum() * e;
-    if ans.is_finite() {
-        return Ok(ans);
-    }
-    check!(@nan, el3, [x, kc, p]);
     Err("el3: Failed to converge.")
 }
 
