@@ -817,13 +817,13 @@ mod tests {
     }
 
     #[test]
-        assert_eq!(el3(0.5, 0.0, 0.5), Err("el3: kc must not be zero."));
+    fn test_el3_special_cases() {
         use crate::cel;
         use std::f64::{INFINITY, NAN};
         // x = 0: el3(0, kc, p) = 0
         assert_eq!(el3(0.0, 0.5, 0.5).unwrap(), 0.0);
         // kc = 0: should return Err
-        assert!(el3(0.5, 0.0, 0.5).is_err());
+        assert_eq!(el3(0.5, 0.0, 0.5), Err("el3: kc must not be zero."));
         // x = inf: el3(inf, kc, p) = cel(kc, p, 1, 1)
         assert_close!(
             el3(INFINITY, 0.5, 0.5).unwrap(),
@@ -852,5 +852,5 @@ mod tests {
 
 #[cfg(feature = "reduce-iteration")]
 crate::test_force_unreachable! {
-    assert!(el3(0.5, 0.5, 0.5).is_err());
+    assert_eq!(el3(0.5, 0.5, 0.5), Err("el3: Failed to converge."));
 }
