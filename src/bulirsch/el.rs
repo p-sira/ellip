@@ -379,7 +379,7 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
     // small
     if e < 0.1 && z < 0.1 && t < 1.0 && r < 1.0 {
         declare!(mut [rb, ra, rr] = [T::zero(); MAX_ND]);
-        
+
         for k in 2..=C::ND {
             let k_float = T::from(k).unwrap();
             rb[k - 2] = 0.5 / k_float;
