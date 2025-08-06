@@ -8,7 +8,7 @@ use num_traits::Float;
 
 use crate::{
     bulirsch::DefaultPrecision,
-    crate_util::{check, declare},
+    crate_util::{case, check, declare, let_mut},
     ellipeinc, ellipf, ellippi, StrErr,
 };
 
@@ -68,33 +68,28 @@ pub fn el1<T: Float>(x: T, kc: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn _el1<T: Float, C: _BulirschConst<T>>(x: T, kc: T) -> Result<T, StrErr> {
+    let ans = el1_unchecked::<T, C>(x, kc);
+    if ans.is_finite() {
+        return Ok(ans);
+    }
     check!(@nan, el1, [x, kc]);
-
-    if x == 0.0 {
-        return Ok(0.0);
-    }
-
-    if kc == 0.0 {
-        return Err("el1: kc cannot be zero.");
-    }
-
-    if kc == inf!() {
-        return Ok(0.0);
-    }
-
-    // phi = π/2
+    check!(@zero, el1, [kc]);
+    case!(kc == inf!(), T::zero());
+    case!(x == T::zero(), T::zero());
     if x == inf!() {
         return cel1(kc);
     }
+    Err("el1: Failed to converge.")
+}
 
-    let mut y = (1.0 / x).abs();
-    let mut kc = kc.abs();
-    let mut m = 1.0;
-    let mut l = 0;
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[inline]
+pub fn el1_unchecked<T: Float, C: _BulirschConst<T>>(x: T, kc: T) -> T {
+    declare!(mut [y = x.recip().abs(), kc = kc.abs(), m = T::one(), l = 0, e, g]);
 
-    loop {
-        let e = m * kc;
-        let g = m;
+    for _ in 0..N_MAX_ITERATIONS {
+        e = m * kc;
+        g = m;
         m = kc + m;
         y = -e / y + y;
 
@@ -111,15 +106,13 @@ pub fn _el1<T: Float, C: _BulirschConst<T>>(x: T, kc: T) -> Result<T, StrErr> {
             continue;
         }
 
-        break;
-    }
+        if y < 0.0 {
+            l += 1;
+        }
 
-    if y < 0.0 {
-        l += 1;
+        return x.signum() * ((m / y).atan() + pi!() * T::from(l).unwrap()) / m;
     }
-
-    let e = ((m / y).atan() + pi!() * T::from(l).unwrap()) / m;
-    Ok(if x < 0.0 { -e } else { e })
+    nan!()
 }
 
 /// Computes [incomplete elliptic integral of the second kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E12).
@@ -179,41 +172,38 @@ pub fn el2<T: Float>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn _el2<T: Float, C: _BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
+    let ans = el2_unchecked::<T, C>(x, kc, a, b);
+    if ans.is_finite() {
+        return Ok(ans);
+    }
     check!(@nan, el2, [x, kc, a, b]);
-
-    if x == 0.0 {
-        return Ok(0.0);
-    }
-
-    if kc == 0.0 {
-        return Err("el2: kc cannot be zero.");
-    }
-
-    // phi = π/2
+    check!(@zero, el2, [kc]);
+    case!(x == T::zero(), T::zero());
     if x == inf!() {
+        // phi = π/2
         return cel2(kc, a, b);
     }
 
-    let mut b = b;
-    let mut c = x * x;
-    let mut d = 1.0 + c;
-    let mut p = ((1.0 + kc * kc * c) / d).sqrt();
+    Err("el2: Failed to converge.")
+}
+
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[inline]
+pub fn el2_unchecked<T: Float, C: _BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> T {
+    let_mut!(b);
+    declare!(mut [c = x * x, d = T::one() + c, p = ((T::one() + kc * kc * c) / d).sqrt()]);
 
     d = x / d;
     c = d / (p * 2.0);
     let z = a - b;
     let mut i = a;
     let mut a = (b + a) / 2.0;
-    let mut y = (1.0 / x).abs();
-    let mut f = 0.0;
-    let mut l = 0;
-    let mut m = 1.0;
-    let mut kc = kc.abs();
+    declare!(mut [y = x.recip().abs(), f = T::zero(), l = 0, m = T::one(), kc = kc.abs(), e, g]);
 
-    loop {
+    for _ in 0..N_MAX_ITERATIONS {
         b = i * kc + b;
-        let e = m * kc;
-        let mut g = e / p;
+        e = m * kc;
+        g = e / p;
         d = f * g + d;
         f = c;
         i = a;
@@ -237,20 +227,14 @@ pub fn _el2<T: Float, C: _BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> Result<T
             continue;
         }
 
-        break;
+        if y < 0.0 {
+            l += 1;
+        }
+
+        let e = x.signum() * ((m / y).atan() + pi!() * T::from(l).unwrap()) * a / m;
+        return e + c * z;
     }
-
-    if y < 0.0 {
-        l += 1;
-    }
-
-    let mut e = ((m / y).atan() + pi!() * T::from(l).unwrap()) * a / m;
-
-    if x < 0.0 {
-        e = -e;
-    }
-
-    Ok(e + c * z)
+    nan!()
 }
 
 /// Computes [incomplete elliptic integral of the third kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E16).
@@ -376,8 +360,7 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
     declare!(mut [k = 0, l, m, n]);
 
     // bool
-    let mut bo;
-    let mut bk = false;
+    declare!(mut [bo, bk = false]);
 
     hh = x * x;
     f = p * hh;
@@ -395,10 +378,8 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
 
     // small
     if e < 0.1 && z < 0.1 && t < 1.0 && r < 1.0 {
-        let mut rb: [T; MAX_ND] = [T::zero(); MAX_ND];
-        let mut ra: [T; MAX_ND] = [T::zero(); MAX_ND];
-        let mut rr: [T; MAX_ND] = [T::zero(); MAX_ND];
-
+        declare!(mut [rb, ra, rr] = [T::zero(); MAX_ND]);
+        
         for k in 2..=C::ND {
             let k_float = T::from(k).unwrap();
             rb[k - 2] = 0.5 / k_float;
@@ -625,13 +606,12 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
         s = s * 0.5;
     }
     e = (e + fa.sqrt() * s) / T::from(n).unwrap();
-    let ans = if x > 0.0 { e } else { -e };
-    if ans.is_nan() {
-        check!(@nan, el3, [x, kc, p]);
-        Err("el3: Failed to converge.")
-    } else {
-        Ok(ans)
+    let ans = x.signum() * e;
+    if ans.is_finite() {
+        return Ok(ans);
     }
+    check!(@nan, el3, [x, kc, p]);
+    Err("el3: Failed to converge.")
 }
 
 const MAX_ND: usize = 50;
