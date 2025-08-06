@@ -16,7 +16,7 @@ use num_traits::Float;
 
 use crate::{
     carlson::elliprc_unchecked,
-    crate_util::{case, check},
+    crate_util::{case, check, declare},
     StrErr,
 };
 
@@ -122,10 +122,7 @@ pub fn elliprf_unchecked<T: Float>(x: T, y: T, z: T) -> T {
         return elliprc_unchecked(x, y);
     }
 
-    let mut xn = x;
-    let mut yn = y;
-    let mut zn = z;
-
+    declare!(mut [xn = x, yn = y, zn = z]);
     if xn == 0.0 {
         swap(&mut xn, &mut zn);
     } else if yn == 0.0 {
@@ -133,18 +130,18 @@ pub fn elliprf_unchecked<T: Float>(x: T, y: T, z: T) -> T {
     }
 
     if zn == 0.0 {
-        let mut xn = xn.sqrt();
-        let mut yn = yn.sqrt();
-
-        while (xn - yn).abs() >= 2.7 * epsilon!() * xn.abs() {
-            let t = (xn * yn).sqrt();
-            xn = (xn + yn) / 2.0;
-            yn = t;
+        declare!(mut [xn = xn.sqrt(), yn = yn.sqrt(), t]);
+        for _ in 0..N_MAX_ITERATIONS {
+            if (xn - yn).abs() >= 2.7 * epsilon!() * xn.abs() {
+                t = (xn * yn).sqrt();
+                xn = (xn + yn) / 2.0;
+                yn = t;
+                continue;
+            }
+            break;
         }
         return pi!() / (xn + yn);
     }
-
-    let four = 4.0;
 
     let mut an = (xn + yn + zn) / 3.0;
     let a0 = an;
@@ -153,22 +150,20 @@ pub fn elliprf_unchecked<T: Float>(x: T, y: T, z: T) -> T {
             .max((an - xn).abs())
             .max((an - yn).abs())
             .max((an - zn).abs());
-    let mut fn_val = 1.0;
-    let mut ans = nan!();
+    declare!(mut [fn_val = T::one(), ans = nan!()]);
     for _ in 0..N_MAX_ITERATIONS {
         let root_x = xn.sqrt();
         let root_y = yn.sqrt();
         let root_z = zn.sqrt();
 
         let lambda = root_x * root_y + root_x * root_z + root_y * root_z;
+        an = (an + lambda) / 4.0;
+        xn = (xn + lambda) / 4.0;
+        yn = (yn + lambda) / 4.0;
+        zn = (zn + lambda) / 4.0;
 
-        an = (an + lambda) / four;
-        xn = (xn + lambda) / four;
-        yn = (yn + lambda) / four;
-        zn = (zn + lambda) / four;
-
-        q = q / four;
-        fn_val = fn_val * four;
+        q = q / 4.0;
+        fn_val = fn_val * 4.0;
 
         if q < an.abs() {
             let x = (a0 - x) / (an * fn_val);
