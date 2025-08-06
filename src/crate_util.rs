@@ -107,6 +107,9 @@ macro_rules! return_if_valid_else {
 pub(crate) use return_if_valid_else;
 
 macro_rules! declare {
+    (mut [$($var:ident),+ $(,)?] = $value:expr) => {
+        $(let mut $var = $value;)+
+    };
     (mut [$($var:ident $(= $value:expr)?),+ $(,)?]) => {
         $(let mut $var $(= $value)?;)+
     };
