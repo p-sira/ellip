@@ -701,7 +701,7 @@ mod tests {
         // x = 0: el1(0, kc) = 0
         assert_eq!(el1(0.0, 0.5).unwrap(), 0.0);
         // kc = 0: should return Err
-        assert!(el1(0.5, 0.0).is_err());
+        assert_eq!(el1(0.5, 0.0), Err("el1: kc cannot be zero."));
         // x = inf: el1(inf, kc) = cel1(kc)
         assert_eq!(el1(INFINITY, 0.5).unwrap(), cel1(0.5).unwrap());
         // kc = inf: el1(x, inf) = 0
@@ -709,8 +709,8 @@ mod tests {
         // y = 0 branch in the loop
         assert_close!(el1(1.0, 1.0).unwrap(), 0.7853981633974483, 1e-15);
         // x = nan or kc = nan: should return Err
-        assert!(el1(NAN, 0.5).is_err());
-        assert!(el1(0.5, NAN).is_err());
+        assert_eq!(el1(NAN, 0.5), Err("el1: Arguments cannot be NAN."));
+        assert_eq!(el1(0.5, NAN), Err("el1: Arguments cannot be NAN."));
     }
 
     #[test]
@@ -745,7 +745,7 @@ mod tests {
         // x = 0: el2(0, kc, a, b) = 0
         assert_eq!(el2(0.0, 0.5, 1.0, 1.0).unwrap(), 0.0);
         // kc = 0: should return Err
-        assert!(el2(0.5, 0.0, 1.0, 1.0).is_err());
+        assert_eq!(el2(0.5, 0.0, 1.0, 1.0), Err("el2: kc cannot be zero."));
         // a = 0, b = 0: el2(x, kc, 0, 0) = 0
         assert_eq!(el2(0.5, 0.5, 0.0, 0.0).unwrap(), 0.0);
         // x = inf: el2(inf, kc, a, b) = cel2(kc, a, b)
@@ -754,8 +754,14 @@ mod tests {
             cel2(0.5, 1.0, 1.0).unwrap()
         );
         // x = nan or kc = nan: should return Err
-        assert!(el2(NAN, 0.5, 1.0, 1.0).is_err());
-        assert!(el2(0.5, NAN, 1.0, 1.0).is_err());
+        assert_eq!(
+            el2(NAN, 0.5, 1.0, 1.0),
+            Err("el2: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            el2(0.5, NAN, 1.0, 1.0),
+            Err("el2: Arguments cannot be NAN.")
+        );
     }
 
     #[test]
@@ -811,7 +817,7 @@ mod tests {
     }
 
     #[test]
-    fn test_el3_special_cases() {
+        assert_eq!(el3(0.5, 0.0, 0.5), Err("el3: kc must not be zero."));
         use crate::cel;
         use std::f64::{INFINITY, NAN};
         // x = 0: el3(0, kc, p) = 0
@@ -838,9 +844,9 @@ mod tests {
         // kc = 1, p <= 0: el3(x, 1, p) = (ln(1+vx) - ln(1-vx)) / (2v); v = sqrt(-p)
         assert_close!(el3(4.0, 1.0, -0.5).unwrap(), 5.0, 1e-15);
         // x = nan, kc = nan, or p = nan: should return Err
-        assert!(el3(NAN, 0.5, 0.5).is_err());
-        assert!(el3(0.5, NAN, 0.5).is_err());
-        assert!(el3(0.5, 0.5, NAN).is_err());
+        assert_eq!(el3(NAN, 0.5, 0.5), Err("el3: Arguments cannot be NAN."));
+        assert_eq!(el3(0.5, NAN, 0.5), Err("el3: Arguments cannot be NAN."));
+        assert_eq!(el3(0.5, 0.5, NAN), Err("el3: Arguments cannot be NAN."));
     }
 }
 
