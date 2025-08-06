@@ -13,7 +13,10 @@
 
 use num_traits::Float;
 
-use crate::{crate_util::check, elliprf, polyeval, StrErr};
+use crate::{
+    crate_util::{check, declare},
+    polyeval, StrErr,
+};
 
 /// Computes [complete elliptic integral of the first kind](https://dlmf.nist.gov/19.2.E8).
 /// ```text
@@ -267,9 +270,9 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
             if m == neg_inf!() {
                 return Ok(0.0);
             }
-            // Handles inf
             #[cfg(not(feature = "reduce-iteration"))]
             if m > 1.0 {
+                // Also handles inf
                 return Err("ellipk: m must be less than 1.");
             }
             Err("ellipk: Unexpected error.")
@@ -288,8 +291,29 @@ pub(crate) fn ellipk_precise<T: Float>(m: T) -> Result<T, StrErr> {
         return Err("ellipk: m must be less than 1.");
     }
 
-    elliprf(0.0, 1.0 - m, 1.0)
+    Ok(ellipk_precise_unchecked(m))
 }
+
+/// Based on elliprf(1, 1-m, 0)
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[inline]
+pub fn ellipk_precise_unchecked<T: Float>(m: T) -> T {
+    declare!(mut [xn = T::one(), yn = (T::one() - m).sqrt(), t]);
+
+    for _ in 0..MAX_ITERATION {
+        if (xn - yn).abs() >= 2.7 * epsilon!() * xn.abs() {
+            t = (xn * yn).sqrt();
+            xn = (xn + yn) / 2.0;
+            yn = t;
+            continue;
+        }
+        break;
+    }
+
+    pi!() / (xn + yn)
+}
+
+const MAX_ITERATION: usize = 10;
 
 #[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
@@ -326,11 +350,11 @@ mod tests {
         // m < 0: should be valid, compare with reference value
         assert!(ellipk(-1.0).unwrap().is_finite());
         // m > 1: should return Err
-        assert!(ellipk(1.1).is_err());
+        assert_eq!(ellipk(1.1), Err("ellipk: m must be less than 1."));
         // m = NaN: should return Err
-        assert!(ellipk(NAN).is_err());
+        assert_eq!(ellipk(NAN), Err("ellipk: Arguments cannot be NAN."));
         // m = inf: should return Err
-        assert!(ellipk(INFINITY).is_err());
+        assert_eq!(ellipk(INFINITY), Err("ellipk: m must be less than 1."));
         // m = -inf: K(-inf) = 0
         assert_eq!(ellipk(NEG_INFINITY).unwrap(), 0.0);
     }
@@ -338,5 +362,5 @@ mod tests {
 
 #[cfg(feature = "reduce-iteration")]
 crate::test_force_unreachable! {
-    assert!(ellipk(f64::INFINITY).is_err());
+            assert_eq!(ellipk(f64::INFINITY), Err("ellipk: m must be less than 1."));
 }
