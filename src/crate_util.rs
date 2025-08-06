@@ -94,18 +94,6 @@ macro_rules! case {
 }
 pub(crate) use case;
 
-/// ans is considered valid when ans is finite and not nan.
-macro_rules! return_if_valid_else {
-    ($ans:ident, {$($else:tt)+}) => {
-        if $ans.is_finite() {
-            return Ok($ans);
-        } else {
-            $($else)+
-        }
-    };
-}
-pub(crate) use return_if_valid_else;
-
 macro_rules! declare {
     (mut [$($var:ident),+ $(,)?] = $value:expr) => {
         $(let mut $var = $value;)+
