@@ -115,6 +115,26 @@ macro_rules! func_wrapper {
             panic!("Unsupported number of arguments")
         }
     };
+    ($func:expr, k,  1) => {
+        fn wrapped_func(args: &Vec<f64>) -> f64 {
+            $func(args[0] * args[0]).unwrap()
+        }
+    };
+    ($func:expr, k, 2) => {
+        fn wrapped_func(args: &Vec<f64>) -> f64 {
+            $func(args[0], args[1] * args[1]).unwrap()
+        }
+    };
+    ($func:expr, k, 3) => {
+        fn wrapped_func(args: &Vec<f64>) -> f64 {
+            $func(args[0], args[1], args[2] * args[2]).unwrap()
+        }
+    };
+    ($func:expr, k, $_:expr) => {
+        fn wrapped_func(_args: &Vec<f64>) -> f64 {
+            panic!("Unsupported number of arguments")
+        }
+    };
 }
 
 #[macro_export]
@@ -122,12 +142,14 @@ macro_rules! compare_test_data_boost {
     ($filename:expr, $func:expr, $rtol:expr) => {
         compare_test_data_boost!($filename, $func, f64, $rtol, 0.0)
     };
-    ($filename:expr, $func:expr, $t:ident, $rtol:expr) => {
-        compare_test_data_boost!($filename, $func, f64, $rtol, 0.0)
-    };
-    ($filename:expr, $func:expr, $rtol:expr, $atol:expr) => {
+        ($filename:expr, $func:expr, $rtol:expr, atol: $atol:expr) => {
         compare_test_data_boost!($filename, $func, f64, $rtol, $atol)
     };
+    ($filename:expr, $func:expr, $n_args:tt, $rtol:expr) => {{
+        use crate::func_wrapper;
+        func_wrapper!($func, k, $n_args);
+        compare_test_data_boost!($filename, wrapped_func, f64, $rtol, 0.0)
+    }};
     ($filename:expr, $func:expr, $t:ident, $rtol:expr, $atol:expr) => {
         {
             use crate::compare_test_data;

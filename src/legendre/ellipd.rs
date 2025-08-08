@@ -88,13 +88,9 @@ mod tests {
     use super::*;
     use crate::compare_test_data_boost;
 
-    fn ellipd_k(inp: &[f64]) -> f64 {
-        ellipd(inp[0] * inp[0]).unwrap()
-    }
-
     #[test]
     fn test_ellipd() {
-        compare_test_data_boost!("ellipd_data.txt", ellipd_k, 2.9e-16);
+        compare_test_data_boost!("ellipd_data.txt", ellipd, 1, 2.9e-16);
     }
 
     #[test]

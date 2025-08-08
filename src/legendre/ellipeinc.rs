@@ -168,13 +168,9 @@ mod tests {
 
     use super::*;
 
-    fn ellipeinc_k<T: Float>(inp: &[T]) -> T {
-        ellipeinc(inp[0], inp[1] * inp[1]).unwrap()
-    }
-
     #[test]
     fn test_ellipeinc() {
-        compare_test_data_boost!("ellipeinc_data.txt", ellipeinc_k::<f64>, 5e-16);
+        compare_test_data_boost!("ellipeinc_data.txt", ellipeinc, 2, 5e-16);
     }
 
     #[test]

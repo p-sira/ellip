@@ -322,18 +322,15 @@ mod tests {
     use crate::compare_test_data_boost;
     use crate::compare_test_data_wolfram;
 
-    fn ellipk_k(k: &[f64]) -> f64 {
-        ellipk(k[0] * k[0]).unwrap()
-    }
-
     #[test]
     fn test_ellipk_boost() {
-        compare_test_data_boost!("ellipk_data.txt", ellipk_k, f64::EPSILON);
+        compare_test_data_boost!("ellipk_data.txt", ellipk, 1, f64::EPSILON);
     }
 
     #[test]
     fn test_ellipk_wolfram() {
         compare_test_data_wolfram!("ellipk_cov.csv", ellipk, 1, 6e-15);
+        compare_test_data_wolfram!("ellipk_data.csv", ellipk, 1, 5e-14);
     }
 
     #[test]

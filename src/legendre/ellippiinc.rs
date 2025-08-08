@@ -328,18 +328,14 @@ mod tests {
 
     use super::*;
 
-    fn ellippiinc_k(inp: &[f64]) -> f64 {
-        ellippiinc(inp[1], inp[0], inp[2] * inp[2]).unwrap()
-    }
-
     #[test]
     fn test_ellippi() {
-        compare_test_data_boost!("ellippiinc_data.txt", ellippiinc_k, 2.1e-15);
+        compare_test_data_boost!("ellippiinc_data.txt", ellippiinc, 3, 2.1e-15);
     }
 
     #[test]
     fn test_ellippi_large() {
-        compare_test_data_boost!("ellippi3_large_data.txt", ellippiinc_k, 6e-15);
+        compare_test_data_boost!("ellippi3_large_data.txt", ellippiinc, 3, 6e-15);
     }
 
     #[test]

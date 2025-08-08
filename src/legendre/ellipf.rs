@@ -168,13 +168,9 @@ mod tests {
     use super::*;
     use crate::compare_test_data_boost;
 
-    fn ellipf_k(inp: &[f64]) -> f64 {
-        ellipf(inp[0], inp[1] * inp[1]).unwrap()
-    }
-
     #[test]
     fn test_ellipf() {
-        compare_test_data_boost!("ellipf_data.txt", ellipf_k, 5.1e-16);
+        compare_test_data_boost!("ellipf_data.txt", ellipf, 2, 5.1e-16);
     }
 
     #[test]
