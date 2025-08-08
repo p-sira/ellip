@@ -311,12 +311,16 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
 #[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
 mod tests {
-    use crate::{compare_test_data_boost, ellipeinc};
+    use crate::{compare_test_data_boost, compare_test_data_wolfram, ellipeinc};
 
     use super::*;
 
     fn ellippiinc_k(inp: &[f64]) -> f64 {
         ellippiinc(inp[1], inp[0], inp[2] * inp[2]).unwrap()
+    }
+
+    fn ellippiinc_m(inp: &[f64]) -> f64 {
+        ellippiinc(inp[0], inp[1], inp[2]).unwrap()
     }
 
     #[test]
@@ -327,6 +331,21 @@ mod tests {
     #[test]
     fn test_ellippi_large() {
         compare_test_data_boost!("ellippi3_large_data.txt", ellippiinc_k, 6e-15);
+    }
+
+    #[test]
+    fn test_ellippiinc_wolfram() {
+        compare_test_data_wolfram!("ellippiinc_data.csv", ellippiinc_m, 2e-12)
+    }
+
+    #[test]
+    fn test_ellippiinc_wolfram_neg() {
+        compare_test_data_wolfram!("ellippiinc_neg.csv", ellippiinc_m, 2e-12)
+    }
+    
+    #[test]
+    fn test_ellippiinc_wolfram_pv() {
+        compare_test_data_wolfram!("ellippiinc_pv.csv", ellippiinc_m, 2e-12)
     }
 
     #[test]
