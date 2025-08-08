@@ -12,7 +12,11 @@
 
 use num_traits::Float;
 
-use crate::{crate_util::check, ellipe, ellipk, elliprf, elliprj, StrErr};
+use crate::{
+    carlson::{elliprf_unchecked, elliprj_unchecked},
+    crate_util::check,
+    ellipe, ellipk, StrErr,
+};
 
 /// Computes [complete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E8).
 /// ```text
@@ -67,21 +71,6 @@ use crate::{crate_util::check, ellipe, ellipk, elliprf, elliprj, StrErr};
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
-    // n = -inf: Π(-inf, m) = 0
-    // m = -inf: Π(n, -inf) = 0
-    if n < -1e306 || m < -1e306 {
-        return Ok(0.0);
-    }
-
-    if m > 1.0 - epsilon!() {
-        if m > 1.0 {
-            return Err("ellippi: m must be less than 1.");
-        }
-        // m -> 1-
-        let sign = (1.0 - n).signum();
-        return Ok(sign * inf!());
-    }
-
     if n > 1.0 - epsilon!() {
         if n > 1.0 {
             // n -> 1+
@@ -92,7 +81,7 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
 
             // Use Cauchy principal value
             // https://dlmf.nist.gov/19.25.E4
-            return Ok(-1.0 / 3.0 * m / n * elliprj(0.0, 1.0 - m, 1.0, 1.0 - m / n)?);
+            return Ok(-1.0 / 3.0 * m / n * elliprj_unchecked(0.0, 1.0 - m, 1.0, 1.0 - m / n));
         }
         if n == 1.0 {
             return Err("ellippi: n cannot be 1.");
@@ -100,49 +89,72 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
         return Ok(inf!());
     }
 
+    let ans = ellippi_unchecked(n, m);
+    if ans.is_finite() {
+        return Ok(ans);
+    }
+    check!(@nan, ellippi, [n, m]);
+    if m > 1.0 - epsilon!() {
+        if m > 1.0 {
+            return Err("ellippi: m must be less than 1.");
+        }
+        // m -> 1-
+        let sign = (1.0 - n).signum();
+        return Ok(sign * inf!());
+    }
+    if n < -1e306 || m < -1e306 {
+        // n = -inf: Π(-inf, m) = 0
+        // m = -inf: Π(n, -inf) = 0
+        return Ok(0.0);
+    }
+    Err("ellippi: Unexpected error.")
+}
+
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[inline]
+pub fn ellippi_unchecked<T: Float>(n: T, m: T) -> T {
     if n <= 0.0 {
         if n == 0.0 {
             if m == 0.0 {
-                return Ok(pi_2!());
+                // ellippi(0,0)
+                return pi_2!();
             }
-            return ellipk(m);
+            // ellippi(0,m)
+            return ellipk(m).unwrap_or(nan!());
         }
+        // n < 0: ellippi(n,m)
         // Apply A&S 17.7.17
         let nn = (m - n) / (1.0 - n);
         let nm1 = (1.0 - m) / (1.0 - n);
 
-        let mut result = ellippi_vc(nn, m, nm1)?;
+        let mut result = ellippi_vc(nn, m, nm1);
         // Split calculations to avoid overflow/underflow
         result = result * -n / (1.0 - n);
         result = result * (1.0 - m) / (m - n);
-        result = result + ellipk(m)? * m / (m - n);
-        return Ok(result);
+        result = result + ellipk(m).unwrap_or(nan!()) * m / (m - n);
+        return result;
     }
 
     // https://dlmf.nist.gov/19.6.E1
     if m == n {
         let mc = 1.0 - m;
-        return Ok(1.0 / mc * ellipe(m)?);
+        return 1.0 / mc * ellipe(m).unwrap_or(nan!());
     }
 
     // Compute vc = 1-n without cancellation errors
     let vc = 1.0 - n;
-    let ans = ellippi_vc(n, m, vc);
-    if ans.is_err() {
-        check!(@nan, ellippi, [n, m]);
-    }
-    ans
+    ellippi_vc(n, m, vc)
 }
 
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
-pub fn ellippi_vc<T: Float>(n: T, m: T, vc: T) -> Result<T, StrErr> {
+pub fn ellippi_vc<T: Float>(n: T, m: T, vc: T) -> T {
     let x = 0.0;
     let y = 1.0 - m;
     let z = 1.0;
     let p = vc;
 
-    Ok(elliprf(x, y, z)? + n * elliprj(x, y, z, p)? / 3.0)
+    elliprf_unchecked(x, y, z) + n * elliprj_unchecked(x, y, z, p) / 3.0
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
@@ -167,9 +179,9 @@ mod tests {
             EPSILON, INFINITY, NAN, NEG_INFINITY,
         };
         // m > 1: should return Err
-        assert!(ellippi(0.5, 1.1).is_err());
+        assert_eq!(ellippi(0.5, 1.1), Err("ellippi: m must be less than 1."));
         // n == 1: should return Err
-        assert!(ellippi(1.0, 0.5).is_err());
+        assert_eq!(ellippi(1.0, 0.5), Err("ellippi: n cannot be 1."));
         // n = 0: Π(0, m) = K(m)
         assert_eq!(ellippi(0.0, 0.5).unwrap(), ellipk(0.5).unwrap());
         // m = 0, n < 1: Π(n, 0) = pi/(2 sqrt(1-n))
@@ -198,9 +210,12 @@ mod tests {
         // m = -inf: Π(n, -inf) = 0
         assert_eq!(ellippi(0.5, NEG_INFINITY).unwrap(), 0.0);
         // n = nan or m = nan: should return Err
-        assert!(ellippi(NAN, 0.5).is_err());
-        assert!(ellippi(0.5, NAN).is_err());
+        assert_eq!(ellippi(NAN, 0.5), Err("ellippi: Arguments cannot be NAN."));
+        assert_eq!(ellippi(0.5, NAN), Err("ellippi: Arguments cannot be NAN."));
         // m = inf: should return Err
-        assert!(ellippi(0.5, INFINITY).is_err());
+        assert_eq!(
+            ellippi(0.5, INFINITY),
+            Err("ellippi: m must be less than 1.")
+        );
     }
 }

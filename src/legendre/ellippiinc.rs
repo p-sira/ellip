@@ -12,10 +12,13 @@
 
 use num_traits::Float;
 
-use crate::crate_util::check;
-use crate::legendre::ellippi::ellippi_vc;
-
-use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj, StrErr};
+use crate::{
+    carlson::{elliprc_unchecked, elliprf_unchecked, elliprj_unchecked},
+    crate_util::check,
+    ellipf,
+    legendre::{ellipeinc_unchecked, ellippi::ellippi_vc},
+    StrErr,
+};
 
 /// Computes [incomplete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E7).
 /// ```text
@@ -83,11 +86,21 @@ use crate::{ellipeinc, ellipf, elliprc, elliprf, elliprj, StrErr};
 /// - Wolfram Research. “EllipticPi,” 2022. <https://reference.wolfram.com/language/ref/EllipticPi.html>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellippiinc<T: Float>(phi: T, n: T, m: T) -> Result<T, StrErr> {
-    let ans = ellippiinc_vc(phi, n, m, 1.0 - n);
-    if ans.is_err() {
-        check!(@nan, ellippiinc, [phi, n, m]);
+    let ans = ellippiinc_vc(phi, n, m, 1.0 - n)?;
+    if ans.is_finite() {
+        return Ok(ans);
     }
-    ans
+
+    check!(@nan, ellippiinc, [phi, n, m]);
+    let sphi = phi.abs().sin();
+    let sp2 = sphi * sphi;
+    if m * sp2 > 1.0 {
+        return Err("ellippiinc: m sin²φ must be smaller or equal to one.");
+    }
+    if phi.is_infinite() {
+        return Ok(phi.signum() * inf!());
+    }
+    Err("ellippiinc: Unexpected error.")
 }
 
 #[inline]
@@ -97,10 +110,6 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
     let sphi = phi.abs().sin();
     let sp2 = sphi * sphi;
     let mut result = 0.0;
-
-    if m * sp2 > 1.0 {
-        return Err("ellippiinc: m sin²φ must be smaller or equal to one.");
-    }
 
     if n * sp2 == 1.0 {
         return Err("ellippiinc: n sin²φ must not equal one.");
@@ -118,7 +127,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
         }
 
         // http://functions.wolfram.com/08.06.03.0008.01
-        result = (1.0 - m * sp2).sqrt() * phi.tan() - ellipeinc(phi, m)?;
+        result = (1.0 - m * sp2).sqrt() * phi.tan() - ellipeinc_unchecked(phi, m)?;
         result = result / (1.0 - m);
         result = result + ellipf(phi, m)?;
         return Ok(result);
@@ -126,7 +135,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
 
     if phi >= pi_2!() || phi <= 0.0 {
         if phi == pi_2!() {
-            return ellippi_vc(n, m, nc);
+            return Ok(ellippi_vc(n, m, nc));
         }
 
         // https://dlmf.nist.gov/19.6.E11
@@ -142,7 +151,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
 
             // Phi is so large that phi%pi is necessarily zero (or garbage),
             // just return the second part of the duplication formula:
-            result = 2.0 * phi.abs() * ellippi_vc(n, m, nc)? / pi!();
+            result = 2.0 * phi.abs() * ellippi_vc(n, m, nc) / pi!();
         } else {
             let mut rphi = phi.abs() % pi_2!();
             let mut mm = ((phi.abs() - rphi) / pi_2!()).round();
@@ -160,7 +169,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
 
             result = sign * ellippiinc_vc(rphi, n, m, nc)?;
             if mm > 0.0 && nc > 0.0 {
-                result = result + mm * ellippi_vc(n, m, nc)?;
+                result = result + mm * ellippi_vc(n, m, nc);
             }
         }
         return if phi < 0.0 { Ok(-result) } else { Ok(result) };
@@ -175,7 +184,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
         // This appears to have lower error in test dataset.
         // https://dlmf.nist.gov/19.7.E8
         return Ok((ellipf(phi, m)?
-            + c.sqrt() * elliprc((c - 1.0) * (c - m), (c - n) * (c - w2))?)
+            + c.sqrt() * elliprc_unchecked((c - 1.0) * (c - m), (c - n) * (c - w2)))
             - ellippiinc(phi, w2, m)?);
 
         // https://dlmf.nist.gov/19.25.E16
@@ -209,7 +218,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
                 ellippiinc_vc(phi, nn, m, nm1)?
             } else {
                 let c = 1.0 / sp2;
-                nn / 3.0 * elliprj(c - 1.0, c - m, c, c - nn)? + ellipf(phi, m)?
+                nn / 3.0 * elliprj_unchecked(c - 1.0, c - m, c, c - nn) + ellipf(phi, m)?
             };
             result = result * n / (n - 1.0);
             result = result * (m - 1.0) / (n - m);
@@ -296,15 +305,13 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
 
     let p = if n * t < 0.5 { 1.0 - n * t } else { x + nc * t };
 
-    let result = sphi * (elliprf(x, y, z)? + n * t * elliprj(x, y, z, p)? / 3.0);
-
-    Ok(result)
+    Ok(sphi * (elliprf_unchecked(x, y, z) + n * t * elliprj_unchecked(x, y, z, p) / 3.0))
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
 mod tests {
-    use crate::compare_test_data_boost;
+    use crate::{compare_test_data_boost, ellipeinc};
 
     use super::*;
 
@@ -339,9 +346,15 @@ mod tests {
             INFINITY, NAN, NEG_INFINITY,
         };
         // m * sin^2(phi) >= 1: should return Err
-        assert!(ellippiinc(FRAC_PI_2, 0.5, 1.1).is_err());
+        assert_eq!(
+            ellippiinc(FRAC_PI_2, 0.5, 1.1),
+            Err("ellippiinc: m sin²φ must be smaller or equal to one.")
+        );
         // n * sin^2(phi) = 1: should return Err
-        assert!(ellippiinc(FRAC_PI_2, 1.0, 0.5).is_err());
+        assert_eq!(
+            ellippiinc(FRAC_PI_2, 1.0, 0.5),
+            Err("ellippiinc: n sin²φ must not equal one.")
+        );
         // Π(phi, 0, 0) = phi
         assert_eq!(ellippiinc(0.4, 0.0, 0.0).unwrap(), 0.4);
         // phi = 0: Π(0, n, m) = 0
@@ -376,10 +389,22 @@ mod tests {
         // phi = -inf: Π(φ, n, m) = -inf
         assert_eq!(ellippiinc(NEG_INFINITY, 0.2, 0.5).unwrap(), -INFINITY);
         // phi % pi/2 !=0, m >= 1: should return Err
-        assert!(ellippiinc(4.14159, 0.5, 1.0).is_err());
+        assert_eq!(
+            ellippiinc(4.14159, 0.5, 1.0),
+            Err("ellippiinc: The result is complex.")
+        );
         // phi = nan or n = nan or m = nan: should return Err
-        assert!(ellippiinc(NAN, 0.5, 0.5).is_err());
-        assert!(ellippiinc(0.5, NAN, 0.5).is_err());
-        assert!(ellippiinc(0.5, 0.5, NAN).is_err());
+        assert_eq!(
+            ellippiinc(NAN, 0.5, 0.5),
+            Err("ellippiinc: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            ellippiinc(0.5, NAN, 0.5),
+            Err("ellippiinc: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            ellippiinc(0.5, 0.5, NAN),
+            Err("ellippiinc: Arguments cannot be NAN.")
+        );
     }
 }
