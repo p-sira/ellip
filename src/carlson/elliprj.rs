@@ -76,43 +76,13 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
     check!(@neg, elliprj, "x, y, and z must be non-negative.", [x, y, z]);
     check!(@multi_zero, elliprj, [x, y, z]);
 
-    let_mut!(x, y, z);
-    // for p < 0, the integral is singular, return Cauchy principal value
-    let ans = if p <= 0.0 {
-        if p == 0.0 {
-            return Err("elliprj: p must be non-zero");
-        }
-
-        // We must ensure that x < y < z.
-        // Since the integral is symmetrical in x, y and z
-        // we can just permute the values:
-        if x > y {
-            swap(&mut x, &mut y);
-        }
-        if y > z {
-            swap(&mut y, &mut z);
-        }
-        if x > y {
-            swap(&mut x, &mut y);
-        }
-
-        let q = -p;
-        let p = (z * (x + y + q) - x * y) / (z + q);
-        let mut value = (p - z) * elliprj_unchecked(x, y, z, p);
-        value = value - 3.0 * elliprf_unchecked(x, y, z);
-        value = value
-            + 3.0
-                * ((x * y * z) / (x * y + p * q)).sqrt()
-                * elliprc_unchecked(x * y + p * q, p * q);
-        value / (z + q)
-    } else {
-        elliprj_unchecked(x, y, z, p)
-    };
+    let ans = elliprj_unchecked(x, y, z, p);
 
     if ans.is_finite() {
         return Ok(ans);
     }
     check!(@nan, elliprj, [x, y, z, p]);
+    check!(@zero, elliprj, [p]);
     case!(@any [x, y, z, p] == inf!(), T::zero());
     Err("elliprj: Failed to converge.")
 }
@@ -140,7 +110,33 @@ fn elliprc1p<T: Float>(y: T) -> T {
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
-    let_mut!(x, z);
+    let_mut!(x, y, z);
+    // for p < 0, the integral is singular, return Cauchy principal value
+    if p <= 0.0 {
+        // We must ensure that x < y < z.
+        // Since the integral is symmetrical in x, y and z
+        // we can just permute the values:
+        if x > y {
+            swap(&mut x, &mut y);
+        }
+        if y > z {
+            swap(&mut y, &mut z);
+        }
+        if x > y {
+            swap(&mut x, &mut y);
+        }
+
+        let q = -p;
+        let p = (z * (x + y + q) - x * y) / (z + q);
+        let mut value = (p - z) * elliprj_unchecked(x, y, z, p);
+        value = value - 3.0 * elliprf_unchecked(x, y, z);
+        value = value
+            + 3.0
+                * ((x * y * z) / (x * y + p * q)).sqrt()
+                * elliprc_unchecked(x * y + p * q, p * q);
+        return value / (z + q);
+    }
+
     // Special cases
     // https://dlmf.nist.gov/19.20#iii
     if x == y {
@@ -339,7 +335,7 @@ mod tests {
         // p = 0: should return Err
         assert_eq!(
             elliprj(1.0, 1.0, 1.0, 0.0),
-            Err("elliprj: p must be non-zero")
+            Err("elliprj: p cannot be zero.")
         );
         // NANs: should return Err
         assert_eq!(
