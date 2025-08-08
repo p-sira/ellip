@@ -207,53 +207,66 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
     }
 
     if n < 0.0 && m <= 1.0 {
-        // If we don't shift to 0 <= v <= 1 we get
-        // cancellation errors later on.  Use
-        // A&S 17.7.15/16 to shift to v > 0.
-        let nn = (m - n) / (1.0 - n);
-        let nm1 = (1.0 - m) / (1.0 - n);
+        // FullSimplify[EllipticPi[m, phi, m], Assumptions -> m < 0]
+        // > (-EllipticE[phi, m] + (m*Cos[phi]*Sin[phi])/Sqrt[1 - m*Sin[phi]^2])/(-1 + m)
+        // > (EllipticE[phi, m] - (m*Cos[phi]*Sin[phi])/Sqrt[1 - m*Sin[phi]^2])/(1 - m)
+        if (n - m).abs() < epsilon!() {
+            return Ok((ellipeinc_unchecked(phi, m)?
+                - (m * phi.abs().cos() * sphi) / (1.0 - m * sp2).sqrt())
+                / (1.0 - m));
+        }
 
-        if nn > m {
-            result = if nn.abs() < n.abs() {
-                ellippiinc_vc(phi, nn, m, nm1)?
+        // m must be greater or equal to n for nn to be positive, thus valid sqrt(nn)
+        if m >= n {
+            // If we don't shift to 0 <= v <= 1 we get
+            // cancellation errors later on.  Use
+            // A&S 17.7.15/16 to shift to v > 0.
+            let nn = (m - n) / (1.0 - n);
+            let nm1 = (1.0 - m) / (1.0 - n);
+
+            if nn > m {
+                result = if nn.abs() < n.abs() {
+                    ellippiinc_vc(phi, nn, m, nm1)?
+                } else {
+                    let c = 1.0 / sp2;
+                    nn / 3.0 * elliprj_unchecked(c - 1.0, c - m, c, c - nn) + ellipf(phi, m)?
+                };
+                result = result * n / (n - 1.0);
+                result = result * (m - 1.0) / (n - m);
+            }
+
+            if m != 0.0 {
+                let mut t = ellipf(phi, m)?;
+                t = t * m / (m - n);
+                result = result + t;
+            }
+
+            let mut p2 = -n * nn;
+            if p2 <= min_val!() {
+                p2 = (-n).sqrt() * nn.sqrt();
             } else {
-                let c = 1.0 / sp2;
-                nn / 3.0 * elliprj_unchecked(c - 1.0, c - m, c, c - nn) + ellipf(phi, m)?
-            };
-            result = result * n / (n - 1.0);
-            result = result * (m - 1.0) / (n - m);
+                p2 = p2.sqrt();
+            }
+
+            let delta = (1.0 - m * sp2).sqrt();
+            let t = n / ((m - n) * (n - 1.0));
+
+            debug_assert!(t > min_val!());
+            result = result + ((p2 / 2.0) * (2.0 * phi).sin() / delta).atan() * t.sqrt();
+
+            // It should not be possible for t to be less than MIN value.
+            // if t > min_val!() {
+            //     result = result + ((p2 / 2.0) * (2.0 * phi).sin() / delta).atan() * t.sqrt();
+            // } else {
+            //     result = result
+            //         + (((p2 / 2.0) * (2.0 * phi).sin() / delta).atan()
+            //             * ((1.0 / (m - n)).abs()).sqrt()
+            //             * ((n / (n - 1.0).abs()).sqrt()));
+            // }
+
+            return Ok(result);
         }
-
-        if m != 0.0 {
-            let mut t = ellipf(phi, m)?;
-            t = t * m / (m - n);
-            result = result + t;
-        }
-
-        let mut p2 = -n * nn;
-        if p2 <= min_val!() {
-            p2 = (-n).sqrt() * nn.sqrt();
-        } else {
-            p2 = p2.sqrt();
-        }
-
-        let delta = (1.0 - m * sp2).sqrt();
-        let t = n / ((m - n) * (n - 1.0));
-
-        debug_assert!(t > min_val!());
-        result = result + ((p2 / 2.0) * (2.0 * phi).sin() / delta).atan() * t.sqrt();
-
-        // It should not be possible for t to be less than MIN value.
-        // if t > min_val!() {
-        //     result = result + ((p2 / 2.0) * (2.0 * phi).sin() / delta).atan() * t.sqrt();
-        // } else {
-        //     result = result
-        //         + (((p2 / 2.0) * (2.0 * phi).sin() / delta).atan()
-        //             * ((1.0 / (m - n)).abs()).sqrt()
-        //             * ((n / (n - 1.0).abs()).sqrt()));
-        // }
-
-        return Ok(result);
+        // Fall through
     }
 
     if m == 1.0 {
@@ -342,7 +355,7 @@ mod tests {
     fn test_ellippiinc_wolfram_neg() {
         compare_test_data_wolfram!("ellippiinc_neg.csv", ellippiinc_m, 2e-12)
     }
-    
+
     #[test]
     fn test_ellippiinc_wolfram_pv() {
         compare_test_data_wolfram!("ellippiinc_pv.csv", ellippiinc_m, 2e-12)
