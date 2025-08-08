@@ -173,11 +173,11 @@ macro_rules! compare_test_data_boost {
 
 #[macro_export]
 macro_rules! compare_test_data_wolfram {
-    ($filename:expr, $func:expr, $n_args:tt, $rtol:expr) => {
+    ($filename:expr, $func:expr, $n_args:tt, $rtol:expr) => {{
         use crate::func_wrapper;
         func_wrapper!($func, $n_args);
         compare_test_data_wolfram!($filename, wrapped_func, f64, $rtol, 0.0)
-    };
+    }};
     ($filename:expr, $func:expr, $t:ident, $rtol:expr, $atol:expr) => {{
         {
             use crate::compare_test_data;
