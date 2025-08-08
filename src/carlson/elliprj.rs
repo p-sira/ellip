@@ -73,9 +73,6 @@ use num_traits::Float;
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
-    check!(@neg, elliprj, "x, y, and z must be non-negative.", [x, y, z]);
-    check!(@multi_zero, elliprj, [x, y, z]);
-
     let ans = elliprj_unchecked(x, y, z, p);
 
     if ans.is_finite() {
@@ -83,6 +80,8 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
     }
     check!(@nan, elliprj, [x, y, z, p]);
     check!(@zero, elliprj, [p]);
+    check!(@neg, elliprj, "x, y, and z must be non-negative.", [x, y, z]);
+    check!(@multi_zero, elliprj, [x, y, z]);
     case!(@any [x, y, z, p] == inf!(), T::zero());
     Err("elliprj: Failed to converge.")
 }
