@@ -1,6 +1,9 @@
 # Changelog
 ## 0.3
 ### 0.3.7
+**Bug Fixes**
+- `ellippiinc`: Fix negative m domain where n < 0 and m <= n.
+
 **Improvements**
 - Improve performance across all functions by removing unnecessary checks.
 - Improve and fix error messages.
