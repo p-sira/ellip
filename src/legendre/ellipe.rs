@@ -300,10 +300,6 @@ mod tests {
         ellipe(k[0] * k[0]).unwrap()
     }
 
-    fn ellipe_m(m: &[f64]) -> f64 {
-        ellipe(m[0]).unwrap()
-    }
-
     #[test]
     fn test_ellipe() {
         compare_test_data_boost!("ellipe_data.txt", ellipe_k, f64::EPSILON);
@@ -311,7 +307,7 @@ mod tests {
 
     #[test]
     fn test_ellipe_wolfram() {
-        compare_test_data_wolfram!("ellipe_cov.csv", ellipe_m, 7e-16);
+        compare_test_data_wolfram!("ellipe_cov.csv", ellipe, 1, 7e-16);
     }
 
     #[test]

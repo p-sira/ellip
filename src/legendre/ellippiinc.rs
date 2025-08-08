@@ -332,10 +332,6 @@ mod tests {
         ellippiinc(inp[1], inp[0], inp[2] * inp[2]).unwrap()
     }
 
-    fn ellippiinc_m(inp: &[f64]) -> f64 {
-        ellippiinc(inp[0], inp[1], inp[2]).unwrap()
-    }
-
     #[test]
     fn test_ellippi() {
         compare_test_data_boost!("ellippiinc_data.txt", ellippiinc_k, 2.1e-15);
@@ -348,17 +344,17 @@ mod tests {
 
     #[test]
     fn test_ellippiinc_wolfram() {
-        compare_test_data_wolfram!("ellippiinc_data.csv", ellippiinc_m, 2e-12)
+        compare_test_data_wolfram!("ellippiinc_data.csv", ellippiinc, 3, 2e-12);
     }
 
     #[test]
     fn test_ellippiinc_wolfram_neg() {
-        compare_test_data_wolfram!("ellippiinc_neg.csv", ellippiinc_m, 2e-12)
+        compare_test_data_wolfram!("ellippiinc_neg.csv", ellippiinc, 3, 2e-12);
     }
 
     #[test]
     fn test_ellippiinc_wolfram_pv() {
-        compare_test_data_wolfram!("ellippiinc_pv.csv", ellippiinc_m, 2e-12)
+        compare_test_data_wolfram!("ellippiinc_pv.csv", ellippiinc, 3, 2e-12);
     }
 
     #[test]

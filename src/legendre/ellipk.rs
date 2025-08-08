@@ -326,10 +326,6 @@ mod tests {
         ellipk(k[0] * k[0]).unwrap()
     }
 
-    fn ellipk_m(m: &[f64]) -> f64 {
-        ellipk(m[0]).unwrap()
-    }
-
     #[test]
     fn test_ellipk_boost() {
         compare_test_data_boost!("ellipk_data.txt", ellipk_k, f64::EPSILON);
@@ -337,7 +333,7 @@ mod tests {
 
     #[test]
     fn test_ellipk_wolfram() {
-        compare_test_data_wolfram!("ellipk_cov.csv", ellipk_m, 6e-15);
+        compare_test_data_wolfram!("ellipk_cov.csv", ellipk, 1, 6e-15);
     }
 
     #[test]
