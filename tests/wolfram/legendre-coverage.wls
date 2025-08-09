@@ -11,7 +11,7 @@ M = Union[idx / 20, {1 - 1*^-6}];
 
 (* Complete Elliptic Integrals of the First Kind *)
 
-ellipK = Table[{m, EllipticK[m]}, {m, M}];
+ellipK = Table[{m, EllipticK[SetPrecision[m, 30]]}, {m, M}];
 
 Export["../data/wolfram/ellipk_cov.csv", N[ellipK], "CSV"];
 
@@ -19,6 +19,6 @@ Export["../data/wolfram/ellipk_cov.csv", N[ellipK], "CSV"];
 
 (* Test coverage for m in [0,1] *)
 
-ellipE = Table[{m, EllipticE[m]}, {m, M}];
+ellipE = Table[{m, EllipticE[SetPrecision[m, 30]]}, {m, M}];
 
 Export["../data/wolfram/ellipe_cov.csv", N[ellipE], "CSV"];

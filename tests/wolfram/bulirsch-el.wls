@@ -19,8 +19,8 @@ xRange = Subdivide[-2, 2, 30];
 
 kcRange = Union[Subdivide[-2, -muEL1, 15], Subdivide[muEL1, 2, 15]];
 
-el1 = Flatten[Table[{x, kc, EllipticF[ArcTan[x], 1 - kc * kc]}, {x, xRange
-  }, {kc, kcRange}], 1];
+el1 = Flatten[Table[{x, kc, EllipticF[SetPrecision[ArcTan[x], 30], SetPrecision[
+  1 - kc * kc, 30]]}, {x, xRange}, {kc, kcRange}], 1];
 
 Export["../data/wolfram/el1_data.csv", N[el1], "CSV"];
 
@@ -35,14 +35,15 @@ aRange = Subdivide[-1, 1, 5];
 bRange = Subdivide[-1, 1, 5];
 
 el2 = Select[Flatten[Table[{x, kc, a, b, ResourceFunction["BulirschEL2"
-  ][x, kc * kc, a, b]}, {x, xRange}, {kc, kcRange}, {a, aRange}, {b, bRange
-  }], 3], Im[#[[5]]] == 0&];
+  ][SetPrecision[x, 30], SetPrecision[kc * kc, 30], SetPrecision[a, 30],
+   SetPrecision[b, 30]]}, {x, xRange}, {kc, kcRange}, {a, aRange}, {b, 
+  bRange}], 3], Im[#[[5]]] == 0&];
 
 Export["../data/wolfram/el2_data.csv", N[el2], "CSV"];
 
 (* Bulirsch's Incomplete Elliptic integrals of the Third Kind - Normal domain *)
 
-xRange = Union[Subdivide[-1, 1, 10], {0}];
+xRange = Union[Subdivide[-1 + muEL3, 1 - muEL3, 10], {0}];
 
 kcRange = Union[Subdivide[-1.5, -muEL3, 10], Subdivide[muEL3, 1.5, 10
   ]];
@@ -65,7 +66,8 @@ el3 =
   Select[
     Table[
       With[{x = data[[1]], kc = data[[2]], p = data[[3]]},
-        {x, kc, p, EllipticPi[1 - p, ArcTan[x], 1 - kc * kc]}
+        {x, kc, p, EllipticPi[SetPrecision[1 - p, 30], SetPrecision[ArcTan[
+          x], 30], SetPrecision[1 - kc * kc, 30]]}
       ]
       ,
       {data, validKcPX}
@@ -92,7 +94,8 @@ el3PV =
   Select[
     Table[
       With[{x = data[[1]], kc = data[[2]], p = data[[3]]},
-        {x, kc, p, ResourceFunction["BulirschEL3"][x, kc * kc, p]}
+        {x, kc, p, ResourceFunction["BulirschEL3"][SetPrecision[x, 30
+          ], SetPrecision[kc * kc, 30], SetPrecision[p, 30]]}
       ]
       ,
       {data, validKcPXPV}

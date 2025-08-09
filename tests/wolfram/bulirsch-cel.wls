@@ -26,12 +26,14 @@ aRange = Subdivide[-2, 2, 4];
 bRange = Subdivide[-2, 2, 4];
 
 cel = Select[Flatten[Table[{kc, p, a, b, ResourceFunction["BulirschCEL"
-    ][kc * kc, p, a, b]}, {kc, kcRange}, {p, pRange}, {a, aRange}, {b, bRange
-    }], 3], Element[#[[5]], Reals]&];
+    ][SetPrecision[kc * kc, 30], SetPrecision[p, 30], SetPrecision[a, 30],
+     SetPrecision[b, 30]]}, {kc, kcRange}, {p, pRange}, {a, aRange}, {b, 
+    bRange}], 3], Element[#[[5]], Reals]&];
 
 celPV = Select[Flatten[Table[{kc, p, a, b, ResourceFunction["BulirschCEL"
-    ][kc * kc, p, a, b]}, {kc, kcRange}, {p, pRangePV}, {a, aRange}, {b, 
-    bRange}], 3], Element[#[[5]], Reals]&];
+    ][SetPrecision[kc * kc, 30], SetPrecision[p, 30], SetPrecision[a, 30],
+     SetPrecision[b, 30]]}, {kc, kcRange}, {p, pRangePV}, {a, aRange}, {b,
+     bRange}], 3], Element[#[[5]], Reals]&];
 
 Export["../data/wolfram/cel_data.csv", N[cel], "CSV"];
 
@@ -41,8 +43,8 @@ Export["../data/wolfram/cel_pv.csv", N[celPV], "CSV"];
 
 kcRange = Union[Subdivide[-2, -muCel1, 50], Subdivide[muCel1, 2, 50]];
 
-cel1 = Select[Table[{kc, EllipticK[1 - kc * kc]}, {kc, kcRange}], Element[
-    #[[2]], Reals]&];
+cel1 = Select[Table[{kc, EllipticK[SetPrecision[1 - kc * kc, 30]]}, {
+    kc, kcRange}], Element[#[[2]], Reals]&];
 
 Export["../data/wolfram/cel1_data.csv", N[cel1], "CSV"];
 
@@ -51,7 +53,8 @@ Export["../data/wolfram/cel1_data.csv", N[cel1], "CSV"];
 kcRange = Union[Subdivide[-2, -muCel2, 10], Subdivide[muCel2, 2, 10]];
 
 cel2 = Select[Flatten[Table[{kc, a, b, ResourceFunction["BulirschCEL"
-    ][kc * kc, 1, a, b]}, {kc, kcRange}, {a, aRange}, {b, bRange}], 2], Element[
-    #[[4]], Reals]&];
+    ][SetPrecision[kc * kc, 30], 1, SetPrecision[a, 30], SetPrecision[b, 
+    30]]}, {kc, kcRange}, {a, aRange}, {b, bRange}], 2], Element[#[[4]], 
+    Reals]&];
 
 Export["../data/wolfram/cel2_data.csv", N[cel2], "CSV"];

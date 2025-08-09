@@ -35,7 +35,8 @@ ellipPiInc =
         Table[
             With[{phi = triplet[[1]], m = triplet[[2]], n = triplet[[
                 3]]},
-                {phi, n, m, EllipticPi[n, phi, m]}
+                {phi, n, m, EllipticPi[SetPrecision[n, 30], SetPrecision[
+                    phi, 30], SetPrecision[m, 30]]}
             ]
             ,
             {triplet, normalTriplets}
@@ -52,7 +53,8 @@ ellipPiIncNeg =
     Flatten[
         Table[
             With[{phi = phiVal, m = mVal, n = nVal},
-                {phi, n, m, EllipticPi[n, phi, m]}
+                {phi, n, m, EllipticPi[SetPrecision[n, 30], SetPrecision[
+                    phi, 30], SetPrecision[m, 30]]}
             ]
             ,
             {phiVal, PHI}
@@ -85,7 +87,8 @@ ellipPiIncPV =
         Table[
             With[{phi = triplet[[1]], m = triplet[[2]], n = triplet[[
                 3]]},
-                {phi, n, m, EllipticPi[n, phi, m]}
+                {phi, n, m, EllipticPi[SetPrecision[n, 30], SetPrecision[
+                    phi, 30], SetPrecision[m, 30]]}
             ]
             ,
             {triplet, pvTriplets}

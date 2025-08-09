@@ -25,8 +25,8 @@ xRangeRC = Union[Subdivide[muRC, 2, 30], {0}];
 
 yRangeRC = Subdivide[muRC, 2, 30];
 
-rcNormal = Flatten[Table[{x, y, CarlsonRC[x, y]}, {x, xRangeRC}, {y, 
-  yRangeRC}], 1];
+rcNormal = Flatten[Table[{x, y, CarlsonRC[SetPrecision[x, 30], SetPrecision[
+  y, 30]]}, {x, xRangeRC}, {y, yRangeRC}], 1];
 
 rcNormal = Select[rcNormal, Element[#[[3]], Reals]&];
 
@@ -36,8 +36,8 @@ Export["../data/wolfram/elliprc_data.csv", N[rcNormal], "CSV"];
 
 yRangeRCPV = Subdivide[-2, -muRC, 20];
 
-rcPV = Flatten[Table[{x, y, CarlsonRC[x, y]}, {x, xRangeRC}, {y, yRangeRCPV
-  }], 1];
+rcPV = Flatten[Table[{x, y, CarlsonRC[SetPrecision[x, 30], SetPrecision[
+  y, 30]]}, {x, xRangeRC}, {y, yRangeRCPV}], 1];
 
 rcPV = Select[rcPV, Element[#[[3]], Reals]&];
 
@@ -70,7 +70,8 @@ rdNormal =
   Select[
     Table[
       With[{x = data[[1]], y = data[[2]], z = data[[3]]},
-        {x, y, z, CarlsonRD[x, y, z]}
+        {x, y, z, CarlsonRD[SetPrecision[x, 30], SetPrecision[y, 30],
+           SetPrecision[z, 30]]}
       ]
       ,
       {data, validRD}
@@ -109,7 +110,8 @@ rgNormal =
   Select[
     Table[
       With[{x = data[[1]], y = data[[2]], z = data[[3]]},
-        {x, y, z, CarlsonRG[x, y, z]}
+        {x, y, z, CarlsonRG[SetPrecision[x, 30], SetPrecision[y, 30],
+           SetPrecision[z, 30]]}
       ]
       ,
       {data, validRG}
@@ -148,7 +150,8 @@ rfNormal =
   Select[
     Table[
       With[{x = data[[1]], y = data[[2]], z = data[[3]]},
-        {x, y, z, CarlsonRF[x, y, z]}
+        {x, y, z, CarlsonRF[SetPrecision[x, 30], SetPrecision[y, 30],
+           SetPrecision[z, 30]]}
       ]
       ,
       {data, validRF}
@@ -190,7 +193,8 @@ rjNormal =
     Table[
       With[{x = data[[1]], y = data[[2]], z = data[[3]], p = data[[4]]
         },
-        {x, y, z, p, CarlsonRJ[x, y, z, p]}
+        {x, y, z, p, CarlsonRJ[SetPrecision[x, 30], SetPrecision[y, 30
+          ], SetPrecision[z, 30], SetPrecision[p, 30]]}
       ]
       ,
       {data, validRJ}
@@ -224,7 +228,8 @@ rjPV =
     Table[
       With[{x = data[[1]], y = data[[2]], z = data[[3]], p = data[[4]]
         },
-        {x, y, z, p, CarlsonRJ[x, y, z, p]}
+        {x, y, z, p, CarlsonRJ[SetPrecision[x, 30], SetPrecision[y, 30
+          ], SetPrecision[z, 30], SetPrecision[p, 30]]}
       ]
       ,
       {data, validRJPV}
