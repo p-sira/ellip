@@ -340,17 +340,17 @@ mod tests {
 
     #[test]
     fn test_ellippiinc_wolfram() {
-        compare_test_data_wolfram!("ellippiinc_data.csv", ellippiinc, 3, 2e-12);
+        compare_test_data_wolfram!("ellippiinc_data.csv", ellippiinc, 3, 5e-14);
     }
 
     #[test]
     fn test_ellippiinc_wolfram_neg() {
-        compare_test_data_wolfram!("ellippiinc_neg.csv", ellippiinc, 3, 2e-12);
+        compare_test_data_wolfram!("ellippiinc_neg.csv", ellippiinc, 3, 5e-14);
     }
 
     #[test]
     fn test_ellippiinc_wolfram_pv() {
-        compare_test_data_wolfram!("ellippiinc_pv.csv", ellippiinc, 3, 2e-12);
+        compare_test_data_wolfram!("ellippiinc_pv.csv", ellippiinc, 3, 5e-14);
     }
 
     #[test]
