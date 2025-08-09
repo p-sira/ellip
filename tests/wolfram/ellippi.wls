@@ -7,7 +7,9 @@ epsilon = 2.22*^-16;
 
 (* Mu helps prevent answers approaching infinity, making the comparison fairer. *)
 
-mu = 50 * epsilon
+mu = epsilon;
+
+muPV = 50 * epsilon;
 
 mNormal = Subdivide[0, 1 - mu, 50];
 
@@ -35,9 +37,9 @@ Export["../data/wolfram/ellippi_neg.csv", N[ellipPiNeg], "CSV"];
 
 (* Elliptic integrals of the Third Kind - PV domain *)
 
-nPV = Subdivide[1 + mu, 10, 20];
+nPV = Subdivide[1 + muPV, 10, 20];
 
-mPV = Subdivide[0, 1 - mu, 25];
+mPV = Subdivide[0, 1 - muPV, 25];
 
 ellipPiPV = Flatten[Table[{n, m, EllipticPi[SetPrecision[n, 30], SetPrecision[
     m, 30]]}, {n, nPV}, {m, mPV}], 1];

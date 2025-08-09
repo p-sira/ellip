@@ -5,7 +5,7 @@
 
 epsilon = 2.22*^-16;
 
-mu = 50 * epsilon;
+mu = epsilon;
 
 PHI = Subdivide[0, Pi / 2, 5];
 
