@@ -81,7 +81,7 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
 
             // Use Cauchy principal value
             // https://dlmf.nist.gov/19.25.E4
-            return Ok(-1.0 / 3.0 * m / n * elliprj_unchecked(0.0, 1.0 - m, 1.0, 1.0 - m / n));
+            return Ok(-3.0.recip() * m / n * elliprj_unchecked(0.0, 1.0 - m, 1.0, 1.0 - m / n));
         }
         if n == 1.0 {
             return Err("ellippi: n cannot be 1.");
@@ -114,6 +114,9 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
 #[inline]
 pub fn ellippi_unchecked<T: Float>(n: T, m: T) -> T {
     if n <= 0.0 {
+        if 1.0 - m < epsilon!() {
+            return -inf!();
+        }
         if n == 0.0 {
             if m == 0.0 {
                 // ellippi(0,0)
@@ -161,11 +164,26 @@ pub fn ellippi_vc<T: Float>(n: T, m: T, vc: T) -> T {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compare_test_data_boost;
+    use crate::{compare_test_data_boost, compare_test_data_wolfram};
 
     #[test]
     fn test_ellippi() {
         compare_test_data_boost!("ellippi2_data_f64.txt", ellippi, 2, 4.4e-16);
+    }
+
+    #[test]
+    fn test_ellippi_wolfram() {
+        compare_test_data_wolfram!("ellippi_data.csv", ellippi, 2, 5e-15);
+    }
+
+    #[test]
+    fn test_ellippi_wolfram_neg() {
+        compare_test_data_wolfram!("ellippi_neg.csv", ellippi, 2, 5e-15);
+    }
+
+    #[test]
+    fn test_ellippi_wolfram_pv() {
+        compare_test_data_wolfram!("ellippi_pv.csv", ellippi, 2, 1e-14);
     }
 
     #[test]
