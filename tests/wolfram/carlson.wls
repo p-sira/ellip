@@ -9,9 +9,9 @@ epsilon = 2.22*^-16;
 
 muRC = epsilon;
 
-muRD = 50 * epsilon;
+muRD = epsilon;
 
-muRG = 50 * epsilon;
+muRG = epsilon;
 
 muRF = epsilon;
 
