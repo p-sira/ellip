@@ -44,37 +44,6 @@ mod parser {
     }
 }
 
-fn params_from_boost_file(file_path: &str) -> Vec<Vec<f64>> {
-    use std::{
-        fs::File,
-        io::{BufRead, BufReader},
-        path::Path,
-        str::FromStr,
-    };
-
-    let path = Path::new(file_path);
-    if !path.exists() {
-        panic!("Test data not found: {}", file_path);
-    }
-
-    let file = File::open(file_path).expect("Cannot open file");
-    let reader = BufReader::new(file);
-
-    let cases: Vec<Vec<f64>> = reader
-        .lines()
-        .map(|line| {
-            line.expect("Cannot read line")
-                .split_whitespace()
-                .map(|arg| {
-                    f64::from_str(arg).unwrap_or_else(|_| panic!("Cannot parse param {}", arg))
-                })
-                .collect()
-        })
-        .collect();
-
-    cases
-}
-
 fn bench_cases<M: Measurement>(
     group: &mut BenchmarkGroup<M>,
     bench_name: &str,
@@ -116,17 +85,11 @@ macro_rules! wrap_functions {
 }
 
 macro_rules! generate_benchmarks {
-    (@params boost, $func:ident) => {
-        params_from_boost_file(concat!("tests/data/boost/", stringify!($func), "_data.txt"))
-    };
-    (@params wolfram, $func:ident) => {
-        parser::read_wolfram_data(concat!("tests/data/wolfram/", stringify!($func), "_data.csv")).unwrap()
-    };
-    ($bench_name:ident, [$($func:ident),*], $test_data:ident) => {
+    ($bench_name:ident, [$($func:ident),*]) => {
         pub fn $bench_name(c: &mut Criterion) {
             $(
                 let mut group = c.benchmark_group(stringify!($bench_name));
-                let cases = generate_benchmarks!(@params $test_data, $func);
+                let cases = parser::read_wolfram_data(concat!("tests/data/wolfram/", stringify!($func), "_data.csv")).unwrap();
 
                 bench_cases(&mut group, stringify!($func), &|inp| {
                     $func(inp)
@@ -136,19 +99,15 @@ macro_rules! generate_benchmarks {
             )*
         }
     };
-    (legendre, [$($func:ident : $n_args:tt),* $(,)?], $test_data:ident $(,)?) => {
-        wrap_functions! {@m: $($func : $n_args),*}
-        generate_benchmarks! {legendre, [$($func),*], $test_data}
-    };
-    ($bench_name:ident, [$($func:ident : $n_args:tt),* $(,)?], $test_data:ident $(,)?) => {
+    ($bench_name:ident, [$($func:ident : $n_args:tt),* $(,)?] $(,)?) => {
         wrap_functions! {$($func : $n_args),*}
-        generate_benchmarks! {$bench_name, [$($func),*], $test_data}
+        generate_benchmarks! {$bench_name, [$($func),*]}
     };
 }
 
-generate_benchmarks! {legendre, [ellipk:1, ellipe:1, ellipf:2, ellipeinc:2, ellippi:2, ellippiinc:3, ellipd:1, ellipdinc: 2], boost}
-generate_benchmarks! {carlson, [elliprf:3, elliprg:3, elliprj:4, elliprc:2, elliprd:3], boost}
-generate_benchmarks! {bulirsch, [cel:4, cel1:1, cel2:3, el1:2, el2:4, el3:3], wolfram}
+generate_benchmarks! {legendre, [ellipk:1, ellipe:1, ellipf:2, ellipeinc:2, ellippi:2, ellippiinc:3, ellipd:1, ellipdinc: 2]}
+generate_benchmarks! {carlson, [elliprf:3, elliprg:3, elliprj:4, elliprc:2, elliprd:3]}
+generate_benchmarks! {bulirsch, [cel:4, cel1:1, cel2:3, el1:2, el2:4, el3:3]}
 
 criterion_group!(benches, legendre, carlson, bulirsch);
 criterion_main!(benches);
