@@ -89,7 +89,17 @@ macro_rules! generate_benchmarks {
         pub fn $bench_name(c: &mut Criterion) {
             $(
                 let mut group = c.benchmark_group(stringify!($bench_name));
-                let cases = parser::read_wolfram_data(concat!("tests/data/wolfram/", stringify!($func), "_data.csv")).unwrap();
+
+                let test_paths = ellip_dev_utils::file::find_test_files(stringify!($func), "wolfram");
+                if test_paths.is_empty() {
+                    eprintln!("No test files found for function: {}", stringify!($func));
+                    return;
+                }
+
+                let cases = test_paths
+                    .iter()
+                    .flat_map(|test_path| parser::read_wolfram_data(test_path.to_str().unwrap()).unwrap())
+                    .collect::<Vec<Vec<f64>>>();
 
                 bench_cases(&mut group, stringify!($func), &|inp| {
                     $func(inp)

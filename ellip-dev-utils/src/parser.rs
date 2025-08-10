@@ -5,7 +5,7 @@
 
 use num_traits::Float;
 
-use crate::{test_report::Case, StrErr};
+use crate::{StrErr, test_report::Case};
 
 pub fn parse_wolfram_str<T: Float>(s: &str) -> Result<T, StrErr> {
     Ok(match s.trim() {
