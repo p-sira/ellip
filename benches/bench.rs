@@ -7,24 +7,12 @@ use criterion::{
     criterion_group, criterion_main, measurement::Measurement, BenchmarkGroup, Criterion,
 };
 
-// Reuse from generate_error_report
 mod parser {
     use ellip::StrErr;
+    use ellip_dev_utils::parser::parse_wolfram_str;
     use num_traits::Float;
 
-    fn parse_wolfram_str<T: Float>(s: &str) -> Result<T, StrErr> {
-        Ok(match s.trim() {
-            "Infinity" => T::infinity(),
-            "-Infinity" => T::neg_infinity(),
-            "ComplexInfinity" => T::infinity(),
-            "Indeterminate" => T::nan(),
-            "NaN" => T::nan(),
-            _ => T::from(s.parse::<f64>().map_err(|_| "Cannot parse float")?)
-                .expect("Cannot parse float"),
-        })
-    }
-
-    /// Reads wolfram data from file and returns a vector of Cases
+    /// Reads wolfram data from file and returns a vector of T
     pub fn read_wolfram_data<T: Float>(file_path: &str) -> Result<Vec<Vec<T>>, StrErr> {
         use csv::ReaderBuilder;
         use std::fs::File;
