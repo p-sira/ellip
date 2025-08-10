@@ -51,7 +51,9 @@ pub fn compute_errors_from_cases<T: Float + Debug>(
 }
 
 fn format_float(value: &f64) -> String {
-    if *value >= 1e5 {
+    if value.is_nan() {
+        "NAN".to_string()
+    } else if *value >= 1e5 {
         format!("{:.2e}", value)
     } else {
         format!("{:.2}", value)
@@ -125,4 +127,34 @@ macro_rules! get_entry {
             $mu,
         )
     }};
+}
+
+fn format_error_summary(value: &(f64, f64)) -> String {
+    format!(
+        "{} (max={})",
+        format_float(&value.0),
+        format_float(&value.1)
+    )
+}
+
+fn format_performance(value: &f64) -> String {
+    if value.is_nan() {
+        "NAN".to_string()
+    } else if *value < 1000.0 {
+        format!("{:.1} ns", value)
+    } else if *value < 1_000_000.0 {
+        format!("{:.1} μs", value / 1000.0)
+    } else {
+        format!("{:.1} ms", value / 1_000_000.0)
+    }
+}
+
+#[derive(Tabled)]
+pub struct SummaryEntry<'a> {
+    #[tabled(rename = "Function")]
+    name: &'a str,
+    #[tabled(rename = "Median Error (ε)", display = "format_error_summary")]
+    errors: (f64, f64),
+    #[tabled(rename = "Mean Performance", display = "format_performance")]
+    mean_performance: f64,
 }

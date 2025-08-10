@@ -9,6 +9,7 @@ pub struct Stats {
     pub variance: f64,
     pub max: f64,
     pub p99: f64,
+    pub n: usize,
 }
 
 impl Stats {
@@ -19,6 +20,7 @@ impl Stats {
             variance: f64::NAN,
             max: f64::NAN,
             p99: f64::NAN,
+            n: 0,
         };
     }
 
@@ -36,21 +38,21 @@ impl Stats {
         valids.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
         let sum: f64 = valids.iter().sum();
-        let count = valids.len();
-        let mean = sum / count as f64;
+        let n = valids.len();
+        let mean = sum / n as f64;
 
         // Calculate median
-        let median = if count % 2 == 0 {
-            (valids[count / 2 - 1] + valids[count / 2]) / 2.0
+        let median = if n % 2 == 0 {
+            (valids[n / 2 - 1] + valids[n / 2]) / 2.0
         } else {
-            valids[count / 2]
+            valids[n / 2]
         };
 
         // Calculate P99 error
-        let p99_pos = count as f64 * 0.99;
+        let p99_pos = n as f64 * 0.99;
         let p99_pos_low = p99_pos as usize;
         let p99_frac = p99_pos - p99_pos_low as f64;
-        let p99 = if p99_pos_low + 1 < count {
+        let p99 = if p99_pos_low + 1 < n {
             valids[p99_pos_low] * (1.0 - p99_frac) + valids[p99_pos_low + 1] * p99_frac
         } else {
             valids[p99_pos_low]
@@ -64,7 +66,7 @@ impl Stats {
                 diff * diff
             })
             .sum::<f64>()
-            / count as f64;
+            / n as f64;
 
         let max = *valids
             .iter()
@@ -77,6 +79,7 @@ impl Stats {
             variance,
             max,
             p99,
+            n,
         }
     }
 }
