@@ -52,6 +52,10 @@ pRange = Subdivide[muEL3, 1.0, 10];
 
 pRangePV = Subdivide[-3.0, -1.1, 10];
 
+EL3[x_, kc_, p_] :=
+  EllipticPi[SetPrecision[1 - p, 30], SetPrecision[ArcTan[x], 30], SetPrecision[
+    1 - kc * kc, 30]];
+
 validKcPX =
   Select[
     Flatten[Table[{x, kc, p}, {x, xRange}, {kc, kcRange}, {p, pRange}
@@ -66,8 +70,7 @@ el3 =
   Select[
     Table[
       With[{x = data[[1]], kc = data[[2]], p = data[[3]]},
-        {x, kc, p, EllipticPi[SetPrecision[1 - p, 30], SetPrecision[ArcTan[
-          x], 30], SetPrecision[1 - kc * kc, 30]]}
+        {x, kc, p, EL3[x, kc, p]}
       ]
       ,
       {data, validKcPX}
@@ -94,8 +97,7 @@ el3PV =
   Select[
     Table[
       With[{x = data[[1]], kc = data[[2]], p = data[[3]]},
-        {x, kc, p, ResourceFunction["BulirschEL3"][SetPrecision[x, 30
-          ], SetPrecision[kc * kc, 30], SetPrecision[p, 30]]}
+        {x, kc, p, EL3[x, kc, p]}
       ]
       ,
       {data, validKcPXPV}
