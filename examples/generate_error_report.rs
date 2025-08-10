@@ -175,10 +175,18 @@ fn compute_errors_from_cases<T: Float + Debug>(
 }
 
 fn format_float(value: &f64) -> String {
-    if *value > 1e5 {
+    if *value >= 1e5 {
         format!("{:.2e}", value)
     } else {
         format!("{:.2}", value)
+    }
+}
+
+fn format_mu(value: &u64) -> String {
+    if *value >= 10000 {
+        format!("{:e}", value)
+    } else {
+        format!("{}", value)
     }
 }
 
@@ -196,8 +204,8 @@ struct ErrorEntry<'a> {
     max: f64,
     #[tabled(rename = "Variance (ε²)", display = "format_float")]
     variance: f64,
-    #[tabled(rename = "μ (ε²)")]
-    mu: u32,
+    #[tabled(rename = "μ (ε²)", display = "format_mu")]
+    mu: u64,
 }
 
 fn generate_error_entry_from_file<T: Float + Debug>(
@@ -211,7 +219,7 @@ fn generate_error_entry_from_file<T: Float + Debug>(
     }
 }
 
-fn generate_error_table(entries: &[(&str, Stats, u32)]) -> String {
+fn generate_error_table(entries: &[(&str, Stats, u64)]) -> String {
     let rows: Vec<ErrorEntry> = entries
         .iter()
         .map(|(name, stats, mu)| ErrorEntry {
@@ -241,7 +249,15 @@ macro_rules! func_wrapper {
     };
     ($func:expr, 3) => {
         fn wrapped_func(args: &Vec<f64>) -> f64 {
-            $func(args[0], args[1], args[2]).unwrap()
+            let ans = $func(args[0], args[1], args[2]).unwrap_or_else(|e| {
+                println!("{}: {}, {}, {}", e, args[0], args[1], args[2]);
+                panic!()
+            });
+            if ans.is_nan() {
+                println!("{}, {}, {}", args[0], args[1], args[2]);
+                panic!("NAN")
+            }
+            ans
         }
     };
     ($func:expr, 4) => {
@@ -334,8 +350,8 @@ fn main() {
              get_entry!("wolfram/ellipk_neg", "ellipk (Neg m)", ellipk, 1, 1),
              get_entry!("wolfram/ellipe_data", "ellipe", ellipe, 1, 1),
              get_entry!("wolfram/ellipe_neg", "ellipe (Neg m)", ellipe, 1, 1),
-             get_entry!("wolfram/ellippi_data", "ellippi", ellippi, 2, 50),
-             get_entry!("wolfram/ellippi_neg", "ellippi (Neg m)", ellippi, 2, 50),
+             get_entry!("wolfram/ellippi_data", "ellippi", ellippi, 2, 1),
+             get_entry!("wolfram/ellippi_neg", "ellippi (Neg m)", ellippi, 2, 1),
              get_entry!("wolfram/ellippi_pv", "ellippi (p.v.)", ellippi, 2, 50),
          ]),
          "",
@@ -345,9 +361,9 @@ fn main() {
              get_entry!("wolfram/ellipf_neg", "ellipf (Neg m)", ellipf, 2, 1),
              get_entry!("wolfram/ellipeinc_data", "ellipeinc", ellipeinc, 2, 1),
              get_entry!("wolfram/ellipeinc_neg", "ellipeinc (Neg m)", ellipeinc, 2, 1),
-             get_entry!("wolfram/ellippiinc_data", "ellippiinc", ellippiinc, 3, 50),
-             get_entry!("wolfram/ellippiinc_neg", "ellippiinc (Neg m)", ellippiinc, 3, 50),
-             get_entry!("wolfram/ellippiinc_pv", "ellippiinc (p.v.)", ellippiinc, 3, 50),
+             get_entry!("wolfram/ellippiinc_data", "ellippiinc", ellippiinc, 3, 1),
+             get_entry!("wolfram/ellippiinc_neg", "ellippiinc (Neg m)", ellippiinc, 3, 1),
+             get_entry!("wolfram/ellippiinc_pv", "ellippiinc (p.v.)", ellippiinc, 3, 1),
          ]),
          "",
          "## Bulirsch's Elliptic Integrals",
@@ -372,24 +388,21 @@ fn main() {
          "",
          &generate_error_table(&[
              get_entry!("wolfram/elliprf_data", "elliprf", elliprf, 3, 1),
-             get_entry!("wolfram/elliprg_data", "elliprg", elliprg, 3, 50),
+             get_entry!("wolfram/elliprg_data", "elliprg", elliprg, 3, 1),
              get_entry!("wolfram/elliprj_data", "elliprj", elliprj, 4, 50),
-             get_entry!("wolfram/elliprj_pv", "elliprj (p.v.)", elliprj, 4, 50),
+             get_entry!("wolfram/elliprj_pv", "elliprj (p.v.)", elliprj, 4, 10000000000),
+             get_entry!("boost/elliprj_pv_small", "elliprj (p.v., small*)", elliprj, 4, 50),
              get_entry!("wolfram/elliprc_data", "elliprc", elliprc, 2, 1),
              get_entry!("wolfram/elliprc_pv", "elliprc (p.v.)", elliprc, 2, 1),
              get_entry!("wolfram/elliprd_data", "elliprd", elliprd, 3, 50),
          ]),
          "",
-         "## Carlson's Symmetric Elliptic Integrals with Boost Math",
-         "For functions that require higher precision, the accuracy of `ellip` on f64 is tested against",
-         "the answers from Boost Math at double precision.",
+         "*small: Results compared with Boost Math implementation without promoting double, i.e, computed purely using `f64`.",
          "",
-         &generate_error_table(&[
-             get_entry!("boost/elliprf_data", "elliprf", elliprf, 3, 1),
-             get_entry!("boost/elliprg_data", "elliprg", elliprg, 3, 50),
-             get_entry!("boost/elliprj_data", "elliprj", elliprj, 4, 50),
-             get_entry!("boost/elliprj_pv", "elliprj (p.v.)", elliprj, 4, 50),
-         ]),
+         "Current implementation of `elliprj` is less numerically stable in p.v. cases,",
+         "as seen by large errors in the non-small test cases. That said, Ellip's results are consistent",
+         "with Boost Math when limited to same precision (See [tests/data/boost/carlson.cpp](https://github.com/p-sira/ellip/blob/main/tests/data/boost/carlson.cpp)).",
+         "Since the function is convergent, such errors can be mitigated when Rust's `f128` is released."
      ];
 
     use std::fs::File;
