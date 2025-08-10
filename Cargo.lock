@@ -202,10 +202,19 @@ version = "0.3.7"
 dependencies = [
  "criterion",
  "csv",
+ "ellip-dev-utils",
  "itertools 0.14.0",
  "num-lazy",
  "num-traits",
  "numeric_literals",
+]
+
+[[package]]
+name = "ellip-dev-utils"
+version = "0.1.0"
+dependencies = [
+ "csv",
+ "num-traits",
  "tabled",
 ]
 
