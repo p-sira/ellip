@@ -44,7 +44,6 @@ use num_traits::Float;
 ///
 /// ## Special Cases
 /// - D(0, m) = 0
-/// - D(φ, 0) = sin φ
 /// - D(π/2, m) = D(m)
 /// - D(φ, -∞) = 0
 /// - D(∞, m) = ∞
@@ -134,7 +133,7 @@ mod tests {
 
     use super::*;
     use crate::compare_test_data_boost;
-    
+
     #[test]
     fn test_ellipdinc() {
         compare_test_data_boost!("ellipdinc_data.txt", ellipdinc, 2, 6.4e-16);
