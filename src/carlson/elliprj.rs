@@ -125,15 +125,22 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
             swap(&mut x, &mut y);
         }
 
-        let q = -p;
-        let p = (z * (x + y + q) - x * y) / (z + q);
-        let mut value = (p - z) * elliprj_unchecked(x, y, z, p);
-        value = value - 3.0 * elliprf_unchecked(x, y, z);
-        value = value
-            + 3.0
-                * ((x * y * z) / (x * y + p * q)).sqrt()
-                * elliprc_unchecked(x * y + p * q, p * q);
-        return value / (z + q);
+        let q = -p; // 0.40000001775999994
+        let z_plus_q = z + q;
+        let xy = x * y;
+        let p = (z * (x + y + q) - xy) / z_plus_q; // 1.100000012765
+        let pq = p * q;
+        let xy_plus_pq = xy + pq;
+        let xyz = xy * z;
+
+        let rj = elliprj_unchecked(x, y, z, p); // 1.0156958182254865
+        let rf = elliprf_unchecked(x, y, z); // 1.0411466273191994
+        let rc = elliprc_unchecked(xy_plus_pq, pq); // 1.2747968994213601
+
+        let mut value = (p - z) * rj;
+        value = value - 3.0 * rf;
+        value = value + 3.0 * (xyz / xy_plus_pq).sqrt() * rc;
+        return value / z_plus_q;
     }
 
     // Special cases
@@ -163,7 +170,7 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
         // This prevents division by zero.
         if p.max(y) / p.min(y) > 1.2 {
             // RJ(x,y,y,p)
-            return (3.0 / (p - y)) * (elliprc_unchecked(x, y) - elliprc_unchecked(x, p));
+            return 3.0 * (elliprc_unchecked(x, y) - elliprc_unchecked(x, p)) / (p - y);
         }
     }
 
@@ -257,7 +264,7 @@ mod tests {
     use itertools::Itertools;
 
     use super::*;
-    use crate::{assert_close, compare_test_data_boost};
+    use crate::{assert_close, compare_test_data_boost, compare_test_data_wolfram};
 
     fn __elliprj(inp: &[&f64]) -> f64 {
         elliprj(*inp[0], *inp[1], *inp[2], *inp[3]).unwrap()
@@ -280,26 +287,16 @@ mod tests {
     #[test]
     fn test_elliprj() {
         compare_test_data_boost!("elliprj_data.txt", _elliprj, 2.7e-14, atol: 5e-25);
-    }
-
-    #[test]
-    fn test_elliprj_e2() {
         compare_test_data_boost!("elliprj_e2.txt", _elliprj, 4.8e-14, atol: 5e-25);
-    }
-
-    #[test]
-    fn test_elliprj_e3() {
         compare_test_data_boost!("elliprj_e3.txt", _elliprj, 3.1e-15, atol: 5e-25);
-    }
-
-    #[test]
-    fn test_elliprj_e4() {
         compare_test_data_boost!("elliprj_e4.txt", _elliprj, 2.2e-16, atol: 5e-25);
+        compare_test_data_boost!("elliprj_zp.txt", _elliprj, 3.5e-15, atol: 5e-25);
     }
 
     #[test]
-    fn test_elliprj_zp() {
-        compare_test_data_boost!("elliprj_zp.txt", _elliprj, 3.5e-15, atol: 5e-25);
+    fn test_elliprj_wolfram() {
+        compare_test_data_wolfram!("elliprj_data.csv", elliprj, 4, 2e-15);
+        compare_test_data_wolfram!("elliprj_pv.csv", elliprj, 4, 2e-15);
     }
 
     #[test]
