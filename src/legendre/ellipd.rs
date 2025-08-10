@@ -78,8 +78,12 @@ pub fn ellipd<T: Float>(m: T) -> Result<T, StrErr> {
         return Ok(1.0 / (-m).sqrt());
     }
 
+    let ans = elliprd_unchecked(0.0, 1.0 - m, 1.0) / 3.0;
+    if ans.is_finite() {
+        return Ok(ans);
+    }
     check!(@nan, ellipd, [m]);
-    Ok(elliprd_unchecked(0.0, 1.0 - m, 1.0) / 3.0)
+    Err("ellipd: Unexpected error.")
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
