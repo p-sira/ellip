@@ -90,11 +90,17 @@ pub fn ellipd<T: Float>(m: T) -> Result<T, StrErr> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compare_test_data_boost;
+    use crate::{compare_test_data_boost, compare_test_data_wolfram};
 
     #[test]
     fn test_ellipd() {
         compare_test_data_boost!("ellipd_data.txt", ellipd, 1, 2.9e-16);
+    }
+
+    #[test]
+    fn test_ellipd_wolfram() {
+        compare_test_data_wolfram!("ellipd_data.csv", ellipd, 1, 8e-16);
+        compare_test_data_wolfram!("ellipd_neg.csv", ellipd, 1, 8e-16);
     }
 
     #[test]

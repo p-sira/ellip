@@ -75,7 +75,6 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     let phi = phi.abs();
     if phi > 1.0 / epsilon!() {
         if phi >= max_val!() {
-            // Need to handle infinity as a special case:
             return Ok(sign * inf!());
         }
         // Phi is so large that phi%pi is necessarily zero (or garbage),
@@ -132,11 +131,17 @@ mod tests {
     use core::f64;
 
     use super::*;
-    use crate::compare_test_data_boost;
+    use crate::{compare_test_data_boost, compare_test_data_wolfram};
 
     #[test]
     fn test_ellipdinc() {
         compare_test_data_boost!("ellipdinc_data.txt", ellipdinc, 2, 6.4e-16);
+    }
+
+    #[test]
+    fn test_ellipdinc_wolfram() {
+        compare_test_data_wolfram!("ellipdinc_data.csv", ellipdinc, 2, 2e-15);
+        compare_test_data_wolfram!("ellipdinc_neg.csv", ellipdinc, 2, 1e-15);
     }
 
     #[test]
