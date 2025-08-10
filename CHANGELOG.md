@@ -7,6 +7,7 @@
 **Improvements**
 - Improve performance across all functions by removing unnecessary checks.
 - Improve and fix error messages.
+- Slightly increase accuracy of the p.v. cases of `elliprj`.
 
 ### 0.3.6
 **Bug Fixes**
