@@ -125,17 +125,17 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
             swap(&mut x, &mut y);
         }
 
-        let q = -p; // 0.40000001775999994
+        let q = -p;
         let z_plus_q = z + q;
         let xy = x * y;
-        let p = (z * (x + y + q) - xy) / z_plus_q; // 1.100000012765
+        let p = (z * (x + y + q) - xy) / z_plus_q;
         let pq = p * q;
         let xy_plus_pq = xy + pq;
         let xyz = xy * z;
 
-        let rj = elliprj_unchecked(x, y, z, p); // 1.0156958182254865
-        let rf = elliprf_unchecked(x, y, z); // 1.0411466273191994
-        let rc = elliprc_unchecked(xy_plus_pq, pq); // 1.2747968994213601
+        let rj = elliprj_unchecked(x, y, z, p);
+        let rf = elliprf_unchecked(x, y, z);
+        let rc = elliprc_unchecked(xy_plus_pq, pq);
 
         let mut value = (p - z) * rj;
         value = value - 3.0 * rf;
