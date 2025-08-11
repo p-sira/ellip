@@ -18,13 +18,11 @@ jobs:
     - uses: actions/checkout@v4
     - name: Generate Error Report
       run: cargo run --example generate_error_report
-    - name: Generate Test Summary and README
-      run: cargo run --example generate_test_summary
     - name: Commit & Push
       run: |
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
         git add .
-        git diff --cached --quiet || git commit -m "DOC: CI Generated Test Summary and Error Report"
+        git diff --cached --quiet || git commit -m "DOC: CI Generated Error Report"
         git pull --rebase origin main
         git push
