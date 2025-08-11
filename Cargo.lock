@@ -216,6 +216,8 @@ dependencies = [
  "csv",
  "glob",
  "num-traits",
+ "serde",
+ "serde_json",
  "tabled",
 ]
 

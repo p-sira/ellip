@@ -76,38 +76,7 @@ Learn more at [doc.rs](https://docs.rs/ellip).
     - `elliprd`: Degenerate elliptic integral of the third kind (RD).
 
 # Testing
-Generated on x86_64-unknown-linux-gnu rustc 1.88.0 using ellip v0.3.7 at `f64` precision (ε≈2.22e-16).
-
-### Legendre's Elliptic Integrals
-| Function   | Median Error (ε) | Max Error (ε) | Mean Performance |
-|------------|------------------|---------------|------------------|
-| ellipk     | 0.00             | 108.14        | 14.9 ns          |
-| ellipe     | 0.00             | 3.00          | 13.5 ns          |
-| ellipf     | 0.66             | 7.47          | 103.4 ns         |
-| ellipeinc  | 0.70             | 24.66         | 166.8 ns         |
-| ellippi    | 0.53             | 36.35         | 168.0 ns         |
-| ellippiinc | 0.78             | 1.04e3        | 277.6 ns         |
-| ellipd     | 0.60             | 2.64          | 30.1 ns          |
-| ellipdinc  | 1.00             | 8.38          | 106.2 ns         |
-
-### Carlson's Symmetric Integrals
-| Function | Median Error (ε) | Max Error (ε) | Mean Performance |
-|----------|------------------|---------------|------------------|
-| elliprf  | 0.00             | 1.75          | 46.0 ns          |
-| elliprg  | 0.00             | 2.45          | 99.0 ns          |
-| elliprj  | 0.67             | 5.42e7        | 165.6 ns         |
-| elliprc  | 0.00             | 2.82          | 23.0 ns          |
-| elliprd  | 0.62             | 6.49          | 75.9 ns          |
-
-### Bulirsch's Elliptic Integrals
-| Function | Median Error (ε) | Max Error (ε) | Mean Performance |
-|----------|------------------|---------------|------------------|
-| cel      | 0.70             | 38.34         | 34.2 ns          |
-| cel1     | 0.00             | 8.68          | 11.5 ns          |
-| cel2     | 0.61             | 3.97          | 23.0 ns          |
-| el1      | 0.00             | 1.60          | 38.8 ns          |
-| el2      | 0.70             | 79.92         | 57.3 ns          |
-| el3      | 0.70             | 1.17e4        | 126.6 ns         |
+{{TESTSUMMARY}}
 
 The function results are compared with Boost Math test data and Wolfram Engine test data.
 The accuracy report and the test data along with the test generation scripts can

@@ -5,6 +5,7 @@
 
 type StrErr = &'static str;
 
+pub mod benchmark;
 pub mod env;
 pub mod file;
 pub mod parser;

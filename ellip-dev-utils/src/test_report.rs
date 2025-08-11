@@ -53,7 +53,7 @@ pub fn compute_errors_from_cases<T: Float + Debug>(
 fn format_float(value: &f64) -> String {
     if value.is_nan() {
         "NAN".to_string()
-    } else if *value >= 1e5 {
+    } else if *value >= 1e3 {
         format!("{:.2e}", value)
     } else {
         format!("{:.2}", value)
@@ -129,14 +129,6 @@ macro_rules! get_entry {
     }};
 }
 
-fn format_error_summary(value: &(f64, f64)) -> String {
-    format!(
-        "{} (max={})",
-        format_float(&value.0),
-        format_float(&value.1)
-    )
-}
-
 fn format_performance(value: &f64) -> String {
     if value.is_nan() {
         "NAN".to_string()
@@ -153,8 +145,57 @@ fn format_performance(value: &f64) -> String {
 pub struct SummaryEntry<'a> {
     #[tabled(rename = "Function")]
     name: &'a str,
-    #[tabled(rename = "Median Error (ε)", display = "format_error_summary")]
-    errors: (f64, f64),
+    #[tabled(rename = "Median Error (ε)", display = "format_float")]
+    median_error: f64,
+    #[tabled(rename = "Max Error (ε)", display = "format_float")]
+    max_error: f64,
     #[tabled(rename = "Mean Performance", display = "format_performance")]
     mean_performance: f64,
+}
+
+pub fn generate_summary_table(entries: &[(&str, Stats, f64)]) -> String {
+    let rows: Vec<SummaryEntry> = entries
+        .iter()
+        .map(|(name, stats, perf)| SummaryEntry {
+            name,
+            median_error: stats.median,
+            max_error: stats.max,
+            mean_performance: *perf / stats.n as f64,
+        })
+        .collect();
+
+    Table::new(rows).with(Style::markdown()).to_string()
+}
+
+#[macro_export]
+macro_rules! get_summary_entry {
+    ($group:expr, $name:expr, $func:expr, $arg_count:tt) => {{
+        use ellip_dev_utils::{
+            benchmark, file, parser, stats,
+            test_report::{self, Case},
+        };
+        use std::path::Path;
+
+        ellip_dev_utils::func_wrapper!($func, $arg_count);
+
+        let test_paths = file::find_test_files(stringify!($func), "wolfram");
+        let cases = test_paths
+            .iter()
+            .flat_map(|test_path| parser::read_wolfram_data(test_path.to_str().unwrap()).unwrap())
+            .collect::<Vec<Case<f64>>>();
+        let stats = stats::Stats::from_vec(&test_report::compute_errors_from_cases(
+            &wrapped_func,
+            cases,
+        ));
+
+        // Criterion directory structure: target/criterion/<group>/<func>/new/estimates.json
+        let criterion_path_buf = Path::new("target/criterion")
+            .join($group)
+            .join(stringify!($func))
+            .join("new");
+        let perf = benchmark::extract_criterion_mean(criterion_path_buf.to_str().unwrap_or(""))
+            .unwrap_or(f64::NAN);
+
+        ($name, stats, perf)
+    }};
 }

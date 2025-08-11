@@ -198,9 +198,14 @@ macro_rules! compare_test_data_wolfram {
     ($filename:expr, $func:expr, $n_args:tt, $rtol:expr) => {{
         use crate::func_wrapper;
         func_wrapper!($func, $n_args);
-        compare_test_data_wolfram!($filename, wrapped_func, f64, $rtol, 0.0)
+        compare_test_data_wolfram!("./tests/data/wolfram", $filename, wrapped_func, f64, $rtol, 0.0)
     }};
-    ($filename:expr, $func:expr, $t:ident, $rtol:expr, $atol:expr) => {{
+    ($path:expr, $filename:expr, $func:expr, $n_args:tt, $rtol:expr) => {{
+        use crate::func_wrapper;
+        func_wrapper!($func, $n_args);
+        compare_test_data_wolfram!($path, $filename, wrapped_func, f64, $rtol, 0.0)
+    }};
+    ($path:expr, $filename:expr, $func:expr, $t:ident, $rtol:expr, $atol:expr) => {{
         {
             use crate::compare_test_data;
             use crate::test_util::WolframFloat;
@@ -210,7 +215,7 @@ macro_rules! compare_test_data_wolfram {
             use std::path::Path;
             use csv::ReaderBuilder;
 
-            let path = Path::new("./tests/data/wolfram").join($filename);
+            let path = Path::new($path).join($filename);
             if !path.exists() {
                 eprintln!(
                     "Skipping test due to test data not found: {}\nDownload test data from: https://github.com/p-sira/ellip/tree/main/tests/data",
