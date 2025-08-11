@@ -90,15 +90,6 @@ Generated on x86_64-unknown-linux-gnu rustc 1.88.0 using ellip v0.3.7 at `f64` p
 | ellipd     | 0.60             | 2.64          | 30.1 ns          |
 | ellipdinc  | 1.00             | 8.38          | 106.2 ns         |
 
-### Carlson's Symmetric Integrals
-| Function | Median Error (ε) | Max Error (ε) | Mean Performance |
-|----------|------------------|---------------|------------------|
-| elliprf  | 0.00             | 1.75          | 46.0 ns          |
-| elliprg  | 0.00             | 2.45          | 99.0 ns          |
-| elliprj  | 0.67             | 5.42e7        | 165.6 ns         |
-| elliprc  | 0.00             | 2.82          | 23.0 ns          |
-| elliprd  | 0.62             | 6.49          | 75.9 ns          |
-
 ### Bulirsch's Elliptic Integrals
 | Function | Median Error (ε) | Max Error (ε) | Mean Performance |
 |----------|------------------|---------------|------------------|
@@ -108,6 +99,15 @@ Generated on x86_64-unknown-linux-gnu rustc 1.88.0 using ellip v0.3.7 at `f64` p
 | el1      | 0.00             | 1.60          | 38.8 ns          |
 | el2      | 0.70             | 79.92         | 57.3 ns          |
 | el3      | 0.70             | 1.17e4        | 126.6 ns         |
+
+### Carlson's Symmetric Integrals
+| Function | Median Error (ε) | Max Error (ε) | Mean Performance |
+|----------|------------------|---------------|------------------|
+| elliprf  | 0.00             | 1.75          | 46.0 ns          |
+| elliprg  | 0.00             | 2.45          | 99.0 ns          |
+| elliprj  | 0.67             | 5.42e7        | 165.6 ns         |
+| elliprc  | 0.00             | 2.82          | 23.0 ns          |
+| elliprd  | 0.62             | 6.49          | 75.9 ns          |
 
 The function results are compared with Boost Math test data and Wolfram Engine test data.
 The accuracy report and the test data along with the test generation scripts can
