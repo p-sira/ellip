@@ -7,7 +7,11 @@
 **Improvements**
 - Improve performance across all functions by removing unnecessary checks.
 - Improve and fix error messages.
+- Add test summary and benchmark data in README.
 - Slightly increase accuracy of the p.v. cases of `elliprj`.
+
+**Tests**
+- Add Wolfram test data for `ellipd` and `ellipdinc`.
 
 ### 0.3.6
 **Bug Fixes**
