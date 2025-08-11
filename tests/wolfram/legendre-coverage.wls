@@ -13,7 +13,7 @@ M = Union[idx / 20, {1 - 1*^-6}];
 
 ellipK = Table[{m, EllipticK[SetPrecision[m, 30]]}, {m, M}];
 
-Export["../data/wolfram/ellipk_cov.csv", N[ellipK], "CSV"];
+Export["../data/coverage/ellipk_cov.csv", N[ellipK], "CSV"];
 
 (* Complete Elliptic Integrals of the Second Kind *)
 
@@ -21,4 +21,4 @@ Export["../data/wolfram/ellipk_cov.csv", N[ellipK], "CSV"];
 
 ellipE = Table[{m, EllipticE[SetPrecision[m, 30]]}, {m, M}];
 
-Export["../data/wolfram/ellipe_cov.csv", N[ellipE], "CSV"];
+Export["../data/coverage/ellipe_cov.csv", N[ellipE], "CSV"];
