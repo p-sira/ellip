@@ -3,6 +3,7 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
+#![cfg_attr(feature = "reduce-iteration", allow(unused))]
 #![allow(clippy::excessive_precision)]
 //! # ELLIP
 //! **Ellip** is an elliptic integral functions for Rust.

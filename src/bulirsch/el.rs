@@ -764,7 +764,7 @@ mod tests {
         assert_close!(complete_el3, cel(0.5, 0.5, 1.0, 1.0).unwrap(), 1e-15);
         // x = inf: el3(inf, kc, p) = Π(n, m)
         assert_close!(complete_el3, ellippi(0.5, 0.75).unwrap(), 1e-15);
-        
+
         // kc = 1, p > 0: el3(x, 1, p) = atan(sqrt(p) * x) / sqrt(p)
         assert_eq!(
             el3(4.0, 1.0, 0.5).unwrap(),

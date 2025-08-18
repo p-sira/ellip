@@ -265,6 +265,7 @@ fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
         Some(_) => ellipe_precise(m),
         None => {
             check!(@nan, ellipe, [m]);
+            #[cfg(not(feature = "reduce-iteration"))]
             if m > 1.0 {
                 // Infinity cases
                 return Err("ellipe: m must be less than 1.");
@@ -324,4 +325,9 @@ mod tests {
         // m = -inf: E(-inf) = inf
         assert_eq!(ellipe(NEG_INFINITY).unwrap(), INFINITY);
     }
+}
+
+#[cfg(feature = "reduce-iteration")]
+crate::test_force_unreachable! {
+    assert_eq!(ellipe(f64::INFINITY), Err("ellipe: Unexpected error."));
 }

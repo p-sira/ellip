@@ -73,7 +73,7 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         return Ok(ans);
     }
     check!(@nan, elliprg, [x, y, z]);
-    return Err("elliprg: Arguments must be finite.");
+    Err("elliprg: Arguments must be finite.")
 }
 
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]

@@ -90,6 +90,7 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
     }
 
     let ans = ellippi_unchecked(n, m);
+    #[cfg(not(feature = "reduce-iteration"))]
     if ans.is_finite() {
         return Ok(ans);
     }
@@ -232,4 +233,9 @@ mod tests {
             Err("ellippi: m must be less than 1.")
         );
     }
+}
+
+#[cfg(feature = "reduce-iteration")]
+crate::test_force_unreachable! {
+    assert_eq!(ellippi(0.5, 0.5), Err("ellippi: Unexpected error."));
 }

@@ -114,17 +114,15 @@ pub fn elliprc_unchecked<T: Float>(x: T, y: T) -> T {
         return prefix * ((y - x) / x).sqrt().atan() / (y - x).sqrt();
     }
 
-    #[allow(unused_assignments)]
-    let mut ans = nan!();
-    #[cfg(not(feature = "reduce-iteration"))]
+    #[cfg(feature = "reduce-iteration")]
+    return nan!();
+
     if y / x > 0.5 {
         let arg = ((x - y) / x).sqrt();
-        ans = prefix * ((arg).ln_1p() - (-arg).ln_1p()) / (2.0 * (x - y).sqrt())
+        prefix * ((arg).ln_1p() - (-arg).ln_1p()) / (2.0 * (x - y).sqrt())
     } else {
-        ans = prefix * ((x.sqrt() + (x - y).sqrt()) / y.sqrt()).ln() / (x - y).sqrt()
-    };
-
-    ans
+        prefix * ((x.sqrt() + (x - y).sqrt()) / y.sqrt()).ln() / (x - y).sqrt()
+    }
 }
 
 #[cfg(not(feature = "reduce-iteration"))]
