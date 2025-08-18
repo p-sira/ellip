@@ -1,12 +1,9 @@
 # Testing
-This report presents the accuracy of the ellip crate using [**symmetric relative error**](https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/relative_error.html)
-metric. Errors are expressed in units of machine epsilon (ε).
-The test data spans the domain of each function up to **μ** to avoid approaching the function's limit.
-The reference values are computed using [**Wolfram Engine**](https://www.wolfram.com/engine/).
-You can find the scripts in the directory [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/).
+This report presents the accuracy of the ellip crate using [**symmetric relative error**](https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/relative_error.html) metric. Errors are expressed in units of machine epsilon (ε). The test data spans the domain of each function up to **μ** to avoid approaching the function's limit. The reference values are computed using [**Wolfram Engine**](https://www.wolfram.com/engine/). You can find the scripts in the directory [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/). 
 This report is generated on x86_64-unknown-linux-gnu rustc 1.88.0 using ellip v0.3.7 at `f64` precision (ε≈2.22e-16).
 
 ## Legendre's Complete Elliptic Integrals
+
 | Function        | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
 |-----------------|----------|------------|---------|---------|---------------|--------|
 | ellipk          | 0.27     | 0.00       | 1.52    | 20.95   | 0.81          | 1      |
@@ -20,6 +17,7 @@ This report is generated on x86_64-unknown-linux-gnu rustc 1.88.0 using ellip v0
 | ellipd (Neg m)  | 0.59     | 0.61       | 1.93    | 2.64    | 0.27          | 1      |
 
 ## Legendre's Incomplete Elliptic Integrals
+
 | Function           | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
 |--------------------|----------|------------|---------|---------|---------------|--------|
 | ellipf             | 0.65     | 0.66       | 2.59    | 7.47    | 0.44          | 1      |
@@ -33,12 +31,8 @@ This report is generated on x86_64-unknown-linux-gnu rustc 1.88.0 using ellip v0
 | ellipdinc (Neg m)  | 1.16     | 0.93       | 3.55    | 4.20    | 0.82          | 1      |
 
 ## Bulirsch's Elliptic Integrals
-Bulirsh's elliptic integrals are not natively implemented in Wolfram Engine.
-Nevertheless, some of the integrals can be converted to their Legendre's counterpart,
-which are available on Wolfram Engine. However, for `cel` and `el2`, their values cannot
-be mapped simply. Hence, the reference values are generated using the functions
-submitted by Jan Mangaldan on [Wolfram Function Repository](https://resources.wolframcloud.com/FunctionRepository/).
-As for `cel2`, it is mapped to `cel` with p=1.
+Bulirsh's elliptic integrals are not natively implemented in Wolfram Engine. Nevertheless, some of the integrals can be converted to their Legendre's counterpart, which are available on Wolfram Engine. However, for `cel` and `el2`, their values cannot be mapped simply. Hence, the reference values are generated using the functions submitted by Jan Mangaldan on [Wolfram Function Repository](https://resources.wolframcloud.com/FunctionRepository/). As for `cel2`, it is mapped to `cel` with p=1.
+
 | Function   | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
 |------------|----------|------------|---------|---------|---------------|--------|
 | cel        | 0.92     | 0.71       | 5.64    | 28.60   | 2.83          | 1      |
@@ -47,7 +41,7 @@ As for `cel2`, it is mapped to `cel` with p=1.
 | cel2       | 0.61     | 0.61       | 2.27    | 3.97    | 0.40          | 1      |
 | el1        | 0.36     | 0.00       | 1.11    | 1.60    | 0.15          | 1      |
 | el2        | 1.60     | 0.70       | 18.01   | 79.92   | 24.32         | 1      |
-| el3        | 20.92    | 0.66       | 19.53   | 1.17e4  | 2.25e5        | 50     |
+| el3        | 1.66     | 0.66       | 19.40   | 46.32   | 15.89         | 50     |
 | el3 (p.v.) | 1.56     | 0.81       | 13.88   | 16.54   | 7.99          | 50     |
 
 ## Carlson's Symmetric Elliptic Integrals
@@ -63,9 +57,6 @@ As for `cel2`, it is mapped to `cel` with p=1.
 | elliprc (p.v.)         | 0.49     | 0.54       | 1.91    | 2.82    | 0.25          | 1      |
 | elliprd                | 0.60     | 0.62       | 2.41    | 6.49    | 0.37          | 50     |
 
-*small: Results compared with Boost Math implementation without promoting double, i.e, computed purely using `f64`.
+*small: Use small argument values, close to the function's limit. Results compared with Boost Math implementation without promoting double, i.e, computed purely using `f64`.
 
-Current implementation of `elliprj` is less numerically stable in p.v. cases,
-as seen by large errors in the non-small test cases. That said, Ellip's results are consistent
-with Boost Math when limited to same precision (See [tests/data/boost/carlson.cpp](https://github.com/p-sira/ellip/blob/main/tests/data/boost/carlson.cpp)).
-Since the function is convergent, such errors can be mitigated when Rust's `f128` is released.
+Current implementation of `elliprj` is less numerically stable in p.v. cases, as seen by large errors in the non-small test cases. That said, Ellip's results are consistent with Boost Math when limited to same precision (See [tests/data/boost/carlson.cpp](https://github.com/p-sira/ellip/blob/main/tests/data/boost/carlson.cpp)). Since the function is convergent, such errors can be mitigated when Rust's `f128` is released.

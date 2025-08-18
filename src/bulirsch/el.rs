@@ -8,8 +8,9 @@ use num_traits::Float;
 
 use crate::{
     bulirsch::DefaultPrecision,
+    carlson::elliprc_unchecked,
     crate_util::{case, check, declare, let_mut},
-    ellipeinc, ellipf, ellippi, StrErr,
+    ellipeinc, ellipf, ellippi, ellippiinc, StrErr,
 };
 
 use super::{_BulirschConst, cel1, cel2};
@@ -295,6 +296,9 @@ pub fn el3<T: Float>(x: T, kc: T, p: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrErr> {
+    let m = 1.0 - kc * kc;
+    let n = 1.0 - p;
+
     if kc.abs() < epsilon!() {
         return Err("el3: kc must not be zero.");
     }
@@ -304,9 +308,6 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
     }
 
     // Handle special cases
-    let m = 1.0 - kc * kc;
-    let n = 1.0 - p;
-
     if x == inf!() {
         return ellippi(n, m);
     }
@@ -349,6 +350,10 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
         return Ok(result);
     }
 
+    if kc.abs() < C::lim_kc_p() && p > C::lim_kc_p() {
+        return ellippiinc(phi, n, m);
+    }
+
     let x_abs = x.abs();
 
     // real
@@ -357,7 +362,7 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
     let zd;
 
     // int
-    declare!(mut [k = 0, l, m, n]);
+    declare!(mut [k = 0, l, mm, nn]);
 
     // bool
     declare!(mut [bo, bk = false]);
@@ -504,10 +509,10 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
 
     y = 1.0 / y;
     e = s;
-    n = 1;
+    nn = 1;
     t = 1.0;
     l = 0;
-    m = 0;
+    mm = 0;
 
     for _ in 0..N_MAX_ITERATIONS {
         y = y - e / y;
@@ -522,11 +527,11 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
         q = g + q;
         g = t;
         t = s + t;
-        n = n + n;
-        m = m + m;
+        nn = nn + nn;
+        mm = mm + mm;
         if bo {
             if z < 0.0 {
-                m += k;
+                mm += k;
             }
             k = if r < 0.0 { -1 } else { 1 };
             h = e / (u * u + v * v);
@@ -585,24 +590,29 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
                 z = C::cb();
             }
             if z < 0.0 {
-                m += if h < 0.0 { -1 } else { 1 };
+                mm += if h < 0.0 { -1 } else { 1 };
             }
-            s = (h / z).atan() + T::from(m).unwrap() * pi!();
+            s = (h / z).atan() + T::from(mm).unwrap() * pi!();
         } else {
             s = if bk {
                 ye.asinh()
             } else {
-                z.ln() + T::from(m).unwrap() * ln_2!()
+                z.ln() + T::from(mm).unwrap() * ln_2!()
             };
             s = s * 0.5;
         }
-        e = (e + fa.sqrt() * s) / T::from(n).unwrap();
+        e = (e + fa.sqrt() * s) / T::from(nn).unwrap();
         let ans = x.signum() * e;
         if ans.is_finite() {
             return Ok(ans);
         }
         check!(@nan, el3, [x, kc, p]);
         break;
+    }
+
+    let ans = ellippiinc(phi, n, m);
+    if ans.is_ok() {
+        return ans;
     }
     Err("el3: Failed to converge.")
 }
@@ -618,31 +628,16 @@ const N_MAX_ITERATIONS: usize = 1;
 #[cfg(not(feature = "reduce-iteration"))]
 #[cfg(test)]
 mod tests {
-    use itertools::iproduct;
-
     use super::*;
-    use crate::{assert_close, ellipdinc, ellipeinc, ellipf, ellippiinc, test_util::linspace};
+    use crate::{assert_close, compare_test_data_wolfram};
 
     #[test]
     fn test_el1() {
-        fn test_special_cases(x: f64, kc: f64) {
-            let m = 1.0 - kc * kc;
-            let phi = x.atan();
-            let f = ellipf(phi, m).unwrap();
+        compare_test_data_wolfram!("el1_data.csv", el1, 2, 5.0 * f64::EPSILON);
+    }
 
-            assert_close!(f, el1(x, kc).unwrap(), 1.2e-14);
-        }
-
-        let x = linspace(0.0, 100.0, 50);
-        let linsp_neg = linspace(-1.0, -1e-3, 50);
-        x.iter()
-            .zip(linsp_neg.iter())
-            .for_each(|(&x, &kc)| test_special_cases(x, kc));
-        let linsp_pos = linspace(1e-3, 1.0, 50);
-        x.iter()
-            .zip(linsp_pos.iter())
-            .for_each(|(&x, &kc)| test_special_cases(x, kc));
-
+    #[test]
+    fn test_el1_references() {
         // Test computed values from the reference
         // Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
         fn test_reference(x: f64, expected: f64) {
@@ -688,27 +683,7 @@ mod tests {
 
     #[test]
     fn test_el2() {
-        fn test_special_cases(x: f64, kc: f64) {
-            let m = 1.0 - kc * kc;
-            let phi = x.atan();
-            let f = ellipf(phi, m).unwrap();
-            let e = ellipeinc(phi, m).unwrap();
-            let d = ellipdinc(phi, m).unwrap();
-
-            assert_close!(f, el2(x, kc, 1.0, 1.0).unwrap(), 1.2e-14);
-            assert_close!(e, el2(x, kc, 1.0, kc * kc).unwrap(), 7e-14);
-            assert_close!(d, el2(x, kc, 0.0, 1.0).unwrap(), 6e-14);
-        }
-
-        let x = linspace(0.0, 100.0, 50);
-        let linsp_neg = linspace(-1.0, -1e-3, 50);
-        x.iter()
-            .zip(linsp_neg.iter())
-            .for_each(|(&x, &kc)| test_special_cases(x, kc));
-        let linsp_pos = linspace(1e-3, 1.0, 50);
-        x.iter()
-            .zip(linsp_pos.iter())
-            .for_each(|(&x, &kc)| test_special_cases(x, kc));
+        compare_test_data_wolfram!("el2_data.csv", el2, 4, 100.0 * f64::EPSILON);
     }
 
     #[test]
@@ -739,25 +714,12 @@ mod tests {
 
     #[test]
     fn test_el3() {
-        fn _test(x: f64, kc: f64, p: f64) {
-            let m = 1.0 - kc * kc;
-            let phi = x.atan();
-            let n = 1.0 - p;
-            let ellippi = ellippiinc(phi, n, m).unwrap();
+        compare_test_data_wolfram!("el3_data.csv", el3, 3, 3e-12);
+        compare_test_data_wolfram!("el3_pv.csv", el3, 3, 5e-15);
+    }
 
-            assert_close!(ellippi, el3(x, kc, p).unwrap(), 4.6e-15);
-        }
-
-        let linsp_x = linspace(10.0, 10.0, 15);
-        let linsp_kc = [
-            linspace(-1.0 + 1e-3, -1e-3, 50),
-            linspace(1e-3, 1.0 - 1e-3, 50),
-        ]
-        .concat();
-        let linsp_p = linspace(1e-3, 1.0 - 1e-3, 10);
-
-        iproduct!(linsp_x, linsp_kc, linsp_p).for_each(|(x, kc, p)| _test(x, kc, p));
-
+    #[test]
+    fn test_el3_references() {
         // Test computed values from the reference
         // Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions III.”
         fn test_reference(x: f64, kc: f64, p: f64, expected: f64) {
