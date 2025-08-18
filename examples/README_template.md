@@ -76,11 +76,10 @@ Learn more at [doc.rs](https://docs.rs/ellip).
     - `elliprd`: Degenerate elliptic integral of the third kind (RD).
 
 # Testing
-{{TESTSUMMARY}}
 
-The function results are compared with Boost Math test data and Wolfram Engine test data.
-The accuracy report and the test data along with the test generation scripts can
-be found [here](https://github.com/p-sira/ellip/blob/main/tests).
+In the unit tests, the functions are tested against the Boost Math and Wolfram test data. Since Ellip accepts the argument `m` (parameter) instead of `k` (modulus) to allow larger domain support, the full accuracy report uses exclusively the Wolfram data. The full accuracy report, test data, and test generation scripts can be found [here](https://github.com/p-sira/ellip/blob/main/tests).
+
+{{TESTSUMMARY}}
 
 ---
 

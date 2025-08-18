@@ -76,6 +76,9 @@ Learn more at [doc.rs](https://docs.rs/ellip).
     - `elliprd`: Degenerate elliptic integral of the third kind (RD).
 
 # Testing
+
+In the unit tests, the functions are tested against the Boost Math and Wolfram test data. Since Ellip accepts the argument `m` (parameter) instead of `k` (modulus) to allow larger domain support, the full accuracy report uses exclusively the Wolfram data. The full accuracy report, test data, and test generation scripts can be found [here](https://github.com/p-sira/ellip/blob/main/tests).
+
 Generated on x86_64-unknown-linux-gnu rustc 1.88.0 using ellip v0.3.7 at `f64` precision (ε≈2.22e-16).
 
 ### Legendre's Elliptic Integrals
@@ -108,10 +111,6 @@ Generated on x86_64-unknown-linux-gnu rustc 1.88.0 using ellip v0.3.7 at `f64` p
 | elliprj  | 0.67             | 5.42e7        | 166.5 ns         |
 | elliprc  | 0.00             | 2.82          | 23.2 ns          |
 | elliprd  | 0.62             | 6.49          | 76.1 ns          |
-
-The function results are compared with Boost Math test data and Wolfram Engine test data.
-The accuracy report and the test data along with the test generation scripts can
-be found [here](https://github.com/p-sira/ellip/blob/main/tests).
 
 ---
 
