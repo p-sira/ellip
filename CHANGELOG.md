@@ -1,12 +1,26 @@
 # Changelog
 ## 0.3
+### 0.3.7
+**Bug Fixes**
+- `ellippiinc`: Fix negative m domain where n < 0 and m <= n.
+
+**Improvements**
+- Improve performance across all functions by removing unnecessary checks.
+- Improve and fix error messages.
+- Add test summary and benchmark data in README.
+- `el3`: Improve accuracy.
+- `elliprj`: Slightly increase accuracy of the p.v. cases.
+
+**Tests**
+- Add Wolfram test data for `ellipd` and `ellipdinc`.
+
 ### 0.3.6
 **Bug Fixes**
 - `ellipdinc`: Fix incorrect result when m = -inf.
 - `el3`: Fix NAN when p is small and kc = 0.
 
 **Improvements**
-- Improve performance of `legendre` functions and `el3`.
+- Improve performance of `legendre` functions by lazy checking and `el3` by using array instead of Vec.
 - Handle special cases and edge cases (infinity, nan, etc.) for all `carlson` functions.
 - Increase test coverage.
 
@@ -20,7 +34,7 @@
 
 **Improvements**
 - Loosen the bounds of the `bulirsch` functions.
-- Improve the performance of the `bulirsch` functions.
+- Improve the performance of the `bulirsch` functions by lazy checking.
 - Handle special cases and edge cases (infinity, nan, etc.) for all `bulirsch` functions.
 - Add special cases documentation for `bulirsch` functions.
 - Improve and fix documentation.

@@ -11,7 +11,7 @@
 //  Use, modification and distribution are subject to the
 //  Boost Software License, Version 1.0.
 
-use crate::{crate_util::check, ellipd, elliprd, StrErr};
+use crate::{carlson::elliprd_unchecked, crate_util::check, ellipd, StrErr};
 use num_traits::Float;
 
 /// Computes [incomplete elliptic integral of Legendre's type](https://dlmf.nist.gov/19.2.E6).
@@ -44,7 +44,6 @@ use num_traits::Float;
 ///
 /// ## Special Cases
 /// - D(0, m) = 0
-/// - D(φ, 0) = sin φ
 /// - D(π/2, m) = D(m)
 /// - D(φ, -∞) = 0
 /// - D(∞, m) = ∞
@@ -76,7 +75,6 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     let phi = phi.abs();
     if phi > 1.0 / epsilon!() {
         if phi >= max_val!() {
-            // Need to handle infinity as a special case:
             return Ok(sign * inf!());
         }
         // Phi is so large that phi%pi is necessarily zero (or garbage),
@@ -109,39 +107,41 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 
     let mut result = 0.0;
     if rphi != 0.0 {
-        result = s * elliprd(cm1, c - m, c)? / 3.0;
+        result = s * elliprd_unchecked(cm1, c - m, c) / 3.0;
     }
     if mm != 0.0 {
         result = result + mm * ellipd(m)?;
     }
 
     let ans = sign * result;
-    #[cfg(feature = "reduce-iteration")]
+    #[cfg(feature = "test_force_fail")]
     let ans = nan!();
 
-    if ans.is_nan() {
-        check!(@nan, ellipdinc, [phi, m]);
-        Err("ellipdinc: Unexpected error.")
-    } else {
-        Ok(ans)
+    if !ans.is_nan() {
+        // Infinites should be handled properly by ellipd
+        return Ok(ans);
     }
+    check!(@nan, ellipdinc, [phi, m]);
+    Err("ellipdinc: Unexpected error.")
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use core::f64;
 
     use super::*;
-    use crate::compare_test_data_boost;
-
-    fn ellipdinc_k(inp: &[f64]) -> f64 {
-        ellipdinc(inp[0], inp[1] * inp[1]).unwrap()
-    }
+    use crate::{compare_test_data_boost, compare_test_data_wolfram};
 
     #[test]
     fn test_ellipdinc() {
-        compare_test_data_boost!("ellipdinc_data.txt", ellipdinc_k, 6.4e-16);
+        compare_test_data_boost!("ellipdinc_data.txt", ellipdinc, 2, 6.4e-16);
+    }
+
+    #[test]
+    fn test_ellipdinc_wolfram() {
+        compare_test_data_wolfram!("ellipdinc_data.csv", ellipdinc, 2, 2e-15);
+        compare_test_data_wolfram!("ellipdinc_neg.csv", ellipdinc, 2, 1e-15);
     }
 
     #[test]
@@ -153,7 +153,10 @@ mod tests {
         // phi = pi/2, m = 1: D(pi/2, 1) = inf
         assert_eq!(ellipdinc(FRAC_PI_2, 1.0).unwrap(), INFINITY);
         // m * sin^2(phi) >= 1: should return Err
-        assert!(ellipdinc(FRAC_PI_2, 2.0).is_err());
+        assert_eq!(
+            ellipdinc(FRAC_PI_2, 2.0),
+            Err("ellipdinc: m sin²φ must be smaller than one.")
+        );
         // phi = 0: D(0, m) = 0
         assert_eq!(ellipdinc(0.0, 0.5).unwrap(), 0.0);
         // phi = pi/2, m = 0: D(pi/2, 0) = pi/4
@@ -166,20 +169,29 @@ mod tests {
             2.0 * 1e16 * ellipd(0.4).unwrap() / PI
         );
         // phi = nan or m = nan: should return Err
-        assert!(ellipdinc(NAN, 0.5).is_err());
-        assert!(ellipdinc(0.5, NAN).is_err());
+        assert_eq!(
+            ellipdinc(NAN, 0.5),
+            Err("ellipdinc: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            ellipdinc(0.5, NAN),
+            Err("ellipdinc: Arguments cannot be NAN.")
+        );
         // phi = inf: D(inf, m) = inf
         assert_eq!(ellipdinc(INFINITY, 0.5).unwrap(), INFINITY);
         // phi = -inf: D(-inf, m) = -inf
         assert_eq!(ellipdinc(NEG_INFINITY, 0.5).unwrap(), NEG_INFINITY);
         // m = inf: should return Err
-        assert!(ellipdinc(0.5, INFINITY).is_err());
+        assert_eq!(
+            ellipdinc(0.5, INFINITY),
+            Err("ellipdinc: m sin²φ must be smaller than one.")
+        );
         // m = -inf: D(phi, -inf) = 0.0
         assert_eq!(ellipdinc(0.5, NEG_INFINITY).unwrap(), 0.0);
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
-    assert!(ellipdinc(0.5, 0.5).is_err());
+    assert_eq!(ellipdinc(0.5, 0.5), Err("ellipdinc: Unexpected error."));
 }

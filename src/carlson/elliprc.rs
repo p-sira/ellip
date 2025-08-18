@@ -13,7 +13,7 @@
 use num_traits::Float;
 
 use crate::{
-    crate_util::{case, check, declare, let_mut, return_if_valid_else},
+    crate_util::{case, check, let_mut},
     StrErr,
 };
 
@@ -74,13 +74,25 @@ pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, StrErr> {
         return Err("elliprc: y must be non-zero.");
     }
 
-    _elliprc(x, y)
+    let ans = elliprc_unchecked(x, y);
+    if ans.is_finite() {
+        return Ok(ans);
+    }
+    check!(@nan, elliprc, [x, y]);
+    case!(@any [x, y] == inf!(), T::zero());
+    Err("elliprc: Unexpected error.")
 }
 
+/// Unsafe version of [elliprc](crate::elliprc).
+///
+/// Undefined behavior with invalid arguments and edge cases.
+/// # Known Invalid Cases
+/// - x < 0
+/// - y = 0
+/// - x = ∞ or y = ∞
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
-fn _elliprc<T: Float>(x: T, y: T) -> Result<T, StrErr> {
-    declare!([_x = x, _y = y]);
+pub fn elliprc_unchecked<T: Float>(x: T, y: T) -> T {
     let_mut!(x, y);
     let mut prefix = 1.0;
     // for y < 0, the integral is singular, return Cauchy principal value
@@ -91,35 +103,29 @@ fn _elliprc<T: Float>(x: T, y: T) -> Result<T, StrErr> {
     }
 
     if x == 0.0 {
-        return Ok(prefix * pi_2!() / y.sqrt());
+        return prefix * pi_2!() / y.sqrt();
     }
 
     if x == y {
-        return Ok(prefix / x.sqrt());
+        return prefix / x.sqrt();
     }
 
     if y > x {
-        return Ok(prefix * ((y - x) / x).sqrt().atan() / (y - x).sqrt());
+        return prefix * ((y - x) / x).sqrt().atan() / (y - x).sqrt();
     }
 
-    #[allow(unused_assignments)]
-    let mut ans = nan!();
-    #[cfg(not(feature = "reduce-iteration"))]
+    #[cfg(feature = "test_force_fail")]
+    return nan!();
+
     if y / x > 0.5 {
         let arg = ((x - y) / x).sqrt();
-        ans = prefix * ((arg).ln_1p() - (-arg).ln_1p()) / (2.0 * (x - y).sqrt())
+        prefix * ((arg).ln_1p() - (-arg).ln_1p()) / (2.0 * (x - y).sqrt())
     } else {
-        ans = prefix * ((x.sqrt() + (x - y).sqrt()) / y.sqrt()).ln() / (x - y).sqrt()
-    };
-
-    return_if_valid_else!(ans, {
-        check!(@nan, elliprc, [_x, _y]);
-        case!(@any [_x, _y] == inf!(), T::zero());
-        Err("elliprc: Unexpected error.")
-    })
+        prefix * ((x.sqrt() + (x - y).sqrt()) / y.sqrt()).ln() / (x - y).sqrt()
+    }
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -138,9 +144,9 @@ mod tests {
     fn test_elliprc_special_cases() {
         use std::f64::{consts::PI, INFINITY, NAN};
         // x < 0: should return Err
-        assert!(elliprc(-1.0, 1.0).is_err());
+        assert_eq!(elliprc(-1.0, 1.0), Err("elliprc: x must be non-negative."));
         // y == 0: should return Err
-        assert!(elliprc(1.0, 0.0).is_err());
+        assert_eq!(elliprc(1.0, 0.0), Err("elliprc: y must be non-zero."));
         // RC(x, x) = 1/sqrt(x)
         assert_eq!(elliprc(1.0, 1.0).unwrap(), 1.0);
         assert_eq!(elliprc(4.0, 4.0).unwrap(), 0.5);
@@ -160,15 +166,15 @@ mod tests {
             ((3.0 + 8.0.sqrt()).ln() / 8.0.sqrt())
         );
         // NANs: should return Err
-        assert!(elliprc(NAN, 1.0).is_err());
-        assert!(elliprc(1.0, NAN).is_err());
+        assert_eq!(elliprc(NAN, 1.0), Err("elliprc: Arguments cannot be NAN."));
+        assert_eq!(elliprc(1.0, NAN), Err("elliprc: Arguments cannot be NAN."));
         // Infs: should return 0
         assert_eq!(elliprc(INFINITY, 1.0).unwrap(), 0.0);
         assert_eq!(elliprc(1.0, INFINITY).unwrap(), 0.0);
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
-    assert!(elliprc(2.0, 1.0).is_err());
+    assert_eq!(elliprc(2.0, 1.0), Err("elliprc: Unexpected error."));
 }

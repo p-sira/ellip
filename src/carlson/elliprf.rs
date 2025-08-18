@@ -15,8 +15,9 @@ use std::mem::swap;
 use num_traits::Float;
 
 use crate::{
-    crate_util::{case, check, return_if_valid_else},
-    elliprc, StrErr,
+    carlson::elliprc_unchecked,
+    crate_util::{case, check, declare},
+    StrErr,
 };
 
 /// Computes RF ([symmetric elliptic integral of the first kind](https://dlmf.nist.gov/19.16.E1)).
@@ -66,56 +67,62 @@ use crate::{
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
-    if x.min(y).min(z) < 0.0 || (y + z).min(x + y).min(x + z) < 0.0 {
-        return Err("elliprf: x, y, and z must be non-negative, and at most one can be zero.");
+    let ans = elliprf_unchecked(x, y, z);
+    if ans.is_finite() {
+        return Ok(ans);
     }
+    check!(@nan, elliprf, [x, y, z]);
+    check!(@neg, elliprf, [x, y, z]);
+    check!(@multi_zero, elliprf, [x, y, z]);
+    case!(@any [x, y, z] == inf!(), T::zero());
+    Err("elliprf: Failed to converge.")
+}
 
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[inline]
+pub fn elliprf_unchecked<T: Float>(x: T, y: T, z: T) -> T {
     // Special cases from http://dlmf.nist.gov/19.20#i
     if x == y {
         if x == z {
             // RF(x,x,x)
-            return Ok(1.0 / x.sqrt());
+            return 1.0 / x.sqrt();
         }
 
         if z == 0.0 {
             // RF(x,x,0)
             // RF(0,y,y)
-            return Ok(pi!() / (2.0 * x.sqrt()));
+            return pi!() / (2.0 * x.sqrt());
         }
 
         // RF(x,x,z)
         // RF(x,y,y)
-        return elliprc(z, x);
+        return elliprc_unchecked(z, x);
     }
 
     if x == z {
         if y == 0.0 {
             // RF(x,0,x)
             // RF(0,y,y)
-            return Ok(pi!() / (2.0 * x.sqrt()));
+            return pi!() / (2.0 * x.sqrt());
         }
 
         // RF(x,y,x)
         // RF(x,y,y)
-        return elliprc(y, x);
+        return elliprc_unchecked(y, x);
     }
 
     if y == z {
         if x == 0.0 {
             // RF(0,y,y)
-            return Ok(pi!() / (2.0 * y.sqrt()));
+            return pi!() / (2.0 * y.sqrt());
         }
 
         // RF(x,y,y)
-        return elliprc(x, y);
+        return elliprc_unchecked(x, y);
     }
 
-    let mut xn = x;
-    let mut yn = y;
-    let mut zn = z;
-
+    declare!(mut [xn = x, yn = y, zn = z]);
     if xn == 0.0 {
         swap(&mut xn, &mut zn);
     } else if yn == 0.0 {
@@ -123,18 +130,18 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
     }
 
     if zn == 0.0 {
-        let mut xn = xn.sqrt();
-        let mut yn = yn.sqrt();
-
-        while (xn - yn).abs() >= 2.7 * epsilon!() * xn.abs() {
-            let t = (xn * yn).sqrt();
-            xn = (xn + yn) / 2.0;
-            yn = t;
+        declare!(mut [xn = xn.sqrt(), yn = yn.sqrt(), t]);
+        for _ in 0..N_MAX_ITERATIONS {
+            if (xn - yn).abs() >= 2.7 * epsilon!() * xn.abs() {
+                t = (xn * yn).sqrt();
+                xn = (xn + yn) / 2.0;
+                yn = t;
+                continue;
+            }
+            break;
         }
-        return Ok(pi!() / (xn + yn));
+        return pi!() / (xn + yn);
     }
-
-    let four = 4.0;
 
     let mut an = (xn + yn + zn) / 3.0;
     let a0 = an;
@@ -143,22 +150,20 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
             .max((an - xn).abs())
             .max((an - yn).abs())
             .max((an - zn).abs());
-    let mut fn_val = 1.0;
-    let mut ans = nan!();
+    declare!(mut [fn_val = T::one(), ans = nan!()]);
     for _ in 0..N_MAX_ITERATIONS {
         let root_x = xn.sqrt();
         let root_y = yn.sqrt();
         let root_z = zn.sqrt();
 
         let lambda = root_x * root_y + root_x * root_z + root_y * root_z;
+        an = (an + lambda) / 4.0;
+        xn = (xn + lambda) / 4.0;
+        yn = (yn + lambda) / 4.0;
+        zn = (zn + lambda) / 4.0;
 
-        an = (an + lambda) / four;
-        xn = (xn + lambda) / four;
-        yn = (yn + lambda) / four;
-        zn = (zn + lambda) / four;
-
-        q = q / four;
-        fn_val = fn_val * four;
+        q = q / 4.0;
+        fn_val = fn_val * 4.0;
 
         if q < an.abs() {
             let x = (a0 - x) / (an * fn_val);
@@ -177,20 +182,16 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         }
     }
 
-    return_if_valid_else!(ans, {
-        check!(@nan, elliprf, [x, y, z]);
-        case!(@any [x, y, z] == inf!(), T::zero());
-        Err("elliprf: Failed to converge.")
-    })
+    ans
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 const N_MAX_ITERATIONS: usize = 11;
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 const N_MAX_ITERATIONS: usize = 1;
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use core::f64;
@@ -241,17 +242,44 @@ mod tests {
     fn test_elliprf_special_cases() {
         use std::f64::{INFINITY, NAN};
         // Negative arguments: should return Err
-        assert!(elliprf(-1.0, 1.0, 1.0).is_err());
-        assert!(elliprf(1.0, -1.0, 1.0).is_err());
-        assert!(elliprf(1.0, 1.0, -1.0).is_err());
+        assert_eq!(
+            elliprf(-1.0, 1.0, 2.0),
+            Err("elliprf: Arguments must be non-negative.")
+        );
+        assert_eq!(
+            elliprf(1.0, -1.0, 1.0),
+            Err("elliprf: Arguments must be non-negative.")
+        );
+        assert_eq!(
+            elliprf(1.0, 1.0, -1.0),
+            Err("elliprf: Arguments must be non-negative.")
+        );
         // More than one zero: should return Err
-        assert!(elliprf(0.0, 0.0, 1.0).is_err());
-        assert!(elliprf(0.0, 1.0, 0.0).is_err());
-        assert!(elliprf(1.0, 0.0, 0.0).is_err());
+        assert_eq!(
+            elliprf(0.0, 0.0, 1.0),
+            Err("elliprf: At most one argument can be zero.")
+        );
+        assert_eq!(
+            elliprf(0.0, 1.0, 0.0),
+            Err("elliprf: At most one argument can be zero.")
+        );
+        assert_eq!(
+            elliprf(1.0, 0.0, 0.0),
+            Err("elliprf: At most one argument can be zero.")
+        );
         // NANs: should return Err
-        assert!(elliprf(NAN, 1.0, 1.0).is_err());
-        assert!(elliprf(1.0, NAN, 1.0).is_err());
-        assert!(elliprf(1.0, 1.0, NAN).is_err());
+        assert_eq!(
+            elliprf(NAN, 1.0, 1.0),
+            Err("elliprf: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            elliprf(1.0, NAN, 1.0),
+            Err("elliprf: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            elliprf(1.0, 1.0, NAN),
+            Err("elliprf: Arguments cannot be NAN.")
+        );
         // Infs: should return zero
         assert_eq!(elliprf(INFINITY, 1.0, 1.0).unwrap(), 0.0);
         assert_eq!(elliprf(1.0, INFINITY, 1.0).unwrap(), 0.0);
@@ -259,7 +287,7 @@ mod tests {
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
-    assert!(elliprf(0.2, 0.5, 1e300).is_err());
+    assert_eq!(elliprf(0.2, 0.5, 1e300), Err("elliprf: Failed to converge."));
 }

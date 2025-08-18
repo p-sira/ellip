@@ -8,7 +8,7 @@ use num_traits::Float;
 
 use crate::{
     bulirsch::DefaultPrecision,
-    crate_util::{case, check, declare, return_if_valid_else},
+    crate_util::{case, check, declare},
     StrErr,
 };
 
@@ -78,11 +78,7 @@ pub fn _cel<T: Float, C: _BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T
     check!(@zero, cel, [kc, p]);
 
     let mut kc = kc.abs();
-    if kc == inf!() {
-        return Ok(0.0);
-    }
-
-    declare!(mut [pp = p, aa = a, bb = b]);
+    declare!(mut [pp = p, aa = a, bb = b, f, q, g]);
 
     let mut e = kc;
     let mut m = 1.0;
@@ -91,9 +87,9 @@ pub fn _cel<T: Float, C: _BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T
         pp = pp.sqrt();
         bb = bb / pp;
     } else {
-        let mut f = kc * kc;
-        let mut q = 1.0 - f;
-        let g = 1.0 - pp;
+        f = kc * kc;
+        q = 1.0 - f;
+        g = 1.0 - pp;
         f = f - pp;
         q = (bb - aa * pp) * q;
         pp = (f / g).sqrt();
@@ -103,12 +99,12 @@ pub fn _cel<T: Float, C: _BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T
 
     let mut ans = T::nan();
     for _ in 0..MAX_ITERATION {
-        let f = aa;
+        f = aa;
         aa = bb / pp + aa;
-        let g = e / pp;
+        g = e / pp;
         bb = 2.0 * (f * g + bb);
         pp = g + pp;
-        let g = m;
+        g = m;
         m = kc + m;
 
         if (g - kc).abs() > g * C::ca() {
@@ -121,18 +117,19 @@ pub fn _cel<T: Float, C: _BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T
         break;
     }
 
-    return_if_valid_else!(ans, {
-        check!(@nan, cel, [kc, p, a, b]);
-        check!(@multi, cel, "infinite", is_infinite, [kc, p, a, b]);
-        case!(@any [kc.abs(), p.abs()] == inf!(), T::zero());
-        if a.is_infinite() {
-            return Ok(a.signum() * inf!());
-        }
-        if b.is_infinite() {
-            return Ok(b.signum() * inf!());
-        }
-        Err("cel: Failed to converge.")
-    })
+    if ans.is_finite() {
+        return Ok(ans);
+    }
+    check!(@nan, cel, [kc, p, a, b]);
+    check!(@multi, cel, "infinite", is_infinite, [kc, p, a, b]);
+    case!(@any [kc.abs(), p.abs()] == inf!(), T::zero());
+    if a.is_infinite() {
+        return Ok(a.signum() * inf!());
+    }
+    if b.is_infinite() {
+        return Ok(b.signum() * inf!());
+    }
+    Err("cel: Failed to converge.")
 }
 
 /// Computes [complete elliptic integral of the first kind in Bulirsch's form](https://link.springer.com/article/10.1007/bf01397975).
@@ -183,12 +180,9 @@ pub fn cel1<T: Float>(kc: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn _cel1<T: Float, C: _BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
-    let mut kc = kc.abs();
-    let mut m = 1.0;
-
-    let mut ans = T::nan();
+    declare!(mut [kc = kc.abs(), m = T::one(), ans = T::nan(), h]);
     for _ in 0..MAX_ITERATION {
-        let h = m;
+        h = m;
         m = kc + m;
 
         if (h - kc).abs() > C::ca() * h {
@@ -201,14 +195,12 @@ pub fn _cel1<T: Float, C: _BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
         break;
     }
 
-    return_if_valid_else!(ans, {
-        check!(@nan, cel1, [kc]);
-        check!(@zero, cel1, [kc]);
-        if kc.is_infinite() {
-            return Ok(0.0);
-        }
-        Err("cel1: Failed to converge.")
-    })
+    if ans.is_finite() {
+        return Ok(ans);
+    }
+    check!(@nan, cel1, [kc]);
+    check!(@zero, cel1, [kc]);
+    Err("cel1: Failed to converge.")
 }
 
 /// Computes [complete elliptic integral of the second kind in Bulirsch's form](https://link.springer.com/article/10.1007/bf01397975).
@@ -268,22 +260,13 @@ pub fn cel2<T: Float>(kc: T, a: T, b: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn _cel2<T: Float, C: _BulirschConst<T>>(kc: T, a: T, b: T) -> Result<T, StrErr> {
-    if kc == 0.0 {
-        return Err("cel2: kc cannot be zero.");
-    }
-
-    let mut kc = kc.abs();
-    declare!(mut [aa = a, bb = b]);
-
-    let mut m = 1.0;
-    let mut c = aa;
+    declare!(mut [kc = kc.abs(), aa = a, bb = b, m = T::one(), c = aa, ans = T::nan(), m0]);
     aa = bb + aa;
 
-    let mut ans = T::nan();
     for _ in 0..MAX_ITERATION {
         bb = (c * kc + bb) * 2.0;
         c = aa;
-        let m0 = m;
+        m0 = m;
         m = kc + m;
         aa = bb / m + aa;
 
@@ -296,28 +279,30 @@ pub fn _cel2<T: Float, C: _BulirschConst<T>>(kc: T, a: T, b: T) -> Result<T, Str
         break;
     }
 
-    return_if_valid_else!(ans, {
-        check!(@nan, cel2, [kc, a, b]);
-        check!(@multi, cel2, "infinite", is_infinite, [kc, a, b]);
-        if kc.is_infinite() {
-            return Ok(0.0);
-        }
-        if a.is_infinite() {
-            return Ok(a.signum() * inf!());
-        }
-        if b.is_infinite() {
-            return Ok(b.signum() * inf!());
-        }
-        Err("cel2: Failed to converge.")
-    })
+    if ans.is_finite() {
+        return Ok(ans);
+    }
+    check!(@nan, cel2, [kc, a, b]);
+    check!(@zero, cel2, [kc]);
+    check!(@multi, cel2, "infinite", is_infinite, [kc, a, b]);
+    if kc.is_infinite() {
+        return Ok(0.0);
+    }
+    if a.is_infinite() {
+        return Ok(a.signum() * inf!());
+    }
+    if b.is_infinite() {
+        return Ok(b.signum() * inf!());
+    }
+    Err("cel2: Failed to converge.")
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 const MAX_ITERATION: i16 = 10;
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 const MAX_ITERATION: i16 = 1;
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use itertools::iproduct;
@@ -383,9 +368,9 @@ mod tests {
     fn test_cel_special_cases() {
         use std::f64::{INFINITY, NAN, NEG_INFINITY};
         // kc = 0: should return Err
-        assert!(cel(0.0, 1.0, 1.0, 1.0).is_err());
+        assert_eq!(cel(0.0, 1.0, 1.0, 1.0), Err("cel: kc cannot be zero."));
         // p = 0: should return Err
-        assert!(cel(0.5, 0.0, 1.0, 1.0).is_err());
+        assert_eq!(cel(0.5, 0.0, 1.0, 1.0), Err("cel: p cannot be zero."));
         // a = 0, b = 0: cel(kc, p, 0, 0) = 0
         assert_eq!(cel(0.5, 1.0, 0.0, 0.0).unwrap(), 0.0);
         // kc = inf: cel(inf, p, a, b) = 0
@@ -405,10 +390,22 @@ mod tests {
         // b = inf: cel(kc, p, a, -inf) = -inf
         assert_eq!(cel(0.5, 1.0, 1.0, NEG_INFINITY).unwrap(), NEG_INFINITY);
         // NANs: should return Err
-        assert!(cel(NAN, 1.0, 1.0, 1.0).is_err());
-        assert!(cel(0.5, NAN, 1.0, 1.0).is_err());
-        assert!(cel(0.5, 1.0, NAN, 1.0).is_err());
-        assert!(cel(0.5, 1.0, 1.0, NAN).is_err());
+        assert_eq!(
+            cel(NAN, 1.0, 1.0, 1.0),
+            Err("cel: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            cel(0.5, NAN, 1.0, 1.0),
+            Err("cel: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            cel(0.5, 1.0, NAN, 1.0),
+            Err("cel: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            cel(0.5, 1.0, 1.0, NAN),
+            Err("cel: Arguments cannot be NAN.")
+        );
     }
 
     #[test]
@@ -428,13 +425,13 @@ mod tests {
     fn test_cel1_special_cases() {
         use std::f64::{INFINITY, NAN, NEG_INFINITY};
         // kc = 0: should return Err
-        assert!(cel1(0.0).is_err());
+        assert_eq!(cel1(0.0), Err("cel1: kc cannot be zero."));
         // kc = inf: cel1(inf) = 0
         assert_eq!(cel1(INFINITY).unwrap(), 0.0);
         // kc = -inf: cel1(-inf) = 0
         assert_eq!(cel1(NEG_INFINITY).unwrap(), 0.0);
         // kc = NaN: should return Err
-        assert!(cel1(NAN).is_err());
+        assert_eq!(cel1(NAN), Err("cel1: Arguments cannot be NAN."));
     }
 
     #[test]
@@ -454,7 +451,7 @@ mod tests {
     fn test_cel2_special_cases() {
         use std::f64::{INFINITY, NAN, NEG_INFINITY};
         // kc = 0: should return Err
-        assert!(cel2(0.0, 1.0, 1.0).is_err());
+        assert_eq!(cel2(0.0, 1.0, 1.0), Err("cel2: kc cannot be zero."));
         // kc = inf: cel2(inf, 1, 1) = 0
         assert_eq!(cel2(INFINITY, 1.0, 1.0).unwrap(), 0.0);
         // kc = -inf: cel2(-inf, 1, 1) = 0
@@ -470,15 +467,15 @@ mod tests {
         // b = inf: cel2(kc, a, -inf) = -inf
         assert_eq!(cel2(0.5, 1.0, NEG_INFINITY).unwrap(), NEG_INFINITY);
         // NANs: should return Err
-        assert!(cel2(NAN, 1.0, 1.0).is_err());
-        assert!(cel2(0.5, NAN, 1.0).is_err());
-        assert!(cel2(0.5, 1.0, NAN).is_err());
+        assert_eq!(cel2(NAN, 1.0, 1.0), Err("cel2: Arguments cannot be NAN."));
+        assert_eq!(cel2(0.5, NAN, 1.0), Err("cel2: Arguments cannot be NAN."));
+        assert_eq!(cel2(0.5, 1.0, NAN), Err("cel2: Arguments cannot be NAN."));
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
-    assert!(cel(1e300, 0.2, 0.5, 0.5).is_err());
-    assert!(cel1(1e300).is_err());
-    assert!(cel2(1e300, 0.5, 0.5).is_err());
+    assert_eq!(cel(1e300, 0.2, 0.5, 0.5), Err("cel: Failed to converge."));
+    assert_eq!(cel1(1e300), Err("cel1: Failed to converge."));
+    assert_eq!(cel2(1e300, 0.5, 0.5), Err("cel2: Failed to converge."));
 }

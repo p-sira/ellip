@@ -13,8 +13,9 @@
 use std::mem::swap;
 
 use crate::{
-    crate_util::{case, check, declare, let_mut, return_if_valid_else},
-    elliprc, elliprd, elliprf, StrErr,
+    carlson::{elliprc_unchecked, elliprd_unchecked, elliprf_unchecked},
+    crate_util::{case, check, declare, let_mut},
+    StrErr,
 };
 use num_traits::Float;
 
@@ -43,6 +44,11 @@ use num_traits::Float;
 ///   - or p = 0.
 /// - Returns the Cauchy principal value if p < 0.
 ///
+/// ## Graph
+/// ![Symmetric Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprj_plot.svg?raw=true)
+///
+/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprj_plot.html)
+///
 /// ## Special Cases
 /// - RJ(x, x, x, x) = 1/(x sqrt(x))
 /// - RJ(x, y, z, z) = RD(x, y, z)
@@ -50,11 +56,6 @@ use num_traits::Float;
 /// - RJ(x, y, y, y) = RD(x, y, y)
 /// - RJ(x, y, y, p) = 3/(p-y) * (RC(x, y) - RC(x, p)) for y ≠ p
 /// - RJ(x, y, z, p) = 0 for x = ∞ or y = ∞ or z = ∞ or p = ∞
-///
-/// ## Graph
-/// ![Symmetric Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprj_plot.svg?raw=true)
-///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprj_plot.html)
 ///
 /// # Related Functions
 /// With c = csc²φ and kc² = 1 - m,
@@ -72,16 +73,45 @@ use num_traits::Float;
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
-    if x.min(y).min(z) < 0.0 || (y + z).min(x + y).min(x + z) == 0.0 {
-        return Err("elliprj: x, y, and z must be non-negative, and at most one can be zero.");
-    }
-    if p == 0.0 {
-        return Err("elliprj: p must be non-zero");
-    }
+    let ans = elliprj_unchecked(x, y, z, p);
 
+    if ans.is_finite() {
+        return Ok(ans);
+    }
+    check!(@nan, elliprj, [x, y, z, p]);
+    check!(@zero, elliprj, [p]);
+    check!(@neg, elliprj, "x, y, and z must be non-negative.", [x, y, z]);
+    check!(@multi_zero, elliprj, [x, y, z]);
+    case!(@any [x, y, z, p] == inf!(), T::zero());
+    Err("elliprj: Failed to converge.")
+}
+
+/// Calculate RC(1, 1 + x)
+#[inline]
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+fn elliprc1p<T: Float>(y: T) -> T {
+    // We can skip y = -1 check since the call from elliprj already did the check.
+    // for 1 + y < 0, the integral is singular, return Cauchy principal value
+    if y > 0.0 {
+        y.sqrt().atan() / y.sqrt()
+    } else if y == 0.0 {
+        1.0
+    } else if y > -0.5 {
+        let arg = (-y).sqrt();
+        (arg.ln_1p() - (-arg).ln_1p()) / (2.0 * (-y).sqrt())
+    } else if y < -1.0 {
+        (1.0 / -y).sqrt() * elliprc_unchecked(-y, -1.0 - y)
+    } else {
+        ((1.0 + (-y).sqrt()) / (1.0 + y).sqrt()).ln() / (-y).sqrt()
+    }
+}
+
+#[inline]
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
     let_mut!(x, y, z);
     // for p < 0, the integral is singular, return Cauchy principal value
-    if p < 0.0 {
+    if p <= 0.0 {
         // We must ensure that x < y < z.
         // Since the integral is symmetrical in x, y and z
         // we can just permute the values:
@@ -96,51 +126,33 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
         }
 
         let q = -p;
-        let p = (z * (x + y + q) - x * y) / (z + q);
-        let mut value = (p - z) * _elliprj(x, y, z, p)?;
-        value = value - 3.0 * elliprf(x, y, z)?;
-        value =
-            value + 3.0 * ((x * y * z) / (x * y + p * q)).sqrt() * elliprc(x * y + p * q, p * q)?;
-        return Ok(value / (z + q));
+        let z_plus_q = z + q;
+        let xy = x * y;
+        let p = (z * (x + y + q) - xy) / z_plus_q;
+        let pq = p * q;
+        let xy_plus_pq = xy + pq;
+        let xyz = xy * z;
+
+        let rj = elliprj_unchecked(x, y, z, p);
+        let rf = elliprf_unchecked(x, y, z);
+        let rc = elliprc_unchecked(xy_plus_pq, pq);
+
+        let mut value = (p - z) * rj;
+        value = value - 3.0 * rf;
+        value = value + 3.0 * (xyz / xy_plus_pq).sqrt() * rc;
+        return value / z_plus_q;
     }
 
-    _elliprj(x, y, z, p)
-}
-
-/// Calculate RC(1, 1 + x)
-#[inline]
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
-fn elliprc1p<T: Float>(y: T) -> Result<T, StrErr> {
-    // We can skip y = -1 check since the call from elliprj already did the check.
-    // for 1 + y < 0, the integral is singular, return Cauchy principal value
-    if y > 0.0 {
-        Ok(y.sqrt().atan() / y.sqrt())
-    } else if y == 0.0 {
-        Ok(1.0)
-    } else if y > -0.5 {
-        let arg = (-y).sqrt();
-        Ok((arg.ln_1p() - (-arg).ln_1p()) / (2.0 * (-y).sqrt()))
-    } else if y < -1.0 {
-        Ok((1.0 / -y).sqrt() * elliprc(-y, -1.0 - y)?)
-    } else {
-        Ok(((1.0 + (-y).sqrt()) / (1.0 + y).sqrt()).ln() / (-y).sqrt())
-    }
-}
-
-#[inline]
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
-fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
-    let_mut!(x, z);
     // Special cases
     // https://dlmf.nist.gov/19.20#iii
     if x == y {
         if x == z {
             if x == p {
                 // RJ(x,x,x,x)
-                return Ok(1.0 / (x * x.sqrt()));
+                return 1.0 / (x * x.sqrt());
             } else {
                 // RJ(x,x,x,p)
-                return Ok((3.0 / (x - p)) * (elliprc(x, p)? - 1.0 / x.sqrt()));
+                return (3.0 / (x - p)) * (elliprc_unchecked(x, p) - 1.0 / x.sqrt());
             }
         } else {
             // RJ(x,x,z,p)
@@ -153,18 +165,18 @@ fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
     if y == z {
         if y == p {
             // RJ(x,y,y,y)
-            return elliprd(x, y, y);
+            return elliprd_unchecked(x, y, y);
         }
         // This prevents division by zero.
         if p.max(y) / p.min(y) > 1.2 {
             // RJ(x,y,y,p)
-            return Ok((3.0 / (p - y)) * (elliprc(x, y)? - elliprc(x, p)?));
+            return 3.0 * (elliprc_unchecked(x, y) - elliprc_unchecked(x, p)) / (p - y);
         }
     }
 
     if z == p {
         // RJ(x,y,z,z)
-        return elliprd(x, y, z);
+        return elliprd_unchecked(x, y, z);
     }
 
     declare!(mut [xn = x, yn = y, zn = z, pn = p]);
@@ -191,9 +203,9 @@ fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
 
         if en < -0.5 && en > -1.5 {
             let b = 2.0 * rp * (pn + rx * (ry + rz) + ry * rz) / dn;
-            rc_sum = rc_sum + fmn / dn * elliprc(1.0, b)?;
+            rc_sum = rc_sum + fmn / dn * elliprc_unchecked(1.0, b);
         } else {
-            rc_sum = rc_sum + fmn / dn * elliprc1p(en)?;
+            rc_sum = rc_sum + fmn / dn * elliprc1p(en);
         }
 
         let lambda = rx * ry + rx * rz + ry * rz;
@@ -237,33 +249,22 @@ fn _elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
         delta = delta / 64.0;
     }
 
-    return_if_valid_else!(ans, {
-        check!(@nan, elliprj, [x, y, z, p]);
-        case!(@any [x, y, z, p] == inf!(), T::zero());
-        eprintln!(
-            "{}, {}, {}, {}",
-            x.to_f64().unwrap(),
-            y.to_f64().unwrap(),
-            z.to_f64().unwrap(),
-            p.to_f64().unwrap()
-        );
-        Err("elliprj: Failed to converge.")
-    })
+    ans
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 const N_MAX_ITERATION: usize = 100;
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 const N_MAX_ITERATION: usize = 1;
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use itertools::Itertools;
 
     use super::*;
-    use crate::{assert_close, compare_test_data_boost};
+    use crate::{assert_close, compare_test_data_boost, compare_test_data_wolfram};
 
     fn __elliprj(inp: &[&f64]) -> f64 {
         elliprj(*inp[0], *inp[1], *inp[2], *inp[3]).unwrap()
@@ -285,47 +286,70 @@ mod tests {
 
     #[test]
     fn test_elliprj() {
-        compare_test_data_boost!("elliprj_data.txt", _elliprj, 2.7e-14, 5e-25);
+        compare_test_data_boost!("elliprj_data.txt", _elliprj, 2.7e-14, atol: 5e-25);
+        compare_test_data_boost!("elliprj_e2.txt", _elliprj, 4.8e-14, atol: 5e-25);
+        compare_test_data_boost!("elliprj_e3.txt", _elliprj, 3.1e-15, atol: 5e-25);
+        compare_test_data_boost!("elliprj_e4.txt", _elliprj, 2.2e-16, atol: 5e-25);
+        compare_test_data_boost!("elliprj_zp.txt", _elliprj, 3.5e-15, atol: 5e-25);
     }
 
     #[test]
-    fn test_elliprj_e2() {
-        compare_test_data_boost!("elliprj_e2.txt", _elliprj, 4.8e-14, 5e-25);
-    }
-
-    #[test]
-    fn test_elliprj_e3() {
-        compare_test_data_boost!("elliprj_e3.txt", _elliprj, 3.1e-15, 5e-25);
-    }
-
-    #[test]
-    fn test_elliprj_e4() {
-        compare_test_data_boost!("elliprj_e4.txt", _elliprj, 2.2e-16, 5e-25);
-    }
-
-    #[test]
-    fn test_elliprj_zp() {
-        compare_test_data_boost!("elliprj_zp.txt", _elliprj, 3.5e-15, 5e-25);
+    fn test_elliprj_wolfram() {
+        compare_test_data_wolfram!("elliprj_data.csv", elliprj, 4, 2e-15);
+        compare_test_data_wolfram!("elliprj_pv.csv", elliprj, 4, 2e-10);
     }
 
     #[test]
     fn test_elliprj_special_cases() {
         use std::f64::{INFINITY, NAN};
         // Negative arguments: should return Err
-        assert!(elliprj(-1.0, 1.0, 1.0, 1.0).is_err());
-        assert!(elliprj(1.0, -1.0, 1.0, 1.0).is_err());
-        assert!(elliprj(1.0, 1.0, -1.0, 1.0).is_err());
+        assert_eq!(
+            elliprj(-1.0, 1.0, 1.0, 1.0),
+            Err("elliprj: x, y, and z must be non-negative.")
+        );
+        assert_eq!(
+            elliprj(1.0, -1.0, 1.0, 1.0),
+            Err("elliprj: x, y, and z must be non-negative.")
+        );
+        assert_eq!(
+            elliprj(1.0, 1.0, -1.0, 1.0),
+            Err("elliprj: x, y, and z must be non-negative.")
+        );
         // More than one zero among x, y, z: should return Err
-        assert!(elliprj(0.0, 0.0, 1.0, 1.0).is_err());
-        assert!(elliprj(0.0, 1.0, 0.0, 1.0).is_err());
-        assert!(elliprj(1.0, 0.0, 0.0, 1.0).is_err());
+        assert_eq!(
+            elliprj(0.0, 0.0, 1.0, 1.0),
+            Err("elliprj: At most one argument can be zero.")
+        );
+        assert_eq!(
+            elliprj(0.0, 1.0, 0.0, 1.0),
+            Err("elliprj: At most one argument can be zero.")
+        );
+        assert_eq!(
+            elliprj(1.0, 0.0, 0.0, 1.0),
+            Err("elliprj: At most one argument can be zero.")
+        );
         // p = 0: should return Err
-        assert!(elliprj(1.0, 1.0, 1.0, 0.0).is_err());
+        assert_eq!(
+            elliprj(1.0, 1.0, 1.0, 0.0),
+            Err("elliprj: p cannot be zero.")
+        );
         // NANs: should return Err
-        assert!(elliprj(NAN, 1.0, 1.0, 1.0).is_err());
-        assert!(elliprj(1.0, NAN, 1.0, 1.0).is_err());
-        assert!(elliprj(1.0, 1.0, NAN, 1.0).is_err());
-        assert!(elliprj(1.0, 1.0, 1.0, NAN).is_err());
+        assert_eq!(
+            elliprj(NAN, 1.0, 1.0, 1.0),
+            Err("elliprj: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            elliprj(1.0, NAN, 1.0, 1.0),
+            Err("elliprj: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            elliprj(1.0, 1.0, NAN, 1.0),
+            Err("elliprj: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            elliprj(1.0, 1.0, 1.0, NAN),
+            Err("elliprj: Arguments cannot be NAN.")
+        );
         // Infs: should return zero
         assert_eq!(elliprj(INFINITY, 1.0, 1.0, 1.0).unwrap(), 0.0);
         assert_eq!(elliprj(1.0, INFINITY, 1.0, 1.0).unwrap(), 0.0);
@@ -336,13 +360,13 @@ mod tests {
     #[test]
     fn cover_deadcode() {
         // else branch
-        assert!(elliprc1p(-0.6).unwrap().is_finite());
+        assert!(elliprc1p(-0.6).is_finite());
         // y < -1
-        assert!(elliprc1p(-1.1).unwrap().is_finite());
+        assert!(elliprc1p(-1.1).is_finite());
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
-    assert!(elliprj(0.2, 0.5, 1e300, 1.0).is_err());
+    assert_eq!(elliprj(0.2, 0.5, 1e300, 1.0), Err("elliprj: Failed to converge."));
 }

@@ -8,8 +8,8 @@ use num_traits::Float;
 
 use crate::{
     bulirsch::DefaultPrecision,
-    crate_util::{check, declare},
-    ellipeinc, ellipf, ellippi, StrErr,
+    crate_util::{case, check, declare, let_mut},
+    ellipeinc, ellipf, ellippi, ellippiinc, StrErr,
 };
 
 use super::{_BulirschConst, cel1, cel2};
@@ -68,33 +68,28 @@ pub fn el1<T: Float>(x: T, kc: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn _el1<T: Float, C: _BulirschConst<T>>(x: T, kc: T) -> Result<T, StrErr> {
+    let ans = el1_unchecked::<T, C>(x, kc);
+    if ans.is_finite() {
+        return Ok(ans);
+    }
     check!(@nan, el1, [x, kc]);
-
-    if x == 0.0 {
-        return Ok(0.0);
-    }
-
-    if kc == 0.0 {
-        return Err("el1: kc cannot be zero.");
-    }
-
-    if kc == inf!() {
-        return Ok(0.0);
-    }
-
-    // phi = π/2
+    check!(@zero, el1, [kc]);
+    case!(kc == inf!(), T::zero());
+    case!(x == T::zero(), T::zero());
     if x == inf!() {
         return cel1(kc);
     }
+    Err("el1: Failed to converge.")
+}
 
-    let mut y = (1.0 / x).abs();
-    let mut kc = kc.abs();
-    let mut m = 1.0;
-    let mut l = 0;
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[inline]
+pub fn el1_unchecked<T: Float, C: _BulirschConst<T>>(x: T, kc: T) -> T {
+    declare!(mut [y = x.recip().abs(), kc = kc.abs(), m = T::one(), l = 0, e, g]);
 
-    loop {
-        let e = m * kc;
-        let g = m;
+    for _ in 0..N_MAX_ITERATIONS {
+        e = m * kc;
+        g = m;
         m = kc + m;
         y = -e / y + y;
 
@@ -111,15 +106,13 @@ pub fn _el1<T: Float, C: _BulirschConst<T>>(x: T, kc: T) -> Result<T, StrErr> {
             continue;
         }
 
-        break;
-    }
+        if y < 0.0 {
+            l += 1;
+        }
 
-    if y < 0.0 {
-        l += 1;
+        return x.signum() * ((m / y).atan() + pi!() * T::from(l).unwrap()) / m;
     }
-
-    let e = ((m / y).atan() + pi!() * T::from(l).unwrap()) / m;
-    Ok(if x < 0.0 { -e } else { e })
+    nan!()
 }
 
 /// Computes [incomplete elliptic integral of the second kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E12).
@@ -179,41 +172,38 @@ pub fn el2<T: Float>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn _el2<T: Float, C: _BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
+    let ans = el2_unchecked::<T, C>(x, kc, a, b);
+    if ans.is_finite() {
+        return Ok(ans);
+    }
     check!(@nan, el2, [x, kc, a, b]);
-
-    if x == 0.0 {
-        return Ok(0.0);
-    }
-
-    if kc == 0.0 {
-        return Err("el2: kc cannot be zero.");
-    }
-
-    // phi = π/2
+    check!(@zero, el2, [kc]);
+    case!(x == T::zero(), T::zero());
     if x == inf!() {
+        // phi = π/2
         return cel2(kc, a, b);
     }
 
-    let mut b = b;
-    let mut c = x * x;
-    let mut d = 1.0 + c;
-    let mut p = ((1.0 + kc * kc * c) / d).sqrt();
+    Err("el2: Failed to converge.")
+}
+
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[inline]
+pub fn el2_unchecked<T: Float, C: _BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> T {
+    let_mut!(b);
+    declare!(mut [c = x * x, d = T::one() + c, p = ((T::one() + kc * kc * c) / d).sqrt()]);
 
     d = x / d;
     c = d / (p * 2.0);
     let z = a - b;
     let mut i = a;
     let mut a = (b + a) / 2.0;
-    let mut y = (1.0 / x).abs();
-    let mut f = 0.0;
-    let mut l = 0;
-    let mut m = 1.0;
-    let mut kc = kc.abs();
+    declare!(mut [y = x.recip().abs(), f = T::zero(), l = 0, m = T::one(), kc = kc.abs(), e, g]);
 
-    loop {
+    for _ in 0..N_MAX_ITERATIONS {
         b = i * kc + b;
-        let e = m * kc;
-        let mut g = e / p;
+        e = m * kc;
+        g = e / p;
         d = f * g + d;
         f = c;
         i = a;
@@ -237,20 +227,14 @@ pub fn _el2<T: Float, C: _BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> Result<T
             continue;
         }
 
-        break;
+        if y < 0.0 {
+            l += 1;
+        }
+
+        let e = x.signum() * ((m / y).atan() + pi!() * T::from(l).unwrap()) * a / m;
+        return e + c * z;
     }
-
-    if y < 0.0 {
-        l += 1;
-    }
-
-    let mut e = ((m / y).atan() + pi!() * T::from(l).unwrap()) * a / m;
-
-    if x < 0.0 {
-        e = -e;
-    }
-
-    Ok(e + c * z)
+    nan!()
 }
 
 /// Computes [incomplete elliptic integral of the third kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E16).
@@ -311,6 +295,9 @@ pub fn el3<T: Float>(x: T, kc: T, p: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrErr> {
+    let m = 1.0 - kc * kc;
+    let n = 1.0 - p;
+
     if kc.abs() < epsilon!() {
         return Err("el3: kc must not be zero.");
     }
@@ -320,9 +307,6 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
     }
 
     // Handle special cases
-    let m = 1.0 - kc * kc;
-    let n = 1.0 - p;
-
     if x == inf!() {
         return ellippi(n, m);
     }
@@ -365,6 +349,10 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
         return Ok(result);
     }
 
+    if kc.abs() < C::lim_kc_p() && p > C::lim_kc_p() {
+        return ellippiinc(phi, n, m);
+    }
+
     let x_abs = x.abs();
 
     // real
@@ -373,11 +361,10 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
     let zd;
 
     // int
-    declare!(mut [k = 0, l, m, n]);
+    declare!(mut [k = 0, l, mm, nn]);
 
     // bool
-    let mut bo;
-    let mut bk = false;
+    declare!(mut [bo, bk = false]);
 
     hh = x * x;
     f = p * hh;
@@ -395,9 +382,7 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
 
     // small
     if e < 0.1 && z < 0.1 && t < 1.0 && r < 1.0 {
-        let mut rb: [T; MAX_ND] = [T::zero(); MAX_ND];
-        let mut ra: [T; MAX_ND] = [T::zero(); MAX_ND];
-        let mut rr: [T; MAX_ND] = [T::zero(); MAX_ND];
+        declare!(mut [rb, ra, rr] = [T::zero(); MAX_ND]);
 
         for k in 2..=C::ND {
             let k_float = T::from(k).unwrap();
@@ -523,12 +508,11 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
 
     y = 1.0 / y;
     e = s;
-    n = 1;
+    nn = 1;
     t = 1.0;
     l = 0;
-    m = 0;
+    mm = 0;
 
-    let mut failed = true;
     for _ in 0..N_MAX_ITERATIONS {
         y = y - e / y;
         if y == 0.0 {
@@ -542,11 +526,11 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
         q = g + q;
         g = t;
         t = s + t;
-        n = n + n;
-        m = m + m;
+        nn = nn + nn;
+        mm = mm + mm;
         if bo {
             if z < 0.0 {
-                m += k;
+                mm += k;
             }
             k = if r < 0.0 { -1 } else { 1 };
             h = e / (u * u + v * v);
@@ -591,85 +575,68 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
             }
             continue;
         }
-        failed = false;
+        if y < 0.0 {
+            l += 1;
+        }
+        e = (t / y).atan() + pi!() * T::from(l).unwrap();
+        e = e * (c * t + d) / (t * (t + q));
+
+        if bo {
+            h = v / (t + u);
+            z = 1.0 - r * h;
+            h = r + h;
+            if z == 0.0 {
+                z = C::cb();
+            }
+            if z < 0.0 {
+                mm += if h < 0.0 { -1 } else { 1 };
+            }
+            s = (h / z).atan() + T::from(mm).unwrap() * pi!();
+        } else {
+            s = if bk {
+                ye.asinh()
+            } else {
+                z.ln() + T::from(mm).unwrap() * ln_2!()
+            };
+            s = s * 0.5;
+        }
+        e = (e + fa.sqrt() * s) / T::from(nn).unwrap();
+        let ans = x.signum() * e;
+        if ans.is_finite() {
+            return Ok(ans);
+        }
+        check!(@nan, el3, [x, kc, p]);
         break;
     }
 
-    if failed {
-        return Err("el3: Failed to converge.");
+    let ans = ellippiinc(phi, n, m);
+    if ans.is_ok() {
+        return ans;
     }
-
-    if y < 0.0 {
-        l += 1;
-    }
-    e = (t / y).atan() + pi!() * T::from(l).unwrap();
-    e = e * (c * t + d) / (t * (t + q));
-
-    if bo {
-        h = v / (t + u);
-        z = 1.0 - r * h;
-        h = r + h;
-        if z == 0.0 {
-            z = C::cb();
-        }
-        if z < 0.0 {
-            m += if h < 0.0 { -1 } else { 1 };
-        }
-        s = (h / z).atan() + T::from(m).unwrap() * pi!();
-    } else {
-        s = if bk {
-            ye.asinh()
-        } else {
-            z.ln() + T::from(m).unwrap() * ln_2!()
-        };
-        s = s * 0.5;
-    }
-    e = (e + fa.sqrt() * s) / T::from(n).unwrap();
-    let ans = if x > 0.0 { e } else { -e };
-    if ans.is_nan() {
-        check!(@nan, el3, [x, kc, p]);
-        Err("el3: Failed to converge.")
-    } else {
-        Ok(ans)
-    }
+    Err("el3: Failed to converge.")
 }
 
 const MAX_ND: usize = 50;
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 const N_MAX_ITERATIONS: usize = 10;
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 const N_MAX_ITERATIONS: usize = 1;
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
-    use itertools::iproduct;
-
     use super::*;
-    use crate::{assert_close, ellipdinc, ellipeinc, ellipf, ellippiinc, test_util::linspace};
+    use crate::{assert_close, compare_test_data_wolfram};
 
     #[test]
     fn test_el1() {
-        fn test_special_cases(x: f64, kc: f64) {
-            let m = 1.0 - kc * kc;
-            let phi = x.atan();
-            let f = ellipf(phi, m).unwrap();
+        compare_test_data_wolfram!("el1_data.csv", el1, 2, 5.0 * f64::EPSILON);
+    }
 
-            assert_close!(f, el1(x, kc).unwrap(), 1.2e-14);
-        }
-
-        let x = linspace(0.0, 100.0, 50);
-        let linsp_neg = linspace(-1.0, -1e-3, 50);
-        x.iter()
-            .zip(linsp_neg.iter())
-            .for_each(|(&x, &kc)| test_special_cases(x, kc));
-        let linsp_pos = linspace(1e-3, 1.0, 50);
-        x.iter()
-            .zip(linsp_pos.iter())
-            .for_each(|(&x, &kc)| test_special_cases(x, kc));
-
+    #[test]
+    fn test_el1_references() {
         // Test computed values from the reference
         // Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions.”
         fn test_reference(x: f64, expected: f64) {
@@ -701,7 +668,7 @@ mod tests {
         // x = 0: el1(0, kc) = 0
         assert_eq!(el1(0.0, 0.5).unwrap(), 0.0);
         // kc = 0: should return Err
-        assert!(el1(0.5, 0.0).is_err());
+        assert_eq!(el1(0.5, 0.0), Err("el1: kc cannot be zero."));
         // x = inf: el1(inf, kc) = cel1(kc)
         assert_eq!(el1(INFINITY, 0.5).unwrap(), cel1(0.5).unwrap());
         // kc = inf: el1(x, inf) = 0
@@ -709,33 +676,13 @@ mod tests {
         // y = 0 branch in the loop
         assert_close!(el1(1.0, 1.0).unwrap(), 0.7853981633974483, 1e-15);
         // x = nan or kc = nan: should return Err
-        assert!(el1(NAN, 0.5).is_err());
-        assert!(el1(0.5, NAN).is_err());
+        assert_eq!(el1(NAN, 0.5), Err("el1: Arguments cannot be NAN."));
+        assert_eq!(el1(0.5, NAN), Err("el1: Arguments cannot be NAN."));
     }
 
     #[test]
     fn test_el2() {
-        fn test_special_cases(x: f64, kc: f64) {
-            let m = 1.0 - kc * kc;
-            let phi = x.atan();
-            let f = ellipf(phi, m).unwrap();
-            let e = ellipeinc(phi, m).unwrap();
-            let d = ellipdinc(phi, m).unwrap();
-
-            assert_close!(f, el2(x, kc, 1.0, 1.0).unwrap(), 1.2e-14);
-            assert_close!(e, el2(x, kc, 1.0, kc * kc).unwrap(), 7e-14);
-            assert_close!(d, el2(x, kc, 0.0, 1.0).unwrap(), 6e-14);
-        }
-
-        let x = linspace(0.0, 100.0, 50);
-        let linsp_neg = linspace(-1.0, -1e-3, 50);
-        x.iter()
-            .zip(linsp_neg.iter())
-            .for_each(|(&x, &kc)| test_special_cases(x, kc));
-        let linsp_pos = linspace(1e-3, 1.0, 50);
-        x.iter()
-            .zip(linsp_pos.iter())
-            .for_each(|(&x, &kc)| test_special_cases(x, kc));
+        compare_test_data_wolfram!("el2_data.csv", el2, 4, 100.0 * f64::EPSILON);
     }
 
     #[test]
@@ -745,7 +692,7 @@ mod tests {
         // x = 0: el2(0, kc, a, b) = 0
         assert_eq!(el2(0.0, 0.5, 1.0, 1.0).unwrap(), 0.0);
         // kc = 0: should return Err
-        assert!(el2(0.5, 0.0, 1.0, 1.0).is_err());
+        assert_eq!(el2(0.5, 0.0, 1.0, 1.0), Err("el2: kc cannot be zero."));
         // a = 0, b = 0: el2(x, kc, 0, 0) = 0
         assert_eq!(el2(0.5, 0.5, 0.0, 0.0).unwrap(), 0.0);
         // x = inf: el2(inf, kc, a, b) = cel2(kc, a, b)
@@ -754,31 +701,24 @@ mod tests {
             cel2(0.5, 1.0, 1.0).unwrap()
         );
         // x = nan or kc = nan: should return Err
-        assert!(el2(NAN, 0.5, 1.0, 1.0).is_err());
-        assert!(el2(0.5, NAN, 1.0, 1.0).is_err());
+        assert_eq!(
+            el2(NAN, 0.5, 1.0, 1.0),
+            Err("el2: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            el2(0.5, NAN, 1.0, 1.0),
+            Err("el2: Arguments cannot be NAN.")
+        );
     }
 
     #[test]
     fn test_el3() {
-        fn _test(x: f64, kc: f64, p: f64) {
-            let m = 1.0 - kc * kc;
-            let phi = x.atan();
-            let n = 1.0 - p;
-            let ellippi = ellippiinc(phi, n, m).unwrap();
+        compare_test_data_wolfram!("el3_data.csv", el3, 3, 3e-12);
+        compare_test_data_wolfram!("el3_pv.csv", el3, 3, 5e-15);
+    }
 
-            assert_close!(ellippi, el3(x, kc, p).unwrap(), 4.6e-15);
-        }
-
-        let linsp_x = linspace(10.0, 10.0, 15);
-        let linsp_kc = [
-            linspace(-1.0 + 1e-3, -1e-3, 50),
-            linspace(1e-3, 1.0 - 1e-3, 50),
-        ]
-        .concat();
-        let linsp_p = linspace(1e-3, 1.0 - 1e-3, 10);
-
-        iproduct!(linsp_x, linsp_kc, linsp_p).for_each(|(x, kc, p)| _test(x, kc, p));
-
+    #[test]
+    fn test_el3_references() {
         // Test computed values from the reference
         // Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions III.”
         fn test_reference(x: f64, kc: f64, p: f64, expected: f64) {
@@ -817,19 +757,14 @@ mod tests {
         // x = 0: el3(0, kc, p) = 0
         assert_eq!(el3(0.0, 0.5, 0.5).unwrap(), 0.0);
         // kc = 0: should return Err
-        assert!(el3(0.5, 0.0, 0.5).is_err());
+        assert_eq!(el3(0.5, 0.0, 0.5), Err("el3: kc must not be zero."));
+
+        let complete_el3 = el3(INFINITY, 0.5, 0.5).unwrap();
         // x = inf: el3(inf, kc, p) = cel(kc, p, 1, 1)
-        assert_close!(
-            el3(INFINITY, 0.5, 0.5).unwrap(),
-            cel(0.5, 0.5, 1.0, 1.0).unwrap(),
-            1e-15
-        );
+        assert_close!(complete_el3, cel(0.5, 0.5, 1.0, 1.0).unwrap(), 1e-15);
         // x = inf: el3(inf, kc, p) = Π(n, m)
-        assert_close!(
-            el3(INFINITY, 0.5, 0.5).unwrap(),
-            ellippi(0.5, 0.75).unwrap(),
-            1e-15
-        );
+        assert_close!(complete_el3, ellippi(0.5, 0.75).unwrap(), 1e-15);
+
         // kc = 1, p > 0: el3(x, 1, p) = atan(sqrt(p) * x) / sqrt(p)
         assert_eq!(
             el3(4.0, 1.0, 0.5).unwrap(),
@@ -838,13 +773,15 @@ mod tests {
         // kc = 1, p <= 0: el3(x, 1, p) = (ln(1+vx) - ln(1-vx)) / (2v); v = sqrt(-p)
         assert_close!(el3(4.0, 1.0, -0.5).unwrap(), 5.0, 1e-15);
         // x = nan, kc = nan, or p = nan: should return Err
-        assert!(el3(NAN, 0.5, 0.5).is_err());
-        assert!(el3(0.5, NAN, 0.5).is_err());
-        assert!(el3(0.5, 0.5, NAN).is_err());
+        assert_eq!(el3(NAN, 0.5, 0.5), Err("el3: Arguments cannot be NAN."));
+        assert_eq!(el3(0.5, NAN, 0.5), Err("el3: Arguments cannot be NAN."));
+        assert_eq!(el3(0.5, 0.5, NAN), Err("el3: Arguments cannot be NAN."));
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
-    assert!(el3(0.5, 0.5, 0.5).is_err());
+    assert_eq!(el1(0.5, 0.5), Err("el1: Failed to converge."));
+    assert_eq!(el2(0.5, 0.5, 0.5, 0.5), Err("el2: Failed to converge."));
+    assert_eq!(el3(0.5, 0.5, 0.5), Err("el3: Failed to converge."));
 }

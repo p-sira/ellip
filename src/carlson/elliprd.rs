@@ -15,7 +15,7 @@ use std::mem::swap;
 use num_traits::Float;
 
 use crate::{
-    crate_util::{case, check, let_mut, return_if_valid_else},
+    crate_util::{case, check, let_mut},
     StrErr,
 };
 
@@ -68,13 +68,35 @@ use crate::{
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
-    if x.min(y) < 0.0 || x + y == 0.0 {
-        return Err("elliprd: x and y must be non-negative, and at most one can be zero.");
+    if x.min(y) < 0.0 {
+        return Err("elliprd: x and y must be non-negative.");
+    }
+    if x == 0.0 && y == 0.0 {
+        return Err("elliprd: Both x and y cannot be zero.");
     }
     if z <= 0.0 {
         return Err("elliprd: z must be positive");
     }
 
+    let ans = elliprd_unchecked(x, y, z);
+    if ans.is_finite() {
+        return Ok(ans);
+    }
+    check!(@nan, elliprd, [x, y, z]);
+    case!(@any [x, y, z] == inf!(), T::zero());
+    Err("elliprd: Failed to converge.")
+}
+
+/// Unsafe version of [elliprd](crate::elliprd).
+///
+/// Undefined behavior with invalid arguments and edge cases.
+/// # Known Invalid Cases
+/// - x < 0, y < 0, z ≤ 0
+/// - x = 0 and y = 0
+/// - x = ∞ or y = ∞
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[inline]
+pub fn elliprd_unchecked<T: Float>(x: T, y: T, z: T) -> T {
     let_mut!(x, y);
 
     // Special cases
@@ -84,10 +106,10 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
 
     if y == z {
         if x == y {
-            return Ok(1.0 / (x * x.sqrt()));
+            return 1.0 / (x * x.sqrt());
         }
         if x == 0.0 {
-            return Ok(3.0 * pi!() / (4.0 * y * y.sqrt()));
+            return 3.0 * pi!() / (4.0 * y * y.sqrt());
         }
     }
 
@@ -109,7 +131,7 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         }
         let rf = pi!() / (xn + yn);
         let pt = (x0 + 3.0 * y0) / (4.0 * z * (x0 + y0)) - sum / (z * (y - z));
-        return Ok(pt * rf * 3.0);
+        return pt * rf * 3.0;
     }
 
     let mut xn = x;
@@ -164,21 +186,16 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
             break;
         }
     }
-
-    return_if_valid_else!(ans, {
-        check!(@nan, elliprd, [x, y, z]);
-        case!(@any [x, y, z] == inf!(), T::zero());
-        Err("elliprd: Failed to converge.")
-    })
+    ans
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 const N_MAX_ITERATIONS: usize = 50;
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 const N_MAX_ITERATIONS: usize = 1;
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -221,17 +238,35 @@ mod tests {
     fn test_elliprd_special_cases() {
         use std::f64::{INFINITY, NAN};
         // x < 0 or y < 0: should return Err
-        assert!(elliprd(-1.0, 1.0, 1.0).is_err());
-        assert!(elliprd(1.0, -1.0, 1.0).is_err());
+        assert_eq!(
+            elliprd(-1.0, 1.0, 1.0),
+            Err("elliprd: x and y must be non-negative.")
+        );
+        assert_eq!(
+            elliprd(1.0, -1.0, 1.0),
+            Err("elliprd: x and y must be non-negative.")
+        );
         // z <= 0: should return Err
-        assert!(elliprd(1.0, 1.0, 0.0).is_err());
-        assert!(elliprd(1.0, 1.0, -1.0).is_err());
+        assert_eq!(elliprd(1.0, 1.0, 0.0), Err("elliprd: z must be positive"));
+        assert_eq!(elliprd(1.0, 1.0, -1.0), Err("elliprd: z must be positive"));
         // both x and y zero: should return Err
-        assert!(elliprd(0.0, 0.0, 1.0).is_err());
+        assert_eq!(
+            elliprd(0.0, 0.0, 1.0),
+            Err("elliprd: Both x and y cannot be zero.")
+        );
         // NANs: should return Err
-        assert!(elliprd(NAN, 1.0, 1.0).is_err());
-        assert!(elliprd(1.0, NAN, 1.0).is_err());
-        assert!(elliprd(1.0, 1.0, NAN).is_err());
+        assert_eq!(
+            elliprd(NAN, 1.0, 1.0),
+            Err("elliprd: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            elliprd(1.0, NAN, 1.0),
+            Err("elliprd: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            elliprd(1.0, 1.0, NAN),
+            Err("elliprd: Arguments cannot be NAN.")
+        );
         // Infs: should return zero
         assert_eq!(elliprd(INFINITY, 1.0, 1.0).unwrap(), 0.0);
         assert_eq!(elliprd(1.0, INFINITY, 1.0).unwrap(), 0.0);
@@ -239,7 +274,7 @@ mod tests {
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
-    assert!(elliprd(0.2, 0.5, 1e300).is_err());
+    assert_eq!(elliprd(0.2, 0.5, 1e300), Err("elliprd: Failed to converge."));
 }

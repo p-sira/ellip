@@ -29,7 +29,8 @@ normalPairs =
 ellipF =
     Table[
         With[{phi = pair[[1]], m = pair[[2]]},
-            {phi, m, EllipticF[phi, m]}
+            {phi, m, EllipticF[SetPrecision[phi, 30], SetPrecision[m,
+                 30]]}
         ]
         ,
         {pair, normalPairs}
@@ -37,8 +38,8 @@ ellipF =
 
 Export["../data/wolfram/ellipf_data.csv", N[ellipF], "CSV"];
 
-ellipFNeg = Flatten[Table[{phi, m, EllipticF[phi, m]}, {phi, PHI}, {m,
-     MNeg}], 1]
+ellipFNeg = Flatten[Table[{phi, m, EllipticF[SetPrecision[phi, 30], SetPrecision[
+    m, 30]]}, {phi, PHI}, {m, MNeg}], 1]
 
 Export["../data/wolfram/ellipf_neg.csv", N[ellipFNeg], "CSV"];
 
@@ -47,7 +48,8 @@ Export["../data/wolfram/ellipf_neg.csv", N[ellipFNeg], "CSV"];
 ellipEInc =
     Table[
         With[{phi = pair[[1]], m = pair[[2]]},
-            {phi, m, EllipticE[phi, m]}
+            {phi, m, EllipticE[SetPrecision[phi, 30], SetPrecision[m,
+                 30]]}
         ]
         ,
         {pair, normalPairs}
@@ -55,7 +57,38 @@ ellipEInc =
 
 Export["../data/wolfram/ellipeinc_data.csv", N[ellipEInc], "CSV"];
 
-ellipEIncNeg = Flatten[Table[{phi, m, EllipticE[phi, m]}, {phi, PHI},
-     {m, MNeg}], 1]
+ellipEIncNeg = Flatten[Table[{phi, m, EllipticE[SetPrecision[phi, 30],
+     SetPrecision[m, 30]]}, {phi, PHI}, {m, MNeg}], 1]
 
 Export["../data/wolfram/ellipeinc_neg.csv", N[ellipEIncNeg], "CSV"];
+
+(* Incomplete Elliptic Integrals of Legendre's Type *)
+
+EllipticD[phi_, m_] :=
+    Module[{c},
+        Which[
+            phi == 0,
+                0
+            ,
+            True,
+                c = Csc[phi] ^ 2;
+                CarlsonRD[c - 1, c - m, c] / 3
+        ]
+    ];
+
+ellipDInc =
+    Table[
+        With[{phi = pair[[1]], m = pair[[2]]},
+            {phi, m, EllipticD[SetPrecision[phi, 30], SetPrecision[m,
+                 30]]}
+        ]
+        ,
+        {pair, normalPairs}
+    ];
+
+Export["../data/wolfram/ellipdinc_data.csv", N[ellipDInc], "CSV"];
+
+ellipDIncNeg = Flatten[Table[{phi, m, EllipticD[SetPrecision[phi, 30],
+     SetPrecision[m, 30]]}, {phi, PHI}, {m, MNeg}], 1]
+
+Export["../data/wolfram/ellipdinc_neg.csv", N[ellipDIncNeg], "CSV"];

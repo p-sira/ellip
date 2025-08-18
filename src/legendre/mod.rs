@@ -22,3 +22,5 @@ pub use ellipf::ellipf;
 pub use ellipk::ellipk;
 pub use ellippi::ellippi;
 pub use ellippiinc::ellippiinc;
+
+pub(crate) use ellipeinc::ellipeinc_unchecked;

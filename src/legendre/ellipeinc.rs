@@ -14,8 +14,9 @@
 use num_traits::Float;
 
 use crate::{
-    crate_util::{check, return_if_valid_else},
-    ellipe, elliprd, elliprf, StrErr,
+    carlson::{elliprd_unchecked, elliprf_unchecked},
+    crate_util::check,
+    ellipe, StrErr,
 };
 
 /// Computes [incomplete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E5).
@@ -70,8 +71,21 @@ use crate::{
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 /// - The MathWorks, Inc. “ellipticE.” Accessed April 21, 2025. <https://www.mathworks.com/help/symbolic/sym.elliptice.html>.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
+    let ans = ellipeinc_unchecked(phi, m)?;
+    // Infinites are expected to be handled properly by ellipeinc_unchecked
+    if !ans.is_nan() {
+        return Ok(ans);
+    }
+    #[cfg(feature = "test_force_fail")]
+    let ans = nan!();
+    check!(@nan, ellipeinc, [phi, m]);
+    Err("ellipeinc: Unexpected error.")
+}
+
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[inline]
+pub fn ellipeinc_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     if phi == 0.0 {
         return Ok(0.0);
     }
@@ -86,7 +100,7 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         if phi >= max_val!() {
             return Ok(invert * inf!());
         }
-        return Ok(invert * 2.0 * phi * ellipe(m)? / pi!());
+        return Ok(invert * 2.0 * phi * ellipe_wrapper(m)? / pi!());
     }
 
     // m -> -inf, sqrt(1+m sin²θ) -> m sinθ
@@ -129,38 +143,34 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         let c2p = rphi.cos() * rphi.cos();
         let c = 1.0 / s2p;
         let cm1 = c2p / s2p;
-        s * ((1.0 - m) * elliprf(cm1, c - m, c)?
-            + m * (1.0 - m) * elliprd(cm1, c, c - m)? / 3.0
+        s * ((1.0 - m) * elliprf_unchecked(cm1, c - m, c)
+            + m * (1.0 - m) * elliprd_unchecked(cm1, c, c - m) / 3.0
             + m * (cm1 / (c * (c - m))).sqrt())
     };
 
     if mm != 0.0 {
-        result = result + mm * ellipe(m)?;
+        result = result + mm * ellipe_wrapper(m)?;
     }
 
-    let ans = invert * result;
-    #[cfg(feature = "reduce-iteration")]
-    let ans = nan!();
-    return_if_valid_else!(ans, {
-        check!(@nan, ellipeinc, [phi, m]);
-        Err("ellipeinc: Unexpected error.")
-    })
+    Ok(invert * result)
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[inline]
+fn ellipe_wrapper<T: Float>(m: T) -> Result<T, StrErr> {
+    check!(@nan, ellipeinc, [m]);
+    ellipe(m)
+}
+
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use crate::compare_test_data_boost;
 
     use super::*;
 
-    fn ellipeinc_k<T: Float>(inp: &[T]) -> T {
-        ellipeinc(inp[0], inp[1] * inp[1]).unwrap()
-    }
-
     #[test]
     fn test_ellipeinc() {
-        compare_test_data_boost!("ellipeinc_data.txt", ellipeinc_k::<f64>, 5e-16);
+        compare_test_data_boost!("ellipeinc_data.txt", ellipeinc, 2, 5e-16);
     }
 
     #[test]
@@ -174,7 +184,10 @@ mod tests {
         // m = 1: E(phi, 1) = sin(phi)
         assert_eq!(ellipeinc(0.4, 1.0).unwrap(), 0.4.sin());
         // m * sin^2(phi) >= 1: should return Err
-        assert!(ellipeinc(FRAC_PI_2, 2.0).is_err());
+        assert_eq!(
+            ellipeinc(FRAC_PI_2, 2.0),
+            Err("ellipeinc: m sin²φ must be smaller than one.")
+        );
         // phi = 0: E(0, m) = 0
         assert_eq!(ellipeinc(0.0, 0.5).unwrap(), 0.0);
         // phi -> 0, m > 0: E(phi, m) = phi
@@ -184,8 +197,14 @@ mod tests {
         // m < 0: should be valid
         assert!(ellipeinc(FRAC_PI_2, -1.0).unwrap().is_finite());
         // phi = nan or m = nan: should return Err
-        assert!(ellipeinc(NAN, 0.5).is_err());
-        assert!(ellipeinc(0.5, NAN).is_err());
+        assert_eq!(
+            ellipeinc(NAN, 0.5),
+            Err("ellipeinc: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            ellipeinc(0.5, NAN),
+            Err("ellipeinc: Arguments cannot be NAN.")
+        );
         // phi > 1/epsilon: E(phi, m) = 2 * phi * E(m) / pi
         assert_eq!(
             ellipeinc(1e16, 0.5).unwrap(),
@@ -196,7 +215,10 @@ mod tests {
         // phi = -inf: E(-inf, m) = -inf
         assert_eq!(ellipeinc(NEG_INFINITY, 0.5).unwrap(), NEG_INFINITY);
         // m = inf: should return Err
-        assert!(ellipeinc(0.5, INFINITY).is_err());
+        assert_eq!(
+            ellipeinc(0.5, INFINITY),
+            Err("ellipeinc: m sin²φ must be smaller than one.")
+        );
         // m -> -inf: E(phi, m) = (1-cos(phi)) sqrt(-m)
         assert_eq!(
             ellipeinc(0.5, -MAX).unwrap(),
@@ -207,7 +229,7 @@ mod tests {
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
-    assert!(ellipeinc(0.5, 0.2).is_err());
+    assert_eq!(ellipeinc(0.5, 0.2), Err("ellipeinc: Unexpected error."));
 }

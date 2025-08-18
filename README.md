@@ -76,9 +76,41 @@ Learn more at [doc.rs](https://docs.rs/ellip).
     - `elliprd`: Degenerate elliptic integral of the third kind (RD).
 
 # Testing
-The function results are compared with Boost Math test data and Wolfram Engine test data.
-The accuracy report and the test data along with the test generation scripts can
-be found [here](https://github.com/p-sira/ellip/blob/main/tests).
+
+In the unit tests, the functions are tested against the Boost Math and Wolfram test data. Since Ellip accepts the argument `m` (parameter) instead of `k` (modulus) to allow larger domain support, the full accuracy report uses exclusively the Wolfram data. The full accuracy report, test data, and test generation scripts can be found [here](https://github.com/p-sira/ellip/blob/main/tests).
+
+Generated on x86_64-unknown-linux-gnu rustc 1.88.0 using ellip v0.3.7 at `f64` precision (ε≈2.22e-16).
+
+### Legendre's Elliptic Integrals
+| Function   | Median Error (ε) | Max Error (ε) | Mean Performance |
+|------------|------------------|---------------|------------------|
+| ellipk     | 0.00             | 108.14        | 14.8 ns          |
+| ellipe     | 0.00             | 3.00          | 13.3 ns          |
+| ellipf     | 0.66             | 7.47          | 104.1 ns         |
+| ellipeinc  | 0.70             | 24.66         | 168.1 ns         |
+| ellippi    | 0.53             | 36.35         | 170.1 ns         |
+| ellippiinc | 0.78             | 1.04e3        | 279.6 ns         |
+| ellipd     | 0.60             | 2.64          | 30.5 ns          |
+| ellipdinc  | 1.00             | 8.38          | 106.1 ns         |
+
+### Bulirsch's Elliptic Integrals
+| Function | Median Error (ε) | Max Error (ε) | Mean Performance |
+|----------|------------------|---------------|------------------|
+| cel      | 0.70             | 38.34         | 34.7 ns          |
+| cel1     | 0.00             | 8.68          | 11.7 ns          |
+| cel2     | 0.61             | 3.97          | 23.1 ns          |
+| el1      | 0.00             | 1.60          | 38.4 ns          |
+| el2      | 0.70             | 79.92         | 57.3 ns          |
+| el3      | 0.70             | 46.32         | 120.6 ns         |
+
+### Carlson's Symmetric Integrals
+| Function | Median Error (ε) | Max Error (ε) | Mean Performance |
+|----------|------------------|---------------|------------------|
+| elliprf  | 0.00             | 1.75          | 47.3 ns          |
+| elliprg  | 0.00             | 2.45          | 100.1 ns         |
+| elliprj  | 0.67             | 5.42e7        | 166.5 ns         |
+| elliprc  | 0.00             | 2.82          | 23.2 ns          |
+| elliprd  | 0.62             | 6.49          | 76.1 ns          |
 
 ---
 

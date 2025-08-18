@@ -11,11 +11,15 @@ muRC = epsilon;
 
 muRD = 50 * epsilon;
 
-muRG = 50 * epsilon;
+muRG = epsilon;
 
 muRF = epsilon;
 
 muRJ = 50 * epsilon;
+
+muRJPV = 1*^10 * epsilon;
+
+muRJPVSmall = 50 * epsilon;
 
 (* Carlson RC - Degenerate symmetric elliptic integral of RF *)
 
@@ -25,8 +29,8 @@ xRangeRC = Union[Subdivide[muRC, 2, 30], {0}];
 
 yRangeRC = Subdivide[muRC, 2, 30];
 
-rcNormal = Flatten[Table[{x, y, CarlsonRC[x, y]}, {x, xRangeRC}, {y, 
-  yRangeRC}], 1];
+rcNormal = Flatten[Table[{x, y, CarlsonRC[SetPrecision[x, 30], SetPrecision[
+  y, 30]]}, {x, xRangeRC}, {y, yRangeRC}], 1];
 
 rcNormal = Select[rcNormal, Element[#[[3]], Reals]&];
 
@@ -36,8 +40,8 @@ Export["../data/wolfram/elliprc_data.csv", N[rcNormal], "CSV"];
 
 yRangeRCPV = Subdivide[-2, -muRC, 20];
 
-rcPV = Flatten[Table[{x, y, CarlsonRC[x, y]}, {x, xRangeRC}, {y, yRangeRCPV
-  }], 1];
+rcPV = Flatten[Table[{x, y, CarlsonRC[SetPrecision[x, 30], SetPrecision[
+  y, 30]]}, {x, xRangeRC}, {y, yRangeRCPV}], 1];
 
 rcPV = Select[rcPV, Element[#[[3]], Reals]&];
 
@@ -70,7 +74,8 @@ rdNormal =
   Select[
     Table[
       With[{x = data[[1]], y = data[[2]], z = data[[3]]},
-        {x, y, z, CarlsonRD[x, y, z]}
+        {x, y, z, CarlsonRD[SetPrecision[x, 30], SetPrecision[y, 30],
+           SetPrecision[z, 30]]}
       ]
       ,
       {data, validRD}
@@ -109,7 +114,8 @@ rgNormal =
   Select[
     Table[
       With[{x = data[[1]], y = data[[2]], z = data[[3]]},
-        {x, y, z, CarlsonRG[x, y, z]}
+        {x, y, z, CarlsonRG[SetPrecision[x, 30], SetPrecision[y, 30],
+           SetPrecision[z, 30]]}
       ]
       ,
       {data, validRG}
@@ -148,7 +154,8 @@ rfNormal =
   Select[
     Table[
       With[{x = data[[1]], y = data[[2]], z = data[[3]]},
-        {x, y, z, CarlsonRF[x, y, z]}
+        {x, y, z, CarlsonRF[SetPrecision[x, 30], SetPrecision[y, 30],
+           SetPrecision[z, 30]]}
       ]
       ,
       {data, validRF}
@@ -190,7 +197,8 @@ rjNormal =
     Table[
       With[{x = data[[1]], y = data[[2]], z = data[[3]], p = data[[4]]
         },
-        {x, y, z, p, CarlsonRJ[x, y, z, p]}
+        {x, y, z, p, CarlsonRJ[SetPrecision[x, 30], SetPrecision[y, 30
+          ], SetPrecision[z, 30], SetPrecision[p, 30]]}
       ]
       ,
       {data, validRJ}
@@ -203,12 +211,18 @@ Export["../data/wolfram/elliprj_data.csv", N[rjNormal], "CSV"];
 
 (* PV domain: x >= 0, y >= 0, z >= 0, p < 0, at most one of x,y,z can be zero *)
 
-pRangeRJPV = Subdivide[-2, -muRJ, 5];
+xRangeRJPV = Union[Subdivide[muRJPV, 2, 5], {0}];
+
+yRangeRJPV = Union[Subdivide[muRJPV, 2, 5], {0}];
+
+zRangeRJPV = Union[Subdivide[muRJPV, 2, 5], {0}];
+
+pRangeRJPV = Subdivide[-2, -muRJPV, 5];
 
 validRJPV =
   Select[
-    Flatten[Table[{x, y, z, p}, {x, xRangeRJ}, {y, yRangeRJ}, {z, zRangeRJ
-      }, {p, pRangeRJPV}], 3]
+    Flatten[Table[{x, y, z, p}, {x, xRangeRJPV}, {y, yRangeRJPV}, {z,
+       zRangeRJPV}, {p, pRangeRJPV}], 3]
     ,
     With[
       {x = #[[1]], y = #[[2]], z = #[[3]], p = #[[4]]}
@@ -224,7 +238,8 @@ rjPV =
     Table[
       With[{x = data[[1]], y = data[[2]], z = data[[3]], p = data[[4]]
         },
-        {x, y, z, p, CarlsonRJ[x, y, z, p]}
+        {x, y, z, p, CarlsonRJ[SetPrecision[x, 40], SetPrecision[y, 40
+          ], SetPrecision[z, 40], SetPrecision[p, 40]]}
       ]
       ,
       {data, validRJPV}
@@ -234,3 +249,38 @@ rjPV =
   ];
 
 Export["../data/wolfram/elliprj_pv.csv", N[rjPV], "CSV"];
+
+xyzRJPV = Subdivide[muRJPVSmall, muRJPV, 3];
+
+pRangeRJPV = Subdivide[-2, -muRJPVSmall, 5];
+
+validRJPVSmall =
+  Select[
+    Flatten[Table[{x, y, z, p}, {x, xyzRJPV}, {y, xyzRJPV}, {z, xyzRJPV
+      }, {p, pRangeRJPV}], 3]
+    ,
+    With[
+      {x = #[[1]], y = #[[2]], z = #[[3]], p = #[[4]]}
+      ,
+      (* At most one of x, y, z can be zero *)
+      !(x == 0 && y == 0) && !(x == 0 && z == 0) && !(y == 0 && z == 
+        0)
+    ]&
+  ];
+
+rjPVSmall =
+  Select[
+    Table[
+      With[{x = data[[1]], y = data[[2]], z = data[[3]], p = data[[4]]
+        },
+        {x, y, z, p, CarlsonRJ[SetPrecision[x, 40], SetPrecision[y, 40
+          ], SetPrecision[z, 40], SetPrecision[p, 40]]}
+      ]
+      ,
+      {data, validRJPVSmall}
+    ]
+    ,
+    Element[#[[5]], Reals]&
+  ];
+
+Export["../data/wolfram/elliprj_pv_small.csv", N[rjPVSmall], "CSV"];

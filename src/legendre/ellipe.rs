@@ -13,7 +13,7 @@
 
 use num_traits::Float;
 
-use crate::{crate_util::check, elliprg, polyeval, StrErr};
+use crate::{carlson::elliprg_unchecked, crate_util::check, polyeval, StrErr};
 
 /// Computes [complete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E8).
 /// ```text
@@ -265,6 +265,11 @@ fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
         Some(_) => ellipe_precise(m),
         None => {
             check!(@nan, ellipe, [m]);
+            #[cfg(not(feature = "test_force_fail"))]
+            if m > 1.0 {
+                // Infinity cases
+                return Err("ellipe: m must be less than 1.");
+            }
             Err("ellipe: Unexpected error.")
         }
     }
@@ -281,10 +286,10 @@ fn ellipe_precise<T: Float>(m: T) -> Result<T, StrErr> {
         return Err("ellipe: m must be less than 1.");
     }
 
-    Ok(2.0 * elliprg(0.0, 1.0 - m, 1.0)?)
+    Ok(2.0 * elliprg_unchecked(0.0, 1.0 - m, 1.0))
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use core::f64;
@@ -292,29 +297,21 @@ mod tests {
     use super::*;
     use crate::{compare_test_data_boost, compare_test_data_wolfram};
 
-    fn ellipe_k(k: &[f64]) -> f64 {
-        ellipe(k[0] * k[0]).unwrap()
-    }
-
-    fn ellipe_m(m: &[f64]) -> f64 {
-        ellipe(m[0]).unwrap()
-    }
-
     #[test]
     fn test_ellipe() {
-        compare_test_data_boost!("ellipe_data.txt", ellipe_k, f64::EPSILON);
+        compare_test_data_boost!("ellipe_data.txt", ellipe, 1, f64::EPSILON);
     }
 
     #[test]
     fn test_ellipe_wolfram() {
-        compare_test_data_wolfram!("ellipe_cov.csv", ellipe_m, 7e-16);
+        compare_test_data_wolfram!("./tests/data/coverage", "ellipe_cov.csv", ellipe, 1, 7e-16);
     }
 
     #[test]
     fn test_ellipe_special_cases() {
         use std::f64::{consts::FRAC_PI_2, INFINITY, NAN, NEG_INFINITY};
         // m > 1: should return Err
-        assert!(ellipe(1.1).is_err());
+        assert_eq!(ellipe(1.1), Err("ellipe: m must be less than 1."));
         // m = 0: E(0) = pi/2
         assert_eq!(ellipe(0.0).unwrap(), FRAC_PI_2);
         // m = 1: E(1) = 1
@@ -322,10 +319,15 @@ mod tests {
         // m < 0: should be valid, compare with reference value
         assert!(ellipe(-1.0).unwrap().is_finite());
         // m = NaN: should return Err
-        assert!(ellipe(NAN).is_err());
+        assert_eq!(ellipe(NAN), Err("ellipe: Arguments cannot be NAN."));
         // m = inf: should return Err
-        assert!(ellipe(INFINITY).is_err());
+        assert_eq!(ellipe(INFINITY), Err("ellipe: m must be less than 1."));
         // m = -inf: E(-inf) = inf
         assert_eq!(ellipe(NEG_INFINITY).unwrap(), INFINITY);
     }
+}
+
+#[cfg(feature = "test_force_fail")]
+crate::test_force_unreachable! {
+    assert_eq!(ellipe(f64::INFINITY), Err("ellipe: Unexpected error."));
 }

@@ -13,20 +13,33 @@ MNeg = Subdivide[-5, -mu, 1000];
 
 (* Complete Elliptic Integrals of the First Kind *)
 
-ellipK = Table[{m, EllipticK[m]}, {m, M}];
+ellipK = Table[{m, EllipticK[SetPrecision[m, 30]]}, {m, M}];
 
-Export["../data/wolfram/ellipk_data.csv", ellipK, "CSV"];
+Export["../data/wolfram/ellipk_data.csv", N[ellipK], "CSV"];
 
-ellipKNeg = Table[{m, EllipticK[m]}, {m, MNeg}];
+ellipKNeg = Table[{m, EllipticK[SetPrecision[m, 30]]}, {m, MNeg}];
 
-Export["../data/wolfram/ellipk_neg.csv", ellipKNeg, "CSV"];
+Export["../data/wolfram/ellipk_neg.csv", N[ellipKNeg], "CSV"];
 
 (* Complete Elliptic Integrals of the Second Kind *)
 
-ellipE = Table[{m, EllipticE[m]}, {m, M}];
+ellipE = Table[{m, EllipticE[SetPrecision[m, 30]]}, {m, M}];
 
-Export["../data/wolfram/ellipe_data.csv", ellipE, "CSV"];
+Export["../data/wolfram/ellipe_data.csv", N[ellipE], "CSV"];
 
-ellipENeg = Table[{m, EllipticE[m]}, {m, MNeg}];
+ellipENeg = Table[{m, EllipticE[SetPrecision[m, 30]]}, {m, MNeg}];
 
-Export["../data/wolfram/ellipe_neg.csv", ellipENeg, "CSV"];
+Export["../data/wolfram/ellipe_neg.csv", N[ellipENeg], "CSV"];
+
+M = Subdivide[mu, 1 - mu, 1000];
+
+EllipticD[m_] :=
+    (EllipticK[m] - EllipticE[m]) / m;
+
+ellipD = Table[{m, EllipticD[SetPrecision[m, 30]]}, {m, M}];
+
+Export["../data/wolfram/ellipd_data.csv", N[ellipD], "CSV"];
+
+ellipDNeg = Table[{m, EllipticD[SetPrecision[m, 30]]}, {m, MNeg}];
+
+Export["../data/wolfram/ellipd_neg.csv", N[ellipDNeg], "CSV"];
