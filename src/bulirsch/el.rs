@@ -8,7 +8,6 @@ use num_traits::Float;
 
 use crate::{
     bulirsch::DefaultPrecision,
-    carlson::elliprc_unchecked,
     crate_util::{case, check, declare, let_mut},
     ellipeinc, ellipf, ellippi, ellippiinc, StrErr,
 };
