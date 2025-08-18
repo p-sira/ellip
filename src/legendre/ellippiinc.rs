@@ -321,7 +321,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
     Ok(sphi * (elliprf_unchecked(x, y, z) + n * t * elliprj_unchecked(x, y, z, p) / 3.0))
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use crate::{compare_test_data_boost, compare_test_data_wolfram, ellipeinc};

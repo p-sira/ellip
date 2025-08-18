@@ -79,7 +79,7 @@ pub fn ellipd<T: Float>(m: T) -> Result<T, StrErr> {
     }
 
     let ans = elliprd_unchecked(0.0, 1.0 - m, 1.0) / 3.0;
-    #[cfg(feature = "reduce-iteration")]
+    #[cfg(feature = "test_force_fail")]
     let ans = nan!();
 
     if ans.is_finite() {
@@ -89,7 +89,7 @@ pub fn ellipd<T: Float>(m: T) -> Result<T, StrErr> {
     Err("ellipd: Unexpected error.")
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -128,7 +128,7 @@ mod tests {
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(ellipd(0.5), Err("ellipd: Unexpected error."));
 }

@@ -77,7 +77,7 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     if !ans.is_nan() {
         return Ok(ans);
     }
-    #[cfg(feature = "reduce-iteration")]
+    #[cfg(feature = "test_force_fail")]
     let ans = nan!();
     check!(@nan, ellipeinc, [phi, m]);
     Err("ellipeinc: Unexpected error.")
@@ -161,7 +161,7 @@ fn ellipe_wrapper<T: Float>(m: T) -> Result<T, StrErr> {
     ellipe(m)
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use crate::compare_test_data_boost;
@@ -229,7 +229,7 @@ mod tests {
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(ellipeinc(0.5, 0.2), Err("ellipeinc: Unexpected error."));
 }

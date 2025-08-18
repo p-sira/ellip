@@ -155,7 +155,7 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 
     ans = sign * ans;
     if ans.is_finite() {
-        #[cfg(not(feature = "reduce-iteration"))]
+        #[cfg(not(feature = "test_force_fail"))]
         return Ok(ans);
     }
     check!(@nan, ellipf, [phi, m]);
@@ -163,7 +163,7 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     Err("ellipf: Unexpected error.")
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -221,7 +221,7 @@ mod tests {
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(ellipf(0.5, 0.5), Err("ellipf: Unexpected error."));
 }

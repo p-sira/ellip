@@ -189,13 +189,13 @@ pub fn elliprd_unchecked<T: Float>(x: T, y: T, z: T) -> T {
     ans
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 const N_MAX_ITERATIONS: usize = 50;
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 const N_MAX_ITERATIONS: usize = 1;
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -274,7 +274,7 @@ mod tests {
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(elliprd(0.2, 0.5, 1e300), Err("elliprd: Failed to converge."));
 }

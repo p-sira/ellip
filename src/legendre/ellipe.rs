@@ -265,7 +265,7 @@ fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
         Some(_) => ellipe_precise(m),
         None => {
             check!(@nan, ellipe, [m]);
-            #[cfg(not(feature = "reduce-iteration"))]
+            #[cfg(not(feature = "test_force_fail"))]
             if m > 1.0 {
                 // Infinity cases
                 return Err("ellipe: m must be less than 1.");
@@ -289,7 +289,7 @@ fn ellipe_precise<T: Float>(m: T) -> Result<T, StrErr> {
     Ok(2.0 * elliprg_unchecked(0.0, 1.0 - m, 1.0))
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use core::f64;
@@ -327,7 +327,7 @@ mod tests {
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(ellipe(f64::INFINITY), Err("ellipe: Unexpected error."));
 }

@@ -90,7 +90,7 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
     }
 
     let ans = ellippi_unchecked(n, m);
-    #[cfg(not(feature = "reduce-iteration"))]
+    #[cfg(not(feature = "test_force_fail"))]
     if ans.is_finite() {
         return Ok(ans);
     }
@@ -161,7 +161,7 @@ pub fn ellippi_vc<T: Float>(n: T, m: T, vc: T) -> T {
     elliprf_unchecked(x, y, z) + n * elliprj_unchecked(x, y, z, p) / 3.0
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -235,7 +235,7 @@ mod tests {
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(ellippi(0.5, 0.5), Err("ellippi: Unexpected error."));
 }

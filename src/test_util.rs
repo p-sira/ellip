@@ -264,7 +264,7 @@ macro_rules! assert_close {
     };
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 #[macro_export]
 macro_rules! test_force_unreachable {
     ($($inner:tt)*) => {

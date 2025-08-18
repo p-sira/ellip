@@ -134,7 +134,7 @@ pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
         / 2.0
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use itertools::Itertools;

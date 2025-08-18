@@ -33,7 +33,7 @@ jobs:
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: Generate code coverage
-        run: cargo llvm-cov run --example generate_error_report --lcov --output-path lcov.info
+        run: cargo llvm-cov run --example generate_error_report --lcov --output-path lcov.info --ignore-filename-regex 'ellip-dev-utils/.*'
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
@@ -52,7 +52,7 @@ jobs:
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: Generate code coverage
-        run: cargo llvm-cov -p ellip --lcov --output-path lcov.info test --tests --features reduce-iteration --no-default-features --ignore-filename-regex 'benches/.*|examples/.*|src/test_util\.rs'
+        run: cargo llvm-cov -p ellip --lcov --output-path lcov.info test --tests --features test_force_fail --no-default-features --ignore-filename-regex 'benches/.*|examples/.*|src/test_util\.rs'
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:

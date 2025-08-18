@@ -20,7 +20,7 @@ pub fn assert_close<T: Float + Debug>(actual: T, expected: T, rtol: T) {
     }
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use super::*;

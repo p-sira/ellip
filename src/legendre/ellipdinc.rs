@@ -114,7 +114,7 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     }
 
     let ans = sign * result;
-    #[cfg(feature = "reduce-iteration")]
+    #[cfg(feature = "test_force_fail")]
     let ans = nan!();
 
     if !ans.is_nan() {
@@ -125,7 +125,7 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     Err("ellipdinc: Unexpected error.")
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use core::f64;
@@ -191,7 +191,7 @@ mod tests {
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(ellipdinc(0.5, 0.5), Err("ellipdinc: Unexpected error."));
 }

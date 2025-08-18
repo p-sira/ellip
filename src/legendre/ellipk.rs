@@ -270,7 +270,7 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
             if m == neg_inf!() {
                 return Ok(0.0);
             }
-            #[cfg(not(feature = "reduce-iteration"))]
+            #[cfg(not(feature = "test_force_fail"))]
             if m > 1.0 {
                 // Also handles inf
                 return Err("ellipk: m must be less than 1.");
@@ -315,7 +315,7 @@ pub fn ellipk_precise_unchecked<T: Float>(m: T) -> T {
 
 const MAX_ITERATION: usize = 10;
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -353,7 +353,7 @@ mod tests {
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(ellipk(f64::INFINITY), Err("ellipk: Unexpected error."));
 }

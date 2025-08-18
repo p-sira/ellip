@@ -45,4 +45,4 @@ harness = false
 [features]
 default = []
 # Used for generating code coverage report only
-reduce-iteration = []
+test_force_fail = []

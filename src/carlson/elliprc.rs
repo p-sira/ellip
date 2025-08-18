@@ -114,7 +114,7 @@ pub fn elliprc_unchecked<T: Float>(x: T, y: T) -> T {
         return prefix * ((y - x) / x).sqrt().atan() / (y - x).sqrt();
     }
 
-    #[cfg(feature = "reduce-iteration")]
+    #[cfg(feature = "test_force_fail")]
     return nan!();
 
     if y / x > 0.5 {
@@ -125,7 +125,7 @@ pub fn elliprc_unchecked<T: Float>(x: T, y: T) -> T {
     }
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -174,7 +174,7 @@ mod tests {
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(elliprc(2.0, 1.0), Err("elliprc: Unexpected error."));
 }

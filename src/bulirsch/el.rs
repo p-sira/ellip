@@ -618,13 +618,13 @@ pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrE
 
 const MAX_ND: usize = 50;
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 const N_MAX_ITERATIONS: usize = 10;
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 const N_MAX_ITERATIONS: usize = 1;
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -779,7 +779,7 @@ mod tests {
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(el1(0.5, 0.5), Err("el1: Failed to converge."));
     assert_eq!(el2(0.5, 0.5, 0.5, 0.5), Err("el2: Failed to converge."));

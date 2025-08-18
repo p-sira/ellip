@@ -297,12 +297,12 @@ pub fn _cel2<T: Float, C: _BulirschConst<T>>(kc: T, a: T, b: T) -> Result<T, Str
     Err("cel2: Failed to converge.")
 }
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 const MAX_ITERATION: i16 = 10;
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 const MAX_ITERATION: i16 = 1;
 
-#[cfg(not(feature = "reduce-iteration"))]
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use itertools::iproduct;
@@ -473,7 +473,7 @@ mod tests {
     }
 }
 
-#[cfg(feature = "reduce-iteration")]
+#[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(cel(1e300, 0.2, 0.5, 0.5), Err("cel: Failed to converge."));
     assert_eq!(cel1(1e300), Err("cel1: Failed to converge."));
