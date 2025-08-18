@@ -142,7 +142,7 @@ macro_rules! compare_test_data_boost {
     ($filename:expr, $func:expr, $rtol:expr) => {
         compare_test_data_boost!($filename, $func, f64, $rtol, 0.0)
     };
-        ($filename:expr, $func:expr, $rtol:expr, atol: $atol:expr) => {
+    ($filename:expr, $func:expr, $rtol:expr, atol: $atol:expr) => {
         compare_test_data_boost!($filename, $func, f64, $rtol, $atol)
     };
     ($filename:expr, $func:expr, $n_args:tt, $rtol:expr) => {{

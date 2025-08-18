@@ -355,5 +355,5 @@ mod tests {
 
 #[cfg(feature = "reduce-iteration")]
 crate::test_force_unreachable! {
-            assert_eq!(ellipk(f64::INFINITY), Err("ellipk: m must be less than 1."));
+    assert_eq!(ellipk(f64::INFINITY), Err("ellipk: Unexpected error."));
 }

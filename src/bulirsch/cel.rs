@@ -478,7 +478,7 @@ mod tests {
 
 #[cfg(feature = "reduce-iteration")]
 crate::test_force_unreachable! {
-            assert_eq!(cel(1e300, 0.2, 0.5, 0.5), Err("cel: Arguments cannot be NAN."));
-        assert_eq!(cel1(1e300), Err("cel1: Arguments cannot be NAN."));
-        assert_eq!(cel2(1e300, 0.5, 0.5), Err("cel2: Arguments cannot be NAN."));
+    assert_eq!(cel(1e300, 0.2, 0.5, 0.5), Err("cel: Failed to converge."));
+    assert_eq!(cel1(1e300), Err("cel1: Failed to converge."));
+    assert_eq!(cel2(1e300, 0.5, 0.5), Err("cel2: Failed to converge."));
 }

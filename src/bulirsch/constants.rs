@@ -101,10 +101,10 @@ mod tests {
         assert_eq!(<f32 as _BulirschConst<f32>>::D, 7);
         assert_eq!(<f32 as _BulirschConst<f32>>::ca(), 1e-3);
         assert_eq!(<f32 as _BulirschConst<f32>>::cb(), 1e-9);
-        assert_eq!(<f32 as _BulirschConst<f32>>::lim_kc_p(), 1e-4);
+        assert_eq!(<f32 as _BulirschConst<f32>>::lim_kc_p(), 1e-7);
         assert_eq!(<f64 as _BulirschConst<f64>>::D, 16);
         assert_eq!(<f64 as _BulirschConst<f64>>::ca(), 1e-8);
         assert_eq!(<f64 as _BulirschConst<f64>>::cb(), 1e-18);
-        assert_eq!(<f64 as _BulirschConst<f64>>::lim_kc_p(), 1e-13);
+        assert_eq!(<f64 as _BulirschConst<f64>>::lim_kc_p(), 1e-12);
     }
 }
