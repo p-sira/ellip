@@ -8,7 +8,8 @@
 - Improve performance across all functions by removing unnecessary checks.
 - Improve and fix error messages.
 - Add test summary and benchmark data in README.
-- Slightly increase accuracy of the p.v. cases of `elliprj`.
+- `el3`: Improve accuracy.
+- `elliprj`: Slightly increase accuracy of the p.v. cases.
 
 **Tests**
 - Add Wolfram test data for `ellipd` and `ellipdinc`.
