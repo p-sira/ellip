@@ -6,7 +6,11 @@
 #[macro_export]
 macro_rules! figure_path {
     ($filename:literal) => {
-        concat!["../../figures/", $filename]
+        if cfg!(feature = "save-to-bin") {
+            concat!["../../figures/bin/", $filename]
+        } else {
+            concat!["../../figures/", $filename]
+        }
     };
 }
 
