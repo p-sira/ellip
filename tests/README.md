@@ -1,11 +1,6 @@
 # Testing
-
-This report presents the accuracy of the ellip crate using [**symmetric relative error**](https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/relative_error.html)
-metric. Errors are expressed in units of machine epsilon (ε).
-The test data spans the domain of each function up to **μ** to avoid approaching the function's limit.
-The reference values are computed using [**Wolfram Engine**](https://www.wolfram.com/engine/).
-You can find the scripts in the directory [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/).
-This report is generated on x86_64-unknown-linux-gnu rustc 1.88.0 using ellip v0.3.6 at `f64` precision (ε≈2.22e-16).
+This report presents the accuracy of the ellip crate using [**symmetric relative error**](https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/relative_error.html) metric. Errors are expressed in units of machine epsilon (ε). The test data spans the domain of each function up to **μ** to avoid approaching the function's limit. The reference values are computed using [**Wolfram Engine**](https://www.wolfram.com/engine/). You can find the scripts in the directory [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/). 
+This report is generated on x86_64-unknown-linux-gnu rustc 1.89.0 using ellip v0.3.7 at `f64` precision (ε≈2.22e-16).
 
 ## Legendre's Complete Elliptic Integrals
 
@@ -36,7 +31,6 @@ This report is generated on x86_64-unknown-linux-gnu rustc 1.88.0 using ellip v0
 | ellipdinc (Neg m)  | 1.16     | 0.93       | 3.55    | 4.20    | 0.82          | 1      |
 
 ## Bulirsch's Elliptic Integrals
-
 Bulirsh's elliptic integrals are not natively implemented in Wolfram Engine. Nevertheless, some of the integrals can be converted to their Legendre's counterpart, which are available on Wolfram Engine. However, for `cel` and `el2`, their values cannot be mapped simply. Hence, the reference values are generated using the functions submitted by Jan Mangaldan on [Wolfram Function Repository](https://resources.wolframcloud.com/FunctionRepository/). As for `cel2`, it is mapped to `cel` with p=1.
 
 | Function   | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
