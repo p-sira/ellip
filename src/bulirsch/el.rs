@@ -758,18 +758,13 @@ mod tests {
         assert_eq!(el3(0.0, 0.5, 0.5).unwrap(), 0.0);
         // kc = 0: should return Err
         assert_eq!(el3(0.5, 0.0, 0.5), Err("el3: kc must not be zero."));
+
+        let complete_el3 = el3(INFINITY, 0.5, 0.5).unwrap();
         // x = inf: el3(inf, kc, p) = cel(kc, p, 1, 1)
-        assert_close!(
-            el3(INFINITY, 0.5, 0.5).unwrap(),
-            cel(0.5, 0.5, 1.0, 1.0).unwrap(),
-            1e-15
-        );
+        assert_close!(complete_el3, cel(0.5, 0.5, 1.0, 1.0).unwrap(), 1e-15);
         // x = inf: el3(inf, kc, p) = Π(n, m)
-        assert_close!(
-            el3(INFINITY, 0.5, 0.5).unwrap(),
-            ellippi(0.5, 0.75).unwrap(),
-            1e-15
-        );
+        assert_close!(complete_el3, ellippi(0.5, 0.75).unwrap(), 1e-15);
+        
         // kc = 1, p > 0: el3(x, 1, p) = atan(sqrt(p) * x) / sqrt(p)
         assert_eq!(
             el3(4.0, 1.0, 0.5).unwrap(),
@@ -786,5 +781,7 @@ mod tests {
 
 #[cfg(feature = "reduce-iteration")]
 crate::test_force_unreachable! {
+    assert_eq!(el1(0.5, 0.5), Err("el1: Failed to converge."));
+    assert_eq!(el2(0.5, 0.5, 0.5, 0.5), Err("el2: Failed to converge."));
     assert_eq!(el3(0.5, 0.5, 0.5), Err("el3: Failed to converge."));
 }
