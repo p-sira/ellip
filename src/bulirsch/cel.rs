@@ -200,9 +200,6 @@ pub fn _cel1<T: Float, C: _BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
     }
     check!(@nan, cel1, [kc]);
     check!(@zero, cel1, [kc]);
-    if kc.is_infinite() {
-        return Ok(0.0);
-    }
     Err("cel1: Failed to converge.")
 }
 
