@@ -3,16 +3,13 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-#![allow(deprecated)]
 use num_traits::Float;
 
 use crate::{
-    bulirsch::DefaultPrecision,
+    bulirsch::constants::{BulirschConst, DefaultPrecision},
     crate_util::{case, check, declare},
     StrErr,
 };
-
-use super::_BulirschConst;
 
 /// Computes [complete elliptic integral in Bulirsch form](https://dlmf.nist.gov/19.2#iii).
 /// ```text
@@ -74,7 +71,7 @@ pub fn cel<T: Float>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
 
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub fn _cel<T: Float, C: _BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
+pub fn _cel<T: Float, C: BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
     check!(@zero, cel, [kc, p]);
 
     let mut kc = kc.abs();
@@ -179,7 +176,7 @@ pub fn cel1<T: Float>(kc: T) -> Result<T, StrErr> {
 
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub fn _cel1<T: Float, C: _BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
+pub fn _cel1<T: Float, C: BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
     declare!(mut [kc = kc.abs(), m = T::one(), ans = T::nan(), h]);
     for _ in 0..MAX_ITERATION {
         h = m;
@@ -259,7 +256,7 @@ pub fn cel2<T: Float>(kc: T, a: T, b: T) -> Result<T, StrErr> {
 
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub fn _cel2<T: Float, C: _BulirschConst<T>>(kc: T, a: T, b: T) -> Result<T, StrErr> {
+pub fn _cel2<T: Float, C: BulirschConst<T>>(kc: T, a: T, b: T) -> Result<T, StrErr> {
     declare!(mut [kc = kc.abs(), aa = a, bb = b, m = T::one(), c = aa, ans = T::nan(), m0]);
     aa = bb + aa;
 

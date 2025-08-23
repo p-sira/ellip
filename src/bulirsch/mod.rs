@@ -10,6 +10,7 @@ mod constants;
 mod el;
 
 pub use cel::{cel, cel1, cel2};
-pub use constants::BulirschConst;
-pub(crate) use constants::{DefaultPrecision, _BulirschConst};
 pub use el::{el1, el2, el3};
+
+#[cfg(feature = "unstable")]
+pub use constants::{BulirschConst, DefaultPrecision, HalfPrecision};

@@ -1,4 +1,12 @@
 # Changelog
+## 0.4
+### 0.4.0
+**Breaking Changes**
+- `BulirschConst`: The trait signature changed to `BulirschConst<T>`.
+
+**New Features**
+- `unstable` flag: Access features that might be changed in the future.
+
 ## 0.3
 ### 0.3.7
 **Bug Fixes**

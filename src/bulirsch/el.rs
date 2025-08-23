@@ -3,16 +3,14 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-#![allow(deprecated)]
 use num_traits::Float;
 
 use crate::{
-    bulirsch::DefaultPrecision,
+    bulirsch::constants::{BulirschConst, DefaultPrecision},
+    cel1, cel2,
     crate_util::{case, check, declare, let_mut},
     ellipeinc, ellipf, ellippi, ellippiinc, StrErr,
 };
-
-use super::{_BulirschConst, cel1, cel2};
 
 /// Computes [incomplete elliptic integral of the first kind in Bulirsch's form](https://dlmf.nist.gov/19.2.E11_5).
 /// ```text
@@ -67,7 +65,7 @@ pub fn el1<T: Float>(x: T, kc: T) -> Result<T, StrErr> {
 
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub fn _el1<T: Float, C: _BulirschConst<T>>(x: T, kc: T) -> Result<T, StrErr> {
+pub fn _el1<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> Result<T, StrErr> {
     let ans = el1_unchecked::<T, C>(x, kc);
     if ans.is_finite() {
         return Ok(ans);
@@ -84,7 +82,7 @@ pub fn _el1<T: Float, C: _BulirschConst<T>>(x: T, kc: T) -> Result<T, StrErr> {
 
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub fn el1_unchecked<T: Float, C: _BulirschConst<T>>(x: T, kc: T) -> T {
+pub fn el1_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> T {
     declare!(mut [y = x.recip().abs(), kc = kc.abs(), m = T::one(), l = 0, e, g]);
 
     for _ in 0..N_MAX_ITERATIONS {
@@ -171,7 +169,7 @@ pub fn el2<T: Float>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
 
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub fn _el2<T: Float, C: _BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
+pub fn _el2<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
     let ans = el2_unchecked::<T, C>(x, kc, a, b);
     if ans.is_finite() {
         return Ok(ans);
@@ -189,7 +187,7 @@ pub fn _el2<T: Float, C: _BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> Result<T
 
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub fn el2_unchecked<T: Float, C: _BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> T {
+pub fn el2_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> T {
     let_mut!(b);
     declare!(mut [c = x * x, d = T::one() + c, p = ((T::one() + kc * kc * c) / d).sqrt()]);
 
@@ -294,7 +292,7 @@ pub fn el3<T: Float>(x: T, kc: T, p: T) -> Result<T, StrErr> {
 
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub fn _el3<T: Float, C: _BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrErr> {
+pub fn _el3<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrErr> {
     let m = 1.0 - kc * kc;
     let n = 1.0 - p;
 
