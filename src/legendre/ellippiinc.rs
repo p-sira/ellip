@@ -16,7 +16,7 @@ use crate::{
     carlson::{elliprc_unchecked, elliprf_unchecked, elliprj_unchecked},
     crate_util::check,
     ellipf,
-    legendre::{ellipeinc_unchecked, ellippi::ellippi_vc},
+    legendre::{ellipeinc::ellipeinc_unchecked, ellippi::ellippi_vc},
     StrErr,
 };
 

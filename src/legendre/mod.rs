@@ -23,4 +23,5 @@ pub use ellipk::ellipk;
 pub use ellippi::ellippi;
 pub use ellippiinc::ellippiinc;
 
-pub(crate) use ellipeinc::ellipeinc_unchecked;
+#[cfg(feature = "unstable")]
+pub use {ellipeinc::ellipeinc_unchecked, ellippi::ellippi_unchecked};

@@ -17,8 +17,14 @@ pub use elliprf::elliprf;
 pub use elliprg::elliprg;
 pub use elliprj::elliprj;
 
-pub(crate) use elliprc::elliprc_unchecked;
-pub(crate) use elliprd::elliprd_unchecked;
-pub(crate) use elliprf::elliprf_unchecked;
-pub(crate) use elliprg::elliprg_unchecked;
-pub(crate) use elliprj::elliprj_unchecked;
+#[cfg(not(feature = "unstable"))]
+pub(crate) use {
+    elliprc::elliprc_unchecked, elliprd::elliprd_unchecked, elliprf::elliprf_unchecked,
+    elliprg::elliprg_unchecked, elliprj::elliprj_unchecked,
+};
+
+#[cfg(feature = "unstable")]
+pub use {
+    elliprc::elliprc_unchecked, elliprd::elliprd_unchecked, elliprf::elliprf_unchecked,
+    elliprg::elliprg_unchecked, elliprj::elliprj_unchecked,
+};
