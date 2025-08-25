@@ -24,6 +24,7 @@ fn main() {
             get_summary_entry!("legendre", "ellipeinc", ellipeinc, 2),
             get_summary_entry!("legendre", "ellippi", ellippi, 2),
             get_summary_entry!("legendre", "ellippiinc", ellippiinc, 3),
+            get_summary_entry! {"legendre", "ellippiinc_bulirsch", ellippiinc_bulirsch, 3, "ellippiinc"},
             get_summary_entry!("legendre", "ellipd", ellipd, 1),
             get_summary_entry!("legendre", "ellipdinc", ellipdinc, 2),
         ]),

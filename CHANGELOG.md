@@ -5,6 +5,7 @@
 - `BulirschConst`: The trait signature changed to `BulirschConst<T>`.
 
 **New Features**
+- `ellippiinc_bulirsch`: Faster implementation of `ellippiinc`.
 - `unstable` flag: Access features that might be changed in the future.
 
 ## 0.3

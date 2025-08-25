@@ -1,11 +1,6 @@
 # Testing
-
-This report presents the accuracy of the ellip crate using [**symmetric relative error**](https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/relative_error.html)
-metric. Errors are expressed in units of machine epsilon (ε).
-The test data spans the domain of each function up to **μ** to avoid approaching the function's limit.
-The reference values are computed using [**Wolfram Engine**](https://www.wolfram.com/engine/).
-You can find the scripts in the directory [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/).
-This report is generated on x86_64-unknown-linux-gnu rustc 1.88.0 using ellip v0.3.6 at `f64` precision (ε≈2.22e-16).
+This report presents the accuracy of the ellip crate using [**symmetric relative error**](https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/relative_error.html) metric. Errors are expressed in units of machine epsilon (ε). The test data spans the domain of each function up to **μ** to avoid approaching the function's limit. The reference values are computed using [**Wolfram Engine**](https://www.wolfram.com/engine/). You can find the scripts in the directory [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/). 
+This report is generated on x86_64-unknown-linux-gnu rustc 1.89.0 using ellip v0.4.0 at `f64` precision (ε≈2.22e-16).
 
 ## Legendre's Complete Elliptic Integrals
 
@@ -23,20 +18,21 @@ This report is generated on x86_64-unknown-linux-gnu rustc 1.88.0 using ellip v0
 
 ## Legendre's Incomplete Elliptic Integrals
 
-| Function           | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
-|--------------------|----------|------------|---------|---------|---------------|--------|
-| ellipf             | 0.65     | 0.66       | 2.59    | 7.47    | 0.44          | 1      |
-| ellipf (Neg m)     | 0.60     | 0.66       | 2.04    | 3.00    | 0.29          | 1      |
-| ellipeinc          | 0.93     | 0.69       | 8.15    | 24.66   | 2.67          | 1      |
-| ellipeinc (Neg m)  | 0.83     | 0.73       | 2.90    | 3.96    | 0.53          | 1      |
-| ellippiinc         | 1.49     | 0.72       | 22.57   | 165.83  | 62.92         | 1      |
-| ellippiinc (Neg m) | 1.11     | 0.68       | 14.53   | 25.98   | 4.99          | 1      |
-| ellippiinc (p.v.)  | 11.39    | 2.92       | 168.79  | 1.04e3  | 3.38e3        | 1      |
-| ellipdinc          | 1.31     | 1.08       | 4.30    | 8.38    | 1.09          | 1      |
-| ellipdinc (Neg m)  | 1.16     | 0.93       | 3.55    | 4.20    | 0.82          | 1      |
+| Function                    | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
+|-----------------------------|----------|------------|---------|---------|---------------|--------|
+| ellipf                      | 0.65     | 0.66       | 2.59    | 7.47    | 0.44          | 1      |
+| ellipf (Neg m)              | 0.60     | 0.66       | 2.04    | 3.00    | 0.29          | 1      |
+| ellipeinc                   | 0.93     | 0.69       | 8.15    | 24.66   | 2.67          | 1      |
+| ellipeinc (Neg m)           | 0.83     | 0.73       | 2.90    | 3.96    | 0.53          | 1      |
+| ellippiinc                  | 1.49     | 0.72       | 22.57   | 165.83  | 62.92         | 1      |
+| ellippiinc (Neg m)          | 1.11     | 0.68       | 14.53   | 25.98   | 4.99          | 1      |
+| ellippiinc (p.v.)           | 11.39    | 2.92       | 168.79  | 1.04e3  | 3.38e3        | 1      |
+| ellippiinc_bulirsch         | 1.67     | 0.77       | 22.57   | 165.83  | 62.85         | 1      |
+| ellippiinc_bulirsch (Neg m) | 1.07     | 0.80       | 6.92    | 15.94   | 2.46          | 1      |
+| ellipdinc                   | 1.31     | 1.08       | 4.30    | 8.38    | 1.09          | 1      |
+| ellipdinc (Neg m)           | 1.16     | 0.93       | 3.55    | 4.20    | 0.82          | 1      |
 
 ## Bulirsch's Elliptic Integrals
-
 Bulirsh's elliptic integrals are not natively implemented in Wolfram Engine. Nevertheless, some of the integrals can be converted to their Legendre's counterpart, which are available on Wolfram Engine. However, for `cel` and `el2`, their values cannot be mapped simply. Hence, the reference values are generated using the functions submitted by Jan Mangaldan on [Wolfram Function Repository](https://resources.wolframcloud.com/FunctionRepository/). As for `cel2`, it is mapped to `cel` with p=1.
 
 | Function   | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |

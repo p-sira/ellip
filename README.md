@@ -79,19 +79,20 @@ Learn more at [doc.rs](https://docs.rs/ellip).
 
 In the unit tests, the functions are tested against the Boost Math and Wolfram test data. Since Ellip accepts the argument `m` (parameter) instead of `k` (modulus) to allow larger domain support, the full accuracy report uses exclusively the Wolfram data. The full accuracy report, test data, and test generation scripts can be found [here](https://github.com/p-sira/ellip/blob/main/tests).
 
-Generated on x86_64-unknown-linux-gnu rustc 1.88.0 using ellip v0.3.7 at `f64` precision (ε≈2.22e-16).
+Generated on x86_64-unknown-linux-gnu rustc 1.89.0 using ellip v0.4.0 at `f64` precision (ε≈2.22e-16).
 
 ### Legendre's Elliptic Integrals
-| Function   | Median Error (ε) | Max Error (ε) | Mean Performance |
-|------------|------------------|---------------|------------------|
-| ellipk     | 0.00             | 108.14        | 14.8 ns          |
-| ellipe     | 0.00             | 3.00          | 13.3 ns          |
-| ellipf     | 0.66             | 7.47          | 104.1 ns         |
-| ellipeinc  | 0.70             | 24.66         | 168.1 ns         |
-| ellippi    | 0.53             | 36.35         | 170.1 ns         |
-| ellippiinc | 0.78             | 1.04e3        | 279.6 ns         |
-| ellipd     | 0.60             | 2.64          | 30.5 ns          |
-| ellipdinc  | 1.00             | 8.38          | 106.1 ns         |
+| Function            | Median Error (ε) | Max Error (ε) | Mean Performance |
+|---------------------|------------------|---------------|------------------|
+| ellipk              | 0.00             | 108.14        | 14.8 ns          |
+| ellipe              | 0.00             | 3.00          | 13.3 ns          |
+| ellipf              | 0.66             | 7.47          | 104.1 ns         |
+| ellipeinc           | 0.70             | 24.66         | 168.1 ns         |
+| ellippi             | 0.53             | 36.35         | 170.1 ns         |
+| ellippiinc          | 0.78             | 1.04e3        | 279.6 ns         |
+| ellippiinc_bulirsch | 0.83             | 1.04e3        | 227.7 ns         |
+| ellipd              | 0.60             | 2.64          | 30.5 ns          |
+| ellipdinc           | 1.00             | 8.38          | 106.1 ns         |
 
 ### Bulirsch's Elliptic Integrals
 | Function | Median Error (ε) | Max Error (ε) | Mean Performance |

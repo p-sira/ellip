@@ -39,6 +39,7 @@
 //! - [fn@ellipf]: Incomplete elliptic integral of the first kind (F).
 //! - [fn@ellipeinc]: Incomplete elliptic integral of the second kind (E).
 //! - [fn@ellippiinc]: Incomplete elliptic integral of the third kind (Π).
+//! - [fn@ellippiinc_bulirsch]: Faster implementation of [fn@ellippiinc].
 //! - [fn@ellipdinc]: Incomplete elliptic integral of Legendre's type (D).
 //! ## Bulirsch's integrals
 //! - [fn@cel]: General complete elliptic integral in Bulirsch's form.
@@ -53,6 +54,9 @@
 //! - [fn@elliprj]: Symmetric elliptic integral of the third kind (RJ).
 //! - [fn@elliprc]: Degenerate elliptic integral of RF (RC).
 //! - [fn@elliprd]: Degenerate elliptic integral of the third kind (RD).
+//! ## Feature Flags
+//! - `unstable`: Enable unstable or untested features that might be changed without notice in the future.
+//! - `test_force_fail`: Used for testing only. Force tests to reach code unreachable under normal circumstances.
 //!
 //! # Testing
 //! The function results are compared with Boost Math test data and Wolfram Engine test data.
@@ -95,6 +99,7 @@ pub use legendre::ellipdinc;
 pub use legendre::ellipeinc;
 pub use legendre::ellipf;
 pub use legendre::ellippiinc;
+pub use legendre::ellippiinc_bulirsch;
 
 // Bulirsch's integrals
 pub mod bulirsch;

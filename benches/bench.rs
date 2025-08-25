@@ -85,12 +85,19 @@ macro_rules! wrap_functions {
 }
 
 macro_rules! generate_benchmarks {
-    ($bench_name:ident, [$($func:ident),*]) => {
+    (@find_test $func:ident) => {
+        ellip_dev_utils::file::find_test_files(stringify!($func), "wolfram")
+    };
+    (@find_test $func:ident $test_file_name:expr) => {
+        ellip_dev_utils::file::find_test_files($test_file_name, "wolfram")
+    };
+    ($bench_name:ident, [$($func:ident : $n_args:tt $(: $test_file_name:expr)?),* $(,)?] $(,)?) => {
+        wrap_functions! {$($func : $n_args),*}
         pub fn $bench_name(c: &mut Criterion) {
             $(
                 let mut group = c.benchmark_group(stringify!($bench_name));
 
-                let test_paths = ellip_dev_utils::file::find_test_files(stringify!($func), "wolfram");
+                let test_paths = generate_benchmarks!(@find_test $func $($test_file_name)?);
                 if test_paths.is_empty() {
                     eprintln!("No test files found for function: {}", stringify!($func));
                     return;
@@ -109,13 +116,9 @@ macro_rules! generate_benchmarks {
             )*
         }
     };
-    ($bench_name:ident, [$($func:ident : $n_args:tt),* $(,)?] $(,)?) => {
-        wrap_functions! {$($func : $n_args),*}
-        generate_benchmarks! {$bench_name, [$($func),*]}
-    };
 }
 
-generate_benchmarks! {legendre, [ellipk:1, ellipe:1, ellipf:2, ellipeinc:2, ellippi:2, ellippiinc:3, ellipd:1, ellipdinc: 2]}
+generate_benchmarks! {legendre, [ellipk:1, ellipe:1, ellipf:2, ellipeinc:2, ellippi:2, ellippiinc:3, ellippiinc_bulirsch:3:"ellippiinc", ellipd:1, ellipdinc: 2]}
 generate_benchmarks! {carlson, [elliprf:3, elliprg:3, elliprj:4, elliprc:2, elliprd:3]}
 generate_benchmarks! {bulirsch, [cel:4, cel1:1, cel2:3, el1:2, el2:4, el3:3]}
 

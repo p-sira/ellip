@@ -169,7 +169,7 @@ pub fn generate_summary_table(entries: &[(&str, Stats, f64)]) -> String {
 
 #[macro_export]
 macro_rules! get_summary_entry {
-    ($group:expr, $name:expr, $func:expr, $arg_count:tt) => {{
+    ($group:expr, $name:expr, $func:expr, $arg_count:tt, $test_file_name:expr) => {{
         use ellip_dev_utils::{
             benchmark, file, parser, stats,
             test_report::{self, Case},
@@ -178,7 +178,7 @@ macro_rules! get_summary_entry {
 
         ellip_dev_utils::func_wrapper!($func, $arg_count);
 
-        let test_paths = file::find_test_files(stringify!($func), "wolfram");
+        let test_paths = file::find_test_files($test_file_name, "wolfram");
         let cases = test_paths
             .iter()
             .flat_map(|test_path| parser::read_wolfram_data(test_path.to_str().unwrap()).unwrap())
@@ -197,5 +197,8 @@ macro_rules! get_summary_entry {
             .unwrap_or(f64::NAN);
 
         ($name, stats, perf)
+    }};
+    ($group:expr, $name:expr, $func:expr, $arg_count:tt) => {{
+        get_summary_entry! {$group, $name, $func, $arg_count, stringify!($func)}
     }};
 }

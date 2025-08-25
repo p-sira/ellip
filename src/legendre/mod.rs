@@ -21,7 +21,7 @@ pub use ellipeinc::ellipeinc;
 pub use ellipf::ellipf;
 pub use ellipk::ellipk;
 pub use ellippi::ellippi;
-pub use ellippiinc::ellippiinc;
+pub use ellippiinc::{ellippiinc, ellippiinc_bulirsch};
 
 #[cfg(feature = "unstable")]
 pub use {ellipeinc::ellipeinc_unchecked, ellippi::ellippi_unchecked};

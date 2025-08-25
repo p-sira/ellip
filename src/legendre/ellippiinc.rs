@@ -15,7 +15,7 @@ use num_traits::Float;
 use crate::{
     carlson::{elliprc_unchecked, elliprf_unchecked, elliprj_unchecked},
     crate_util::check,
-    ellipf,
+    el3, ellipf,
     legendre::{ellipeinc::ellipeinc_unchecked, ellippi::ellippi_vc},
     StrErr,
 };
@@ -321,10 +321,63 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
     Ok(sphi * (elliprf_unchecked(x, y, z) + n * t * elliprj_unchecked(x, y, z, p) / 3.0))
 }
 
+/// Computes [incomplete elliptic integral of the third kind](https://dlmf.nist.gov/19.2.E7) using the Bulirsch algorithm.
+///
+/// This function should be about 2x as fast as [ellippiinc] in non-PV and m < 1 cases, while maintaining similar accuracy.
+/// Otherwise, it delegates to [ellippiinc].
+///
+/// # Notes
+/// See [ellippiinc] for more details.
+///
+/// # Examples
+/// ```
+/// use ellip::{ellippiinc_bulirsch, util::assert_close};
+/// use std::f64::consts::FRAC_PI_4;
+///
+/// assert_close(ellippiinc_bulirsch(FRAC_PI_4, 0.5, 0.5).unwrap(), 0.9190227391656969, 1e-15);
+/// ```
+///
+/// # References
+/// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+pub fn ellippiinc_bulirsch<T: Float>(phi: T, n: T, m: T) -> Result<T, StrErr> {
+    if phi.is_infinite() {
+        return Ok(phi);
+    }
+
+    if n == 1.0 && m == 0.0 {
+        return Ok(phi.tan());
+    }
+
+    // el3 cannot handle complex kc and PV domain
+    let sphi = phi.sin();
+    if m >= 1.0 || n * sphi * sphi >= 1.0 {
+        return ellippiinc(phi, n, m);
+    }
+
+    let x = phi.tan();
+    let kc = (T::one() - m).sqrt();
+    let p = T::one() - n;
+    let result = el3(x, kc, p);
+    if result.is_ok() {
+        return result;
+    }
+
+    let err_str = match result.err().unwrap() {
+        "el3: kc must not be zero." => "ellippiinc: m must not be 1.",
+        "el3: 1 + px² cannot be zero." => "ellippiinc: 1 + (1-n)tan²φ cannot be zero.",
+        "el3: Failed to converge." => "ellippiinc: Failed to converge.",
+        "el3: Arguments cannot be NAN." => "ellippiinc: Arguments cannot be NAN.",
+        _ => "ellippiinc: Unexpected error.",
+    };
+
+    Err(err_str)
+}
+
 #[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
-    use crate::{compare_test_data_boost, compare_test_data_wolfram, ellipeinc};
+    use crate::{compare_test_data_boost, compare_test_data_wolfram, ellipeinc, ellippi};
 
     use super::*;
 
@@ -333,12 +386,8 @@ mod tests {
     }
 
     #[test]
-    fn test_ellippi() {
+    fn test_ellippiinc() {
         compare_test_data_boost!("ellippiinc_data.txt", ellippiinc_k, 2.1e-15);
-    }
-
-    #[test]
-    fn test_ellippi_large() {
         compare_test_data_boost!("ellippi3_large_data.txt", ellippiinc_k, 6e-15);
     }
 
@@ -358,17 +407,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ellippiinc_err() {
-        use std::f64::consts::FRAC_PI_2;
-        // m sin²φ > 1
-        assert!(ellippiinc(FRAC_PI_2, 0.5, 1.1).is_err());
-        // n sin²φ = 1
-        assert!(ellippiinc(FRAC_PI_2, 1.0, 0.5).is_err());
-    }
-
-    #[test]
     fn test_ellippiinc_special_cases() {
-        use crate::ellippi;
         use std::f64::{
             consts::{FRAC_PI_2, PI},
             INFINITY, NAN, NEG_INFINITY,
@@ -432,6 +471,87 @@ mod tests {
         );
         assert_eq!(
             ellippiinc(0.5, 0.5, NAN),
+            Err("ellippiinc: Arguments cannot be NAN.")
+        );
+    }
+
+    #[test]
+    fn test_ellippiinc_bulirsch_wolfram() {
+        compare_test_data_wolfram!("ellippiinc_data.csv", ellippiinc_bulirsch, 3, 5e-14);
+    }
+
+    #[test]
+    fn test_ellippiinc_bulirsch_wolfram_neg() {
+        compare_test_data_wolfram!("ellippiinc_neg.csv", ellippiinc_bulirsch, 3, 5e-14);
+    }
+
+    #[test]
+    fn test_ellippiinc_bulirsch_wolfram_pv() {
+        compare_test_data_wolfram!("ellippiinc_pv.csv", ellippiinc_bulirsch, 3, 3e-13);
+    }
+
+    #[test]
+    fn test_ellippiinc_bulirsch_special_cases() {
+        use std::f64::{consts::FRAC_PI_2, INFINITY, NAN, NEG_INFINITY};
+        // m * sin^2(phi) >= 1: should return Err
+        assert_eq!(
+            ellippiinc_bulirsch(FRAC_PI_2, 0.5, 1.1),
+            Err("ellippiinc: m sin²φ must be smaller or equal to one.")
+        );
+        // n * sin^2(phi) = 1: should return Err
+        assert_eq!(
+            ellippiinc_bulirsch(FRAC_PI_2, 1.0, 0.5),
+            Err("ellippiinc: n sin²φ must not equal one.")
+        );
+        // Π(phi, 0, 0) = phi
+        assert_eq!(ellippiinc_bulirsch(0.4, 0.0, 0.0).unwrap(), 0.4);
+        // phi = 0: Π(0, n, m) = 0
+        assert_eq!(ellippiinc_bulirsch(0.0, 0.5, 0.5).unwrap(), 0.0);
+        // Π(phi, 1, 0) = tan(phi)
+        assert_eq!(ellippiinc_bulirsch(0.2, 1.0, 0.0).unwrap(), 0.2.tan());
+        // n = 0: Π(φ, 0, m) = F(φ, m)
+        assert_eq!(
+            ellippiinc_bulirsch(0.2, 0.0, 0.5).unwrap(),
+            ellipf(0.2, 0.5).unwrap()
+        );
+        // n = 1: Π(φ, 1, m) = [sqrt(1-m sin2(phi)) tan(phi) - E(phi,m)]/(1-m) + F(phi,m)
+        assert_eq!(
+            ellippiinc_bulirsch(0.2, 1.0, 0.5).unwrap(),
+            ((1.0 - 0.5 * 0.2.sin() * 0.2.sin()).sqrt() * 0.2.tan() - ellipeinc(0.2, 0.5).unwrap())
+                / 0.5
+                + ellipf(0.2, 0.5).unwrap()
+        );
+        // m = 1: Π(φ, n, 1) = [sqrt(n) atanh(sqrt(n) sin(φ)) - log(sec(φ)+tan(φ))]/(n-1)
+        assert_eq!(
+            ellippiinc_bulirsch(0.3, 1.5, 1.0).unwrap(),
+            ((1.5.sqrt() * (1.5.sqrt() * 0.3.sin()).atanh()
+                - (0.3.cos().recip() + 0.3.tan()).ln())
+                / (1.5 - 1.0))
+        );
+        // phi = inf: Π(φ, n, m) = inf
+        assert_eq!(ellippiinc_bulirsch(INFINITY, 0.2, 0.5).unwrap(), INFINITY);
+        // phi = -inf: Π(φ, n, m) = -inf
+        assert_eq!(
+            ellippiinc_bulirsch(NEG_INFINITY, 0.2, 0.5).unwrap(),
+            -INFINITY
+        );
+        // phi % pi/2 !=0, m >= 1: should return Err
+        assert_eq!(
+            ellippiinc_bulirsch(4.14159, 0.5, 1.0),
+            Err("ellippiinc: The result is complex.")
+        );
+
+        // Arguments cannot be NAN
+        assert_eq!(
+            ellippiinc_bulirsch(NAN, 0.5, 0.5),
+            Err("ellippiinc: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            ellippiinc_bulirsch(0.5, NAN, 0.5),
+            Err("ellippiinc: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            ellippiinc_bulirsch(0.5, 0.5, NAN),
             Err("ellippiinc: Arguments cannot be NAN.")
         );
     }
