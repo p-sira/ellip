@@ -24,4 +24,4 @@ pub use ellippi::ellippi;
 pub use ellippiinc::{ellippiinc, ellippiinc_bulirsch};
 
 #[cfg(feature = "unstable")]
-pub use {ellipeinc::ellipeinc_unchecked, ellippi::ellippi_unchecked};
+pub use ellippi::ellippi_unchecked;

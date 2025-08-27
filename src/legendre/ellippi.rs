@@ -111,6 +111,16 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
     Err("ellippi: Unexpected error.")
 }
 
+/// Unsafe version of [ellippi](crate::ellippi).
+/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
+///
+/// Undefined behavior with invalid arguments and edge cases.
+/// # Known Invalid Cases
+/// - n -> 1 or n = 1
+/// - n > 1 (p.v. cases)
+/// - m -> 1 or m = 1
+/// - m > 1
+/// - n -> -∞ or m -> -∞
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn ellippi_unchecked<T: Float>(n: T, m: T) -> T {

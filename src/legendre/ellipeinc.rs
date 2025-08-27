@@ -83,8 +83,8 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     Err("ellipeinc: Unexpected error.")
 }
 
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipeinc_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     if phi == 0.0 {
         return Ok(0.0);
