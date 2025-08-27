@@ -106,6 +106,15 @@ fn elliprc1p<T: Float>(y: T) -> T {
     }
 }
 
+/// Unsafe version of [elliprj](crate::elliprj).
+/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
+///
+/// Undefined behavior with invalid arguments and edge cases.
+/// # Known Invalid Cases
+/// - x < 0, y < 0, z < 0
+/// - More than one of x, y, and z are zero.
+/// - p = 0
+/// - x = ∞ or y = ∞ or z = ∞
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {

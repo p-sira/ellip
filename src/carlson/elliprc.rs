@@ -83,7 +83,8 @@ pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, StrErr> {
     Err("elliprc: Unexpected error.")
 }
 
-/// Unsafe version of [elliprc](crate::elliprc).
+/// Unsafe version of [elliprc].
+/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
 ///
 /// Undefined behavior with invalid arguments and edge cases.
 /// # Known Invalid Cases
