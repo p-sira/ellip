@@ -27,9 +27,6 @@ use crate::{
 /// - x: tangent of amplitude angle. x ∈ ℝ.
 /// - kc: complementary modulus. kc ∈ ℝ, kc ≠ 0.
 ///
-/// The precision of the function can be adjusted by overwriting the trait [super::BulirschConst].
-/// The default is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405) for [f64] and [f32].
-///
 /// ## Domain
 /// - Returns error if kc = 0.
 ///
@@ -47,7 +44,7 @@ use crate::{
 /// With x = tan φ and kc² = 1 - m,
 /// - [ellipf](crate::ellipf)(φ, m) = [el1](crate::el1)(x, kc) = [el2](crate::el2)(x, kc, 1, 1)
 /// - [el1](crate::el1)(∞, kc) = [cel1](crate::cel1)(kc)
-///
+///  
 /// # Examples
 /// ```
 /// use ellip::{el1, util::assert_close};
@@ -56,6 +53,10 @@ use crate::{
 /// assert_close(el1(FRAC_PI_4.tan(), 0.5).unwrap(), 0.8512237490711854, 1e-15);
 /// ```
 ///
+/// # Notes
+/// The default precision of the function is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405)
+/// for [f64]. The precision can be modified in the function [_el1] (requires `unstable` feature flag).
+///
 /// # References
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
@@ -63,6 +64,8 @@ pub fn el1<T: Float>(x: T, kc: T) -> Result<T, StrErr> {
     _el1::<T, DefaultPrecision>(x, kc)
 }
 
+/// Computes [el1]. Control the precision using [BulirschConst].
+/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn _el1<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> Result<T, StrErr> {
@@ -80,6 +83,13 @@ pub fn _el1<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> Result<T, StrErr> {
     Err("el1: Failed to converge.")
 }
 
+/// Unsafe version of [el1].
+/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
+/// Undefined behavior with invalid arguments and edge cases.
+/// # Known Invalid Cases
+/// - kc = 0
+/// - x = 0
+/// - kc = ∞ or x = ∞
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn el1_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> T {
@@ -130,9 +140,6 @@ pub fn el1_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> T {
 /// - a ∈ ℝ
 /// - b ∈ ℝ
 ///
-/// The precision of the function can be adjusted by overwriting the trait [super::BulirschConst].
-/// The default is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405) for [f64] and [f32].
-///
 /// ## Domain
 /// - Returns error if kc = 0.
 ///
@@ -160,6 +167,10 @@ pub fn el1_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> T {
 /// assert_close(el2(FRAC_PI_4.tan(), 0.5, 1.0, 1.0).unwrap(), 0.8512237490711854, 1e-15);
 /// ```
 ///
+/// # Notes
+/// The default precision of the function is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405)
+/// for [f64]. The precision can be modified in the function [_el2] (requires `unstable` feature flag).
+///
 /// # References
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
@@ -167,6 +178,8 @@ pub fn el2<T: Float>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
     _el2::<T, DefaultPrecision>(x, kc, a, b)
 }
 
+/// Computes [el2]. Control the precision using [BulirschConst].
+/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn _el2<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
@@ -185,6 +198,13 @@ pub fn _el2<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> Result<T,
     Err("el2: Failed to converge.")
 }
 
+/// Unsafe version of [el2].
+/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
+/// Undefined behavior with invalid arguments and edge cases.
+/// # Known Invalid Cases
+/// - kc = 0
+/// - x = 0
+/// - x = ∞
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn el2_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> T {
@@ -251,9 +271,6 @@ pub fn el2_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> 
 /// - kc: complementary modulus. kc ∈ ℝ, kc ≠ 0.
 /// - p ∈ ℝ
 ///
-/// The precision of the function can be adjusted by overwriting the trait [super::BulirschConst].
-/// The default is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405) for [f64] and [f32].
-///
 /// ## Domain
 /// - Returns error if:
 ///   - kc = 0,
@@ -283,6 +300,10 @@ pub fn el2_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> 
 /// assert_close(el3(FRAC_PI_4.tan(), 0.5, 1.0).unwrap(), 0.8512237490711854, 1e-15);
 /// ```
 ///
+/// # Notes
+/// The default precision of the function is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405)
+/// for [f64]. The precision can be modified in the function [_el3] (requires `unstable` feature flag).
+///
 /// # References
 /// - Bulirsch, R. “Numerical Calculation of Elliptic Integrals and Elliptic Functions. III.” Numerische Mathematik 13, no. 4 (August 1, 1969): 305–15. <https://doi.org/10.1007/BF02165405>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
@@ -290,6 +311,8 @@ pub fn el3<T: Float>(x: T, kc: T, p: T) -> Result<T, StrErr> {
     _el3::<T, DefaultPrecision>(x, kc, p)
 }
 
+/// Computes [el3]. Control the precision using [BulirschConst].
+/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn _el3<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrErr> {

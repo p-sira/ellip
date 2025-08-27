@@ -4,22 +4,20 @@
  */
 use num_traits::Float;
 
+/// Trait for controling precision of the Bulirsch's integrals
+/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
 pub trait BulirschConst<T: Float> {
     /// Number of significant figures.
     ///
     /// **D** is `7` for `f32` and `16` for `f64`.
     #[allow(dead_code)]
     const D: i32;
-
     /// D-2
     const ND: usize;
-
     /// 1e(-D/2)
     fn ca() -> T;
-
-    /// 1e(-(D+2))
+    /// 1e(-D-2)
     fn cb() -> T;
-
     /// Limit of the kc and p to use ellippiinc
     /// defaults to 1e-4 * CA
     fn lim_kc_p() -> T;
@@ -45,7 +43,6 @@ macro_rules! impl_bulirsch_const {
         }
     };
     ($struct:ident, {D: $d:literal, CA: $ca:literal, CB: $cb:literal, LIM: $lim_kc_p:literal}) => {
-        pub struct $struct;
         impl<T: Float> BulirschConst<T> for $struct {
             impl_bulirsch_const!($d, $ca, $cb, $lim_kc_p);
         }
@@ -54,8 +51,31 @@ macro_rules! impl_bulirsch_const {
 
 impl_bulirsch_const!(@type f32, {D: 7, CA: 1e-3, CB: 1e-9, LIM: 1e-7});
 impl_bulirsch_const!(@type f64, {D: 16, CA: 1e-8, CB: 1e-18, LIM: 1e-12});
+
+/// [f32] precision for Bulirsch's integrals.
+/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
+///
+/// Implement constants for [f32] according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405).
+/// In addition to the literature, [BulirschConst::lim_kc_p] controls the threshold where [el3](crate::el3)
+/// delegates to [ellippiinc](crate::ellippiinc) when |kc| < lim and p > lim, since [el3](crate::el3) will not converge.
+///
+/// # References
+/// - Bulirsch, R. “Numerical Calculation of Elliptic Integrals and Elliptic Functions. III.” Numerische Mathematik 13, no. 4 (August 1, 1969): 305–15. <https://doi.org/10.1007/BF02165405>.
+#[cfg(feature = "unstable")]
+pub struct HalfPrecision;
 #[cfg(feature = "unstable")]
 impl_bulirsch_const!(HalfPrecision, {D: 7, CA: 1e-3, CB: 1e-9, LIM: 1e-7});
+
+/// Default precision for Bulirsch's integrals.
+/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
+///
+/// Implement constants for [f64] according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405).
+/// In addition to the literature, [BulirschConst::lim_kc_p] controls the threshold where [el3](crate::el3)
+/// delegates to [ellippiinc](crate::ellippiinc) when |kc| < lim and p > lim, since [el3](crate::el3) will not converge.
+///
+/// # References
+/// - Bulirsch, R. “Numerical Calculation of Elliptic Integrals and Elliptic Functions. III.” Numerische Mathematik 13, no. 4 (August 1, 1969): 305–15. <https://doi.org/10.1007/BF02165405>.
+pub struct DefaultPrecision;
 impl_bulirsch_const!(DefaultPrecision, {D: 16, CA: 1e-8, CB: 1e-18, LIM: 1e-12});
 
 #[cfg(not(feature = "test_force_fail"))]
