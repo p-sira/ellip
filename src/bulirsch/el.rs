@@ -85,6 +85,7 @@ pub fn _el1<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> Result<T, StrErr> {
 
 /// Unsafe version of [el1].
 /// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
+///
 /// Undefined behavior with invalid arguments and edge cases.
 /// # Known Invalid Cases
 /// - kc = 0
@@ -200,6 +201,7 @@ pub fn _el2<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> Result<T,
 
 /// Unsafe version of [el2].
 /// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
+///
 /// Undefined behavior with invalid arguments and edge cases.
 /// # Known Invalid Cases
 /// - kc = 0
