@@ -4,6 +4,9 @@
 **Breaking Changes**
 - `BulirschConst`: The trait signature changed to `BulirschConst<T>`.
 
+**Bug Fixes**
+- `ellippiinc`: Fix segfault when m sin²(phi) > 1. Early catch and return error instead. 
+
 **New Features**
 - `ellippiinc_bulirsch`: Faster implementation of `ellippiinc`.
 - `unstable` flag: Access features that might be changed in the future.
