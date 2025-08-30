@@ -67,7 +67,7 @@ use num_traits::Float;
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
-    if m < -1e306 {
+    if m < 1e-2 * min_val!() {
         return Ok(0.0);
     }
 

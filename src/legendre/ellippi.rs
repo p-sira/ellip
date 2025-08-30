@@ -103,7 +103,8 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
         let sign = (1.0 - n).signum();
         return Ok(sign * inf!());
     }
-    if n < -1e306 || m < -1e306 {
+    let lim_min = 1e-2 * min_val!();
+    if n < lim_min || m < lim_min {
         // n = -inf: Π(-inf, m) = 0
         // m = -inf: Π(n, -inf) = 0
         return Ok(0.0);
