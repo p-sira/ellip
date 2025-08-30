@@ -92,11 +92,6 @@ pub fn ellippiinc<T: Float>(phi: T, n: T, m: T) -> Result<T, StrErr> {
     }
 
     check!(@nan, ellippiinc, [phi, n, m]);
-    let sphi = phi.abs().sin();
-    let sp2 = sphi * sphi;
-    if m * sp2 > 1.0 {
-        return Err("ellippiinc: m sin²φ must be smaller or equal to one.");
-    }
     if phi.is_infinite() {
         return Ok(phi.signum() * inf!());
     }
@@ -110,6 +105,10 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
     let sphi = phi.abs().sin();
     let sp2 = sphi * sphi;
     let mut result = 0.0;
+
+    if m * sp2 > 1.0 {
+        return Err("ellippiinc: m sin²φ must be smaller or equal to one.");
+    }
 
     if n * sp2 == 1.0 {
         return Err("ellippiinc: n sin²φ must not equal one.");
@@ -377,9 +376,8 @@ pub fn ellippiinc_bulirsch<T: Float>(phi: T, n: T, m: T) -> Result<T, StrErr> {
 #[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
-    use crate::{compare_test_data_boost, compare_test_data_wolfram, ellipeinc, ellippi};
-
     use super::*;
+    use crate::{compare_test_data_boost, compare_test_data_wolfram, ellipeinc, ellippi};
 
     fn ellippiinc_k(inp: &[f64]) -> f64 {
         ellippiinc(inp[1], inp[0], inp[2] * inp[2]).unwrap()
