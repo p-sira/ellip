@@ -31,6 +31,8 @@ ellipENeg = Table[{m, EllipticE[SetPrecision[m, 30]]}, {m, MNeg}];
 
 Export["../data/wolfram/ellipe_neg.csv", N[ellipENeg], "CSV"];
 
+(* Complete Elliptic Integrals of Legendre's Type *)
+
 M = Subdivide[mu, 1 - mu, 1000];
 
 EllipticD[m_] :=
