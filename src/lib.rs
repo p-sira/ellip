@@ -120,7 +120,7 @@ pub use carlson::elliprj;
 
 // Utilities
 mod polyeval;
-use polyeval::*;
+use polyeval::polyeval;
 pub mod util;
 
 #[cfg(test)]
