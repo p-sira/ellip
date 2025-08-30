@@ -268,7 +268,7 @@ fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
             #[cfg(not(feature = "test_force_fail"))]
             if m > 1.0 {
                 // Infinity cases
-                return Err("ellipe: m must be less than 1.");
+                return Err("ellipe: m must not be greater than 1.");
             }
             Err("ellipe: Unexpected error.")
         }
@@ -283,7 +283,7 @@ fn ellipe_precise<T: Float>(m: T) -> Result<T, StrErr> {
         if m == 1.0 {
             return Ok(1.0);
         }
-        return Err("ellipe: m must be less than 1.");
+        return Err("ellipe: m must not be greater than 1.");
     }
 
     Ok(2.0 * elliprg_unchecked(0.0, 1.0 - m, 1.0))
@@ -311,7 +311,7 @@ mod tests {
     fn test_ellipe_special_cases() {
         use std::f64::{consts::FRAC_PI_2, INFINITY, NAN, NEG_INFINITY};
         // m > 1: should return Err
-        assert_eq!(ellipe(1.1), Err("ellipe: m must be less than 1."));
+        assert_eq!(ellipe(1.1), Err("ellipe: m must not be greater than 1."));
         // m = 0: E(0) = pi/2
         assert_eq!(ellipe(0.0).unwrap(), FRAC_PI_2);
         // m = 1: E(1) = 1
@@ -321,7 +321,7 @@ mod tests {
         // m = NaN: should return Err
         assert_eq!(ellipe(NAN), Err("ellipe: Arguments cannot be NAN."));
         // m = inf: should return Err
-        assert_eq!(ellipe(INFINITY), Err("ellipe: m must be less than 1."));
+        assert_eq!(ellipe(INFINITY), Err("ellipe: m must not be greater than 1."));
         // m = -inf: E(-inf) = inf
         assert_eq!(ellipe(NEG_INFINITY).unwrap(), INFINITY);
     }

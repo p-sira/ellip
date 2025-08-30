@@ -273,7 +273,7 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
             #[cfg(not(feature = "test_force_fail"))]
             if m > 1.0 {
                 // Also handles inf
-                return Err("ellipk: m must be less than 1.");
+                return Err("ellipk: m must not be greater than 1.");
             }
             Err("ellipk: Unexpected error.")
         }
@@ -288,7 +288,7 @@ pub(crate) fn ellipk_precise<T: Float>(m: T) -> Result<T, StrErr> {
         if m == 1.0 {
             return Ok(inf!());
         }
-        return Err("ellipk: m must be less than 1.");
+        return Err("ellipk: m must not be greater than 1.");
     }
 
     Ok(ellipk_precise_unchecked(m))
@@ -343,11 +343,14 @@ mod tests {
         // m < 0: should be valid, compare with reference value
         assert!(ellipk(-1.0).unwrap().is_finite());
         // m > 1: should return Err
-        assert_eq!(ellipk(1.1), Err("ellipk: m must be less than 1."));
+        assert_eq!(ellipk(1.1), Err("ellipk: m must not be greater than 1."));
         // m = NaN: should return Err
         assert_eq!(ellipk(NAN), Err("ellipk: Arguments cannot be NAN."));
         // m = inf: should return Err
-        assert_eq!(ellipk(INFINITY), Err("ellipk: m must be less than 1."));
+        assert_eq!(
+            ellipk(INFINITY),
+            Err("ellipk: m must not be greater than 1.")
+        );
         // m = -inf: K(-inf) = 0
         assert_eq!(ellipk(NEG_INFINITY).unwrap(), 0.0);
     }
