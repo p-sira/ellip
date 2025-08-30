@@ -3,6 +3,7 @@
 ### 0.4.0
 **Breaking Changes**
 - `BulirschConst`: The trait signature changed to `BulirschConst<T>`.
+- `bulirsch` functions are bounded by `T: Float + BulirschConst<T>` trait.
 
 **Bug Fixes**
 - `ellippiinc`: Fix segfault when m sin²(phi) > 1. Early catch and return error instead. 
@@ -11,7 +12,11 @@
 - `ellippiinc_bulirsch`: Faster implementation of `ellippiinc`.
 - `unstable` flag: Access features that might be changed in the future.
 - Add `unchecked` version for `carlson` functions, `bulirsch` functions, and `ellippi` under the `unstable` flag.
-- Control the precision of `bulirsch` functions using `BulirschConst` trait for `_cel`, `_cel1`, `_cel2`, `_el1`, `_el2`, and `_el3`. Struct implementing BulirschConst are `DefaultPrecision` and `HalfPrecision`. These are available under the `unstable` flag.
+- `*_with_const`: Control the precision of `bulirsch` functions using `BulirschConst` trait.
+- `DefaultPrecision` and `HalfPrecision` struct for `BulirschConst` trait available under `unstable` flag.
+
+**Tests**
+- Add Wolfram test data for `f32` datatype.
 
 ## 0.3
 ### 0.3.7
