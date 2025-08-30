@@ -6,9 +6,9 @@
 use ellip::ellippiinc;
 use ellip_plot_graph::*;
 use plotly::{
-    Layout, Plot, Surface,
     common::{ColorScale, ColorScalePalette},
     layout::{Annotation, AspectRatio, Axis, LayoutScene},
+    Layout, Plot, Surface,
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
