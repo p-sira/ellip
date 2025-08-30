@@ -5,7 +5,6 @@
 use num_traits::Float;
 
 /// Trait for controling precision of the Bulirsch's integrals
-/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
 pub trait BulirschConst<T: Float> {
     /// Number of significant figures.
     ///
@@ -75,7 +74,9 @@ impl_bulirsch_const!(HalfPrecision, {D: 7, CA: 1e-3, CB: 1e-9, LIM: 1e-7});
 ///
 /// # References
 /// - Bulirsch, R. “Numerical Calculation of Elliptic Integrals and Elliptic Functions. III.” Numerische Mathematik 13, no. 4 (August 1, 1969): 305–15. <https://doi.org/10.1007/BF02165405>.
+#[cfg(feature = "unstable")]
 pub struct DefaultPrecision;
+#[cfg(feature = "unstable")]
 impl_bulirsch_const!(DefaultPrecision, {D: 16, CA: 1e-8, CB: 1e-18, LIM: 1e-12});
 
 #[cfg(not(feature = "test_force_fail"))]

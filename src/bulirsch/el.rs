@@ -6,8 +6,10 @@
 use num_traits::Float;
 
 use crate::{
-    bulirsch::constants::{BulirschConst, DefaultPrecision},
-    cel1, cel2,
+    bulirsch::{
+        cel::{cel1_with_const, cel2_with_const},
+        constants::BulirschConst,
+    },
     crate_util::{case, check, declare, let_mut},
     ellipeinc, ellipf, ellippi, ellippiinc, StrErr,
 };
@@ -55,20 +57,19 @@ use crate::{
 ///
 /// # Notes
 /// The default precision of the function is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405)
-/// for [f64]. The precision can be modified in the function [_el1] (requires `unstable` feature flag).
+/// for [f64] and [f32]. The precision can be modified in the function [el1_with_const] (requires `unstable` feature flag).
 ///
 /// # References
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-pub fn el1<T: Float>(x: T, kc: T) -> Result<T, StrErr> {
-    _el1::<T, DefaultPrecision>(x, kc)
+pub fn el1<T: Float + BulirschConst<T>>(x: T, kc: T) -> Result<T, StrErr> {
+    el1_with_const::<T, T>(x, kc)
 }
 
 /// Computes [el1]. Control the precision using [BulirschConst].
-/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub fn _el1<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> Result<T, StrErr> {
+pub fn el1_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> Result<T, StrErr> {
     let ans = el1_unchecked::<T, C>(x, kc);
     if ans.is_finite() {
         return Ok(ans);
@@ -78,7 +79,7 @@ pub fn _el1<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> Result<T, StrErr> {
     case!(kc == inf!(), T::zero());
     case!(x == T::zero(), T::zero());
     if x == inf!() {
-        return cel1(kc);
+        return cel1_with_const::<T, C>(kc);
     }
     Err("el1: Failed to converge.")
 }
@@ -170,20 +171,19 @@ pub fn el1_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> T {
 ///
 /// # Notes
 /// The default precision of the function is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405)
-/// for [f64]. The precision can be modified in the function [_el2] (requires `unstable` feature flag).
+/// for [f64] and [f32]. The precision can be modified in the function [el2_with_const] (requires `unstable` feature flag).
 ///
 /// # References
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-pub fn el2<T: Float>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
-    _el2::<T, DefaultPrecision>(x, kc, a, b)
+pub fn el2<T: Float + BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
+    el2_with_const::<T, T>(x, kc, a, b)
 }
 
 /// Computes [el2]. Control the precision using [BulirschConst].
-/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub fn _el2<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
+pub fn el2_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
     let ans = el2_unchecked::<T, C>(x, kc, a, b);
     if ans.is_finite() {
         return Ok(ans);
@@ -193,7 +193,7 @@ pub fn _el2<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> Result<T,
     case!(x == T::zero(), T::zero());
     if x == inf!() {
         // phi = π/2
-        return cel2(kc, a, b);
+        return cel2_with_const::<T, C>(kc, a, b);
     }
 
     Err("el2: Failed to converge.")
@@ -304,20 +304,19 @@ pub fn el2_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> 
 ///
 /// # Notes
 /// The default precision of the function is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405)
-/// for [f64]. The precision can be modified in the function [_el3] (requires `unstable` feature flag).
+/// for [f64] and [f32]. The precision can be modified in the function [el3_with_const] (requires `unstable` feature flag).
 ///
 /// # References
 /// - Bulirsch, R. “Numerical Calculation of Elliptic Integrals and Elliptic Functions. III.” Numerische Mathematik 13, no. 4 (August 1, 1969): 305–15. <https://doi.org/10.1007/BF02165405>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-pub fn el3<T: Float>(x: T, kc: T, p: T) -> Result<T, StrErr> {
-    _el3::<T, DefaultPrecision>(x, kc, p)
+pub fn el3<T: Float + BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrErr> {
+    el3_with_const::<T, T>(x, kc, p)
 }
 
 /// Computes [el3]. Control the precision using [BulirschConst].
-/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub fn _el3<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrErr> {
+pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrErr> {
     let m = 1.0 - kc * kc;
     let n = 1.0 - p;
 

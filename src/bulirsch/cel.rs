@@ -6,7 +6,7 @@
 use num_traits::Float;
 
 use crate::{
-    bulirsch::constants::{BulirschConst, DefaultPrecision},
+    bulirsch::constants::BulirschConst,
     crate_util::{case, check, declare},
     StrErr,
 };
@@ -61,20 +61,19 @@ use crate::{
 ///
 /// # Notes
 /// The default precision of the function is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405)
-/// for [f64]. The precision can be modified in the function [_cel] (requires `unstable` feature flag).
+/// for [f64] and [f32]. The precision can be modified in the function [cel_with_const] (requires `unstable` feature flag).
 ///
 /// # References
 /// - Bulirsch, R. “Numerical Calculation of Elliptic Integrals and Elliptic Functions. III.” Numerische Mathematik 13, no. 4 (August 1, 1969): 305–15. <https://doi.org/10.1007/BF02165405>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-pub fn cel<T: Float>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
-    _cel::<T, DefaultPrecision>(kc, p, a, b)
+pub fn cel<T: Float + BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
+    cel_with_const::<T, T>(kc, p, a, b)
 }
 
 /// Computes [cel]. Control the precision using [BulirschConst].
-/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub fn _cel<T: Float, C: BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
+pub fn cel_with_const<T: Float, C: BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
     check!(@zero, cel, [kc, p]);
 
     let mut kc = kc.abs();
@@ -169,20 +168,19 @@ pub fn _cel<T: Float, C: BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T,
 ///
 ///  # Notes
 /// The default precision of the function is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405)
-/// for [f64]. The precision can be modified in the function [_cel1] (requires `unstable` feature flag).
+/// for [f64] and [f32]. The precision can be modified in the function [cel1_with_const] (requires `unstable` feature flag).
 ///
 /// # References
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-pub fn cel1<T: Float>(kc: T) -> Result<T, StrErr> {
-    _cel1::<T, DefaultPrecision>(kc)
+pub fn cel1<T: Float + BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
+    cel1_with_const::<T, T>(kc)
 }
 
 /// Computes [cel1]. Control the precision using [BulirschConst].
-/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub fn _cel1<T: Float, C: BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
+pub fn cel1_with_const<T: Float, C: BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
     declare!(mut [kc = kc.abs(), m = T::one(), ans = T::nan(), h]);
     for _ in 0..MAX_ITERATION {
         h = m;
@@ -252,20 +250,19 @@ pub fn _cel1<T: Float, C: BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
 ///
 /// # Notes
 /// The default precision of the function is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405)
-/// for [f64]. The precision can be modified in the function [_cel2] (requires `unstable` feature flag).
+/// for [f64] and [f32]. The precision can be modified in the function [cel2_with_const] (requires `unstable` feature flag).
 ///
 /// # References
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-pub fn cel2<T: Float>(kc: T, a: T, b: T) -> Result<T, StrErr> {
-    _cel2::<T, DefaultPrecision>(kc, a, b)
+pub fn cel2<T: Float + BulirschConst<T>>(kc: T, a: T, b: T) -> Result<T, StrErr> {
+    cel2_with_const::<T, T>(kc, a, b)
 }
 
 /// Computes [cel2]. Control the precision using [BulirschConst].
-/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub fn _cel2<T: Float, C: BulirschConst<T>>(kc: T, a: T, b: T) -> Result<T, StrErr> {
+pub fn cel2_with_const<T: Float, C: BulirschConst<T>>(kc: T, a: T, b: T) -> Result<T, StrErr> {
     declare!(mut [kc = kc.abs(), aa = a, bb = b, m = T::one(), c = aa, ans = T::nan(), m0]);
     aa = bb + aa;
 

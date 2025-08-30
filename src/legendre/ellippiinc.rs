@@ -13,9 +13,10 @@
 use num_traits::Float;
 
 use crate::{
+    bulirsch::BulirschConst,
     carlson::{elliprc_unchecked, elliprf_unchecked, elliprj_unchecked},
     crate_util::check,
-    el3, ellipf,
+    ellipf,
     legendre::{ellipeinc::ellipeinc_unchecked, ellippi::ellippi_vc},
     StrErr,
 };
@@ -339,7 +340,18 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
 /// # References
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
-pub fn ellippiinc_bulirsch<T: Float>(phi: T, n: T, m: T) -> Result<T, StrErr> {
+pub fn ellippiinc_bulirsch<T: Float + BulirschConst<T>>(phi: T, n: T, m: T) -> Result<T, StrErr> {
+    ellippiinc_bulirsch_with_const::<T, T>(phi, n, m)
+}
+
+/// Computes [ellippiinc_bulirsch]. Control the precision using [BulirschConst].
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[inline]
+pub fn ellippiinc_bulirsch_with_const<T: Float, C: BulirschConst<T>>(
+    phi: T,
+    n: T,
+    m: T,
+) -> Result<T, StrErr> {
     if phi.is_infinite() {
         return Ok(phi);
     }
@@ -357,7 +369,7 @@ pub fn ellippiinc_bulirsch<T: Float>(phi: T, n: T, m: T) -> Result<T, StrErr> {
     let x = phi.tan();
     let kc = (T::one() - m).sqrt();
     let p = T::one() - n;
-    let result = el3(x, kc, p);
+    let result = crate::bulirsch::el::el3_with_const::<T, C>(x, kc, p);
     if result.is_ok() {
         return result;
     }
