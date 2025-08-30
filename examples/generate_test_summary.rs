@@ -7,14 +7,14 @@ use ellip::*;
 use ellip_dev_utils::{env::get_env, get_summary_entry, test_report::generate_summary_table};
 
 fn main() {
-    let [rust_version, platform, ellip_version] = get_env();
+    let env = get_env();
     let template = std::fs::read_to_string("examples/README_template.md")
         .expect("Cannot read README template");
 
     let summary_section = [
         &format!(
-            "Generated on {} rustc {} using ellip v{} at `f64` precision (ε≈2.22e-16).\n",
-            platform, rust_version, ellip_version
+            "Benchmark on {} running {} rustc {} using ellip v{} at `f64` precision (ε≈2.22e-16).\n",
+            env.cpu, env.platform, env.rust_version, env.ellip_version
         ),
         "### Legendre's Elliptic Integrals",
         &generate_summary_table(&[

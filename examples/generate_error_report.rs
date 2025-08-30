@@ -7,13 +7,13 @@ use ellip::*;
 use ellip_dev_utils::{env::get_env, get_entry, test_report::generate_error_table};
 
 fn main() {
-    let [rust_version, platform, ellip_version] = get_env();
+    let env = get_env();
     let template =
         std::fs::read_to_string("examples/error_report_template.md").expect("Cannot read template");
 
     let env = format!(
         "This report is generated on {} rustc {} using ellip v{} at `f64` precision (ε≈2.22e-16).",
-        platform, rust_version, ellip_version
+        env.platform, env.rust_version, env.ellip_version
     );
     let legendre_complete = generate_error_table(&[
         get_entry! {"wolfram/ellipk_data", "ellipk", ellipk, 1, 1},
