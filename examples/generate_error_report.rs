@@ -11,8 +11,12 @@ fn main() {
     let template =
         std::fs::read_to_string("examples/error_report_template.md").expect("Cannot read template");
 
-    let env = format!(
+    let env_str = format!(
         "This report is generated on {} rustc {} using ellip v{} at `f64` precision (ε≈2.22e-16).",
+        env.platform, env.rust_version, env.ellip_version
+    );
+    let env_str_f32 = format!(
+        "Generated on {} rustc {} using ellip v{} at `f32` precision (ε≈1.19e-7).",
         env.platform, env.rust_version, env.ellip_version
     );
     let legendre_complete = generate_error_table(&[
@@ -61,11 +65,16 @@ fn main() {
     ]);
 
     let output = template
-        .replace("{{ENV}}", &env)
-        .replace("{{LEGENDRE_COMPLETE}}", &legendre_complete)
-        .replace("{{LEGENDRE_INCOMPLETE}}", &legendre_incomplete)
-        .replace("{{BULIRSCH}}", &bulirsch)
-        .replace("{{CARLSON}}", &carlson);
+        .replace("{{ENV}}", &env_str)
+        .replace("{{LEGENDRE_COMPLETE}}", &legendre_complete[0])
+        .replace("{{LEGENDRE_INCOMPLETE}}", &legendre_incomplete[0])
+        .replace("{{BULIRSCH}}", &bulirsch[0])
+        .replace("{{CARLSON}}", &carlson[0])
+        .replace("{{ENV_F32}}", &env_str_f32)
+        .replace("{{LEGENDRE_COMPLETE_F32}}", &legendre_complete[1])
+        .replace("{{LEGENDRE_INCOMPLETE_F32}}", &legendre_incomplete[1])
+        .replace("{{BULIRSCH_F32}}", &bulirsch[1])
+        .replace("{{CARLSON_F32}}", &carlson[1]);
 
     use std::fs::File;
     use std::io::Write;

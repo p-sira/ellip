@@ -62,3 +62,63 @@ Bulirsh's elliptic integrals are not natively implemented in Wolfram Engine. Nev
 *small: Use small argument values, close to the function's limit. Results compared with Boost Math implementation without promoting double, i.e, computed purely using `f64`.
 
 Current implementation of `elliprj` is less numerically stable in p.v. cases, as seen by large errors in the non-small test cases. That said, Ellip's results are consistent with Boost Math when limited to same precision (See [tests/data/boost/carlson.cpp](https://github.com/p-sira/ellip/blob/main/tests/data/boost/carlson.cpp)). Since the function is convergent, such errors can be mitigated when Rust's `f128` is released.
+
+## f32 Implementation
+
+Generated on x86_64-unknown-linux-gnu rustc 1.89.0 using ellip v0.4.0 at `f32` precision (ε≈1.19e-7).
+
+### Legendre's Complete Elliptic Integrals
+
+| Function        | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
+|-----------------|----------|------------|---------|---------|---------------|--------|
+| ellipk          | 1.04     | 0.00       | 2.10    | 787.39  | 618.84        | 1      |
+| ellipk (Neg m)  | 0.34     | 0.00       | 1.30    | 1.72    | 0.17          | 1      |
+| ellipe          | 0.20     | 0.00       | 1.00    | 1.92    | 0.14          | 1      |
+| ellipe (Neg m)  | 0.35     | 0.00       | 1.48    | 1.61    | 0.17          | 1      |
+| ellippi         | 374.56   | 0.56       | 7.38e3  | 1.48e4  | 2.62e6        | 1      |
+| ellippi (Neg m) | 351.49   | 0.59       | 7.37e3  | 7.37e3  | 2.46e6        | 1      |
+| ellippi (p.v.)  | 73.55    | 0.76       | 1.18e3  | 1.48e4  | 4.63e5        | 50     |
+| ellipd          | 1.51     | 0.59       | 3.00    | 881.60  | 775.39        | 1      |
+| ellipd (Neg m)  | 0.55     | 0.59       | 1.89    | 2.16    | 0.25          | 1      |
+
+### Legendre's Incomplete Elliptic Integrals
+
+| Function                    | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
+|-----------------------------|----------|------------|---------|---------|---------------|--------|
+| ellipf                      | 0.47     | 0.54       | 2.00    | 5.20    | 0.29          | 1      |
+| ellipf (Neg m)              | 0.46     | 0.53       | 1.63    | 3.54    | 0.23          | 1      |
+| ellipeinc                   | 0.70     | 0.57       | 5.60    | 24.02   | 1.93          | 1      |
+| ellipeinc (Neg m)           | 0.72     | 0.69       | 2.44    | 3.12    | 0.39          | 1      |
+| ellippiinc                  | 1.05     | 0.67       | 16.53   | 71.79   | 11.41         | 1      |
+| ellippiinc (Neg m)          | 1.14     | 0.66       | 12.96   | 40.74   | 8.56          | 1      |
+| ellippiinc (p.v.)           | 5.24     | 1.67       | 64.52   | 298.48  | 327.53        | 1      |
+| ellippiinc_bulirsch         | 1.47e6   | 0.77       | 1.68e7  | 1.68e7  | 2.25e13       | 1      |
+| ellippiinc_bulirsch (Neg m) | 2.25e6   | 0.80       | 1.68e7  | 1.68e7  | 3.26e13       | 1      |
+| ellipdinc                   | 0.92     | 0.74       | 3.81    | 11.97   | 1.00          | 1      |
+| ellipdinc (Neg m)           | 0.84     | 0.76       | 3.00    | 4.44    | 0.52          | 1      |
+
+### Bulirsch's Elliptic Integrals
+
+| Function   | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
+|------------|----------|------------|---------|---------|---------------|--------|
+| cel        | 0.77     | 0.62       | 10.30   | 19.31   | 2.42          | 1      |
+| cel (p.v.) | 1.00     | 0.76       | 9.17    | 14.33   | 2.59          | 1      |
+| cel1       | 17.02    | 0.00       | 850.38  | 850.38  | 1.39e4        | 1      |
+| cel2       | 0.53     | 0.57       | 1.85    | 1.85    | 0.25          | 1      |
+| el1        | 0.40     | 0.00       | 1.93    | 1.96    | 0.23          | 1      |
+| el2        | 1.34     | 0.67       | 19.34   | 48.52   | 10.73         | 1      |
+| el3        | 1.00     | 0.63       | 8.19    | 17.86   | 2.56          | 50     |
+| el3 (p.v.) | 1.13     | 0.80       | 19.63   | 20.89   | 5.55          | 50     |
+
+### Carlson's Symmetric Elliptic Integrals
+
+| Function               | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
+|------------------------|----------|------------|---------|---------|---------------|--------|
+| elliprf                | 0.37     | 0.00       | 1.51    | 1.65    | 0.17          | 1      |
+| elliprg                | 0.36     | 0.00       | 1.30    | 1.45    | 0.17          | 1      |
+| elliprj                | 0.76     | 0.63       | 6.96    | 14.15   | 1.51          | 50     |
+| elliprj (p.v.)         | 2.73     | 0.70       | 56.95   | 434.26  | 403.27        | 1e10   |
+| elliprj (p.v., small*) | NAN      | NAN        | NAN     | NAN     | NAN           | 50     |
+| elliprc                | 0.30     | 0.00       | 1.08    | 1.73    | 0.13          | 1      |
+| elliprc (p.v.)         | 0.50     | 0.57       | 1.78    | 1.98    | 0.22          | 1      |
+| elliprd                | 0.55     | 0.60       | 1.91    | 5.82    | 0.30          | 50     |
