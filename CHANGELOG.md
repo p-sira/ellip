@@ -7,16 +7,19 @@
 
 **Bug Fixes**
 - `ellippiinc`: Fix segfault when m sin²(phi) > 1. Early catch and return error instead. 
+- Fix error message when m > 1 for `ellipk`, `ellipe`, `ellippi`, and `ellipd`.
 
 **New Features**
+- `jacobi_zeta` and `jacobi_zeta_unchecked`: Jacobi Zeta function (Z)
 - `ellippiinc_bulirsch`: Faster implementation of `ellippiinc`.
 - `unstable` flag: Access features that might be changed in the future.
-- Add `unchecked` version for `carlson` functions, `bulirsch` functions, and `ellippi` under the `unstable` flag.
+- Add `unchecked` version for `carlson` functions, `bulirsch` functions, `ellipeinc` and `ellippi` under the `unstable` flag.
 - `*_with_const`: Control the precision of `bulirsch` functions using `BulirschConst` trait.
 - `DefaultPrecision` and `HalfPrecision` struct for `BulirschConst` trait available under `unstable` flag.
 
 **Tests**
 - Add Wolfram test data for `f32` datatype.
+- Add test data for `jacobi_zeta`.
 
 ## 0.3
 ### 0.3.7
