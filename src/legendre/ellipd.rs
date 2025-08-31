@@ -120,7 +120,10 @@ mod tests {
         // m = NaN: should return Err
         assert_eq!(ellipd(NAN), Err("ellipd: Arguments cannot be NAN."));
         // m = inf: should return Err
-        assert_eq!(ellipd(INFINITY), Err("ellipd: m must not be greater than 1."));
+        assert_eq!(
+            ellipd(INFINITY),
+            Err("ellipd: m must not be greater than 1.")
+        );
         // m -> -inf: D(m) = 1/sqrt(-m)
         assert_eq!(ellipd(-MAX).unwrap(), 1.0 / MAX.sqrt());
         // m = -inf: D(-inf) = 0

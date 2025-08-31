@@ -205,7 +205,10 @@ mod tests {
             EPSILON, INFINITY, NAN, NEG_INFINITY,
         };
         // m > 1: should return Err
-        assert_eq!(ellippi(0.5, 1.1), Err("ellippi: m must not be greater than 1."));
+        assert_eq!(
+            ellippi(0.5, 1.1),
+            Err("ellippi: m must not be greater than 1.")
+        );
         // n == 1: should return Err
         assert_eq!(ellippi(1.0, 0.5), Err("ellippi: n cannot be 1."));
         // n = 0: Π(0, m) = K(m)

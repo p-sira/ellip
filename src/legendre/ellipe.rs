@@ -321,7 +321,10 @@ mod tests {
         // m = NaN: should return Err
         assert_eq!(ellipe(NAN), Err("ellipe: Arguments cannot be NAN."));
         // m = inf: should return Err
-        assert_eq!(ellipe(INFINITY), Err("ellipe: m must not be greater than 1."));
+        assert_eq!(
+            ellipe(INFINITY),
+            Err("ellipe: m must not be greater than 1.")
+        );
         // m = -inf: E(-inf) = inf
         assert_eq!(ellipe(NEG_INFINITY).unwrap(), INFINITY);
     }
