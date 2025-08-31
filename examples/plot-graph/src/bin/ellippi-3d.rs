@@ -100,7 +100,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             )
             .annotations(vec![Annotation::new()
             .text(format!(
-                "Generated using the function <a href=\"https://docs.rs/ellip/latest/ellip/legendre/fn.ellippi.html\" target=\"_blank\">ellippi</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",
+                "Generated using <a href=\"https://docs.rs/ellip/latest/ellip/legendre/fn.ellippi.html\" target=\"_blank\">ellippi</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",
                 ellip_version()
             ))
             .x_ref("paper")
