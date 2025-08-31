@@ -83,6 +83,12 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     Err("ellipeinc: Unexpected error.")
 }
 
+/// Unsafe version of [ellipeinc].
+/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
+///
+/// Undefined behavior with invalid arguments and edge cases.
+/// # Known Invalid Cases
+/// - NAN arguments
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipeinc_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
