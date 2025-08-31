@@ -54,6 +54,8 @@
 //! - [fn@elliprj]: Symmetric elliptic integral of the third kind (RJ).
 //! - [fn@elliprc]: Degenerate elliptic integral of RF (RC).
 //! - [fn@elliprd]: Degenerate elliptic integral of the third kind (RD).
+//! ## Miscellaneous functions
+//! - [fn@jacobi_zeta]: Jacobi Zeta function (Z).
 //! ## Feature Flags
 //! - `unstable`: Enable unstable or untested features that might be changed without notice in the future.
 //! - `test_force_fail`: Used for testing only. Force tests to reach code unreachable under normal circumstances.
