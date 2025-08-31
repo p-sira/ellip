@@ -30,7 +30,7 @@ use crate::{
 ///
 /// ## Parameters
 /// - n: characteristic, n ∈ ℝ, n ≠ 1.
-/// - m: elliptic parameter. m ∈ ℝ, m < 1.
+/// - m: elliptic parameter. m ∈ ℝ, m ≤ 1.
 ///
 /// The elliptic modulus (k) is frequently used instead of the parameter (m), where k² = m.
 /// The characteristic (n) is also sometimes expressed in term of α, where α² = n.

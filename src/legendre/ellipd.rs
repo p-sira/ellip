@@ -26,7 +26,7 @@ use crate::{carlson::elliprd_unchecked, crate_util::check, StrErr};
 /// ```
 ///
 /// ## Parameters
-/// - m: elliptic parameter. m ∈ ℝ, m < 1.
+/// - m: elliptic parameter. m ∈ ℝ, m ≤ 1.
 ///
 /// The elliptic modulus (k) is also frequently used instead of the parameter (m), where k² = m.
 ///
