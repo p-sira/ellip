@@ -74,6 +74,8 @@ Learn more at [doc.rs](https://docs.rs/ellip).
     - `elliprj`: Symmetric elliptic integral of the third kind (RJ).
     - `elliprc`: Degenerate elliptic integral of RF (RC).
     - `elliprd`: Degenerate elliptic integral of the third kind (RD).
+- Miscellaneous functions
+    - `jacobi_zeta`: Jacobi Zeta function (Z). 
 
 # Testing
 

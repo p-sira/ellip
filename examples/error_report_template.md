@@ -23,6 +23,10 @@ Bulirsh's elliptic integrals are not natively implemented in Wolfram Engine. Nev
 
 Current implementation of `elliprj` is less numerically stable in p.v. cases, as seen by large errors in the non-small test cases. That said, Ellip's results are consistent with Boost Math when limited to same precision (See [tests/data/boost/carlson.cpp](https://github.com/p-sira/ellip/blob/main/tests/data/boost/carlson.cpp)). Since the function is convergent, such errors can be mitigated when Rust's `f128` is released.
 
+## Miscellaneous Functions
+
+{{MISC}}
+
 ## f32 Implementation
 
 {{ENV_F32}}
@@ -42,3 +46,7 @@ Current implementation of `elliprj` is less numerically stable in p.v. cases, as
 ### Carlson's Symmetric Elliptic Integrals
 
 {{CARLSON_F32}}
+
+### Miscellaneous Functions
+
+{{MISC_F32}}

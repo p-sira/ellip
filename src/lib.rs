@@ -74,8 +74,9 @@
 //! - [Russell Lab](https://github.com/cpmech/russell)
 //!
 //! References for original implementations are:
-//! - NIST Digital Library, [Chapter 19: Elliptic Integrals](https://dlmf.nist.gov/19) (Carlson, 2024).
+//! - NIST Digital Library, [Chapter 19: Elliptic Integrals](https://dlmf.nist.gov/19) (Carlson, 2025).
 //! - Numerical calculation of elliptic integrals and elliptic functions [I](https://link.springer.com/article/10.1007/BF01397975) (Bulirsch, 1965), [II](https://doi.org/10.1007/BF01436529) (Bulirsch, 1965), and [III](https://doi.org/10.1007/BF02165405) (Bulirsch, 1969).
+//! - NIST Digital Library, [Chapter 22 Jacobian Elliptic Functions](https://dlmf.nist.gov/22) (Reinhardt and Walker, 2025).
 //!
 //! Unicode-style mathematical notation are created using [Diagon](https://github.com/ArthurSonzogni/Diagon).
 
@@ -117,6 +118,13 @@ pub use carlson::elliprd;
 pub use carlson::elliprf;
 pub use carlson::elliprg;
 pub use carlson::elliprj;
+
+// Miscellaneous functions
+#[cfg(feature = "unstable")]
+pub mod jacobi_zeta;
+#[cfg(not(feature = "unstable"))]
+mod jacobi_zeta;
+pub use jacobi_zeta::jacobi_zeta;
 
 // Utilities
 mod polyeval;

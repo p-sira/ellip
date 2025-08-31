@@ -74,6 +74,8 @@ Learn more at [doc.rs](https://docs.rs/ellip).
     - `elliprj`: Symmetric elliptic integral of the third kind (RJ).
     - `elliprc`: Degenerate elliptic integral of RF (RC).
     - `elliprd`: Degenerate elliptic integral of the third kind (RD).
+- Miscellaneous functions
+    - `jacobi_zeta`: Jacobi Zeta function (Z). 
 
 # Testing
 
@@ -112,6 +114,11 @@ Benchmark on AMD Ryzen 5 4600H with Radeon Graphics running x86_64-unknown-linux
 | elliprj  | 0.67             | 5.42e7        | 166.5 ns         |
 | elliprc  | 0.00             | 2.82          | 23.2 ns          |
 | elliprd  | 0.62             | 6.49          | 76.1 ns          |
+
+### Miscellaneous Functions
+| Function    | Median Error (ε) | Max Error (ε) | Mean Performance |
+|-------------|------------------|---------------|------------------|
+| jacobi_zeta | 1.42             | 9.83          | 239.6 ns         |
 
 ---
 

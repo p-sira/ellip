@@ -47,6 +47,11 @@ fn main() {
             get_summary_entry!("carlson", "elliprc", elliprc, 2),
             get_summary_entry!("carlson", "elliprd", elliprd, 3),
         ]),
+        "",
+        "### Miscellaneous Functions",
+        &generate_summary_table(&[
+            get_summary_entry!("misc", "jacobi_zeta", jacobi_zeta, 2),
+        ]),
     ];
 
     let output = template.replace("{{TESTSUMMARY}}", &summary_section.join("\n"));

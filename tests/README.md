@@ -63,6 +63,13 @@ Bulirsh's elliptic integrals are not natively implemented in Wolfram Engine. Nev
 
 Current implementation of `elliprj` is less numerically stable in p.v. cases, as seen by large errors in the non-small test cases. That said, Ellip's results are consistent with Boost Math when limited to same precision (See [tests/data/boost/carlson.cpp](https://github.com/p-sira/ellip/blob/main/tests/data/boost/carlson.cpp)). Since the function is convergent, such errors can be mitigated when Rust's `f128` is released.
 
+## Miscellaneous Functions
+
+| Function            | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
+|---------------------|----------|------------|---------|---------|---------------|--------|
+| jacobi_zeta         | 1.95     | 1.41       | 7.59    | 9.83    | 3.39          | 1      |
+| jacobi_zeta (Neg m) | 1.92     | 1.44       | 7.74    | 9.09    | 3.24          | 1      |
+
 ## f32 Implementation
 
 Generated on x86_64-unknown-linux-gnu rustc 1.89.0 using ellip v0.4.0 at `f32` precision (ε≈1.19e-7).
@@ -122,3 +129,10 @@ Generated on x86_64-unknown-linux-gnu rustc 1.89.0 using ellip v0.4.0 at `f32` p
 | elliprc                | 0.30     | 0.00       | 1.08    | 1.73    | 0.13          | 1      |
 | elliprc (p.v.)         | 0.50     | 0.57       | 1.78    | 1.98    | 0.22          | 1      |
 | elliprd                | 0.55     | 0.60       | 1.91    | 5.82    | 0.30          | 50     |
+
+### Miscellaneous Functions
+
+| Function            | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
+|---------------------|----------|------------|---------|---------|---------------|--------|
+| jacobi_zeta         | 1.42     | 0.97       | 6.16    | 7.32    | 1.84          | 1      |
+| jacobi_zeta (Neg m) | 1.47     | 1.09       | 5.65    | 6.76    | 1.85          | 1      |

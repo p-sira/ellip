@@ -63,6 +63,10 @@ fn main() {
         get_entry! {"wolfram/elliprc_pv", "elliprc (p.v.)", elliprc, 2, 1},
         get_entry! {"wolfram/elliprd_data", "elliprd", elliprd, 3, 50},
     ]);
+    let misc = generate_error_table(&[
+        get_entry! {"wolfram/jacobi_zeta_data", "jacobi_zeta", jacobi_zeta, 2, 1},
+        get_entry! {"wolfram/jacobi_zeta_neg", "jacobi_zeta (Neg m)", jacobi_zeta, 2, 1},
+    ]);
 
     let output = template
         .replace("{{ENV}}", &env_str)
@@ -70,11 +74,13 @@ fn main() {
         .replace("{{LEGENDRE_INCOMPLETE}}", &legendre_incomplete[0])
         .replace("{{BULIRSCH}}", &bulirsch[0])
         .replace("{{CARLSON}}", &carlson[0])
+        .replace("{{MISC}}", &misc[0])
         .replace("{{ENV_F32}}", &env_str_f32)
         .replace("{{LEGENDRE_COMPLETE_F32}}", &legendre_complete[1])
         .replace("{{LEGENDRE_INCOMPLETE_F32}}", &legendre_incomplete[1])
         .replace("{{BULIRSCH_F32}}", &bulirsch[1])
-        .replace("{{CARLSON_F32}}", &carlson[1]);
+        .replace("{{CARLSON_F32}}", &carlson[1])
+        .replace("{{MISC_F32}}", &misc[1]);
 
     use std::fs::File;
     use std::io::Write;

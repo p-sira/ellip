@@ -121,6 +121,7 @@ macro_rules! generate_benchmarks {
 generate_benchmarks! {legendre, [ellipk:1, ellipe:1, ellipf:2, ellipeinc:2, ellippi:2, ellippiinc:3, ellippiinc_bulirsch:3:"ellippiinc", ellipd:1, ellipdinc: 2]}
 generate_benchmarks! {carlson, [elliprf:3, elliprg:3, elliprj:4, elliprc:2, elliprd:3]}
 generate_benchmarks! {bulirsch, [cel:4, cel1:1, cel2:3, el1:2, el2:4, el3:3]}
+generate_benchmarks! {misc, [jacobi_zeta:2]}
 
-criterion_group!(benches, legendre, carlson, bulirsch);
+criterion_group!(benches, legendre, carlson, bulirsch, misc);
 criterion_main!(benches);
