@@ -69,6 +69,7 @@ Current implementation of `elliprj` is less numerically stable in p.v. cases, as
 |---------------------|----------|------------|---------|---------|---------------|--------|
 | jacobi_zeta         | 1.95     | 1.41       | 7.59    | 9.83    | 3.39          | 1      |
 | jacobi_zeta (Neg m) | 1.92     | 1.44       | 7.74    | 9.09    | 3.24          | 1      |
+| heuman_lambda       | 0.62     | 0.62       | 2.50    | 8.89    | 0.40          | 1      |
 
 ## f32 Implementation
 
@@ -136,3 +137,4 @@ Generated on x86_64-unknown-linux-gnu rustc 1.89.0 using ellip v0.4.0 at `f32` p
 |---------------------|----------|------------|---------|---------|---------------|--------|
 | jacobi_zeta         | 1.42     | 0.97       | 6.16    | 7.32    | 1.84          | 1      |
 | jacobi_zeta (Neg m) | 1.47     | 1.09       | 5.65    | 6.76    | 1.85          | 1      |
+| heuman_lambda       | 0.51     | 0.52       | 3.02    | 11.23   | 0.72          | 1      |

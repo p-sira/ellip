@@ -56,6 +56,7 @@
 //! - [fn@elliprd]: Degenerate elliptic integral of the third kind (RD).
 //! ## Miscellaneous functions
 //! - [fn@jacobi_zeta]: Jacobi Zeta function (Z).
+//! - [fn@heuman_lambda]: Heuman Lambda function (Λ0).
 //! ## Feature Flags
 //! - `unstable`: Enable unstable or untested features that might be changed without notice in the future.
 //! - `test_force_fail`: Used for testing only. Force tests to reach code unreachable under normal circumstances.
@@ -127,6 +128,11 @@ pub mod jacobi_zeta;
 #[cfg(not(feature = "unstable"))]
 mod jacobi_zeta;
 pub use jacobi_zeta::jacobi_zeta;
+#[cfg(feature = "unstable")]
+pub mod heuman_lambda;
+#[cfg(not(feature = "unstable"))]
+mod heuman_lambda;
+pub use heuman_lambda::heuman_lambda;
 
 // Utilities
 mod polyeval;

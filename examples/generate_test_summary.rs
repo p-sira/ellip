@@ -51,6 +51,7 @@ fn main() {
         "### Miscellaneous Functions",
         &generate_summary_table(&[
             get_summary_entry!("misc", "jacobi_zeta", jacobi_zeta, 2),
+            get_summary_entry!("misc", "heuman_lambda", heuman_lambda, 2),
         ]),
     ];
 

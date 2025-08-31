@@ -76,6 +76,7 @@ Learn more at [doc.rs](https://docs.rs/ellip).
     - `elliprd`: Degenerate elliptic integral of the third kind (RD).
 - Miscellaneous functions
     - `jacobi_zeta`: Jacobi Zeta function (Z). 
+    - `heuman_lambda`: Heuman Lambda function (Λ0).
 
 # Testing
 

@@ -66,6 +66,7 @@ fn main() {
     let misc = generate_error_table(&[
         get_entry! {"wolfram/jacobi_zeta_data", "jacobi_zeta", jacobi_zeta, 2, 1},
         get_entry! {"wolfram/jacobi_zeta_neg", "jacobi_zeta (Neg m)", jacobi_zeta, 2, 1},
+        get_entry! {"wolfram/heuman_lambda_data", "heuman_lambda", heuman_lambda, 2, 1},
     ]);
 
     let output = template

@@ -11,6 +11,7 @@
 
 **New Features**
 - `jacobi_zeta` and `jacobi_zeta_unchecked`: Jacobi Zeta function (Z)
+- `heuman_lambda` and `heuman_lambda_unchecked`: Heuman Lambda function (Λ0).
 - `ellippiinc_bulirsch`: Faster implementation of `ellippiinc`.
 - `unstable` flag: Access features that might be changed in the future.
 - Add `unchecked` version for `carlson` functions, `bulirsch` functions, `ellipeinc` and `ellippi` under the `unstable` flag.
@@ -19,7 +20,7 @@
 
 **Tests**
 - Add Wolfram test data for `f32` datatype.
-- Add test data for `jacobi_zeta`.
+- Add test data for `jacobi_zeta` and `heuman_lambda`.
 
 ## 0.3
 ### 0.3.7

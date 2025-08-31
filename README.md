@@ -76,6 +76,7 @@ Learn more at [doc.rs](https://docs.rs/ellip).
     - `elliprd`: Degenerate elliptic integral of the third kind (RD).
 - Miscellaneous functions
     - `jacobi_zeta`: Jacobi Zeta function (Z). 
+    - `heuman_lambda`: Heuman Lambda function (Λ0).
 
 # Testing
 
@@ -116,9 +117,10 @@ Benchmark on AMD Ryzen 5 4600H with Radeon Graphics running x86_64-unknown-linux
 | elliprd  | 0.62             | 6.49          | 76.1 ns          |
 
 ### Miscellaneous Functions
-| Function    | Median Error (ε) | Max Error (ε) | Mean Performance |
-|-------------|------------------|---------------|------------------|
-| jacobi_zeta | 1.42             | 9.83          | 239.6 ns         |
+| Function      | Median Error (ε) | Max Error (ε) | Mean Performance |
+|---------------|------------------|---------------|------------------|
+| jacobi_zeta   | 1.42             | 9.83          | 239.6 ns         |
+| heuman_lambda | 0.62             | 8.89          | 371.7 ns         |
 
 ---
 
