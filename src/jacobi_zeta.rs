@@ -35,7 +35,6 @@ use crate::{carlson::elliprj_unchecked, crate_util::check, ellipk, StrErr};
 /// - Z(φ, m) = -Z(-φ, m)
 ///
 /// # Related Functions
-/// With kc² = 1 - m and c = csc²φ,
 /// - [jacobi_zeta](crate::jacobi_zeta)(φ, m) = [ellipeinc](crate::ellipeinc)(φ, m) - [ellipe](crate::ellipe)(m) [ellipf](crate::ellipf)(φ, m) / [ellipk](crate::ellipk)(m)
 /// - [jacobi_zeta](crate::jacobi_zeta)(φ, m) = m sin(φ) cos(φ) √(1 - m sin²φ) [elliprj](crate::elliprj)(0, kc², 1, 1 - m sin²φ) / (3 [ellipk](crate::ellipk)(m))
 ///
