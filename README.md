@@ -87,40 +87,40 @@ Benchmark on AMD Ryzen 5 4600H with Radeon Graphics running x86_64-unknown-linux
 ### Legendre's Elliptic Integrals
 | Function            | Median Error (ε) | Max Error (ε) | Mean Performance |
 |---------------------|------------------|---------------|------------------|
-| ellipk              | 0.00             | 108.14        | 14.8 ns          |
-| ellipe              | 0.00             | 3.00          | 13.3 ns          |
-| ellipf              | 0.66             | 7.47          | 104.1 ns         |
-| ellipeinc           | 0.70             | 24.66         | 168.1 ns         |
-| ellippi             | 0.53             | 36.35         | 170.1 ns         |
-| ellippiinc          | 0.78             | 1.04e3        | 279.6 ns         |
-| ellippiinc_bulirsch | 0.83             | 1.04e3        | 227.7 ns         |
-| ellipd              | 0.60             | 2.64          | 30.5 ns          |
-| ellipdinc           | 1.00             | 8.38          | 106.1 ns         |
+| ellipk              | 0.00             | 108.14        | 14.6 ns          |
+| ellipe              | 0.00             | 3.00          | 13.2 ns          |
+| ellipf              | 0.66             | 7.47          | 103.3 ns         |
+| ellipeinc           | 0.70             | 24.66         | 164.6 ns         |
+| ellippi             | 0.53             | 36.35         | 167.0 ns         |
+| ellippiinc          | 0.78             | 1.04e3        | 277.6 ns         |
+| ellippiinc_bulirsch | 0.83             | 1.04e3        | 223.6 ns         |
+| ellipd              | 0.60             | 2.64          | 29.9 ns          |
+| ellipdinc           | 1.00             | 8.38          | 103.1 ns         |
 
 ### Bulirsch's Elliptic Integrals
 | Function | Median Error (ε) | Max Error (ε) | Mean Performance |
 |----------|------------------|---------------|------------------|
-| cel      | 0.70             | 38.34         | 34.7 ns          |
-| cel1     | 0.00             | 8.68          | 11.7 ns          |
-| cel2     | 0.61             | 3.97          | 23.1 ns          |
-| el1      | 0.00             | 1.60          | 38.4 ns          |
-| el2      | 0.70             | 79.92         | 57.3 ns          |
-| el3      | 0.70             | 46.32         | 120.6 ns         |
+| cel      | 0.70             | 38.34         | 34.0 ns          |
+| cel1     | 0.00             | 8.68          | 11.4 ns          |
+| cel2     | 0.61             | 3.97          | 22.8 ns          |
+| el1      | 0.00             | 1.60          | 37.8 ns          |
+| el2      | 0.70             | 79.92         | 56.7 ns          |
+| el3      | 0.70             | 46.32         | 120.4 ns         |
 
 ### Carlson's Symmetric Integrals
 | Function | Median Error (ε) | Max Error (ε) | Mean Performance |
 |----------|------------------|---------------|------------------|
-| elliprf  | 0.00             | 1.75          | 47.3 ns          |
-| elliprg  | 0.00             | 2.45          | 100.1 ns         |
-| elliprj  | 0.67             | 5.42e7        | 166.5 ns         |
-| elliprc  | 0.00             | 2.82          | 23.2 ns          |
-| elliprd  | 0.62             | 6.49          | 76.1 ns          |
+| elliprf  | 0.00             | 1.75          | 45.6 ns          |
+| elliprg  | 0.00             | 2.45          | 98.8 ns          |
+| elliprj  | 0.67             | 5.42e7        | 165.3 ns         |
+| elliprc  | 0.00             | 2.82          | 22.8 ns          |
+| elliprd  | 0.62             | 6.49          | 74.8 ns          |
 
 ### Miscellaneous Functions
 | Function      | Median Error (ε) | Max Error (ε) | Mean Performance |
 |---------------|------------------|---------------|------------------|
-| jacobi_zeta   | 1.42             | 9.83          | 239.6 ns         |
-| heuman_lambda | 0.62             | 8.89          | 371.7 ns         |
+| jacobi_zeta   | 1.42             | 9.83          | 242.4 ns         |
+| heuman_lambda | 0.62             | 8.89          | 372.7 ns         |
 
 ---
 
