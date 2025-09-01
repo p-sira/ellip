@@ -351,10 +351,6 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
     // This cutpoint is empirical
     let phi = x.atan();
     if p.abs() <= 1e-10 && m != 1.0 {
-        if m == 0.0 {
-            return Ok(x);
-        }
-
         // http://functions.wolfram.com/08.06.03.0008.01
         let sp2 = phi.sin() * phi.sin();
         let mut result = (1.0 - m * sp2).sqrt() * x - ellipeinc(phi, m)?;
@@ -371,7 +367,7 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
 
     // real
     declare!(mut [c, d, de, e, f, fa, g, h, hh]);
-    declare!(mut [pm, pz, q, r, s, t, u, v, w, y, ye = T::zero(), z]);
+    declare!(mut [pm, pz, q, r, s = kc, t, u, v, w, y, ye = T::zero(), z]);
     let zd;
 
     // int
@@ -382,11 +378,6 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
 
     hh = x * x;
     f = p * hh;
-    s = if kc == 0.0 {
-        C::ca() / (1.0 + x_abs)
-    } else {
-        kc
-    };
     t = s * s;
     pm = t * 0.5;
     e = hh * t;
@@ -786,6 +777,8 @@ mod tests {
         );
         // kc = 1, p <= 0: el3(x, 1, p) = (ln(1+vx) - ln(1-vx)) / (2v); v = sqrt(-p)
         assert_close!(el3(4.0, 1.0, -0.5).unwrap(), 5.0, 1e-15);
+        // 1 + px² = 0: should return Err
+        assert_eq!(el3(1.0, 0.5, -1.0), Err("el3: 1 + px² cannot be zero."));
         // x = nan, kc = nan, or p = nan: should return Err
         assert_eq!(el3(NAN, 0.5, 0.5), Err("el3: Arguments cannot be NAN."));
         assert_eq!(el3(0.5, NAN, 0.5), Err("el3: Arguments cannot be NAN."));
