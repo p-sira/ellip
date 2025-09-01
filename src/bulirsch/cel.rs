@@ -323,30 +323,18 @@ mod tests {
             let ellipe = ellipe(m).unwrap();
 
             // cel precision is low for K cases
-            assert_close!(ellipk, cel(kc, 1.0, 1.0, 1.0).unwrap(), 2e-12);
-            assert_close!(ellipe, cel(kc, 1.0, 1.0, kc * kc).unwrap(), 1e-15);
-            assert_close!(
-                (ellipe - kc * kc * ellipk) / m,
-                cel(kc, 1.0, 1.0, 0.0).unwrap(),
-                8.5e-14
-            );
+            assert_close! {ellipk, cel(kc, 1.0, 1.0, 1.0).unwrap(), 2e-12};
+            assert_close! {ellipe, cel(kc, 1.0, 1.0, kc * kc).unwrap(), 1e-15};
+            assert_close! {(ellipe - kc * kc * ellipk) / m, cel(kc, 1.0, 1.0, 0.0).unwrap(), 8.5e-14};
 
             // Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions III”
             let n = 1.0 - p;
             let ellippi = ellippi(n, m).unwrap();
 
-            assert_close!(
-                (ellipk - ellipe) / m,
-                cel(kc, 1.0, 0.0, 1.0).unwrap(),
-                6e-12
-            );
+            assert_close! {(ellipk - ellipe) / m, cel(kc, 1.0, 0.0, 1.0).unwrap(), 6e-12};
             // cel precision is very low for PI cases
-            assert_close!(ellippi, cel(kc, p, 1.0, 1.0).unwrap(), 3.5e-12);
-            assert_close!(
-                (ellippi - ellipk) / (1.0 - p),
-                cel(kc, p, 0.0, 1.0).unwrap(),
-                3.5e-12
-            );
+            assert_close! {ellippi, cel(kc, p, 1.0, 1.0).unwrap(), 3.5e-12};
+            assert_close! {(ellippi - ellipk) / (1.0 - p), cel(kc, p, 0.0, 1.0).unwrap(), 3.5e-12};
         }
 
         let linsp_kc = [
