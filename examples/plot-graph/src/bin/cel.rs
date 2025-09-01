@@ -79,7 +79,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     make_html!(plot, "cel_plot.html");
-    write_svg!(plot, "cel_plot.svg", 900, 600, 1.0);
+    write_svg!(plot, "cel_plot.svg", 1000, 600, 1.0);
     println!("Done");
     Ok(())
 }
