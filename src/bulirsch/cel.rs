@@ -347,12 +347,8 @@ mod tests {
         iproduct!(linsp_kc, linsp_p).for_each(|(kc, p)| _test(kc, p));
 
         // Data from Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions III”
-        assert_close!(cel(1e-1, 4.1, 1.2, 1.1).unwrap(), 1.5464442694017956, 5e-16);
-        assert_close!(
-            cel(1e-1, -4.1, 1.2, 1.1).unwrap(),
-            -6.7687378198360556e-1,
-            5e-16
-        );
+        assert_close! {cel(1e-1, 4.1, 1.2, 1.1).unwrap(), 1.5464442694017956, 5e-16};
+        assert_close! {cel(1e-1, -4.1, 1.2, 1.1).unwrap(), -6.7687378198360556e-1, 5e-16};
     }
 
     #[test]
