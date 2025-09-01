@@ -8,6 +8,7 @@
 **Bug Fixes**
 - `ellippiinc`: Fix segfault when m sin²(phi) > 1. Early catch and return error instead. 
 - Fix error message when m > 1 for `ellipk`, `ellipe`, `ellippi`, and `ellipd`.
+- Fix graphs cutting off at the border in the documentation.
 
 **New Features**
 - `jacobi_zeta` and `jacobi_zeta_unchecked`: Jacobi Zeta function (Z)
