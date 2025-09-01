@@ -425,7 +425,7 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
         return Err("el3: 1 + px² cannot be zero.");
     }
 
-    let p1 = if p == 0.0 { C::cb() / hh } else { p };
+    let p1 = p;
     s = s.abs();
     y = x_abs;
     g = if p == 1.0 { C::cb() } else { p1 - 1.0 };
@@ -473,12 +473,12 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
             h = 1.0 / h - h;
             z = h - r - r;
             r = 2.0 + r * h;
-            if r == 0.0 {
-                r = C::cb();
-            }
-            if z == 0.0 {
-                z = h * C::cb();
-            }
+            // if r == 0.0 {
+            //     r = C::cb();
+            // }
+            // if z == 0.0 {
+            //     z = h * C::cb();
+            // }
             z = r / z;
             r = z;
             w = pz;
@@ -520,9 +520,9 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
 
     for _ in 0..N_MAX_ITERATIONS {
         y = y - e / y;
-        if y == 0.0 {
-            y = e.sqrt() * C::cb();
-        }
+        // if y == 0.0 {
+        //     y = e.sqrt() * C::cb();
+        // }
         f = c;
         c = d / q + c;
         g = e / q;
@@ -590,12 +590,12 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
             h = v / (t + u);
             z = 1.0 - r * h;
             h = r + h;
-            if z == 0.0 {
-                z = C::cb();
-            }
-            if z < 0.0 {
-                mm += if h < 0.0 { -1 } else { 1 };
-            }
+            // if z == 0.0 {
+            //     z = C::cb();
+            // }
+            // if z < 0.0 {
+            //     mm += if h < 0.0 { -1 } else { 1 };
+            // }
             s = (h / z).atan() + T::from(mm).unwrap() * pi!();
         } else {
             s = if bk {
