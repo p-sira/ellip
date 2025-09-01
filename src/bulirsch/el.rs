@@ -559,12 +559,12 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
                 g = (1.0 / r - r) * 0.5;
                 hh = u + v * g;
                 h = g * u - v;
-                if hh == 0.0 {
-                    hh = u * C::cb();
-                }
-                if h == 0.0 {
-                    h = v * C::cb();
-                }
+                // if hh == 0.0 {
+                //     hh = u * C::cb();
+                // }
+                // if h == 0.0 {
+                //     h = v * C::cb();
+                // }
                 z = r * h;
                 r = hh / h;
             } else {
