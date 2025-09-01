@@ -351,10 +351,6 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
     // This cutpoint is empirical
     let phi = x.atan();
     if p.abs() <= 1e-10 && m != 1.0 {
-        if m == 0.0 {
-            return Ok(x);
-        }
-
         // http://functions.wolfram.com/08.06.03.0008.01
         let sp2 = phi.sin() * phi.sin();
         let mut result = (1.0 - m * sp2).sqrt() * x - ellipeinc(phi, m)?;
@@ -371,7 +367,7 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
 
     // real
     declare!(mut [c, d, de, e, f, fa, g, h, hh]);
-    declare!(mut [pm, pz, q, r, s, t, u, v, w, y, ye = T::zero(), z]);
+    declare!(mut [pm, pz, q, r, s = kc, t, u, v, w, y, ye = T::zero(), z]);
     let zd;
 
     // int
@@ -382,11 +378,6 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
 
     hh = x * x;
     f = p * hh;
-    s = if kc == 0.0 {
-        C::ca() / (1.0 + x_abs)
-    } else {
-        kc
-    };
     t = s * s;
     pm = t * 0.5;
     e = hh * t;
@@ -434,7 +425,7 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
         return Err("el3: 1 + px² cannot be zero.");
     }
 
-    let p1 = if p == 0.0 { C::cb() / hh } else { p };
+    let p1 = p;
     s = s.abs();
     y = x_abs;
     g = if p == 1.0 { C::cb() } else { p1 - 1.0 };
@@ -482,12 +473,12 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
             h = 1.0 / h - h;
             z = h - r - r;
             r = 2.0 + r * h;
-            if r == 0.0 {
-                r = C::cb();
-            }
-            if z == 0.0 {
-                z = h * C::cb();
-            }
+            // if r == 0.0 {
+            //     r = C::cb();
+            // }
+            // if z == 0.0 {
+            //     z = h * C::cb();
+            // }
             z = r / z;
             r = z;
             w = pz;
@@ -529,9 +520,9 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
 
     for _ in 0..N_MAX_ITERATIONS {
         y = y - e / y;
-        if y == 0.0 {
-            y = e.sqrt() * C::cb();
-        }
+        // if y == 0.0 {
+        //     y = e.sqrt() * C::cb();
+        // }
         f = c;
         c = d / q + c;
         g = e / q;
@@ -568,12 +559,12 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
                 g = (1.0 / r - r) * 0.5;
                 hh = u + v * g;
                 h = g * u - v;
-                if hh == 0.0 {
-                    hh = u * C::cb();
-                }
-                if h == 0.0 {
-                    h = v * C::cb();
-                }
+                // if hh == 0.0 {
+                //     hh = u * C::cb();
+                // }
+                // if h == 0.0 {
+                //     h = v * C::cb();
+                // }
                 z = r * h;
                 r = hh / h;
             } else {
@@ -599,12 +590,12 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
             h = v / (t + u);
             z = 1.0 - r * h;
             h = r + h;
-            if z == 0.0 {
-                z = C::cb();
-            }
-            if z < 0.0 {
-                mm += if h < 0.0 { -1 } else { 1 };
-            }
+            // if z == 0.0 {
+            //     z = C::cb();
+            // }
+            // if z < 0.0 {
+            //     mm += if h < 0.0 { -1 } else { 1 };
+            // }
             s = (h / z).atan() + T::from(mm).unwrap() * pi!();
         } else {
             s = if bk {
@@ -786,6 +777,8 @@ mod tests {
         );
         // kc = 1, p <= 0: el3(x, 1, p) = (ln(1+vx) - ln(1-vx)) / (2v); v = sqrt(-p)
         assert_close!(el3(4.0, 1.0, -0.5).unwrap(), 5.0, 1e-15);
+        // 1 + px² = 0: should return Err
+        assert_eq!(el3(1.0, 0.5, -1.0), Err("el3: 1 + px² cannot be zero."));
         // x = nan, kc = nan, or p = nan: should return Err
         assert_eq!(el3(NAN, 0.5, 0.5), Err("el3: Arguments cannot be NAN."));
         assert_eq!(el3(0.5, NAN, 0.5), Err("el3: Arguments cannot be NAN."));

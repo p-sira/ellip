@@ -105,7 +105,7 @@ Benchmark on AMD Ryzen 5 4600H with Radeon Graphics running x86_64-unknown-linux
 | cel2     | 0.61             | 3.97          | 22.8 ns          |
 | el1      | 0.00             | 1.60          | 37.8 ns          |
 | el2      | 0.70             | 79.92         | 56.7 ns          |
-| el3      | 0.70             | 46.32         | 120.4 ns         |
+| el3      | 0.70             | 46.32         | 117.5 ns         |
 
 ### Carlson's Symmetric Integrals
 | Function | Median Error (ε) | Max Error (ε) | Mean Performance |
