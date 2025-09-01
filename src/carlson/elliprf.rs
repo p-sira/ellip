@@ -79,6 +79,14 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
     Err("elliprf: Failed to converge.")
 }
 
+/// Unsafe version of [elliprf](crate::elliprf).
+/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
+///
+/// Undefined behavior with invalid arguments and edge cases.
+/// # Known Invalid Cases
+/// - x < 0, y < 0, z < 0
+/// - More than one of x, y, and z are zero.
+/// - x = ∞ or y = ∞ or z = ∞
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn elliprf_unchecked<T: Float>(x: T, y: T, z: T) -> T {

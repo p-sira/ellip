@@ -3,16 +3,13 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-#![allow(deprecated)]
 use num_traits::Float;
 
 use crate::{
-    bulirsch::DefaultPrecision,
+    bulirsch::constants::BulirschConst,
     crate_util::{case, check, declare},
     StrErr,
 };
-
-use super::_BulirschConst;
 
 /// Computes [complete elliptic integral in Bulirsch form](https://dlmf.nist.gov/19.2#iii).
 /// ```text
@@ -29,9 +26,6 @@ use super::_BulirschConst;
 /// - p ∈ ℝ, p ≠ 0
 /// - a ∈ ℝ
 /// - b ∈ ℝ
-///
-/// The precision of the function can be adjusted by overwriting the trait [super::BulirschConst].
-/// The default is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405) for [f64] and [f32].
 ///
 /// ## Domain
 /// - Returns error if kc = 0 or p = 0.
@@ -65,16 +59,21 @@ use super::_BulirschConst;
 /// assert_close(cel(0.5, 1.0, 1.0, 1.0).unwrap(), 2.1565156474996434, 1e-15);
 /// ```
 ///
+/// # Notes
+/// The default precision of the function is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405)
+/// for [f64] and [f32]. The precision can be modified in the function [cel_with_const] (requires `unstable` feature flag).
+///
 /// # References
 /// - Bulirsch, R. “Numerical Calculation of Elliptic Integrals and Elliptic Functions. III.” Numerische Mathematik 13, no. 4 (August 1, 1969): 305–15. <https://doi.org/10.1007/BF02165405>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-pub fn cel<T: Float>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
-    _cel::<T, DefaultPrecision>(kc, p, a, b)
+pub fn cel<T: Float + BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
+    cel_with_const::<T, T>(kc, p, a, b)
 }
 
+/// Computes [cel]. Control the precision using [BulirschConst].
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub fn _cel<T: Float, C: _BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
+pub fn cel_with_const<T: Float, C: BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
     check!(@zero, cel, [kc, p]);
 
     let mut kc = kc.abs();
@@ -145,9 +144,6 @@ pub fn _cel<T: Float, C: _BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T
 /// ## Parameters
 /// - kc: complementary modulus. kc ∈ ℝ, kc ≠ 0.
 ///
-/// The precision of the function can be adjusted by overwriting the trait [super::BulirschConst].
-/// The default is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405) for [f64] and [f32].
-///
 /// ## Domain
 /// - Returns error if kc = 0.
 ///
@@ -170,16 +166,21 @@ pub fn _cel<T: Float, C: _BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T
 /// assert_close(cel1(0.5).unwrap(), 2.1565156474996434, 1e-15);
 /// ```
 ///
+///  # Notes
+/// The default precision of the function is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405)
+/// for [f64] and [f32]. The precision can be modified in the function [cel1_with_const] (requires `unstable` feature flag).
+///
 /// # References
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-pub fn cel1<T: Float>(kc: T) -> Result<T, StrErr> {
-    _cel1::<T, DefaultPrecision>(kc)
+pub fn cel1<T: Float + BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
+    cel1_with_const::<T, T>(kc)
 }
 
+/// Computes [cel1]. Control the precision using [BulirschConst].
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub fn _cel1<T: Float, C: _BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
+pub fn cel1_with_const<T: Float, C: BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
     declare!(mut [kc = kc.abs(), m = T::one(), ans = T::nan(), h]);
     for _ in 0..MAX_ITERATION {
         h = m;
@@ -219,9 +220,6 @@ pub fn _cel1<T: Float, C: _BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
 /// - a ∈ ℝ
 /// - b ∈ ℝ
 ///
-/// The precision of the function can be adjusted by overwriting the trait [super::BulirschConst].
-/// The default is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405) for [f64] and [f32].
-///
 /// ## Domain
 /// - Returns error if kc = 0.
 /// - Returns error if more than one arguments are infinite.
@@ -250,16 +248,21 @@ pub fn _cel1<T: Float, C: _BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
 /// assert_close(cel2(0.5, 1.0, 1.0).unwrap(), 2.1565156474996434, 1e-15);
 /// ```
 ///
+/// # Notes
+/// The default precision of the function is set according to the original literature by [Bulirsch](https://doi.org/10.1007/BF02165405)
+/// for [f64] and [f32]. The precision can be modified in the function [cel2_with_const] (requires `unstable` feature flag).
+///
 /// # References
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-pub fn cel2<T: Float>(kc: T, a: T, b: T) -> Result<T, StrErr> {
-    _cel2::<T, DefaultPrecision>(kc, a, b)
+pub fn cel2<T: Float + BulirschConst<T>>(kc: T, a: T, b: T) -> Result<T, StrErr> {
+    cel2_with_const::<T, T>(kc, a, b)
 }
 
+/// Computes [cel2]. Control the precision using [BulirschConst].
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub fn _cel2<T: Float, C: _BulirschConst<T>>(kc: T, a: T, b: T) -> Result<T, StrErr> {
+pub fn cel2_with_const<T: Float, C: BulirschConst<T>>(kc: T, a: T, b: T) -> Result<T, StrErr> {
     declare!(mut [kc = kc.abs(), aa = a, bb = b, m = T::one(), c = aa, ans = T::nan(), m0]);
     aa = bb + aa;
 
@@ -320,30 +323,18 @@ mod tests {
             let ellipe = ellipe(m).unwrap();
 
             // cel precision is low for K cases
-            assert_close!(ellipk, cel(kc, 1.0, 1.0, 1.0).unwrap(), 2e-12);
-            assert_close!(ellipe, cel(kc, 1.0, 1.0, kc * kc).unwrap(), 1e-15);
-            assert_close!(
-                (ellipe - kc * kc * ellipk) / m,
-                cel(kc, 1.0, 1.0, 0.0).unwrap(),
-                8.5e-14
-            );
+            assert_close! {ellipk, cel(kc, 1.0, 1.0, 1.0).unwrap(), 2e-12};
+            assert_close! {ellipe, cel(kc, 1.0, 1.0, kc * kc).unwrap(), 1e-15};
+            assert_close! {(ellipe - kc * kc * ellipk) / m, cel(kc, 1.0, 1.0, 0.0).unwrap(), 8.5e-14};
 
             // Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions III”
             let n = 1.0 - p;
             let ellippi = ellippi(n, m).unwrap();
 
-            assert_close!(
-                (ellipk - ellipe) / m,
-                cel(kc, 1.0, 0.0, 1.0).unwrap(),
-                6e-12
-            );
+            assert_close! {(ellipk - ellipe) / m, cel(kc, 1.0, 0.0, 1.0).unwrap(), 6e-12};
             // cel precision is very low for PI cases
-            assert_close!(ellippi, cel(kc, p, 1.0, 1.0).unwrap(), 3.5e-12);
-            assert_close!(
-                (ellippi - ellipk) / (1.0 - p),
-                cel(kc, p, 0.0, 1.0).unwrap(),
-                3.5e-12
-            );
+            assert_close! {ellippi, cel(kc, p, 1.0, 1.0).unwrap(), 3.5e-12};
+            assert_close! {(ellippi - ellipk) / (1.0 - p), cel(kc, p, 0.0, 1.0).unwrap(), 3.5e-12};
         }
 
         let linsp_kc = [
@@ -356,12 +347,8 @@ mod tests {
         iproduct!(linsp_kc, linsp_p).for_each(|(kc, p)| _test(kc, p));
 
         // Data from Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions III”
-        assert_close!(cel(1e-1, 4.1, 1.2, 1.1).unwrap(), 1.5464442694017956, 5e-16);
-        assert_close!(
-            cel(1e-1, -4.1, 1.2, 1.1).unwrap(),
-            -6.7687378198360556e-1,
-            5e-16
-        );
+        assert_close! {cel(1e-1, 4.1, 1.2, 1.1).unwrap(), 1.5464442694017956, 5e-16};
+        assert_close! {cel(1e-1, -4.1, 1.2, 1.1).unwrap(), -6.7687378198360556e-1, 5e-16};
     }
 
     #[test]

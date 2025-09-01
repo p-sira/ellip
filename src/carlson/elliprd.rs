@@ -88,6 +88,7 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
 }
 
 /// Unsafe version of [elliprd](crate::elliprd).
+/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
 ///
 /// Undefined behavior with invalid arguments and edge cases.
 /// # Known Invalid Cases

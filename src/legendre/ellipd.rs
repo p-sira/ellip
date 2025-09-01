@@ -26,7 +26,7 @@ use crate::{carlson::elliprd_unchecked, crate_util::check, StrErr};
 /// ```
 ///
 /// ## Parameters
-/// - m: elliptic parameter. m ∈ ℝ, m < 1.
+/// - m: elliptic parameter. m ∈ ℝ, m ≤ 1.
 ///
 /// The elliptic modulus (k) is also frequently used instead of the parameter (m), where k² = m.
 ///
@@ -65,7 +65,7 @@ pub fn ellipd<T: Float>(m: T) -> Result<T, StrErr> {
         if m == 1.0 {
             return Ok(inf!());
         }
-        return Err("ellipd: m must be less than 1.");
+        return Err("ellipd: m must not be greater than 1.");
     }
 
     if m.abs() <= epsilon!() {
@@ -116,11 +116,14 @@ mod tests {
         // m < 0: should be valid
         assert!(ellipd(-1.0).unwrap().is_finite());
         // m > 1: should return Err
-        assert_eq!(ellipd(1.1), Err("ellipd: m must be less than 1."));
+        assert_eq!(ellipd(1.1), Err("ellipd: m must not be greater than 1."));
         // m = NaN: should return Err
         assert_eq!(ellipd(NAN), Err("ellipd: Arguments cannot be NAN."));
         // m = inf: should return Err
-        assert_eq!(ellipd(INFINITY), Err("ellipd: m must be less than 1."));
+        assert_eq!(
+            ellipd(INFINITY),
+            Err("ellipd: m must not be greater than 1.")
+        );
         // m -> -inf: D(m) = 1/sqrt(-m)
         assert_eq!(ellipd(-MAX).unwrap(), 1.0 / MAX.sqrt());
         // m = -inf: D(-inf) = 0

@@ -1,4 +1,27 @@
 # Changelog
+## 0.4
+### 0.4.0
+**Breaking Changes**
+- `BulirschConst`: The trait signature changed to `BulirschConst<T>`.
+- `bulirsch` functions are bounded by `T: Float + BulirschConst<T>` trait.
+
+**Bug Fixes**
+- `ellippiinc`: Fix segfault when m sin²(phi) > 1. Early catch and return error instead. 
+- Fix error message when m > 1 for `ellipk`, `ellipe`, `ellippi`, and `ellipd`.
+
+**New Features**
+- `jacobi_zeta` and `jacobi_zeta_unchecked`: Jacobi Zeta function (Z)
+- `heuman_lambda` and `heuman_lambda_unchecked`: Heuman Lambda function (Λ0).
+- `ellippiinc_bulirsch`: Faster implementation of `ellippiinc`.
+- `unstable` flag: Access features that might be changed in the future.
+- Add `unchecked` version for `carlson` functions, `bulirsch` functions, `ellipeinc` and `ellippi` under the `unstable` flag.
+- `*_with_const`: Control the precision of `bulirsch` functions using `BulirschConst` trait.
+- `DefaultPrecision` and `HalfPrecision` struct for `BulirschConst` trait available under `unstable` flag.
+
+**Tests**
+- Add Wolfram test data for `f32` datatype.
+- Add test data for `jacobi_zeta` and `heuman_lambda`.
+
 ## 0.3
 ### 0.3.7
 **Bug Fixes**

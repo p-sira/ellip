@@ -39,6 +39,7 @@
 //! - [fn@ellipf]: Incomplete elliptic integral of the first kind (F).
 //! - [fn@ellipeinc]: Incomplete elliptic integral of the second kind (E).
 //! - [fn@ellippiinc]: Incomplete elliptic integral of the third kind (Π).
+//! - [fn@ellippiinc_bulirsch]: Faster implementation of [fn@ellippiinc].
 //! - [fn@ellipdinc]: Incomplete elliptic integral of Legendre's type (D).
 //! ## Bulirsch's integrals
 //! - [fn@cel]: General complete elliptic integral in Bulirsch's form.
@@ -53,6 +54,12 @@
 //! - [fn@elliprj]: Symmetric elliptic integral of the third kind (RJ).
 //! - [fn@elliprc]: Degenerate elliptic integral of RF (RC).
 //! - [fn@elliprd]: Degenerate elliptic integral of the third kind (RD).
+//! ## Miscellaneous functions
+//! - [fn@jacobi_zeta]: Jacobi Zeta function (Z).
+//! - [fn@heuman_lambda]: Heuman Lambda function (Λ0).
+//! ## Feature Flags
+//! - `unstable`: Enable unstable or untested features that might be changed without notice in the future.
+//! - `test_force_fail`: Used for testing only. Force tests to reach code unreachable under normal circumstances.
 //!
 //! # Testing
 //! The function results are compared with Boost Math test data and Wolfram Engine test data.
@@ -70,8 +77,9 @@
 //! - [Russell Lab](https://github.com/cpmech/russell)
 //!
 //! References for original implementations are:
-//! - NIST Digital Library, [Chapter 19: Elliptic Integrals](https://dlmf.nist.gov/19) (Carlson, 2024).
+//! - NIST Digital Library, [Chapter 19: Elliptic Integrals](https://dlmf.nist.gov/19) (Carlson, 2025).
 //! - Numerical calculation of elliptic integrals and elliptic functions [I](https://link.springer.com/article/10.1007/BF01397975) (Bulirsch, 1965), [II](https://doi.org/10.1007/BF01436529) (Bulirsch, 1965), and [III](https://doi.org/10.1007/BF02165405) (Bulirsch, 1969).
+//! - NIST Digital Library, [Chapter 22 Jacobian Elliptic Functions](https://dlmf.nist.gov/22) (Reinhardt and Walker, 2025).
 //!
 //! Unicode-style mathematical notation are created using [Diagon](https://github.com/ArthurSonzogni/Diagon).
 
@@ -95,6 +103,7 @@ pub use legendre::ellipdinc;
 pub use legendre::ellipeinc;
 pub use legendre::ellipf;
 pub use legendre::ellippiinc;
+pub use legendre::ellippiinc_bulirsch;
 
 // Bulirsch's integrals
 pub mod bulirsch;
@@ -113,9 +122,21 @@ pub use carlson::elliprf;
 pub use carlson::elliprg;
 pub use carlson::elliprj;
 
+// Miscellaneous functions
+#[cfg(feature = "unstable")]
+pub mod jacobi_zeta;
+#[cfg(not(feature = "unstable"))]
+mod jacobi_zeta;
+pub use jacobi_zeta::jacobi_zeta;
+#[cfg(feature = "unstable")]
+pub mod heuman_lambda;
+#[cfg(not(feature = "unstable"))]
+mod heuman_lambda;
+pub use heuman_lambda::heuman_lambda;
+
 // Utilities
 mod polyeval;
-use polyeval::*;
+use polyeval::polyeval;
 pub mod util;
 
 #[cfg(test)]

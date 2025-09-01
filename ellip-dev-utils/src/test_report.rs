@@ -97,35 +97,60 @@ pub fn generate_error_entry_from_file<T: Float + Debug>(
     }
 }
 
-pub fn generate_error_table(entries: &[(&str, Stats, u64)]) -> String {
-    let rows: Vec<ErrorEntry> = entries
+pub fn generate_error_table(entries: &[(&str, u64, Stats, Stats)]) -> [String; 2] {
+    let f64_rows: Vec<ErrorEntry> = entries
         .iter()
-        .map(|(name, stats, mu)| ErrorEntry {
+        .map(|(name, mu, f64_stats, _)| ErrorEntry {
             name,
-            mean: stats.mean,
-            median: stats.median,
-            p99: stats.p99,
-            max: stats.max,
-            variance: stats.variance,
+            mean: f64_stats.mean,
+            median: f64_stats.median,
+            p99: f64_stats.p99,
+            max: f64_stats.max,
+            variance: f64_stats.variance,
             mu: *mu,
         })
         .collect();
 
-    Table::new(rows).with(Style::markdown()).to_string()
+    let f32_rows: Vec<ErrorEntry> = entries
+        .iter()
+        .map(|(name, mu, _, f32_stats)| ErrorEntry {
+            name,
+            mean: f32_stats.mean,
+            median: f32_stats.median,
+            p99: f32_stats.p99,
+            max: f32_stats.max,
+            variance: f32_stats.variance,
+            mu: *mu,
+        })
+        .collect();
+
+    [
+        Table::new(f64_rows).with(Style::markdown()).to_string(),
+        Table::new(f32_rows).with(Style::markdown()).to_string(),
+    ]
 }
 
 #[macro_export]
 macro_rules! get_entry {
     ($file_name: expr, $name: expr, $func: expr, $arg_count: tt, $mu: expr) => {{
-        ellip_dev_utils::func_wrapper!($func, $arg_count);
+        let f64_entries = {
+            let file_path_f64 = concat!["tests/data/", $file_name, ".csv"];
+            ellip_dev_utils::func_wrapper!($func, f64, $arg_count);
+            ellip_dev_utils::test_report::generate_error_entry_from_file(
+                &file_path_f64,
+                &wrapped_func,
+            )
+        };
+        let f32_entries = {
+            let file_path_f32 = concat!["tests/data/f32/", $file_name, ".csv"];
+            ellip_dev_utils::func_wrapper!($func, f32, $arg_count);
+            ellip_dev_utils::test_report::generate_error_entry_from_file(
+                &file_path_f32,
+                &wrapped_func,
+            )
+        };
 
-        let file_path = concat!["tests/data/", $file_name, ".csv"];
-
-        (
-            $name,
-            ellip_dev_utils::test_report::generate_error_entry_from_file(&file_path, &wrapped_func),
-            $mu,
-        )
+        ($name, $mu, f64_entries, f32_entries)
     }};
 }
 
@@ -169,16 +194,16 @@ pub fn generate_summary_table(entries: &[(&str, Stats, f64)]) -> String {
 
 #[macro_export]
 macro_rules! get_summary_entry {
-    ($group:expr, $name:expr, $func:expr, $arg_count:tt) => {{
+    ($group:expr, $name:expr, $func:expr, $arg_count:tt, $test_file_name:expr) => {{
         use ellip_dev_utils::{
             benchmark, file, parser, stats,
             test_report::{self, Case},
         };
         use std::path::Path;
 
-        ellip_dev_utils::func_wrapper!($func, $arg_count);
+        ellip_dev_utils::func_wrapper!($func, f64, $arg_count);
 
-        let test_paths = file::find_test_files(stringify!($func), "wolfram");
+        let test_paths = file::find_test_files($test_file_name, "wolfram");
         let cases = test_paths
             .iter()
             .flat_map(|test_path| parser::read_wolfram_data(test_path.to_str().unwrap()).unwrap())
@@ -197,5 +222,8 @@ macro_rules! get_summary_entry {
             .unwrap_or(f64::NAN);
 
         ($name, stats, perf)
+    }};
+    ($group:expr, $name:expr, $func:expr, $arg_count:tt) => {{
+        get_summary_entry! {$group, $name, $func, $arg_count, stringify!($func)}
     }};
 }

@@ -30,7 +30,7 @@ use crate::{
 ///
 /// ## Parameters
 /// - n: characteristic, n ∈ ℝ, n ≠ 1.
-/// - m: elliptic parameter. m ∈ ℝ, m < 1.
+/// - m: elliptic parameter. m ∈ ℝ, m ≤ 1.
 ///
 /// The elliptic modulus (k) is frequently used instead of the parameter (m), where k² = m.
 /// The characteristic (n) is also sometimes expressed in term of α, where α² = n.
@@ -97,13 +97,14 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
     check!(@nan, ellippi, [n, m]);
     if m > 1.0 - epsilon!() {
         if m > 1.0 {
-            return Err("ellippi: m must be less than 1.");
+            return Err("ellippi: m must not be greater than 1.");
         }
         // m -> 1-
         let sign = (1.0 - n).signum();
         return Ok(sign * inf!());
     }
-    if n < -1e306 || m < -1e306 {
+    let lim_min = 1e-2 * min_val!();
+    if n < lim_min || m < lim_min {
         // n = -inf: Π(-inf, m) = 0
         // m = -inf: Π(n, -inf) = 0
         return Ok(0.0);
@@ -111,6 +112,16 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
     Err("ellippi: Unexpected error.")
 }
 
+/// Unsafe version of [ellippi](crate::ellippi).
+/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
+///
+/// Undefined behavior with invalid arguments and edge cases.
+/// # Known Invalid Cases
+/// - n -> 1 or n = 1
+/// - n > 1 (p.v. cases)
+/// - m -> 1 or m = 1
+/// - m > 1
+/// - n -> -∞ or m -> -∞
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn ellippi_unchecked<T: Float>(n: T, m: T) -> T {
@@ -194,7 +205,10 @@ mod tests {
             EPSILON, INFINITY, NAN, NEG_INFINITY,
         };
         // m > 1: should return Err
-        assert_eq!(ellippi(0.5, 1.1), Err("ellippi: m must be less than 1."));
+        assert_eq!(
+            ellippi(0.5, 1.1),
+            Err("ellippi: m must not be greater than 1.")
+        );
         // n == 1: should return Err
         assert_eq!(ellippi(1.0, 0.5), Err("ellippi: n cannot be 1."));
         // n = 0: Π(0, m) = K(m)
@@ -230,7 +244,7 @@ mod tests {
         // m = inf: should return Err
         assert_eq!(
             ellippi(0.5, INFINITY),
-            Err("ellippi: m must be less than 1.")
+            Err("ellippi: m must not be greater than 1.")
         );
     }
 }

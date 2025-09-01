@@ -3,8 +3,23 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-pub fn get_env() -> [String; 3] {
+pub struct Env {
+    pub rust_version: String,
+    pub platform: String,
+    pub ellip_version: String,
+    pub cpu: String,
+}
+
+pub fn get_env() -> Env {
     use std::process::Command;
+
+    let mut sys = sysinfo::System::new_all();
+    sys.refresh_all();
+    let cpu = match sys.cpus().first() {
+        Some(cpu) => cpu.brand(),
+        None => "Unknown CPU",
+    }
+    .to_string();
 
     let rust_version = {
         let output = Command::new("rustc")
@@ -46,5 +61,10 @@ pub fn get_env() -> [String; 3] {
             .to_owned()
     };
 
-    [rust_version, platform, ellip_version]
+    Env {
+        rust_version,
+        platform,
+        ellip_version,
+        cpu,
+    }
 }

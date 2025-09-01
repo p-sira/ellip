@@ -74,10 +74,13 @@ Learn more at [doc.rs](https://docs.rs/ellip).
     - `elliprj`: Symmetric elliptic integral of the third kind (RJ).
     - `elliprc`: Degenerate elliptic integral of RF (RC).
     - `elliprd`: Degenerate elliptic integral of the third kind (RD).
+- Miscellaneous functions
+    - `jacobi_zeta`: Jacobi Zeta function (Z). 
+    - `heuman_lambda`: Heuman Lambda function (Λ0).
 
 # Testing
 
-In the unit tests, the functions are tested against the Boost Math and Wolfram test data. Since Ellip accepts the argument `m` (parameter) instead of `k` (modulus) to allow larger domain support, the full accuracy report uses exclusively the Wolfram data. The full accuracy report, test data, and test generation scripts can be found [here](https://github.com/p-sira/ellip/blob/main/tests).
+In the unit tests, the functions are tested against the Boost Math and Wolfram test data. Since Ellip accepts the argument `m` (parameter) instead of `k` (modulus) to allow larger domain support, the full accuracy report uses exclusively the Wolfram data. The full accuracy report, test data, and test generation scripts can be found [here](https://github.com/p-sira/ellip/blob/main/tests). The performance benchmark is presented to provide comparison between functions in Ellip. Comparing performance with other libraries is non-trivial, since they accept different domains.
 
 {{TESTSUMMARY}}
 

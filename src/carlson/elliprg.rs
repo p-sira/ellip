@@ -76,6 +76,13 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
     Err("elliprg: Arguments must be finite.")
 }
 
+/// Unsafe version of [elliprg](crate::elliprg).
+/// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
+///
+/// Undefined behavior with invalid arguments and edge cases.
+/// # Known Invalid Cases
+/// - x < 0, y < 0, z < 0
+/// - x, y, or z are infinite.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {

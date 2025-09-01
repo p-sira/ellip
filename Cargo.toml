@@ -1,6 +1,6 @@
 [package]
 name = "ellip"
-version = "0.3.7"
+version = "0.4.0"
 authors = ["Sira Pornsiriprasert <code@psira.me>"]
 
 description = "Elliptic integrals for Rust"
@@ -44,5 +44,6 @@ harness = false
 
 [features]
 default = []
+unstable = []
 # Used for generating code coverage report only
 test_force_fail = []
