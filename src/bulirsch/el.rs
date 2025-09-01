@@ -6,10 +6,7 @@
 use num_traits::Float;
 
 use crate::{
-    bulirsch::{
-        cel::{cel1_with_const, cel2_with_const},
-        constants::BulirschConst,
-    },
+    bulirsch::{cel::cel2_with_const, constants::BulirschConst},
     crate_util::{case, check, declare, let_mut},
     ellipeinc, ellipf, ellippi, ellippiinc, StrErr,
 };
@@ -77,10 +74,6 @@ pub fn el1_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> Result<T, S
     check!(@nan, el1, [x, kc]);
     check!(@zero, el1, [kc]);
     case!(kc == inf!(), T::zero());
-    case!(x == T::zero(), T::zero());
-    if x == inf!() {
-        return cel1_with_const::<T, C>(kc);
-    }
     Err("el1: Failed to converge.")
 }
 
@@ -90,8 +83,7 @@ pub fn el1_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> Result<T, S
 /// Undefined behavior with invalid arguments and edge cases.
 /// # Known Invalid Cases
 /// - kc = 0
-/// - x = 0
-/// - kc = ∞ or x = ∞
+/// - kc = ∞
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn el1_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> T {
@@ -803,7 +795,8 @@ mod tests {
 
 #[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
-    assert_eq!(el1(0.5, 0.5), Err("el1: Failed to converge."));
-    assert_eq!(el2(0.5, 0.5, 0.5, 0.5), Err("el2: Failed to converge."));
-    assert_eq!(el3(0.5, 0.5, 0.5), Err("el3: Failed to converge."));
+    use crate::bulirsch::constants::DefaultPrecision;
+    assert_eq!(el1_with_const::<f64, DefaultPrecision>(0.5, 0.5), Err("el1: Failed to converge."));
+    assert_eq!(el2_with_const::<f64, DefaultPrecision>(0.5, 0.5, 0.5, 0.5), Err("el2: Failed to converge."));
+    assert_eq!(el3_with_const::<f64, DefaultPrecision>(0.5, 0.5, 0.5), Err("el3: Failed to converge."));
 }

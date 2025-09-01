@@ -374,6 +374,9 @@ pub fn ellippiinc_bulirsch_with_const<T: Float, C: BulirschConst<T>>(
         return result;
     }
 
+    #[cfg(feature = "test_force_fail")]
+    let result: Result<T, &_> = Err("");
+
     let err_str = match result.err().unwrap() {
         "el3: kc must not be zero." => "ellippiinc: m must not be 1.",
         "el3: 1 + px² cannot be zero." => "ellippiinc: 1 + (1-n)tan²φ cannot be zero.",
@@ -565,4 +568,9 @@ mod tests {
             Err("ellippiinc: Arguments cannot be NAN.")
         );
     }
+}
+
+#[cfg(feature = "test_force_fail")]
+crate::test_force_unreachable! {
+    assert_eq!(ellippiinc_bulirsch(0.5, 0.5, 0.5), Err("ellippiinc: Unexpected error."));
 }
