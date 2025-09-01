@@ -29,6 +29,8 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
+      - name: Make dir
+        run: mkdir figures/bin
       - name: Plot ${{ matrix.bin }} with retries
         run: |
           set -e
