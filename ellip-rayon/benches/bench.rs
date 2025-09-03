@@ -11,14 +11,29 @@ use ellip_dev_utils::{
     test_report::{Case, format_performance},
 };
 use itertools::izip;
-use rand::{SeedableRng, seq::IndexedRandom};
 use rayon::iter::{IntoParallelRefIterator, ParallelBridge, ParallelIterator};
 
-const SIZES: [usize; 6] = [100, 200, 300, 500, 700, 1000];
-const MULTIPLE: usize = 100;
+const ACCEPT_THRESHOLD: f64 = 0.2;
+const MUTATE: f64 = 1.0;
+const STEP: usize = 100;
+
+const FILE_SAMPLE_SIZE: usize = 500;
+const MAX_ITER: usize = 10;
+
+pub fn linspace(start: usize, end: usize, n: usize) -> Vec<usize> {
+    if n == 0 {
+        return Vec::new();
+    }
+    if n == 1 {
+        return vec![start];
+    }
+
+    let delta = end - start - 1;
+    (0..=(n - 1)).map(|i| start + i * delta / (n - 1)).collect()
+}
 
 fn get_cases(test_paths: &Vec<PathBuf>, n: usize) -> Vec<Case<f64>> {
-    if n % MULTIPLE != 0 {
+    if n % STEP != 0 {
         panic!(concat!("n must be multiple of ", stringify!(MULTIPLE), "."));
     }
 
@@ -26,14 +41,19 @@ fn get_cases(test_paths: &Vec<PathBuf>, n: usize) -> Vec<Case<f64>> {
         .iter()
         .flat_map(|test_path| parser::read_wolfram_data(test_path.to_str().unwrap()).unwrap())
         .collect::<Vec<Case<f64>>>();
-    let mut rng = rand::rngs::StdRng::seed_from_u64(0);
-
-    let base_cases: Vec<Case<f64>> = cases.choose_multiple(&mut rng, n).cloned().collect();
-    let mut result = Vec::with_capacity(n);
-    for _ in 0..n / MULTIPLE {
-        result.extend_from_slice(&base_cases);
+    let base_cases: Vec<Case<f64>> = linspace(0, cases.len(), FILE_SAMPLE_SIZE)
+        .iter()
+        .map(|&i| cases[i].clone())
+        .collect();
+    if n > FILE_SAMPLE_SIZE {
+        let mut result = Vec::with_capacity(n);
+        for _ in 0..n / STEP {
+            result.extend_from_slice(&base_cases);
+        }
+        result
+    } else {
+        base_cases.iter().take(n).cloned().collect()
     }
-    result
 }
 
 fn extract_params(cases: &[Case<f64>], param_index: usize) -> Vec<f64> {
@@ -127,19 +147,66 @@ macro_rules! generate_benchmarks {
     ($($func:ident : $n_args:tt $(: $test_file_name:expr)?),* $(,)?) => {
         pub fn par_threshold(c: &mut Criterion) {
             let mut group = c.benchmark_group("par_threshold");
-            $(
+            let root_path = Path::new("target/criterion/par_threshold");
+            $({
                 let test_paths = &find_test_files!($func $($test_file_name)?);
-                for &size in SIZES.iter() {
-                    generate_benchmarks!(@bench group, $func, test_paths, size, $n_args);
-                }
-            )*
-            group.finish();
-        }
+                let func_name = stringify!($func);
+                let par_path = root_path.join(func_name.to_owned() + "_par");
+                let ser_path = root_path.join(func_name.to_owned() + "_ser");
 
-        macro_rules! get_func_names {
-            () => {
-                [$(stringify!($func)),*]
-            };
+                let mut size = STEP;
+                let mut stepped: Vec<usize> = vec![STEP];
+                for iter in 0..MAX_ITER {
+                    generate_benchmarks!(@bench group, $func, test_paths, size, $n_args);
+                    let par_estimate = extract_criterion_mean(&par_path.join(size.to_string()).join("new").join("estimates.json"));
+                    let ser_estimate = extract_criterion_mean(&ser_path.join(size.to_string()).join("new").join("estimates.json"));
+                    let ratio = par_estimate / ser_estimate;
+
+                    stepped.push(size);
+                    size = if ratio < 1.0 - ACCEPT_THRESHOLD {
+                        // Step back
+                        let next_size = size - ((1.0 - ratio) * MUTATE) as usize * STEP;
+                        if stepped.contains(&next_size) {
+                            size = (size + next_size) / 2;
+                                println!(
+                                "fn {func_name}: thres={} (par={} < ser={})",
+                                size,
+                                format_performance(&par_estimate),
+                                format_performance(&ser_estimate)
+                            );
+                            break;
+                        }
+                        next_size
+                    } else if ratio > 1.0 + ACCEPT_THRESHOLD {
+                        // Step forward
+                        let next_size = size + (ratio * MUTATE) as usize * STEP;
+                        if stepped.contains(&next_size) {
+                            size = (size + next_size) / 2;
+                                println!(
+                                "fn {func_name}: thres={} (par={} < ser={})",
+                                size,
+                                format_performance(&par_estimate),
+                                format_performance(&ser_estimate)
+                            );
+                            break;
+                        }
+                        next_size
+                    } else {
+                        // Just right
+                        println!(
+                            "fn {func_name}: thres={} (par={} < ser={})",
+                            size,
+                            format_performance(&par_estimate),
+                            format_performance(&ser_estimate)
+                        );
+                        break;
+                    };
+                    if iter == MAX_ITER {
+                        eprintln!("fn {func_name} fail to find threshold within max number of iterations.")
+                    }
+                }
+            })*
+            group.finish();
         }
     };
 }
@@ -153,17 +220,6 @@ generate_benchmarks!(
 );
 
 criterion_group!(benches, par_threshold);
-
-macro_rules! get_data_paths {
-    ($bench_case_dir:expr) => {
-        SIZES.map(|size| {
-            $bench_case_dir
-                .join(size.to_string())
-                .join("new")
-                .join("estimates.json")
-        })
-    };
-}
 
 /// Criterion benchmark estimates structure
 #[derive(Debug, serde::Deserialize)]
@@ -200,42 +256,7 @@ pub fn extract_criterion_mean(path: &PathBuf) -> f64 {
     estimates.mean.point_estimate
 }
 
-fn print_threshold() {
-    debug_assert!(SIZES.is_sorted());
-    let root_path = Path::new("target/criterion/par_threshold");
-    for func_name in get_func_names!() {
-        let par_path = root_path.join(func_name.to_owned() + "_par");
-        let ser_path = root_path.join(func_name.to_owned() + "_ser");
-        let par_estimate_paths = get_data_paths!(par_path);
-        let ser_estimate_paths = get_data_paths!(ser_path);
-        let mut found = false;
-        for (size_idx, (par_path, ser_path)) in par_estimate_paths
-            .iter()
-            .zip(ser_estimate_paths)
-            .enumerate()
-        {
-            let par_estimate = extract_criterion_mean(par_path);
-            let ser_estimate = extract_criterion_mean(&ser_path);
-            if par_estimate < ser_estimate {
-                println!(
-                    "fn {func_name}: thres={} (par={} < ser={})",
-                    SIZES[size_idx],
-                    format_performance(&par_estimate),
-                    format_performance(&ser_estimate)
-                );
-                found = true;
-                break;
-            }
-        }
-        if !found {
-            eprintln!("fn {func_name} did not reach threshold!")
-        }
-    }
-}
-
 fn main() {
-    // print_threshold();
     benches();
     Criterion::default().configure_from_args().final_summary();
-    print_threshold();
 }
