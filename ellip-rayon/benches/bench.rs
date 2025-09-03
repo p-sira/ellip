@@ -5,9 +5,11 @@
 
 use std::path::{Path, PathBuf};
 
-use criterion::{BenchmarkId, Criterion, criterion_group};
+use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use ellip_dev_utils::{
-    benchmark::CriterionEstimates, parser, test_report::{format_performance, Case}
+    benchmark::extract_criterion_mean,
+    parser,
+    test_report::{Case, format_performance},
 };
 use itertools::izip;
 use rayon::iter::{IntoParallelRefIterator, ParallelBridge, ParallelIterator};
@@ -157,8 +159,8 @@ macro_rules! generate_benchmarks {
                 let mut stepped: Vec<usize> = vec![STEP];
                 for iter in 0..MAX_ITER {
                     generate_benchmarks!(@bench group, $func, test_paths, size, $n_args);
-                    let par_estimate = extract_criterion_mean(&par_path.join(size.to_string()).join("new").join("estimates.json"));
-                    let ser_estimate = extract_criterion_mean(&ser_path.join(size.to_string()).join("new").join("estimates.json"));
+                    let par_estimate = extract_criterion_mean(&par_path.join(size.to_string()).join("new").join("estimates.json")).unwrap();
+                    let ser_estimate = extract_criterion_mean(&ser_path.join(size.to_string()).join("new").join("estimates.json")).unwrap();
                     let ratio = par_estimate / ser_estimate;
 
                     stepped.push(size);
@@ -219,31 +221,4 @@ generate_benchmarks!(
 );
 
 criterion_group!(benches, par_threshold);
-
-pub fn extract_criterion_mean(path: &PathBuf) -> f64 {
-    use std::fs;
-    let content = fs::read_to_string(path)
-        .inspect_err(|_| {
-            eprintln!(
-                "Cannot read estimates.json file: {}",
-                path.to_str().unwrap_or("nan")
-            )
-        })
-        .unwrap();
-
-    let estimates: CriterionEstimates = serde_json::from_str(&content)
-        .inspect_err(|_| {
-            eprintln!(
-                "Cannot parse estimates.json file: {}",
-                path.to_str().unwrap_or("nan")
-            )
-        })
-        .unwrap();
-
-    estimates.mean.point_estimate
-}
-
-fn main() {
-    benches();
-    Criterion::default().configure_from_args().final_summary();
-}
+criterion_main!(benches);

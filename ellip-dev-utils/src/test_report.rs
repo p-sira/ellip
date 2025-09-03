@@ -218,7 +218,7 @@ macro_rules! get_summary_entry {
             .join($group)
             .join(stringify!($func))
             .join("new");
-        let perf = benchmark::extract_criterion_mean(criterion_path_buf.to_str().unwrap_or(""))
+        let perf = benchmark::extract_criterion_mean(&criterion_path_buf)
             .unwrap_or(f64::NAN);
 
         ($name, stats, perf)
