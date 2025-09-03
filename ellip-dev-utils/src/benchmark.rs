@@ -10,14 +10,14 @@ use crate::StrErr;
 
 /// Criterion benchmark estimates structure
 #[derive(Debug, serde::Deserialize)]
-struct CriterionEstimates {
-    mean: CriterionMean,
+pub struct CriterionEstimates {
+    pub mean: CriterionMean,
 }
 
 /// Criterion mean structure
 #[derive(Debug, serde::Deserialize)]
-struct CriterionMean {
-    point_estimate: f64,
+pub struct CriterionMean {
+    pub point_estimate: f64,
 }
 
 pub fn extract_criterion_mean(benchmark_path: &str) -> Result<f64, StrErr> {

@@ -7,8 +7,7 @@ use std::path::{Path, PathBuf};
 
 use criterion::{BenchmarkId, Criterion, criterion_group};
 use ellip_dev_utils::{
-    parser,
-    test_report::{Case, format_performance},
+    benchmark::CriterionEstimates, parser, test_report::{format_performance, Case}
 };
 use itertools::izip;
 use rayon::iter::{IntoParallelRefIterator, ParallelBridge, ParallelIterator};
@@ -220,18 +219,6 @@ generate_benchmarks!(
 );
 
 criterion_group!(benches, par_threshold);
-
-/// Criterion benchmark estimates structure
-#[derive(Debug, serde::Deserialize)]
-struct CriterionEstimates {
-    mean: CriterionMean,
-}
-
-/// Criterion mean structure
-#[derive(Debug, serde::Deserialize)]
-struct CriterionMean {
-    point_estimate: f64,
-}
 
 pub fn extract_criterion_mean(path: &PathBuf) -> f64 {
     use std::fs;
