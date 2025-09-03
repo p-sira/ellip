@@ -1,0 +1,75 @@
+/*
+ * Ellip is licensed under The 3-Clause BSD, see LICENSE.
+ * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
+ */
+
+use ellip::*;
+use itertools::izip;
+use rayon::iter::{IntoParallelRefIterator, ParallelBridge, ParallelIterator};
+
+macro_rules! impl_par {
+    (@inner, $fn:ident, 2) => {
+        |(&a, &b)| ellip::$fn(a, b)
+    };
+    (@inner, $fn:ident, 3) => {
+        |(&a, &b, &c)| ellip::$fn(a, b, c)
+    };
+    (@inner, $fn:ident, 4) => {
+        |(&a, &b, &c, &d)| ellip::$fn(a, b, c, d)
+    };
+    ($fn:ident, [$arg:ident], 1, $threshold:expr) => {
+        #[doc=concat!["Computes [", stringify!($fn), "](ellip::", stringify!($fn), ") in parallel."]]
+        pub fn $fn($arg: &[f64]) -> Result<Vec<f64>, StrErr> {
+            if $arg.len() < 100 {
+                $arg.iter().map(|&a| ellip::$fn(a)).collect()
+            } else {
+                $arg.par_iter().map(|&a| ellip::$fn(a)).collect()
+            }
+        }
+    };
+    ($fn:ident, [$first:ident, $($args:ident),*], $n_arg:tt, $threshold:expr) => {
+        #[doc=concat!["Computes [", stringify!($fn), "](ellip::", stringify!($fn), ") in parallel."]]
+        pub fn $fn($first: &[f64], $($args: &[f64],)*) -> Result<Vec<f64>, StrErr> {
+            $(
+                if $first.len() != $args.len() {
+                    return Err(concat![stringify!($fn), ": All arguments must have the same length."]);
+                }
+            )*
+            if $first.len() < $threshold {
+                izip!($first, $($args),*).map(impl_par!(@inner, $fn, $n_arg)).collect()
+            } else {
+                izip!($first, $($args),*).par_bridge().map(impl_par!(@inner, $fn, $n_arg)).collect()
+            }
+        }
+    };
+}
+
+// Legendre's Integrals
+impl_par!(ellipk, [m], 1, 1000);
+impl_par!(ellipe, [m], 1, 700);
+impl_par!(ellipf, [phi, m], 2, 1500);
+impl_par!(ellipeinc, [phi, m], 2, 1500);
+impl_par!(ellippi, [n, m], 2, 1500);
+impl_par!(ellippiinc, [phi, n, m], 3, 500);
+impl_par!(ellippiinc_bulirsch, [phi, n, m], 3, 1500);
+impl_par!(ellipd, [m], 1, 500);
+impl_par!(ellipdinc, [phi, m], 2, 1500);
+
+// Bulirsch's Integrals
+impl_par!(cel, [kc, p, a, b], 4, 1500);
+impl_par!(cel1, [kc], 1, 1500);
+impl_par!(cel2, [kc, a, b], 3, 1500);
+impl_par!(el1, [x, kc], 2, 1500);
+impl_par!(el2, [x, kc, a, b], 4, 1500);
+impl_par!(el3, [x, kc, p], 3, 1500);
+
+// Carlson's Integrals
+impl_par!(elliprf, [x, y, z], 3, 1500);
+impl_par!(elliprg, [x, y, z], 3, 1500);
+impl_par!(elliprj, [x, y, z, p], 4, 1500);
+impl_par!(elliprc, [x, y], 2, 1500);
+impl_par!(elliprd, [x, y, z], 3, 1500);
+
+// Miscellaneous Functions
+impl_par!(jacobi_zeta, [phi, m], 2, 1000);
+impl_par!(heuman_lambda, [phi, m], 2, 200);

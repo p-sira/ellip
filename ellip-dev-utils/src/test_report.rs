@@ -154,7 +154,7 @@ macro_rules! get_entry {
     }};
 }
 
-fn format_performance(value: &f64) -> String {
+pub fn format_performance(value: &f64) -> String {
     if value.is_nan() {
         "NAN".to_string()
     } else if *value < 1000.0 {
