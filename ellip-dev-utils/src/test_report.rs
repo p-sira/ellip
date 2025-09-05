@@ -50,7 +50,7 @@ pub fn compute_errors_from_cases<T: Float + Debug>(
         .collect()
 }
 
-fn format_float(value: &f64) -> String {
+pub fn format_float(value: &f64) -> String {
     if value.is_nan() {
         "NAN".to_string()
     } else if *value >= 1e3 {
@@ -218,8 +218,7 @@ macro_rules! get_summary_entry {
             .join($group)
             .join(stringify!($func))
             .join("new");
-        let perf = benchmark::extract_criterion_mean(&criterion_path_buf)
-            .unwrap_or(f64::NAN);
+        let perf = benchmark::extract_criterion_mean(&criterion_path_buf).unwrap_or(f64::NAN);
 
         ($name, stats, perf)
     }};

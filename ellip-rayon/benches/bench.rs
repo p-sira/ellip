@@ -3,16 +3,19 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
+use std::collections::HashSet;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 
-use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
+use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use ellip_dev_utils::{
     benchmark::extract_criterion_mean,
     parser,
-    test_report::{format_performance, Case},
+    test_report::{Case, format_float, format_performance},
 };
 use itertools::izip;
 use rayon::iter::{IntoParallelRefIterator, ParallelBridge, ParallelIterator};
+use tabled::{Table, Tabled, settings::Style};
 
 const ACCEPT_THRESHOLD: f64 = 0.1;
 const INITIAL_STEP_SIZE: f64 = 2.0; // Initial step size as fraction
@@ -79,6 +82,20 @@ macro_rules! find_test_files {
     ($func:ident $test_file_name:expr) => {
         find_test_files($test_file_name, "wolfram")
     };
+}
+
+#[derive(Tabled)]
+struct Record {
+    #[tabled(rename = "Function")]
+    function_name: String,
+    #[tabled(rename = "Threshold")]
+    threshold: usize,
+    #[tabled(rename = "Parallel Time", display = "format_performance")]
+    par_time: f64,
+    #[tabled(rename = "Serial Time", display = "format_performance")]
+    ser_time: f64,
+    #[tabled(rename = "Ratio", display = "format_float")]
+    ratio: f64,
 }
 
 macro_rules! generate_benchmarks {
@@ -151,6 +168,9 @@ macro_rules! generate_benchmarks {
         pub fn par_threshold(c: &mut Criterion) {
             let mut group = c.benchmark_group("par_threshold");
             let root_path = Path::new("target/criterion/par_threshold");
+            let record_file = Path::new("benches/par_threshold.md");
+            let mut record_file = std::fs::File::create(record_file).unwrap();
+            let mut results = Vec::new();
             $({
                 let test_paths = &find_test_files!($func $($test_file_name)?);
                 let func_name = stringify!($func);
@@ -159,9 +179,12 @@ macro_rules! generate_benchmarks {
 
                 let mut size = STEP;
                 let mut step_size = INITIAL_STEP_SIZE;
-                let mut visited: std::collections::HashSet<usize> = std::collections::HashSet::new();
+                let mut visited: HashSet<usize> = HashSet::new();
                 let mut last_direction = 0;
 
+                let mut par_estimate = f64::NAN;
+                let mut ser_estimate = f64::NAN;
+                let mut ratio = f64::NAN;
                 for iter in 0..MAX_ITER {
                     // Round size to nearest STEP multiple
                     size = ((size + STEP / 2) / STEP) * STEP;
@@ -184,9 +207,9 @@ macro_rules! generate_benchmarks {
 
                     generate_benchmarks!(@bench group, $func, test_paths, size, $n_args);
 
-                    let par_estimate = extract_criterion_mean(&par_path.join(size.to_string()).join("new").join("estimates.json")).unwrap();
-                    let ser_estimate = extract_criterion_mean(&ser_path.join(size.to_string()).join("new").join("estimates.json")).unwrap();
-                    let ratio = par_estimate / ser_estimate;
+                    par_estimate = extract_criterion_mean(&par_path.join(size.to_string()).join("new").join("estimates.json")).unwrap();
+                    ser_estimate = extract_criterion_mean(&ser_path.join(size.to_string()).join("new").join("estimates.json")).unwrap();
+                    ratio = par_estimate / ser_estimate;
 
                     if ratio < 1.0 - ACCEPT_THRESHOLD {
                         // Parallel is significantly faster, try smaller size
@@ -239,11 +262,20 @@ macro_rules! generate_benchmarks {
                         eprintln!("fn {func_name}: failed to find threshold within max iterations, last ratio={:.3}", ratio);
                     }
                 }
+                results.push(Record {
+                    function_name: func_name.to_string(),
+                    threshold: size,
+                    par_time: par_estimate,
+                    ser_time: ser_estimate,
+                    ratio: ratio,
+                });
             })*
             group.finish();
+            let result_str = Table::new(results).with(Style::markdown()).to_string();
+            record_file.write_all(result_str.as_bytes()).unwrap();
         }
     };
- }
+}
 
 generate_benchmarks!(
     ellipk:1, ellipe:1, ellippi:2, ellipd:1,

@@ -24,6 +24,7 @@ criterion = "0.7.0"
 ellip-dev-utils = { version = "0.1.0", path = "../ellip-dev-utils" }
 glob = "0.3.3"
 serde_json = "1.0.143"
+tabled = "0.20.0"
 
 [[bench]]
 name = "bench"
