@@ -3,7 +3,6 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-use std::collections::HashSet;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
@@ -17,11 +16,10 @@ use itertools::izip;
 use rayon::iter::{IntoParallelRefIterator, ParallelBridge, ParallelIterator};
 use tabled::{Table, Tabled, settings::Style};
 
+const MAX_THRESHOLD: usize = 10000;
 const ACCEPT_THRESHOLD: f64 = 0.1;
-const INITIAL_STEP_SIZE: f64 = 2.0; // Initial step size as fraction
-const DECAY_FACTOR: f64 = 0.8; // Exponential decay factor
-const MIN_STEP_SIZE: f64 = 0.01; // Minimum step size as fraction
 const STEP: usize = 100;
+const INIT_STEP: usize = 10 * STEP;
 
 const FILE_SAMPLE_SIZE: usize = 500;
 const MAX_ITER: usize = 15;
@@ -84,6 +82,26 @@ macro_rules! find_test_files {
     };
 }
 
+enum ExitCond {
+    None,
+    Converged,
+    MinStep,
+    MaxIter,
+    MaxThres,
+}
+
+impl ExitCond {
+    fn to_string(&self) -> String {
+        match self {
+            Self::None => "-".to_string(),
+            Self::Converged => "Converged".to_string(),
+            Self::MinStep => "Min step size".to_string(),
+            Self::MaxIter => "Max iteration".to_string(),
+            Self::MaxThres => "Max threshold".to_string(),
+        }
+    }
+}
+
 #[derive(Tabled)]
 struct Record {
     #[tabled(rename = "Function")]
@@ -96,6 +114,8 @@ struct Record {
     ser_time: f64,
     #[tabled(rename = "Ratio", display = "format_float")]
     ratio: f64,
+    #[tabled(rename = "Exit Condition", display = "ExitCond::to_string")]
+    exit_cond: ExitCond,
 }
 
 macro_rules! generate_benchmarks {
@@ -177,98 +197,85 @@ macro_rules! generate_benchmarks {
                 let par_path = root_path.join(func_name.to_owned() + "_par");
                 let ser_path = root_path.join(func_name.to_owned() + "_ser");
 
-                let mut size = STEP;
-                let mut step_size = INITIAL_STEP_SIZE;
-                let mut visited: HashSet<usize> = HashSet::new();
-                let mut last_direction = 0;
+                let mut record = Record {
+                    function_name: func_name.to_string(),
+                    threshold: INIT_STEP,
+                    par_time: f64::NAN,
+                    ser_time: f64::NAN,
+                    ratio: f64::NAN,
+                    exit_cond: ExitCond::None,
+                };
 
-                let mut par_estimate = f64::NAN;
-                let mut ser_estimate = f64::NAN;
-                let mut ratio = f64::NAN;
-                for iter in 0..MAX_ITER {
-                    // Round size to nearest STEP multiple
-                    size = ((size + STEP / 2) / STEP) * STEP;
-                    size = size.max(STEP); // Ensure minimum size
+                // --- 1. Expansion phase ---
+                let mut low = STEP;
+                let mut high = INIT_STEP;
 
-                    if visited.contains(&size) {
-                        // We've been here before, reduce step size
-                        step_size *= DECAY_FACTOR;
-                        if step_size < MIN_STEP_SIZE {
-                            println!(
-                                "fn {func_name}: thres={} (converged after {} iterations)",
-                                size, iter + 1
-                            );
-                            break;
+                loop {
+                    // Align to STEP
+                    record.threshold = ((high + STEP / 2) / STEP) * STEP;
+                    record.threshold = record.threshold.max(STEP);
+
+                    generate_benchmarks!(@bench group, $func, test_paths, record.threshold, $n_args);
+                    record.par_time = extract_criterion_mean(
+                        &par_path.join(record.threshold.to_string()).join("new").join("estimates.json")
+                    ).unwrap();
+                    record.ser_time = extract_criterion_mean(
+                        &ser_path.join(record.threshold.to_string()).join("new").join("estimates.json")
+                    ).unwrap();
+                    record.ratio = record.par_time / record.ser_time;
+
+                    if record.ratio < 1.0 {
+                        // Overshoot found
+                        // --- 2. Binary search phase ---
+                        for n in 0..MAX_ITER {
+                            let mid = ((low + high) / 2 / STEP) * STEP;
+                            generate_benchmarks!(@bench group, $func, test_paths, mid, $n_args);
+                            let par_time = extract_criterion_mean(
+                                &par_path.join(mid.to_string()).join("new").join("estimates.json")
+                            ).unwrap();
+                            let ser_time = extract_criterion_mean(
+                                &ser_path.join(mid.to_string()).join("new").join("estimates.json")
+                            ).unwrap();
+                            let ratio = par_time / ser_time;
+
+                            if ratio < 1.0 - ACCEPT_THRESHOLD {
+                                high = mid;
+                            } else if ratio > 1.0 + ACCEPT_THRESHOLD {
+                                low = mid;
+                            } else {
+                                record.threshold = mid;
+                                record.par_time = par_time;
+                                record.ser_time = ser_time;
+                                record.ratio = ratio;
+                                record.exit_cond = ExitCond::Converged;
+                                break;
+                            }
+
+                            if high - low <= STEP {
+                                record.threshold = high;
+                                record.par_time = par_time;
+                                record.ser_time = ser_time;
+                                record.ratio = ratio;
+                                record.exit_cond = ExitCond::MinStep;
+                                break;
+                            }
+
+                            if n == MAX_ITER - 1 {
+                                record.threshold = high;
+                                record.exit_cond = ExitCond::MaxIter;
+                            }
                         }
-                        continue;
-                    }
-
-                    visited.insert(size);
-
-                    generate_benchmarks!(@bench group, $func, test_paths, size, $n_args);
-
-                    par_estimate = extract_criterion_mean(&par_path.join(size.to_string()).join("new").join("estimates.json")).unwrap();
-                    ser_estimate = extract_criterion_mean(&ser_path.join(size.to_string()).join("new").join("estimates.json")).unwrap();
-                    ratio = par_estimate / ser_estimate;
-
-                    if ratio < 1.0 - ACCEPT_THRESHOLD {
-                        // Parallel is significantly faster, try smaller size
-                        let current_direction = -1;
-                        if last_direction == 1 {
-                            // Direction changed, apply decay
-                            step_size *= DECAY_FACTOR;
-                        }
-                        last_direction = current_direction;
-
-                        let step_amount = (size as f64 * step_size) as usize;
-                        let step_amount = step_amount.max(STEP); // Minimum step
-                        size = size.saturating_sub(step_amount);
-
-                    } else if ratio > 1.0 + ACCEPT_THRESHOLD {
-                        // Serial is significantly faster, try larger size
-                        let current_direction = 1;
-                        if last_direction == -1 {
-                            // Direction changed, apply decay
-                            step_size *= DECAY_FACTOR;
-                        }
-                        last_direction = current_direction;
-
-                        let step_amount = (size as f64 * step_size) as usize;
-                        let step_amount = step_amount.max(STEP); // Minimum step
-                        size += step_amount;
-
-                    } else {
-                        // Within acceptable threshold
-                        println!(
-                            "fn {func_name}: thres={} (par={} ≈ ser={}, ratio={:.3})",
-                            size,
-                            format_performance(&par_estimate),
-                            format_performance(&ser_estimate),
-                            ratio
-                        );
                         break;
                     }
-
-                    // Apply minimum step size check
-                    if step_size < MIN_STEP_SIZE {
-                        println!(
-                            "fn {func_name}: thres={} (step size too small, ratio={:.3})",
-                            size, ratio
-                        );
+                    low = high;
+                    high *= 2;
+                    if high > MAX_THRESHOLD {
+                        record.exit_cond = ExitCond::MaxThres;
                         break;
-                    }
-
-                    if iter == MAX_ITER - 1 {
-                        eprintln!("fn {func_name}: failed to find threshold within max iterations, last ratio={:.3}", ratio);
                     }
                 }
-                results.push(Record {
-                    function_name: func_name.to_string(),
-                    threshold: size,
-                    par_time: par_estimate,
-                    ser_time: ser_estimate,
-                    ratio: ratio,
-                });
+
+                results.push(record);
             })*
             group.finish();
             let result_str = Table::new(results).with(Style::markdown()).to_string();
@@ -278,11 +285,12 @@ macro_rules! generate_benchmarks {
 }
 
 generate_benchmarks!(
-    ellipk:1, ellipe:1, ellippi:2, ellipd:1,
-    ellipf:2, ellipeinc:2, ellippiinc:3, ellippiinc_bulirsch:3:"ellippiinc", ellipdinc:2,
-    elliprf:3, elliprg:3, elliprj:4, elliprc:2, elliprd:3,
-    cel:4, cel1:1, cel2:3, el1:2, el2:4, el3:3,
-    jacobi_zeta:2, heuman_lambda:2,
+    ellipe:1, ellippi:2,
+    // ellipk:1, ellipe:1, ellippi:2, ellipd:1,
+    // ellipf:2, ellipeinc:2, ellippiinc:3, ellippiinc_bulirsch:3:"ellippiinc", ellipdinc:2,
+    // elliprf:3, elliprg:3, elliprj:4, elliprc:2, elliprd:3,
+    // cel:4, cel1:1, cel2:3, el1:2, el2:4, el3:3,
+    // jacobi_zeta:2, heuman_lambda:2,
 );
 
 criterion_group!(benches, par_threshold);
