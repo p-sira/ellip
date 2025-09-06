@@ -285,12 +285,11 @@ macro_rules! generate_benchmarks {
 }
 
 generate_benchmarks!(
-    ellipe:1, ellippi:2,
-    // ellipk:1, ellipe:1, ellippi:2, ellipd:1,
-    // ellipf:2, ellipeinc:2, ellippiinc:3, ellippiinc_bulirsch:3:"ellippiinc", ellipdinc:2,
-    // elliprf:3, elliprg:3, elliprj:4, elliprc:2, elliprd:3,
-    // cel:4, cel1:1, cel2:3, el1:2, el2:4, el3:3,
-    // jacobi_zeta:2, heuman_lambda:2,
+    ellipk:1, ellipe:1, ellippi:2, ellipd:1,
+    ellipf:2, ellipeinc:2, ellippiinc:3, ellippiinc_bulirsch:3:"ellippiinc", ellipdinc:2,
+    elliprf:3, elliprg:3, elliprj:4, elliprc:2, elliprd:3,
+    cel:4, cel1:1, cel2:3, el1:2, el2:4, el3:3,
+    jacobi_zeta:2, heuman_lambda:2,
 );
 
 criterion_group!(benches, par_threshold);
