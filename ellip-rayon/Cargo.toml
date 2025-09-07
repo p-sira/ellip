@@ -13,6 +13,11 @@ repository = "https://github.com/p-sira/ellip"
 readme = "README.md"
 license = "BSD-3-Clause"
 
+exclude = [
+    ".gitignore",
+    "benches/par_threshold.md"
+]
+
 [dependencies]
 ellip = "0.4.0"
 itertools = "0.14.0"
