@@ -3,37 +3,35 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-use std::fs;
-use std::path::Path;
+use std::path::PathBuf;
 
 use crate::StrErr;
 
 /// Criterion benchmark estimates structure
 #[derive(Debug, serde::Deserialize)]
-struct CriterionEstimates {
-    mean: CriterionMean,
+pub struct CriterionEstimates {
+    pub mean: CriterionMean,
 }
 
 /// Criterion mean structure
 #[derive(Debug, serde::Deserialize)]
-struct CriterionMean {
-    point_estimate: f64,
+pub struct CriterionMean {
+    pub point_estimate: f64,
 }
 
-pub fn extract_criterion_mean(benchmark_path: &str) -> Result<f64, StrErr> {
-    let estimates_path = Path::new(benchmark_path).join("estimates.json");
+pub fn extract_criterion_mean(path: &PathBuf) -> Result<f64, StrErr>  {
+    use std::fs;
+    let content = fs::read_to_string(path)
+        .map_err(|_| "Cannot read estimates.json file")?;
 
-    let content =
-        fs::read_to_string(&estimates_path).map_err(|_| "Cannot read estimates.json file")?;
-
-    let estimates: CriterionEstimates =
-        serde_json::from_str(&content).map_err(|_| "Cannot parse estimates.json file")?;
+    let estimates: CriterionEstimates = serde_json::from_str(&content)
+        .map_err(|_| "Cannot parse estimates.json file")?;
 
     Ok(estimates.mean.point_estimate)
 }
 
-pub fn extract_criterion_means(benchmark_paths: &[&str]) -> Result<Vec<f64>, StrErr> {
-    benchmark_paths
+pub fn extract_criterion_means(paths: &[PathBuf]) -> Result<Vec<f64>, StrErr> {
+    paths
         .iter()
         .map(|path| extract_criterion_mean(path))
         .collect()
