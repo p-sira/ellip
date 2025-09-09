@@ -6,7 +6,7 @@ license = "BSD-3-Clause"
 description = "Generate plots for Ellip crate"
 
 [dependencies]
-ellip = { version = "0.4", path = "../.." }
+ellip = { version = "0.5", path = "../.." }
 plotly = { version = "0.12.1", features = ["kaleido", "kaleido_download"] }
 
 [features]
