@@ -4,6 +4,9 @@
 **New Features**
 - `no_std` flag: Support no_std environment.
 
+**Bug Fixes**
+- Fix graphs cutting off at the border in the documentation.
+
 ## 0.4
 ### 0.4.0
 **Breaking Changes**

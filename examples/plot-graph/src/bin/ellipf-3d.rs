@@ -84,6 +84,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             .range(vec![0.0, 3.5]),
                     ).aspect_ratio(AspectRatio::new().x(1.0).y(1.0))
             )
+            .legend(
+                plotly::layout::Legend::new()
+                    .x(1.0)
+                    .x_anchor(plotly::common::Anchor::Right)
+            )
             .annotations(vec![Annotation::new()
             .text(format!(
                 "Generated using <a href=\"https://docs.rs/ellip/latest/ellip/legendre/fn.ellipf.html\" target=\"_blank\">ellipf</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",
