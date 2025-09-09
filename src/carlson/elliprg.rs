@@ -4,8 +4,8 @@
  * This code is modified from Boost Math, see LICENSE in this directory.
  */
 
+use core::mem::swap;
 use num_traits::Float;
-use std::mem::swap;
 
 use crate::{
     carlson::{elliprc_unchecked, elliprd_unchecked, elliprf_unchecked},
@@ -142,7 +142,7 @@ pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
 }
 
 #[cfg(not(feature = "test_force_fail"))]
-#[cfg(test)]
+#[cfg(all(test, not(feature = "no_std")))]
 mod tests {
     use itertools::Itertools;
 

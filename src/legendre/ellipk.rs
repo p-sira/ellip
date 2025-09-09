@@ -316,7 +316,7 @@ pub fn ellipk_precise_unchecked<T: Float>(m: T) -> T {
 const MAX_ITERATION: usize = 10;
 
 #[cfg(not(feature = "test_force_fail"))]
-#[cfg(test)]
+#[cfg(all(test, not(feature = "no_std")))]
 mod tests {
     use super::*;
     use crate::compare_test_data_boost;

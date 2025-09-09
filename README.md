@@ -82,45 +82,45 @@ Learn more at [doc.rs](https://docs.rs/ellip).
 
 In the unit tests, the functions are tested against the Boost Math and Wolfram test data. Since Ellip accepts the argument `m` (parameter) instead of `k` (modulus) to allow larger domain support, the full accuracy report uses exclusively the Wolfram data. The full accuracy report, test data, and test generation scripts can be found [here](https://github.com/p-sira/ellip/blob/main/tests). The performance benchmark is presented to provide comparison between functions in Ellip. Comparing performance with other libraries is non-trivial, since they accept different domains.
 
-Benchmark on AMD Ryzen 5 4600H with Radeon Graphics running x86_64-unknown-linux-gnu rustc 1.89.0 using ellip v0.4.0 at `f64` precision (ε≈2.22e-16).
+Benchmark on AMD Ryzen 5 4600H with Radeon Graphics running x86_64-unknown-linux-gnu rustc 1.89.0 using ellip v0.5.0 at `f64` precision (ε≈2.22e-16).
 
 ### Legendre's Elliptic Integrals
 | Function            | Median Error (ε) | Max Error (ε) | Mean Performance |
 |---------------------|------------------|---------------|------------------|
-| ellipk              | 0.00             | 108.14        | 14.6 ns          |
-| ellipe              | 0.00             | 3.00          | 13.2 ns          |
-| ellipf              | 0.66             | 7.47          | 103.3 ns         |
-| ellipeinc           | 0.70             | 24.66         | 164.6 ns         |
-| ellippi             | 0.53             | 36.35         | 167.0 ns         |
-| ellippiinc          | 0.78             | 1.04e3        | 277.6 ns         |
-| ellippiinc_bulirsch | 0.83             | 1.04e3        | 221.4 ns         |
-| ellipd              | 0.60             | 2.64          | 29.9 ns          |
-| ellipdinc           | 1.00             | 8.38          | 103.1 ns         |
+| ellipk              | 0.00             | 108.14        | 14.8 ns          |
+| ellipe              | 0.00             | 3.00          | 13.3 ns          |
+| ellipf              | 0.66             | 7.47          | 104.4 ns         |
+| ellipeinc           | 0.70             | 24.66         | 165.8 ns         |
+| ellippi             | 0.53             | 36.35         | 170.6 ns         |
+| ellippiinc          | 0.78             | 1.04e3        | 279.1 ns         |
+| ellippiinc_bulirsch | 0.83             | 1.04e3        | 223.1 ns         |
+| ellipd              | 0.60             | 2.64          | 30.1 ns          |
+| ellipdinc           | 1.00             | 8.38          | 103.3 ns         |
 
 ### Bulirsch's Elliptic Integrals
 | Function | Median Error (ε) | Max Error (ε) | Mean Performance |
 |----------|------------------|---------------|------------------|
-| cel      | 0.70             | 38.34         | 34.0 ns          |
-| cel1     | 0.00             | 8.68          | 11.4 ns          |
-| cel2     | 0.61             | 3.97          | 22.8 ns          |
-| el1      | 0.00             | 1.60          | 37.8 ns          |
-| el2      | 0.70             | 79.92         | 56.7 ns          |
-| el3      | 0.70             | 46.32         | 117.5 ns         |
+| cel      | 0.70             | 38.34         | 34.5 ns          |
+| cel1     | 0.00             | 8.68          | 11.3 ns          |
+| cel2     | 0.61             | 3.97          | 23.0 ns          |
+| el1      | 0.00             | 1.60          | 38.5 ns          |
+| el2      | 0.70             | 79.92         | 58.0 ns          |
+| el3      | 0.70             | 46.32         | 119.5 ns         |
 
 ### Carlson's Symmetric Integrals
 | Function | Median Error (ε) | Max Error (ε) | Mean Performance |
 |----------|------------------|---------------|------------------|
-| elliprf  | 0.00             | 1.75          | 45.6 ns          |
-| elliprg  | 0.00             | 2.45          | 98.8 ns          |
-| elliprj  | 0.67             | 5.42e7        | 165.3 ns         |
-| elliprc  | 0.00             | 2.82          | 22.8 ns          |
-| elliprd  | 0.62             | 6.49          | 74.8 ns          |
+| elliprf  | 0.00             | 1.75          | 46.1 ns          |
+| elliprg  | 0.00             | 2.45          | 100.3 ns         |
+| elliprj  | 0.67             | 5.42e7        | 167.5 ns         |
+| elliprc  | 0.00             | 2.82          | 22.9 ns          |
+| elliprd  | 0.62             | 6.49          | 75.1 ns          |
 
 ### Miscellaneous Functions
 | Function      | Median Error (ε) | Max Error (ε) | Mean Performance |
 |---------------|------------------|---------------|------------------|
-| jacobi_zeta   | 1.42             | 9.83          | 242.4 ns         |
-| heuman_lambda | 0.62             | 8.89          | 372.7 ns         |
+| jacobi_zeta   | 1.42             | 9.83          | 238.9 ns         |
+| heuman_lambda | 0.62             | 8.89          | 374.5 ns         |
 
 ---
 

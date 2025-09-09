@@ -3,7 +3,7 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-use std::{
+use core::{
     fmt::{Display, Error, Formatter},
     str::FromStr,
 };

@@ -127,7 +127,7 @@ pub fn elliprc_unchecked<T: Float>(x: T, y: T) -> T {
 }
 
 #[cfg(not(feature = "test_force_fail"))]
-#[cfg(test)]
+#[cfg(all(test, not(feature = "no_std")))]
 mod tests {
     use super::*;
     use crate::compare_test_data_boost;

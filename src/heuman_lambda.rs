@@ -91,7 +91,7 @@ pub fn heuman_lambda_unchecked<T: Float>(phi: T, m: T) -> T {
 }
 
 #[cfg(not(feature = "test_force_fail"))]
-#[cfg(test)]
+#[cfg(all(test, not(feature = "no_std")))]
 mod tests {
     use super::*;
     use crate::compare_test_data_wolfram;

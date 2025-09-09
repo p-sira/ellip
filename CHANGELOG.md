@@ -1,4 +1,9 @@
 # Changelog
+## 0.5
+### 0.5.0
+**New Features**
+- `no_std` flag: Support no_std environment.
+
 ## 0.4
 ### 0.4.0
 **Breaking Changes**

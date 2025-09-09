@@ -204,7 +204,7 @@ checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
 
 [[package]]
 name = "ellip"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "criterion",
  "csv",
@@ -319,9 +319,9 @@ dependencies = [
 
 [[package]]
 name = "num-lazy"
-version = "0.2.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b8d2525f2f80ed755ab12528ba733e89276e6b9807b3c8379b9e6948783394b"
+checksum = "ae0667ea2bcc74cbfa6c9d34effb390ef45e989ea8c1418ae049b1cbc29d43f5"
 
 [[package]]
 name = "num-traits"

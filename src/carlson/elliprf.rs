@@ -10,7 +10,7 @@
 //  Use, modification and distribution are subject to the
 //  Boost Software License, Version 1.0.
 
-use std::mem::swap;
+use core::mem::swap;
 
 use num_traits::Float;
 
@@ -200,7 +200,7 @@ const N_MAX_ITERATIONS: usize = 11;
 const N_MAX_ITERATIONS: usize = 1;
 
 #[cfg(not(feature = "test_force_fail"))]
-#[cfg(test)]
+#[cfg(all(test, not(feature = "no_std")))]
 mod tests {
     use core::f64;
 

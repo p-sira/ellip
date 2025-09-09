@@ -290,7 +290,7 @@ fn ellipe_precise<T: Float>(m: T) -> Result<T, StrErr> {
 }
 
 #[cfg(not(feature = "test_force_fail"))]
-#[cfg(test)]
+#[cfg(all(test, not(feature = "no_std")))]
 mod tests {
     use core::f64;
 
