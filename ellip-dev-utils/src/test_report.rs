@@ -214,11 +214,12 @@ macro_rules! get_summary_entry {
         ));
 
         // Criterion directory structure: target/criterion/<group>/<func>/new/estimates.json
-        let criterion_path_buf = Path::new("target/criterion")
+        let estimates_path_buf = Path::new("target/criterion")
             .join($group)
             .join(stringify!($func))
-            .join("new");
-        let perf = benchmark::extract_criterion_mean(&criterion_path_buf).unwrap_or(f64::NAN);
+            .join("new")
+            .join("estimates.json");
+        let perf = benchmark::extract_criterion_mean(&estimates_path_buf).unwrap_or(f64::NAN);
 
         ($name, stats, perf)
     }};
