@@ -22,6 +22,8 @@ jobs:
       run: cargo clippy 
     - name: Test
       run: cargo test -- --show-output
+    - name: Test no_std
+      run: cargo test --features no_std
     - name: Make docs
       run: cargo doc --no-deps
     - name: Format code
