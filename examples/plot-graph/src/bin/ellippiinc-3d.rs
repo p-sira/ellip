@@ -139,7 +139,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                              .range(vec![-3.0, 5.0]),
                      ).aspect_ratio(AspectRatio::new().x(1.0).y(1.0))
              )
-             .annotations(vec![Annotation::new()
+             .legend(
+                plotly::layout::Legend::new()
+                    .x(1.0)
+                    .x_anchor(plotly::common::Anchor::Right)
+            )
+            .annotations(vec![Annotation::new()
              .text(format!(
                  "Generated using <a href=\"https://docs.rs/ellip/latest/ellip/legendre/fn.ellippiinc.html\" target=\"_blank\">ellippiinc</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",
                  ellip_version()

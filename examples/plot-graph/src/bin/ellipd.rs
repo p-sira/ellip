@@ -39,6 +39,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .show_line(true)
                     .range(vec![0.0, 3.0]),
             )
+            .legend(
+                plotly::layout::Legend::new()
+                    .x(1.0)
+                    .x_anchor(plotly::common::Anchor::Right)
+            )
             .annotations(vec![Annotation::new()
             .text(format!(
                 "Generated using <a href=\"https://docs.rs/ellip/latest/ellip/legendre/fn.ellipd.html\" target=\"_blank\">ellipd</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",

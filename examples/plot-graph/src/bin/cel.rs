@@ -6,10 +6,10 @@
 use ellip::cel;
 use ellip_plot_graph::*;
 use plotly::{
-    ImageFormat, Layout, Plot, Scatter,
     color::NamedColor,
     common::{Line, Mode},
     layout::{Annotation, Axis},
+    ImageFormat, Layout, Plot, Scatter,
 };
 
 macro_rules! get_trace {
@@ -65,6 +65,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .title("cel(kc,p,1,1)")
                     .show_line(true)
                     // .range(vec![0.0, 4.0]),
+            )
+            .legend(
+                plotly::layout::Legend::new()
+                    .x(1.0)
+                    .x_anchor(plotly::common::Anchor::Right)
             )
             .annotations(vec![Annotation::new()
             .text(format!(

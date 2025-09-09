@@ -118,7 +118,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                      .show_line(true)
                      .range(vec![-5.0, 5.0]),
              ).legend(Legend::new().y_anchor(Anchor::Middle).y(0.5))
-             .annotations(vec![Annotation::new()
+             .legend(
+                plotly::layout::Legend::new()
+                    .x(1.0)
+                    .x_anchor(plotly::common::Anchor::Right)
+            )
+            .annotations(vec![Annotation::new()
              .text(format!(
                  "Generated using <a href=\"https://docs.rs/ellip/latest/ellip/bulirsch/fn.el3.html\" target=\"_blank\">el3</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",
                  ellip_version()
