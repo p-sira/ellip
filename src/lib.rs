@@ -3,6 +3,7 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
+#![cfg_attr(feature = "no_std", no_std)]
 #![cfg_attr(feature = "test_force_fail", allow(unused))]
 #![allow(clippy::excessive_precision)]
 //! # ELLIP
@@ -139,5 +140,5 @@ mod polyeval;
 use polyeval::polyeval;
 pub mod util;
 
-#[cfg(test)]
+#[cfg(all(test, not(feature = "no_std")))]
 mod test_util;

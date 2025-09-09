@@ -10,7 +10,7 @@
 //  Use, modification and distribution are subject to the
 //  Boost Software License, Version 1.0.
 
-use std::mem::swap;
+use core::mem::swap;
 
 use crate::{
     carlson::{elliprc_unchecked, elliprd_unchecked, elliprf_unchecked},
@@ -268,7 +268,7 @@ const N_MAX_ITERATION: usize = 100;
 const N_MAX_ITERATION: usize = 1;
 
 #[cfg(not(feature = "test_force_fail"))]
-#[cfg(test)]
+#[cfg(all(test, not(feature = "no_std")))]
 mod tests {
     use itertools::Itertools;
 
