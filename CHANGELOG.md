@@ -3,6 +3,7 @@
 ### 0.5.0
 **New Features**
 - `no_std` flag: Support no_std environment.
+- Parallelization available on `ellip-rayon` crate.
 
 **Bug Fixes**
 - Fix graphs cutting off at the border in the documentation.
