@@ -9,7 +9,7 @@ mu = 1 * epsilon;
 
 PHI = Subdivide[0, 2 * Pi, 40];
 
-M = Subdivide[0, 1, 25];
+M = Subdivide[0, 1 - mu, 25];
 
 zeta = Flatten[Table[{phi, m, JacobiZeta[SetPrecision[phi, 30], SetPrecision[
     m, 30]]}, {phi, PHI}, {m, M}], 1];
