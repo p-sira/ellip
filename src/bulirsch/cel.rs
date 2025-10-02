@@ -41,7 +41,6 @@ use crate::{
 /// - cel(kc, p, 0, 0) = 0
 /// - cel(kc, p, a, b) = 0 for |kc| = ∞
 /// - cel(kc, p, a, b) = 0 for |p| = ∞
-/// - cel(kc, p, 0, 0) = 0
 /// - cel(kc, p, a, b) = sign(a) ∞ for |a| = ∞
 /// - cel(kc, p, a, b) = sign(b) ∞ for |b| = ∞
 ///
