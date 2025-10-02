@@ -10,7 +10,7 @@ use crate::{crate_util::check, ellipf, ellipk, jacobi_zeta::jacobi_zeta_unchecke
 /// Computes [Heuman Lambda](https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint/heuman_lambda.html).
 /// ```text
 ///               ⎛      _____ ⎞                            
-///             F ⎝ φ, ╲╱1 - m ⎠    2            ⎛     _____⎞
+///             F ⎝ φ, ╲╱1 - m ⎠    2           ⎛     _____⎞
 /// Λ0(φ, m) = ────────────────── + ─ ⋅ K(m) ⋅ Z ⎝φ, ╲╱1 - m⎠
 ///                ⎛   _____ ⎞      π                        
 ///              K ⎝ ╲╱1 - m ⎠                             
