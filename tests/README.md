@@ -1,6 +1,6 @@
 # Testing
 This report presents the accuracy of the ellip crate using [**symmetric relative error**](https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/relative_error.html) metric. Errors are expressed in units of machine epsilon (ε). The test data spans the domain of each function up to **μ** to avoid approaching the function's limit. The reference values are computed using [**Wolfram Engine**](https://www.wolfram.com/engine/). You can find the scripts in the directory [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/). 
-This report is generated on x86_64-unknown-linux-gnu rustc 1.89.0 using ellip v0.4.0 at `f64` precision (ε≈2.22e-16).
+This report is generated on x86_64-unknown-linux-gnu rustc 1.89.0 using ellip v0.5.0 at `f64` precision (ε≈2.22e-16).
 
 ## Legendre's Complete Elliptic Integrals
 
@@ -67,13 +67,13 @@ Current implementation of `elliprj` is less numerically stable in p.v. cases, as
 
 | Function            | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
 |---------------------|----------|------------|---------|---------|---------------|--------|
-| jacobi_zeta         | 1.95     | 1.41       | 7.59    | 9.83    | 3.39          | 1      |
+| jacobi_zeta         | 1.83     | 1.21       | 7.46    | 11.67   | 3.34          | 1      |
 | jacobi_zeta (Neg m) | 1.92     | 1.44       | 7.74    | 9.09    | 3.24          | 1      |
 | heuman_lambda       | 0.62     | 0.62       | 2.50    | 8.89    | 0.40          | 1      |
 
 ## f32 Implementation
 
-Generated on x86_64-unknown-linux-gnu rustc 1.89.0 using ellip v0.4.0 at `f32` precision (ε≈1.19e-7).
+Generated on x86_64-unknown-linux-gnu rustc 1.89.0 using ellip v0.5.0 at `f32` precision (ε≈1.19e-7).
 
 ### Legendre's Complete Elliptic Integrals
 
