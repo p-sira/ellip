@@ -330,7 +330,7 @@ mod tests {
     #[test]
     fn test_ellipk_wolfram() {
         compare_test_data_wolfram!("./tests/data/coverage", "ellipk_cov.csv", ellipk, 1, 2e-12);
-        compare_test_data_wolfram!("ellipk_data.csv", ellipk, 1, 5e-14);
+        compare_test_data_wolfram!("ellipk_data.csv", ellipk, 1, 5e-15);
     }
 
     #[test]
