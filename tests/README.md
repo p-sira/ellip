@@ -1,6 +1,6 @@
 # Testing
 This report presents the accuracy of the ellip crate using [**symmetric relative error**](https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/relative_error.html) metric. Errors are expressed in units of machine epsilon (ε). The test data spans the domain of each function up to **μ** to avoid approaching the function's limit. The reference values are computed using [**Wolfram Engine**](https://www.wolfram.com/engine/). You can find the scripts in the directory [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/). 
-This report is generated on x86_64-unknown-linux-gnu rustc 1.89.0 using ellip v0.5.1 at `f64` precision (ε≈2.22e-16).
+This report is generated on x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.1 at `f64` precision (ε≈2.22e-16).
 
 ## Legendre's Complete Elliptic Integrals
 
@@ -73,7 +73,7 @@ Current implementation of `elliprj` is less numerically stable in p.v. cases, as
 
 ## f32 Implementation
 
-Generated on x86_64-unknown-linux-gnu rustc 1.89.0 using ellip v0.5.1 at `f32` precision (ε≈1.19e-7).
+Generated on x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.1 at `f32` precision (ε≈1.19e-7).
 
 ### Legendre's Complete Elliptic Integrals
 
@@ -135,6 +135,6 @@ Generated on x86_64-unknown-linux-gnu rustc 1.89.0 using ellip v0.5.1 at `f32` p
 
 | Function            | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
 |---------------------|----------|------------|---------|---------|---------------|--------|
-| jacobi_zeta         | 1.42     | 0.97       | 6.16    | 7.32    | 1.84          | 1      |
-| jacobi_zeta (Neg m) | 1.47     | 1.09       | 5.65    | 6.76    | 1.85          | 1      |
-| heuman_lambda       | 0.50     | 0.56       | 1.95    | 3.35    | 0.29          | 1      |
+| jacobi_zeta         | 1.42     | 0.98       | 6.16    | 7.32    | 1.84          | 1      |
+| jacobi_zeta (Neg m) | 1.47     | 1.09       | 5.65    | 7.21    | 1.86          | 1      |
+| heuman_lambda       | 0.50     | 0.56       | 1.95    | 3.54    | 0.29          | 1      |
