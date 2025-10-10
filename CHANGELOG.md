@@ -1,6 +1,9 @@
 # Changelog
 ## 0.5
 ### 0.5.1
+**Bug Fixes**
+- Fix incorrect `heuman_lambda` implementation.
+
 **Improvements**
 - Reduce crate size.
 
