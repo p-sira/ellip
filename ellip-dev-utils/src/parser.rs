@@ -3,6 +3,7 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
+
 use num_traits::Float;
 
 use crate::{StrErr, test_report::Case};
@@ -51,4 +52,37 @@ pub fn read_wolfram_data<T: Float>(file_path: &str) -> Result<Vec<Case<T>>, StrE
     }
 
     Ok(results)
+}
+
+pub fn read_boost_data<T: Float>(
+    file_path: &str,
+) -> Result<Vec<Case<T>>, StrErr> {
+    use std::fs::File;
+    use std::io::{BufRead, BufReader};
+    use std::path::Path;
+
+    let path = Path::new(file_path);
+    let file = File::open(path).map_err(|_| {
+         eprintln!("Test data not found: {file_path} Download from: https://github.com/p-sira/ellip/tree/main/tests/data");
+         "Test data not found."
+     })?;
+    let reader = BufReader::new(file);
+
+    let mut cases = vec![];
+
+    reader.lines().for_each(|line| {
+        let line = line.expect("Cannot read line");
+        let parts: Vec<&str> = line.split_whitespace().collect();
+        let case = Case {
+            inputs: parts[..parts.len() - 1]
+                .iter()
+                .map(|&v| T::from_str_radix(v, 10).unwrap_or_else(|_| panic!("Cannot parse input(s) as a number")))
+                .collect(),
+            expected: T::from_str_radix(parts[parts.len() - 1], 10)
+                .unwrap_or_else(|_| panic!("Cannot parse expected value as a number")),
+        };
+        cases.push(case);
+    });
+
+    Ok(cases)
 }

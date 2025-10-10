@@ -1,8 +1,16 @@
 # Changelog
 ## 0.5
+### 0.5.1
+**Bug Fixes**
+- Fix incorrect `heuman_lambda` implementation.
+
+**Improvements**
+- Reduce crate size.
+
 ### 0.5.0
 **New Features**
 - `no_std` flag: Support no_std environment.
+- Parallelization available on `ellip-rayon` crate.
 
 **Bug Fixes**
 - Fix graphs cutting off at the border in the documentation.

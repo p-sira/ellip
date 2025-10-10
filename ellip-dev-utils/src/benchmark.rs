@@ -19,13 +19,12 @@ pub struct CriterionMean {
     pub point_estimate: f64,
 }
 
-pub fn extract_criterion_mean(path: &PathBuf) -> Result<f64, StrErr>  {
+pub fn extract_criterion_mean(path: &PathBuf) -> Result<f64, StrErr> {
     use std::fs;
-    let content = fs::read_to_string(path)
-        .map_err(|_| "Cannot read estimates.json file")?;
+    let content = fs::read_to_string(path).map_err(|_| "Cannot read estimates.json file")?;
 
-    let estimates: CriterionEstimates = serde_json::from_str(&content)
-        .map_err(|_| "Cannot parse estimates.json file")?;
+    let estimates: CriterionEstimates =
+        serde_json::from_str(&content).map_err(|_| "Cannot parse estimates.json file")?;
 
     Ok(estimates.mean.point_estimate)
 }

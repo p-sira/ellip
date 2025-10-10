@@ -3,22 +3,17 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-use core::{
-    fmt::{Display, Error, Formatter},
-    str::FromStr,
-};
-
-use num_traits::Float;
-
 #[macro_export]
 macro_rules! compare_test_data {
-    ($func: expr, $inputs :expr, $expected: expr, $t: ident, $rtol:expr, $atol:expr) => {
+    ($func: expr, $cases :expr, $t: ident, $rtol:expr, $atol:expr) => {
         let mut test_fail = 0;
         let mut worst_line = 0;
         let mut worst_params: Vec<$t> = Vec::new();
         let mut worst_errors: [$t;5] = [0.0; 5];
 
-        for (i, (inp, exp)) in $inputs.iter().zip($expected).enumerate() {
+        for (i, case) in $cases.iter().enumerate() {
+            let inp = &case.inputs;
+            let exp = case.expected;
             let result = $func(&inp);
 
             if exp.is_nan() && result.is_nan() {
@@ -29,7 +24,8 @@ macro_rules! compare_test_data {
                 eprintln! ("Test failed on case {}: input = {:?}, expected = {:?}, got = NAN",
                     i + 1,
                     inp,
-                    exp,);
+                    exp,
+                );
                 test_fail += 1;
             }
 
@@ -73,7 +69,7 @@ macro_rules! compare_test_data {
             panic!(
                 "Failed {}/{} cases. Worst on case {}: input = {:?}, expected = {:?}, got = {:?} \n error = {:?}, rel = {:?}, abs = {:?}, rtol = {:?}, atol = {:?}",
                 test_fail,
-                $inputs.len(),
+                $cases.len(),
                 worst_line,
                 worst_params,
                 worst_errors[3],
@@ -89,55 +85,6 @@ macro_rules! compare_test_data {
 }
 
 #[macro_export]
-macro_rules! func_wrapper {
-    ($func:expr, 1) => {
-        fn wrapped_func(args: &Vec<f64>) -> f64 {
-            $func(args[0]).unwrap()
-        }
-    };
-    ($func:expr, 2) => {
-        fn wrapped_func(args: &Vec<f64>) -> f64 {
-            $func(args[0], args[1]).unwrap()
-        }
-    };
-    ($func:expr, 3) => {
-        fn wrapped_func(args: &Vec<f64>) -> f64 {
-            $func(args[0], args[1], args[2]).unwrap()
-        }
-    };
-    ($func:expr, 4) => {
-        fn wrapped_func(args: &Vec<f64>) -> f64 {
-            $func(args[0], args[1], args[2], args[3]).unwrap()
-        }
-    };
-    ($func:expr, $_:expr) => {
-        fn wrapped_func(_args: &Vec<f64>) -> f64 {
-            panic!("Unsupported number of arguments")
-        }
-    };
-    ($func:expr, k,  1) => {
-        fn wrapped_func(args: &Vec<f64>) -> f64 {
-            $func(args[0] * args[0]).unwrap()
-        }
-    };
-    ($func:expr, k, 2) => {
-        fn wrapped_func(args: &Vec<f64>) -> f64 {
-            $func(args[0], args[1] * args[1]).unwrap()
-        }
-    };
-    ($func:expr, k, 3) => {
-        fn wrapped_func(args: &Vec<f64>) -> f64 {
-            $func(args[0], args[1], args[2] * args[2]).unwrap()
-        }
-    };
-    ($func:expr, k, $_:expr) => {
-        fn wrapped_func(_args: &Vec<f64>) -> f64 {
-            panic!("Unsupported number of arguments")
-        }
-    };
-}
-
-#[macro_export]
 macro_rules! compare_test_data_boost {
     ($filename:expr, $func:expr, $rtol:expr) => {
         compare_test_data_boost!($filename, $func, f64, $rtol, 0.0)
@@ -146,107 +93,57 @@ macro_rules! compare_test_data_boost {
         compare_test_data_boost!($filename, $func, f64, $rtol, $atol)
     };
     ($filename:expr, $func:expr, $n_args:tt, $rtol:expr) => {{
-        use crate::func_wrapper;
+        use ellip_dev_utils::func_wrapper;
         func_wrapper!($func, k, $n_args);
         compare_test_data_boost!($filename, wrapped_func, f64, $rtol, 0.0)
     }};
-    ($filename:expr, $func:expr, $t:ident, $rtol:expr, $atol:expr) => {
-        {
-            use crate::compare_test_data;
+    ($filename:expr, $func:expr, $t:ident, $rtol:expr, $atol:expr) => {{
+        use crate::compare_test_data;
+        use ellip_dev_utils::parser;
+        use std::path::Path;
 
-            use std::fs::File;
-            use std::io::{BufRead, BufReader};
-            use std::path::Path;
-            use std::str::FromStr;
-
-            let path = Path::new("./tests/data/boost").join($filename);
-            if !path.exists() {
-                eprintln!(
-                    "Skipping test due to test data not found: {}\nDownload test data from: https://github.com/p-sira/ellip/tree/main/tests/data",
-                    path.to_str().unwrap_or("{path not utf-8}")
-                );
-                return;
+        let path = Path::new("./tests/data/boost").join($filename);
+        match parser::read_boost_data(&path.to_str().unwrap()) {
+            Ok(cases) => {
+                compare_test_data!($func, cases, $t, $rtol, $atol);
             }
-
-            let file = File::open(path).expect("Cannot open file");
-            let reader = BufReader::new(file);
-
-            let mut inputs: Vec<Vec<$t>> = Vec::new();
-            let mut expected: Vec<$t> = Vec::new();
-
-            reader.lines().for_each(|line| {
-                let line = line.expect("Cannot read line");
-                let parts: Vec<&str> = line.split_whitespace().collect();
-                inputs.push(
-                    parts[..parts.len() - 1]
-                        .iter()
-                        .map(|&v| $t::from_str(v).expect("Cannot parse input(s) as a number"))
-                        .collect(),
-                );
-                expected.push(
-                    $t::from_str(parts[parts.len() - 1]).expect("Cannot parse expected value as a number"),
-                );
-            });
-
-            compare_test_data!($func, inputs, expected, $t, $rtol, $atol);
-        }
-    };
+            Err(_) => (),
+        };
+    }};
 }
 
 #[macro_export]
 macro_rules! compare_test_data_wolfram {
     ($filename:expr, $func:expr, $n_args:tt, $rtol:expr) => {{
-        use crate::func_wrapper;
+        use ellip_dev_utils::func_wrapper;
         func_wrapper!($func, $n_args);
-        compare_test_data_wolfram!("./tests/data/wolfram", $filename, wrapped_func, f64, $rtol, 0.0)
+        compare_test_data_wolfram!(
+            "./tests/data/wolfram",
+            $filename,
+            wrapped_func,
+            f64,
+            $rtol,
+            0.0
+        )
     }};
     ($path:expr, $filename:expr, $func:expr, $n_args:tt, $rtol:expr) => {{
-        use crate::func_wrapper;
+        use ellip_dev_utils::func_wrapper;
         func_wrapper!($func, $n_args);
         compare_test_data_wolfram!($path, $filename, wrapped_func, f64, $rtol, 0.0)
     }};
     ($path:expr, $filename:expr, $func:expr, $t:ident, $rtol:expr, $atol:expr) => {{
         {
             use crate::compare_test_data;
-            use crate::test_util::WolframFloat;
-            use std::str::FromStr;
-
-            use std::fs::File;
+            use ellip_dev_utils::parser;
             use std::path::Path;
-            use csv::ReaderBuilder;
 
             let path = Path::new($path).join($filename);
-            if !path.exists() {
-                eprintln!(
-                    "Skipping test due to test data not found: {}\nDownload test data from: https://github.com/p-sira/ellip/tree/main/tests/data",
-                    path.to_str().unwrap_or("{path not utf-8}")
-                );
-                return;
-            }
-
-            let file = File::open(path).expect("Cannot open file");
-            let mut reader = ReaderBuilder::new().has_headers(false).from_reader(file);
-
-            let mut inputs: Vec<Vec<$t>> = Vec::new();
-            let mut expected: Vec<$t> = Vec::new();
-
-            for record in reader.records() {
-                let row = record.expect("Cannot read row");
-                let len = row.len();
-
-                inputs.push(
-                    row.iter().take(len - 1).map(|s| {
-                        WolframFloat::from_str(s).expect("Cannot parse input(s) as a number")
-                        .to_float::<$t>()
-                    }).collect()
-                );
-                expected.push(
-                    WolframFloat::from_str(&row[len - 1]).expect("Cannot parse expected value as a number")
-                    .to_float::<$t>(),
-                );
-            }
-
-            compare_test_data!($func, inputs, expected, $t, $rtol, $atol);
+            match parser::read_wolfram_data(&path.to_str().unwrap()) {
+                Ok(cases) => {
+                    compare_test_data!($func, cases, $t, $rtol, $atol);
+                }
+                Err(_) => (),
+            };
         }
     }};
 }
@@ -292,62 +189,4 @@ pub fn linspace(start: f64, end: f64, num: usize) -> Vec<f64> {
     }
 
     result
-}
-
-/*
- * WolframFloat
-*/
-#[derive(Debug)]
-#[allow(dead_code)]
-pub enum WolframFloat {
-    Float64(f64),
-    Float32(f32),
-    Infinity,
-    NegativeInfinity,
-    ComplexInfinity,
-    Indeterminate,
-    NaN,
-}
-
-impl WolframFloat {
-    pub fn to_float<T: Float>(&self) -> T {
-        match *self {
-            WolframFloat::Float64(v) => T::from(v).unwrap_or_else(|| nan!()),
-            WolframFloat::Float32(v) => T::from(v).unwrap_or_else(|| nan!()),
-            WolframFloat::Infinity => inf!(),
-            WolframFloat::NegativeInfinity => neg_inf!(),
-            WolframFloat::ComplexInfinity => inf!(),
-            WolframFloat::Indeterminate => nan!(),
-            WolframFloat::NaN => nan!(),
-        }
-    }
-}
-
-impl FromStr for WolframFloat {
-    type Err = std::num::ParseFloatError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.trim() {
-            "Infinity" => Ok(WolframFloat::Infinity),
-            "-Infinity" => Ok(WolframFloat::NegativeInfinity),
-            "ComplexInfinity" => Ok(WolframFloat::ComplexInfinity),
-            "Indeterminate" => Ok(WolframFloat::Indeterminate),
-            "NaN" => Ok(WolframFloat::NaN),
-            _ => Ok(WolframFloat::Float64(s.parse::<f64>()?)),
-        }
-    }
-}
-
-impl Display for WolframFloat {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        match *self {
-            WolframFloat::Float64(v) => write!(f, "{}", v),
-            WolframFloat::Float32(v) => write!(f, "{}", v),
-            WolframFloat::Infinity => write!(f, "Infinity"),
-            WolframFloat::NegativeInfinity => write!(f, "NegativeInfinity"),
-            WolframFloat::ComplexInfinity => write!(f, "ComplexInfinity"),
-            WolframFloat::Indeterminate => write!(f, "Indeterminate"),
-            WolframFloat::NaN => write!(f, "NaN"),
-        }
-    }
 }

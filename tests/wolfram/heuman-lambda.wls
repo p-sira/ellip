@@ -12,10 +12,10 @@ PHI = Subdivide[0, 2 * Pi, 40];
 M = Subdivide[mu, 1 - mu, 25];
 
 HeumanLambda[phi_, m_] :=
-    Module[{smc},
-        smc = Sqrt[1 - m];
-        EllipticF[phi, smc] / EllipticK[smc] + (2 / Pi) * EllipticK[m
-            ] * JacobiZeta[phi, smc]
+    Module[{mc},
+        mc = 1 - m;
+        EllipticF[phi, mc] / EllipticK[mc] + (2 / Pi) * EllipticK[m] 
+            * JacobiZeta[phi, mc]
     ]
 
 lambda = Flatten[Table[{phi, m, HeumanLambda[SetPrecision[phi, 30], SetPrecision[

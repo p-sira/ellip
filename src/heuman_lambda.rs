@@ -9,13 +9,11 @@ use crate::{crate_util::check, ellipf, ellipk, jacobi_zeta::jacobi_zeta_unchecke
 
 /// Computes [Heuman Lambda](https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint/heuman_lambda.html).
 /// ```text
-///               ⎛      _____ ⎞                            
-///             F ⎝ φ, ╲╱1 - m ⎠    2            ⎛     _____⎞
-/// Λ0(φ, m) = ────────────────── + ─ ⋅ K(m) ⋅ Z ⎝φ, ╲╱1 - m⎠
-///                ⎛   _____ ⎞      π                        
-///              K ⎝ ╲╱1 - m ⎠                             
+///            F(φ, 1 - m)   2                     
+/// Λ0(φ, m) = ─────────── + ─ ⋅ K(m) ⋅ Z(φ, 1 - m)
+///             K(1 - m)     π                     
 /// ```
-///
+/// 
 /// ## Parameters
 /// - phi: amplitude angle (φ). φ ∈ ℝ.
 /// - m: elliptic parameter. m ∈ ℝ, m ∈ [0, 1).
@@ -33,10 +31,11 @@ use crate::{crate_util::check, ellipf, ellipk, jacobi_zeta::jacobi_zeta_unchecke
 ///
 /// ## Special Cases
 /// - Λ0(nπ/2, m) = n where n ∈ ℤ.
+/// - Λ0(φ, 0) = sin(φ)
 ///
 /// # Related Functions
 /// With mc = 1 - m and Δ² = 1 - mc sin²φ
-/// - [heuman_lambda](crate::heuman_lambda)(φ, m) = [ellipf](crate::ellipf)(φ, sqrt(mc)) / [ellipk](crate::ellipk)(sqrt(mc)) + 2/π * [ellipk](crate::ellipk)(m) * [jacobi_zeta](crate::jacobi_zeta)(φ, sqrt(mc))
+/// - [heuman_lambda](crate::heuman_lambda)(φ, m) = [ellipf](crate::ellipf)(φ, mc) / [ellipk](crate::ellipk)(mc) + 2/π * [ellipk](crate::ellipk)(m) * [jacobi_zeta](crate::jacobi_zeta)(φ, mc)
 /// - [heuman_lambda](crate::heuman_lambda)(φ, m) = 2/π * mc sin(φ)cos(φ)/Δ * [[elliprf](crate::elliprf)(0,mc,1) + m/3Δ² * [elliprj](crate::elliprj)(0,mc,1,1-m/Δ²)]
 ///
 /// # Examples
@@ -44,7 +43,7 @@ use crate::{crate_util::check, ellipf, ellipk, jacobi_zeta::jacobi_zeta_unchecke
 /// use ellip::{heuman_lambda, util::assert_close};
 /// use std::f64::consts::FRAC_PI_4;
 ///
-/// assert_close(heuman_lambda(FRAC_PI_4, 0.5).unwrap(), 0.6767572745112893, 1e-15);
+/// assert_close(heuman_lambda(FRAC_PI_4, 0.5).unwrap(), 0.6183811341833665, 1e-15);
 /// ```
 ///
 /// # References
@@ -74,7 +73,7 @@ pub fn heuman_lambda<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn heuman_lambda_unchecked<T: Float>(phi: T, m: T) -> T {
     if m == 0.0 {
-        return 0.0;
+        return phi.sin();
     }
 
     let n = (phi / pi_2!()).round();
@@ -83,11 +82,10 @@ pub fn heuman_lambda_unchecked<T: Float>(phi: T, m: T) -> T {
     }
 
     let mc = 1.0 - m;
-    let sqrt_mc = mc.sqrt();
-    ellipf(phi, sqrt_mc).unwrap_or(nan!()) / ellipk(sqrt_mc).unwrap_or(nan!())
+    ellipf(phi, mc).unwrap_or(nan!()) / ellipk(mc).unwrap_or(nan!())
         + 2.0 / pi!()
             * ellipk(m).unwrap_or(nan!())
-            * jacobi_zeta_unchecked(phi, sqrt_mc).unwrap_or(nan!())
+            * jacobi_zeta_unchecked(phi, mc).unwrap_or(nan!())
 }
 
 #[cfg(not(feature = "test_force_fail"))]
@@ -117,8 +115,8 @@ mod tests {
             heuman_lambda(1.0, 1.5),
             Err("heuman_lambda: m must satisfy 0.0 ≤ m < 1.0.")
         );
-        // m = 0: ok
-        assert_eq!(heuman_lambda(1.0, 0.0).unwrap(), 0.0);
+        // m = 0: sin(phi)
+        assert_eq!(heuman_lambda(1.0, 0.0).unwrap(), 1.0.sin());
         // m < 0: should return Err
         assert_eq!(
             heuman_lambda(1.0, -1.0),
