@@ -13,7 +13,7 @@ use crate::{crate_util::check, ellipf, ellipk, jacobi_zeta::jacobi_zeta_unchecke
 /// Λ0(φ, m) = ─────────── + ─ ⋅ K(m) ⋅ Z(φ, 1 - m)
 ///             K(1 - m)     π                     
 /// ```
-/// 
+///
 /// ## Parameters
 /// - phi: amplitude angle (φ). φ ∈ ℝ.
 /// - m: elliptic parameter. m ∈ ℝ, m ∈ [0, 1).
