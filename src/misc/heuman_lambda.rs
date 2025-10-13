@@ -5,7 +5,9 @@
 
 use num_traits::Float;
 
-use crate::{crate_util::check, ellipf, ellipk, jacobi_zeta::jacobi_zeta_unchecked_k, StrErr};
+use crate::{
+    crate_util::check, ellipf, ellipk, misc::jacobi_zeta::jacobi_zeta_unchecked_k, StrErr,
+};
 
 /// Computes [Heuman Lambda](https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint/heuman_lambda.html).
 /// ```text

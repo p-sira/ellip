@@ -97,6 +97,7 @@ pub fn jacobi_zeta_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 }
 
 /// [jacobi_zeta_unchecked] with K(m) as an argument
+#[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn jacobi_zeta_unchecked_k<T: Float>(phi: T, m: T, k: T) -> Result<T, StrErr> {
     let sign = phi.signum();
