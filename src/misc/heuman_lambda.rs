@@ -5,9 +5,7 @@
 
 use num_traits::Float;
 
-use crate::{
-    crate_util::check, ellipf, ellipk, misc::jacobi_zeta::jacobi_zeta_unchecked_k, StrErr,
-};
+use crate::{carlson::elliprj_unchecked, crate_util::check, ellipf, ellipk, StrErr};
 
 /// Computes [Heuman Lambda](https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint/heuman_lambda.html).
 /// ```text
@@ -74,8 +72,11 @@ pub fn heuman_lambda<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 /// - m < 0
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn heuman_lambda_unchecked<T: Float>(phi: T, m: T) -> T {
-    if m == 0.0 {
-        return phi.sin();
+    if m <= 0.0 {
+        if m == 0.0 {
+            return phi.sin();
+        }
+        return nan!();
     }
 
     let n = (phi / pi_2!()).round();
@@ -84,12 +85,31 @@ pub fn heuman_lambda_unchecked<T: Float>(phi: T, m: T) -> T {
     }
 
     let mc = 1.0 - m;
-    let k_mc = ellipk(mc).unwrap_or(nan!());
 
-    ellipf(phi, mc).unwrap_or(nan!()) / k_mc
-        + 2.0 / pi!()
-            * ellipk(m).unwrap_or(nan!())
-            * jacobi_zeta_unchecked_k(phi, mc, k_mc).unwrap_or(nan!())
+    let f = ellipf(phi, mc).unwrap_or(nan!());
+    let k_m = ellipk(m).unwrap_or(nan!());
+    let k_mc = ellipk(mc).unwrap_or(nan!());
+    let zeta = jacobi_zeta_unchecked_k(phi, mc, k_mc);
+
+    f / k_mc + k_m * zeta / pi_2!()
+}
+
+/// jacobi_zeta_unchecked with K(m) as an argument
+///
+/// Assume m < 1 and valid K.
+#[inline]
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+fn jacobi_zeta_unchecked_k<T: Float>(phi: T, m: T, k: T) -> T {
+    let sign = phi.signum();
+    let phi = phi.abs();
+    let sinp = phi.sin();
+    let cosp = phi.cos();
+    let s2p = sinp * sinp;
+    let mc = 1.0 - m;
+    let one_m_ms2p = 1.0 - m * s2p;
+
+    sign * m * sinp * cosp * one_m_ms2p.sqrt() * elliprj_unchecked(0.0, mc, 1.0, one_m_ms2p)
+        / (3.0 * k)
 }
 
 #[cfg(not(feature = "test_force_fail"))]
