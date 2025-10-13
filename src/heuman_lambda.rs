@@ -5,7 +5,7 @@
 
 use num_traits::Float;
 
-use crate::{crate_util::check, ellipf, ellipk, jacobi_zeta::jacobi_zeta_unchecked, StrErr};
+use crate::{crate_util::check, ellipf, ellipk, jacobi_zeta::jacobi_zeta_unchecked_k, StrErr};
 
 /// Computes [Heuman Lambda](https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint/heuman_lambda.html).
 /// ```text
@@ -82,10 +82,12 @@ pub fn heuman_lambda_unchecked<T: Float>(phi: T, m: T) -> T {
     }
 
     let mc = 1.0 - m;
-    ellipf(phi, mc).unwrap_or(nan!()) / ellipk(mc).unwrap_or(nan!())
+    let k_mc = ellipk(mc).unwrap_or(nan!());
+
+    ellipf(phi, mc).unwrap_or(nan!()) / k_mc
         + 2.0 / pi!()
             * ellipk(m).unwrap_or(nan!())
-            * jacobi_zeta_unchecked(phi, mc).unwrap_or(nan!())
+            * jacobi_zeta_unchecked_k(phi, mc, k_mc).unwrap_or(nan!())
 }
 
 #[cfg(not(feature = "test_force_fail"))]

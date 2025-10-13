@@ -96,6 +96,34 @@ pub fn jacobi_zeta_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     })
 }
 
+/// [jacobi_zeta_unchecked] with K(m) as an argument
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+pub fn jacobi_zeta_unchecked_k<T: Float>(phi: T, m: T, k: T) -> Result<T, StrErr> {
+    let sign = phi.signum();
+    let phi = phi.abs();
+
+    let sinp = phi.sin();
+    let cosp = phi.cos();
+
+    let nphi = (phi / (pi_2!())).round();
+    Ok(if (phi - nphi * pi_2!()).abs() < epsilon!().sqrt() {
+        // Z(nπ/2, m) when n is an integer.
+        0.0
+    } else if m >= 1.0 {
+        if m != 1.0 {
+            return Err("jacobi_zeta: m must not be greater than 1.");
+        }
+        sign * sinp * cosp.signum()
+    } else {
+        let s2p = sinp * sinp;
+        let mc = 1.0 - m;
+        let one_m_ms2p = 1.0 - m * s2p;
+
+        sign * m * sinp * cosp * one_m_ms2p.sqrt() * elliprj_unchecked(0.0, mc, 1.0, one_m_ms2p)
+            / (3.0 * k)
+    })
+}
+
 #[cfg(not(feature = "test_force_fail"))]
 #[cfg(all(test, not(feature = "no_std")))]
 mod tests {
