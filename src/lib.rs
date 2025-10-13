@@ -125,16 +125,9 @@ pub use carlson::elliprg;
 pub use carlson::elliprj;
 
 // Miscellaneous functions
-#[cfg(feature = "unstable")]
-pub mod jacobi_zeta;
-#[cfg(not(feature = "unstable"))]
-mod jacobi_zeta;
-pub use jacobi_zeta::jacobi_zeta;
-#[cfg(feature = "unstable")]
-pub mod heuman_lambda;
-#[cfg(not(feature = "unstable"))]
-mod heuman_lambda;
-pub use heuman_lambda::heuman_lambda;
+pub mod misc;
+pub use misc::heuman_lambda;
+pub use misc::jacobi_zeta;
 
 // Utilities
 mod polyeval;

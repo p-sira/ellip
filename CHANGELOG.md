@@ -1,5 +1,10 @@
 # Changelog
 ## 0.5
+### 0.5.2
+**Improvements**
+- `heuman_lambda`: Improve performance.
+- Restructure `jacobi_zeta` and `heuman_lambda` into `misc` module.
+
 ### 0.5.1
 **Bug Fixes**
 - Fix incorrect `heuman_lambda` implementation.
