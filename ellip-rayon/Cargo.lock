@@ -204,9 +204,9 @@ checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
 
 [[package]]
 name = "ellip"
-version = "0.5.1"
+version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "baba04061566848a36732d308ba7045f617a342c5066264a5d73842bdfee3381"
+checksum = "63a155def104e83741f8ebd860663358ab5f2cf27329b082d47aff89062eae43"
 dependencies = [
  "num-lazy",
  "num-traits",
@@ -228,7 +228,7 @@ dependencies = [
 
 [[package]]
 name = "ellip-rayon"
-version = "0.5.1"
+version = "0.5.2"
 dependencies = [
  "criterion",
  "ellip",

@@ -21,4 +21,4 @@
 | el2                 | 8000      | 8.2 ms        | 2.1 ms      | 4.02  | Max threshold  |
 | el3                 | 8000      | 8.2 ms        | 4.0 ms      | 2.05  | Max threshold  |
 | jacobi_zeta         | 3000      | 3.1 ms        | 3.2 ms      | 0.99  | Converged      |
-| heuman_lambda       | 300       | 96.1 μs       | 102.4 μs    | 0.94  | Converged      |
+| heuman_lambda       | 300       | 95.7 μs       | 96.6 μs     | 0.99  | Converged      |

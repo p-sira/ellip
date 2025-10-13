@@ -1,6 +1,6 @@
 [package]
 name = "ellip-rayon"
-version = "0.5.1"
+version = "0.5.2"
 edition = "2024"
 
 authors = ["Sira Pornsiriprasert <code@psira.me>"]
@@ -19,7 +19,7 @@ exclude = [
 ]
 
 [dependencies]
-ellip = "0.5.1"
+ellip = "0.5.2"
 itertools = "0.14.0"
 num-traits = "0.2.19"
 rayon = "1.11.0"
