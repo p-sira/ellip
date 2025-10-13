@@ -61,7 +61,7 @@ mod tests {
         let estimates_path = temp_dir.path().join("estimates.json");
         fs::write(&estimates_path, estimates_content).unwrap();
 
-        let mean = extract_criterion_mean(temp_dir.path().to_str().unwrap()).unwrap();
+        let mean = extract_criterion_mean(&estimates_path).unwrap();
         assert_eq!(mean, 150.5);
     }
 
@@ -74,13 +74,13 @@ mod tests {
         let estimates_content1 = r#"{"mean":{"point_estimate":100.0}}"#;
         let estimates_content2 = r#"{"mean":{"point_estimate":200.0}}"#;
 
-        fs::write(temp_dir1.path().join("estimates.json"), estimates_content1).unwrap();
-        fs::write(temp_dir2.path().join("estimates.json"), estimates_content2).unwrap();
-
         let paths = vec![
-            temp_dir1.path().to_str().unwrap(),
-            temp_dir2.path().to_str().unwrap(),
+            temp_dir1.path().join("estimates.json"),
+            temp_dir2.path().join("estimates.json"),
         ];
+
+        fs::write(paths[0].clone(), estimates_content1).unwrap();
+        fs::write(paths[1].clone(), estimates_content2).unwrap();
 
         let means = extract_criterion_means(&paths).unwrap();
         assert_eq!(means, vec![100.0, 200.0]);
