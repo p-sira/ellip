@@ -17,6 +17,9 @@
 //! magnets of various shapes (e.g., [cylindrical](https://doi.org/10.1016/j.jmmm.2018.02.003)),
 //! [astrophysics](https://dx.doi.org/10.1088/0004-637X/696/2/1616), and [string theory](https://dx.doi.org/10.1088/1126-6708/2004/03/004).
 //!
+//! Use [Ellip-Rayon](https://github.com/p-sira/ellip/tree/main/ellip-rayon) to parallelize and improve
+//! performance for large inputs. Ellip is also available for Python via [EllipPy](https://github.com/p-sira/ellippy).
+//!
 //! ## Example
 //! Computing the circumference of an ellipse.
 //! ```
