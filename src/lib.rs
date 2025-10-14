@@ -7,7 +7,7 @@
 #![cfg_attr(feature = "test_force_fail", allow(unused))]
 #![allow(clippy::excessive_precision)]
 //! # Ellip - Elliptic integrals for Rust
-//! 
+//!
 //! **Ellip** is a pure-Rust implementation of [elliptic integrals](https://dlmf.nist.gov/19).
 //! This means there is no dependence on C++ libraries. Ellip also provides less common
 //! functions like Bulirsch's `cel` and `el`. Some applications of elliptic integrals include
