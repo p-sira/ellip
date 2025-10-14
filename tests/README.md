@@ -1,6 +1,6 @@
 # Testing
 This report presents the accuracy of the ellip crate using [**symmetric relative error**](https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/relative_error.html) metric. Errors are expressed in units of machine epsilon (ε). The test data spans the domain of each function up to **μ** to avoid approaching the function's limit. The reference values are computed using [**Wolfram Engine**](https://www.wolfram.com/engine/). You can find the scripts in the directory [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/). 
-This report is generated on x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.2 at `f64` precision (ε≈2.22e-16).
+This report is generated on x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.2 at `f64` precision (ε=2.2204460492503131e-16).
 
 ## Legendre's Complete Elliptic Integrals
 
@@ -37,27 +37,27 @@ Bulirsh's elliptic integrals are not natively implemented in Wolfram Engine. Nev
 
 | Function   | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
 |------------|----------|------------|---------|---------|---------------|--------|
-| cel        | 0.92     | 0.71       | 5.64    | 28.60   | 2.83          | 1      |
-| cel (p.v.) | 1.33     | 0.70       | 20.06   | 38.34   | 15.92         | 1      |
+| cel        | 0.97     | 0.75       | 5.64    | 28.60   | 2.86          | 1      |
+| cel (p.v.) | 1.37     | 0.74       | 19.25   | 36.94   | 14.93         | 1      |
 | cel1       | 0.54     | 0.00       | 8.68    | 8.68    | 1.56          | 1      |
-| cel2       | 0.61     | 0.61       | 2.27    | 3.97    | 0.40          | 1      |
-| el1        | 0.36     | 0.00       | 1.11    | 1.60    | 0.15          | 1      |
-| el2        | 1.60     | 0.70       | 18.01   | 79.92   | 24.32         | 1      |
-| el3        | 1.66     | 0.66       | 19.40   | 46.32   | 15.89         | 50     |
+| cel2       | 0.70     | 0.62       | 3.47    | 3.97    | 0.54          | 1      |
+| el1        | 0.37     | 0.00       | 1.11    | 1.70    | 0.16          | 1      |
+| el2        | 1.69     | 0.71       | 20.81   | 74.60   | 25.26         | 1      |
+| el3        | 1.78     | 0.66       | 21.03   | 53.21   | 23.26         | 50     |
 | el3 (p.v.) | 1.56     | 0.81       | 13.88   | 16.54   | 7.99          | 50     |
 
 ## Carlson's Symmetric Elliptic Integrals
 
 | Function               | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
 |------------------------|----------|------------|---------|---------|---------------|--------|
-| elliprf                | 0.37     | 0.00       | 1.41    | 1.75    | 0.19          | 1      |
-| elliprg                | 0.39     | 0.00       | 2.25    | 2.45    | 0.25          | 1      |
-| elliprj                | 0.80     | 0.67       | 6.59    | 7.42    | 1.15          | 50     |
-| elliprj (p.v.)         | 2.04e3   | 0.69       | 87.56   | 7.60e5  | 1.07e9        | 1e10   |
+| elliprf                | 0.40     | 0.51       | 1.41    | 1.57    | 0.18          | 1      |
+| elliprg                | 0.45     | 0.51       | 2.60    | 5.25    | 0.37          | 1      |
+| elliprj                | 0.81     | 0.66       | 6.59    | 7.42    | 1.22          | 50     |
+| elliprj (p.v.)         | 1.51e3   | 0.63       | 141.81  | 7.12e5  | 8.29e8        | 1e10   |
 | elliprj (p.v., small*) | 0.00     | 0.00       | 0.00    | 0.00    | 0.00          | 50     |
-| elliprc                | 0.30     | 0.00       | 1.23    | 1.96    | 0.15          | 1      |
-| elliprc (p.v.)         | 0.49     | 0.54       | 1.91    | 2.82    | 0.25          | 1      |
-| elliprd                | 0.60     | 0.62       | 2.41    | 6.49    | 0.37          | 50     |
+| elliprc                | 0.31     | 0.00       | 1.23    | 1.96    | 0.15          | 1      |
+| elliprc (p.v.)         | 0.50     | 0.56       | 1.91    | 2.82    | 0.24          | 1      |
+| elliprd                | 0.60     | 0.63       | 2.30    | 6.25    | 0.36          | 50     |
 
 *small: Use small argument values, close to the function's limit. Results compared with Boost Math implementation without promoting double, i.e, computed purely using `f64`.
 
@@ -79,14 +79,14 @@ Generated on x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.2 at `f32` p
 
 | Function        | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
 |-----------------|----------|------------|---------|---------|---------------|--------|
-| ellipk          | 1.04     | 0.00       | 2.10    | 787.39  | 618.84        | 1      |
+| ellipk          | 0.26     | 0.00       | 1.93    | 12.46   | 0.49          | 1      |
 | ellipk (Neg m)  | 0.34     | 0.00       | 1.30    | 1.72    | 0.17          | 1      |
 | ellipe          | 0.20     | 0.00       | 1.00    | 1.92    | 0.14          | 1      |
 | ellipe (Neg m)  | 0.35     | 0.00       | 1.48    | 1.61    | 0.17          | 1      |
-| ellippi         | 374.56   | 0.56       | 7.38e3  | 1.48e4  | 2.62e6        | 1      |
-| ellippi (Neg m) | 351.49   | 0.59       | 7.37e3  | 7.37e3  | 2.46e6        | 1      |
-| ellippi (p.v.)  | 73.55    | 0.76       | 1.18e3  | 1.48e4  | 4.63e5        | 50     |
-| ellipd          | 1.51     | 0.59       | 3.00    | 881.60  | 775.39        | 1      |
+| ellippi         | 0.52     | 0.53       | 2.52    | 4.22    | 0.37          | 1      |
+| ellippi (Neg m) | 0.48     | 0.55       | 2.04    | 2.92    | 0.26          | 1      |
+| ellippi (p.v.)  | 0.80     | 0.71       | 2.63    | 34.47   | 2.59          | 50     |
+| ellipd          | 0.64     | 0.59       | 2.77    | 15.09   | 0.85          | 1      |
 | ellipd (Neg m)  | 0.55     | 0.59       | 1.89    | 2.16    | 0.25          | 1      |
 
 ### Legendre's Incomplete Elliptic Integrals
@@ -109,27 +109,27 @@ Generated on x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.2 at `f32` p
 
 | Function   | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
 |------------|----------|------------|---------|---------|---------------|--------|
-| cel        | 0.77     | 0.62       | 10.30   | 19.31   | 2.42          | 1      |
-| cel (p.v.) | 1.00     | 0.76       | 9.17    | 14.33   | 2.59          | 1      |
-| cel1       | 17.02    | 0.00       | 850.38  | 850.38  | 1.39e4        | 1      |
-| cel2       | 0.53     | 0.57       | 1.85    | 1.85    | 0.25          | 1      |
-| el1        | 0.40     | 0.00       | 1.93    | 1.96    | 0.23          | 1      |
-| el2        | 1.34     | 0.67       | 19.34   | 48.52   | 10.73         | 1      |
-| el3        | 1.00     | 0.63       | 8.19    | 17.86   | 2.56          | 50     |
-| el3 (p.v.) | 1.13     | 0.80       | 19.63   | 20.89   | 5.55          | 50     |
+| cel        | 0.85     | 0.67       | 10.30   | 18.59   | 2.40          | 1      |
+| cel (p.v.) | 0.98     | 0.73       | 9.17    | 14.06   | 2.50          | 1      |
+| cel1       | 0.37     | 0.00       | 1.59    | 1.59    | 0.18          | 1      |
+| cel2       | 1.27e5   | 0.64       | 8.39e6  | 8.39e6  | 1.05e12       | 1      |
+| el1        | 0.41     | 0.00       | 1.93    | 1.96    | 0.23          | 1      |
+| el2        | 1.50     | 0.68       | 20.33   | 91.18   | 19.36         | 1      |
+| el3        | 1.09     | 0.65       | 8.19    | 17.86   | 2.52          | 50     |
+| el3 (p.v.) | 1.40     | 0.86       | 22.73   | 23.50   | 7.49          | 50     |
 
 ### Carlson's Symmetric Elliptic Integrals
 
 | Function               | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε²) |
 |------------------------|----------|------------|---------|---------|---------------|--------|
-| elliprf                | 0.37     | 0.00       | 1.51    | 1.65    | 0.17          | 1      |
-| elliprg                | 0.36     | 0.00       | 1.30    | 1.45    | 0.17          | 1      |
-| elliprj                | 0.76     | 0.63       | 6.96    | 14.15   | 1.51          | 50     |
-| elliprj (p.v.)         | 2.73     | 0.70       | 56.95   | 434.26  | 403.27        | 1e10   |
+| elliprf                | 0.38     | 0.00       | 1.63    | 1.79    | 0.18          | 1      |
+| elliprg                | 0.36     | 0.00       | 1.45    | 2.12    | 0.18          | 1      |
+| elliprj                | 0.75     | 0.61       | 6.96    | 14.15   | 1.58          | 50     |
+| elliprj (p.v.)         | 1.84     | 0.70       | 31.92   | 116.46  | 60.79         | 1e10   |
 | elliprj (p.v., small*) | NAN      | NAN        | NAN     | NAN     | NAN           | 50     |
-| elliprc                | 0.30     | 0.00       | 1.08    | 1.73    | 0.13          | 1      |
-| elliprc (p.v.)         | 0.50     | 0.57       | 1.78    | 1.98    | 0.22          | 1      |
-| elliprd                | 0.55     | 0.60       | 1.91    | 5.82    | 0.30          | 50     |
+| elliprc                | 0.31     | 0.00       | 1.14    | 1.73    | 0.14          | 1      |
+| elliprc (p.v.)         | 0.53     | 0.57       | 1.84    | 2.15    | 0.24          | 1      |
+| elliprd                | 0.52     | 0.58       | 1.85    | 5.82    | 0.30          | 50     |
 
 ### Miscellaneous Functions
 
@@ -137,4 +137,4 @@ Generated on x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.2 at `f32` p
 |---------------------|----------|------------|---------|---------|---------------|--------|
 | jacobi_zeta         | 1.42     | 0.97       | 6.16    | 7.32    | 1.84          | 1      |
 | jacobi_zeta (Neg m) | 1.47     | 1.09       | 5.65    | 6.76    | 1.85          | 1      |
-| heuman_lambda       | 0.50     | 0.56       | 1.99    | 3.35    | 0.29          | 1      |
+| heuman_lambda       | 0.53     | 0.57       | 2.40    | 3.35    | 0.32          | 1      |

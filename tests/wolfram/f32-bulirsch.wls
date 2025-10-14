@@ -7,7 +7,7 @@
 
 (* In the Wolfram function repository, m is defined as kc^2. *)
 
-epsilon = 1.19*^-7;
+epsilon = 1.1920929*^-7;
 
 (* ----- Bulirsch's Complete Elliptic integrals ----- *)
 

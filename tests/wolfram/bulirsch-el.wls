@@ -5,7 +5,7 @@
 
 (* In the Wolfram function repository, m is defined as kc^2. *)
 
-epsilon = 2.22*^-16;
+epsilon = 2.2204460492503131*^-16;
 
 muEL1 = epsilon;
 

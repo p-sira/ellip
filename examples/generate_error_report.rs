@@ -12,7 +12,7 @@ fn main() {
         std::fs::read_to_string("examples/error_report_template.md").expect("Cannot read template");
 
     let env_str = format!(
-        "This report is generated on {} rustc {} using ellip v{} at `f64` precision (ε≈2.22e-16).",
+        "This report is generated on {} rustc {} using ellip v{} at `f64` precision (ε=2.2204460492503131e-16).",
         env.platform, env.rust_version, env.ellip_version
     );
     let env_str_f32 = format!(
