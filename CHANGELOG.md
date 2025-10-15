@@ -6,6 +6,7 @@
 - Reduce crate size.
 
 **Tests**
+- Use exact value of machine epsilon in Wolfram scripts.
 - Fix the percentile calculation for the error report.
 
 ### 0.5.2
