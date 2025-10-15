@@ -3,6 +3,7 @@
 ### 0.5.3
 **Improvements**
 - Improve accuracy of `jacobi_zeta` and `heuman_lambda` by using cos for numerical stability.
+- Reduce crate size.
 
 **Tests**
 - Fix the percentile calculation for the error report.
