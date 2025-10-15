@@ -49,13 +49,14 @@ impl Stats {
         };
 
         // Calculate P99 error
-        let p99_pos = n as f64 * 0.99;
-        let p99_pos_low = p99_pos as usize;
+        let p99_pos = (n - 1) as f64 * 0.99;
+        let p99_pos_low = p99_pos.floor() as usize;
         let p99_frac = p99_pos - p99_pos_low as f64;
+
         let p99 = if p99_pos_low + 1 < n {
             valids[p99_pos_low] * (1.0 - p99_frac) + valids[p99_pos_low + 1] * p99_frac
         } else {
-            valids[p99_pos_low]
+            valids[n - 1]
         };
 
         // Calculate variance
