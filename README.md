@@ -121,8 +121,8 @@ Benchmark on AMD Ryzen 5 4600H with Radeon Graphics running x86_64-unknown-linux
 ### Miscellaneous Functions
 | Function      | Median Error (ε) | Max Error (ε) | Mean Performance |
 |---------------|------------------|---------------|------------------|
-| jacobi_zeta   | 1.34             | 11.67         | 246.9 ns         |
-| heuman_lambda | 0.54             | 9.88          | 341.5 ns         |
+| jacobi_zeta   | 1.31             | 9.14          | 246.0 ns         |
+| heuman_lambda | 0.54             | 2.86          | 342.1 ns         |
 
 ---
 

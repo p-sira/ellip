@@ -104,9 +104,10 @@ fn jacobi_zeta_unchecked_k<T: Float>(phi: T, m: T, k: T) -> T {
     let phi = phi.abs();
     let sinp = phi.sin();
     let cosp = phi.cos();
-    let s2p = sinp * sinp;
+    
     let mc = 1.0 - m;
-    let one_m_ms2p = 1.0 - m * s2p;
+    let c2p = cosp * cosp;
+    let one_m_ms2p = mc + m * c2p;
 
     sign * m * sinp * cosp * one_m_ms2p.sqrt() * elliprj_unchecked(0.0, mc, 1.0, one_m_ms2p)
         / (3.0 * k)

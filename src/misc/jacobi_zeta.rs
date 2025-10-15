@@ -87,9 +87,9 @@ pub fn jacobi_zeta_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         }
         sign * sinp * cosp.signum()
     } else {
-        let s2p = sinp * sinp;
         let mc = 1.0 - m;
-        let one_m_ms2p = 1.0 - m * s2p;
+        let c2p = cosp * cosp;
+        let one_m_ms2p = mc + m * c2p;
 
         sign * m * sinp * cosp * one_m_ms2p.sqrt() * elliprj_unchecked(0.0, mc, 1.0, one_m_ms2p)
             / (3.0 * ellipk(m).unwrap_or(nan!()))
