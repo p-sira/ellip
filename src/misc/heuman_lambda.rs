@@ -104,7 +104,7 @@ fn jacobi_zeta_unchecked_k<T: Float>(phi: T, m: T, k: T) -> T {
     let phi = phi.abs();
     let sinp = phi.sin();
     let cosp = phi.cos();
-    
+
     let mc = 1.0 - m;
     let c2p = cosp * cosp;
     let one_m_ms2p = mc + m * c2p;
