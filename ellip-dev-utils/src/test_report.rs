@@ -228,15 +228,25 @@ macro_rules! get_summary_entry {
     }};
 }
 
+pub fn format_exp(value: &f64) -> String {
+    if value.is_nan() {
+        "NAN".to_string()
+    } else if *value >= 1e3 {
+        format!("${:.2e}$", value).replace("e", "*10^")
+    } else {
+        format!("${:.2}$", value)
+    }
+}
+
 #[derive(Tabled)]
 pub struct AccuracyEntry<'a> {
     #[tabled(rename = "**Function**")]
     name: &'a str,
-    #[tabled(rename = "**Median (ε)**", display = "format_float")]
+    #[tabled(rename = "**Median (ε)**", display = "format_exp")]
     median: f64,
-    #[tabled(rename = "**Max (ε)**", display = "format_float")]
+    #[tabled(rename = "**Max (ε)**", display = "format_exp")]
     max: f64,
-    #[tabled(rename = "**Variance (ε²)**", display = "format_float")]
+    #[tabled(rename = "**Variance (ε²)**", display = "format_exp")]
     variance: f64,
 }
 
