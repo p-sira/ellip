@@ -3,7 +3,7 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  *)
 
-epsilon = 2.22*^-16;
+epsilon = 2.2204460492503131*^-16;
 
 mu = epsilon;
 

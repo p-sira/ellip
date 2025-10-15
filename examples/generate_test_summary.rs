@@ -13,7 +13,7 @@ fn main() {
 
     let summary_section = [
         &format!(
-            "Benchmark on {} running {} rustc {} using ellip v{} at `f64` precision (ε≈2.22e-16).\n",
+            "Benchmark on {} running {} rustc {} using ellip v{} at `f64` precision (ε=2.2204460492503131e-16).\n",
             env.cpu, env.platform, env.rust_version, env.ellip_version
         ),
         "### Legendre's Elliptic Integrals",

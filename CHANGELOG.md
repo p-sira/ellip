@@ -1,5 +1,14 @@
 # Changelog
 ## 0.5
+### 0.5.3
+**Improvements**
+- Improve accuracy of `jacobi_zeta` and `heuman_lambda` by using cos for numerical stability.
+- Reduce crate size.
+
+**Tests**
+- Use exact value of machine epsilon in Wolfram scripts.
+- Fix the percentile calculation for the error report.
+
 ### 0.5.2
 **Improvements**
 - `heuman_lambda`: Improve performance.
