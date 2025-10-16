@@ -6,7 +6,7 @@
 use ellip::elliprd;
 use ellip_plot_graph::*;
 use plotly::{
-    ImageFormat, Layout, Plot, Scatter,
+    Layout, Plot, Scatter,
     color::NamedColor,
     common::{Line, Mode},
     layout::{Annotation, Axis},
@@ -73,8 +73,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .show_arrow(false)]),
     );
 
-    make_html!(plot, "elliprd_plot.html");
-    write_svg!(plot, "elliprd_plot.svg", 1000, 600, 1.0);
-    println!("Done");
+    make_html!(plot, "elliprd.html");
+    write_svg!(plot, "elliprd.svg", 1000, 600, 1.0);
     Ok(())
 }

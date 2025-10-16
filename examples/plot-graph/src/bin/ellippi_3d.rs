@@ -8,7 +8,7 @@ use ellip_plot_graph::*;
 use plotly::{
     Layout, Plot, Surface,
     common::{ColorScale, ColorScalePalette},
-    layout::{Annotation, Axis, LayoutScene},
+    layout::{Annotation, Axis, Camera, CameraCenter, Eye, LayoutScene},
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -97,6 +97,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             .show_line(true)
                             .range(vec![-6.0, 6.0]),
                     )
+                    .camera(
+                        Camera::new().center(
+                            CameraCenter::from((0.0654890001597329, 0.05394199982981092, -0.19710293968962983))
+                        )
+                        .eye(Eye::from((0.6594590207083673, 2.0353952693654382, 0.44207039778309903)))
+                    )
             )
             .legend(
                 plotly::layout::Legend::new()
@@ -115,9 +121,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .show_arrow(false)]),
     );
 
-    make_html!(plot, "ellippi_plot_3d.html");
-    // Current plotly.rs doesn't support exporting 3D plot as image.
-    // The workaround is using the capture function in the html to save a png file.
-    // plot.write_image(figure_path!("ellippi_plot.svg"), ImageFormat::SVG, 900, 900, 0.2);
+    make_html!(plot, "ellippi_3d.html");
+    write_svg!(plot, "ellippi_3d.svg", 800, 600, 1.0);
     Ok(())
 }

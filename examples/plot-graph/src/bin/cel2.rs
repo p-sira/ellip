@@ -6,7 +6,7 @@
 use ellip::cel2;
 use ellip_plot_graph::*;
 use plotly::{
-    ImageFormat, Layout, Plot, Scatter,
+    Layout, Plot, Scatter,
     color::NamedColor,
     common::{Line, Mode},
     layout::{Annotation, Axis},
@@ -81,8 +81,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .show_arrow(false)]),
     );
 
-    make_html!(plot, "cel2_plot.html");
-    write_svg!(plot, "cel2_plot.html", 1000, 600, 1.0);
-    println!("Done");
+    make_html!(plot, "cel2.html");
+    write_svg!(plot, "cel2.html", 1000, 600, 1.0);
     Ok(())
 }
