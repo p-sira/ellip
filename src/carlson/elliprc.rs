@@ -36,9 +36,9 @@ use crate::{
 /// - Returns the Cauchy principal value if y < 0.
 ///
 /// ## Graph
-/// ![Degenerate Symmetric Elliptic Integral of RF (RC)](https://github.com/p-sira/ellip/blob/main/figures/elliprc_plot.svg?raw=true)
+/// ![Degenerate Symmetric Elliptic Integral of RF (RC)](https://github.com/p-sira/ellip/blob/main/figures/elliprc.svg?raw=true)
 ///
-/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/elliprc_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/elliprc.html)
 ///
 /// ## Special Cases
 /// - RC(x, x) = 1/sqrt(x)
