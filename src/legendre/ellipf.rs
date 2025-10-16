@@ -44,7 +44,7 @@ use crate::{
 ///
 /// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/ellipf.html)
 ///
-/// ![Incomplete Elliptic Integral of the First Kind (3D Plot)](https://github.com/p-sira/ellip/blob/main/figures/ellipf_3d.png?raw=true)
+/// ![Incomplete Elliptic Integral of the First Kind (3D Plot)](https://github.com/p-sira/ellip/blob/main/figures/ellipf_3d.svg?raw=true)
 ///
 /// [Interactive 3D Plot](https://p-sira.github.io/ellippy/_static/figures/ellipf_3d.html)
 ///

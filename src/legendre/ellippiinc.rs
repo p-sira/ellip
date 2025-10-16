@@ -47,7 +47,7 @@ use crate::{
 /// - Returns the Cauchy principal value if n sin²φ > 1.
 ///
 /// ## Graph
-/// ![Incomplete Elliptic Integral of the Third Kind (3D Plot)](https://github.com/p-sira/ellip/blob/main/figures/ellippiinc_3d.png?raw=true)
+/// ![Incomplete Elliptic Integral of the Third Kind (3D Plot)](https://github.com/p-sira/ellip/blob/main/figures/ellippiinc_3d.svg?raw=true)
 ///
 /// [Interactive 3D Plot](https://p-sira.github.io/ellippy/_static/figures/ellippiinc_3d.html)
 ///
