@@ -42,9 +42,9 @@ use crate::{
 /// - Returns error if any of x, y, or z is negative, or more than one of them are zero.
 ///
 /// ## Graph
-/// ![Symmetric Elliptic Integral of the First Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprf_plot.svg?raw=true)
+/// ![Symmetric Elliptic Integral of the First Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprf.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprf_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/elliprf.html)
 ///
 /// ## Special Cases
 /// - RF(x, x, x) = 1/sqrt(x)

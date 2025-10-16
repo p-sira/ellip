@@ -37,9 +37,9 @@ use crate::{
 /// - Returns error if m > 1.
 ///
 /// ## Graph
-/// ![Complete Elliptic Integral of the First Kind](https://github.com/p-sira/ellip/blob/main/figures/ellipk_plot.svg?raw=true)
+/// ![Complete Elliptic Integral of the First Kind](https://github.com/p-sira/ellip/blob/main/figures/ellipk.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipk_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/ellipk.html)
 ///
 /// ## Special Cases
 /// - K(0) = π/2

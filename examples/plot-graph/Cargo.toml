@@ -7,7 +7,7 @@ description = "Generate plots for Ellip crate"
 
 [dependencies]
 ellip = { version = "0.5", path = "../.." }
-plotly = { version = "0.12.1", features = ["kaleido", "kaleido_download"] }
+plotly = { version = "0.13.5", features = ["static_export_default"] }
 
 [features]
 # Open the generated HTML

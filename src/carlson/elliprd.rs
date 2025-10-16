@@ -41,9 +41,9 @@ use crate::{
 /// - Returns error if x < 0, y < 0, z ≤ 0 or when both x and y are zero.
 ///
 /// ## Graph
-/// ![Degenerate Symmetric Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprd_plot.svg?raw=true)
+/// ![Degenerate Symmetric Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprd.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprd_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/elliprd.html)
 ///
 /// ## Special Cases
 /// - RD(x, x, x) = 1/(x sqrt(x))

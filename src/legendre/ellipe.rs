@@ -33,9 +33,9 @@ use crate::{carlson::elliprg_unchecked, crate_util::check, polyeval, StrErr};
 /// - Returns error if m > 1.
 ///
 /// ## Graph
-/// ![Complete Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/ellipe_plot.svg?raw=true)
+/// ![Complete Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/ellipe.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipe_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/ellipe.html)
 ///
 /// ## Special Cases
 /// - E(0) = π/2

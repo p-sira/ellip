@@ -34,13 +34,13 @@ use num_traits::Float;
 /// - Returns error if m sin²φ > 1.
 ///
 /// ## Graph
-/// ![Incomplete Elliptic Integral of Legendre's Type](https://github.com/p-sira/ellip/blob/main/figures/ellipdinc_plot.svg?raw=true)
+/// ![Incomplete Elliptic Integral of Legendre's Type](https://github.com/p-sira/ellip/blob/main/figures/ellipdinc.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipdinc_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/ellipdinc.html)
 ///
-/// ![Incomplete Elliptic Integral of Legendre's Type (3D Plot)](https://github.com/p-sira/ellip/blob/main/figures/ellipdinc_plot_3d.png?raw=true)
+/// ![Incomplete Elliptic Integral of Legendre's Type (3D Plot)](https://github.com/p-sira/ellip/blob/main/figures/ellipdinc_3d.svg?raw=true)
 ///
-/// [Interactive 3D Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipdinc_plot_3d.html)
+/// [Interactive 3D Plot](https://p-sira.github.io/ellippy/_static/figures/ellipdinc_3d.html)
 ///
 /// ## Special Cases
 /// - D(0, m) = 0
