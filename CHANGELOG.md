@@ -1,5 +1,9 @@
 # Changelog
 ## 0.5
+### 0.5.5
+**Minor Fixes**
+- Fix 3D plots URLs.
+
 ### 0.5.4
 **Improvements**
 - Serve interactive plots through github.io.

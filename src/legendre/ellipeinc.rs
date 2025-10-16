@@ -42,7 +42,7 @@ use crate::{
 ///
 /// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/ellipeinc.html)
 ///
-/// ![Incomplete Elliptic Integral of the Second Kind (3D Plot)](https://github.com/p-sira/ellip/blob/main/figures/ellipeinc_3d.png?raw=true)
+/// ![Incomplete Elliptic Integral of the Second Kind (3D Plot)](https://github.com/p-sira/ellip/blob/main/figures/ellipeinc_3d.svg?raw=true)
 ///
 /// [Interactive 3D Plot](https://p-sira.github.io/ellippy/_static/figures/ellipeinc_3d.html)
 ///
