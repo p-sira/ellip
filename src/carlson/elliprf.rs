@@ -44,7 +44,7 @@ use crate::{
 /// ## Graph
 /// ![Symmetric Elliptic Integral of the First Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprf_plot.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprf_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/elliprf_plot.html)
 ///
 /// ## Special Cases
 /// - RF(x, x, x) = 1/sqrt(x)

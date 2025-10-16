@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        bin: [cel, cel1, cel2, el1, el2, el3, ellipd, ellipdinc, ellipe, ellipeinc, ellipf, ellipk, elliprc, elliprd, elliprf, elliprg, elliprj, jacobi_zeta, heuman_lambda]
+        bin: [cel, cel1, cel2, el1, el2, el3, ellipd, ellipdinc, ellipdinc_3d, ellipe, ellipeinc, ellipeinc_3d, ellipf, ellipf_3d, ellipk, ellippi_3d, ellippiinc_3d, elliprc, elliprd, elliprf, elliprg, elliprj, jacobi_zeta, heuman_lambda]
     steps:
       - uses: actions/checkout@v4
       - name: Cache cargo registry and build

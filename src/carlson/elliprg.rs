@@ -42,7 +42,7 @@ use crate::{
 /// ## Graph
 /// ![Symmetric Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprg_plot.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprg_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/elliprg_plot.html)
 ///
 /// ## Special Cases
 /// - RG(x, x, x) = sqrt(x)

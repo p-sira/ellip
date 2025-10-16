@@ -7,7 +7,7 @@ use ellip::ellippiinc;
 use ellip_plot_graph::*;
 use plotly::{
     common::{ColorScale, ColorScalePalette},
-    layout::{Annotation, AspectRatio, Axis, LayoutScene},
+    layout::{Annotation, AspectRatio, Axis, Camera, CameraCenter, Eye, LayoutScene},
     Layout, Plot, Surface,
 };
 
@@ -137,7 +137,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                              .title("Π(φ,2,m)")
                              .show_line(true)
                              .range(vec![-3.0, 5.0]),
-                     ).aspect_ratio(AspectRatio::new().x(1.0).y(1.0))
+                     )
+                     .aspect_ratio(AspectRatio::new().x(1.0).y(1.0))
+                     .camera(
+                        Camera::new().center(
+                            CameraCenter::from((0.15482755642412413, -0.014419056103422034, -0.1490570556819364))
+                        )
+                        .eye(Eye::from((1.8067875235082624, 0.8790478568907754, 0.928089704298334)))
+                     )
              )
              .legend(
                 plotly::layout::Legend::new()
@@ -156,9 +163,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
              .show_arrow(false)]),
      );
 
-    make_html!(plot, "ellippiinc_plot_3d.html");
-    // Current plotly.rs doesn't support exporting 3D plot as image.
-    // The workaround is using the capture function in the html to save a png file.
-    // plot.write_image(figure_path!("ellippiinc_plot_3d.svg"), ImageFormat::SVG, 900, 900, 0.2);
+    make_html!(plot, "ellippiinc_3d.html");
+    write_svg!(plot, "ellippiinc_3d.svg", 800, 600, 1.0);
     Ok(())
 }

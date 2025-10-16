@@ -38,7 +38,7 @@ use crate::{
 /// ## Graph
 /// ![Degenerate Symmetric Elliptic Integral of RF (RC)](https://github.com/p-sira/ellip/blob/main/figures/elliprc_plot.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprc_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/elliprc_plot.html)
 ///
 /// ## Special Cases
 /// - RC(x, x) = 1/sqrt(x)

@@ -6,10 +6,10 @@
 use ellip::cel;
 use ellip_plot_graph::*;
 use plotly::{
+    Layout, Plot, Scatter,
     color::NamedColor,
     common::{Line, Mode},
     layout::{Annotation, Axis},
-    ImageFormat, Layout, Plot, Scatter,
 };
 
 macro_rules! get_trace {
@@ -83,8 +83,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .show_arrow(false)]),
     );
 
-    make_html!(plot, "cel_plot.html");
-    write_svg!(plot, "cel_plot.svg", 1000, 600, 1.0);
-    println!("Done");
+    make_html!(plot, "cel.html");
+    write_svg!(plot, "cel.svg", 1000, 600, 1.0);
     Ok(())
 }

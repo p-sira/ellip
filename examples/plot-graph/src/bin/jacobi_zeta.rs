@@ -8,10 +8,10 @@ use std::f64::consts::PI;
 use ellip::jacobi_zeta;
 use ellip_plot_graph::*;
 use plotly::{
+    Layout, Plot, Scatter,
     color::NamedColor,
     common::{Line, Mode},
     layout::{Annotation, Axis},
-    ImageFormat, Layout, Plot, Scatter,
 };
 
 macro_rules! get_trace {
@@ -94,8 +94,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .show_arrow(false)]),
     );
 
-    make_html!(plot, "jacobi_zeta_plot.html");
-    write_svg!(plot, "jacobi_zeta_plot.svg", 1000, 600, 1.0);
-    println!("Done");
+    make_html!(plot, "jacobi_zeta.html");
+    write_svg!(plot, "jacobi_zeta.svg", 1000, 600, 1.0);
     Ok(())
 }

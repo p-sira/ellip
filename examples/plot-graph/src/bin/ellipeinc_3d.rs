@@ -3,19 +3,19 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-use ellip::ellipdinc;
+use ellip::ellipeinc;
 use ellip_plot_graph::*;
 use plotly::{
     Layout, Plot, Surface,
     common::{ColorScale, ColorScalePalette},
-    layout::{Annotation, AspectRatio, Axis, LayoutScene},
+    layout::{Annotation, AspectRatio, Axis, Camera, CameraCenter, Eye, LayoutScene},
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let n_points_m = 50;
     let n_points_s2p = 50;
-    let range_m = [-1.0, 0.8];
-    let range_s2p = [0.0, 0.45];
+    let range_m = [-1.0, 1.0];
+    let range_s2p = [0.0, 0.5];
 
     let mut m: Vec<f64> = (0..n_points_m)
         .map(|i| range_m[0] + i as f64 * (range_m[1] - range_m[0]) / (n_points_m - 1) as f64)
@@ -30,22 +30,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let n_points_dense = 500;
     m.extend(
         (0..n_points_dense)
-            .map(|i| 0.8 + i as f64 * (2.0 - 0.8) / (n_points_dense - 1) as f64)
+            .map(|i| 1.0 + i as f64 * (2.0 - 1.0) / (n_points_dense - 1) as f64)
             .collect::<Vec<f64>>(),
     );
     s2p.extend(
         (0..n_points_dense)
-            .map(|i| 0.45 + i as f64 * (1.0 - 0.45) / (n_points_dense - 1) as f64)
+            .map(|i| 0.5 + i as f64 * (1.0 - 0.5) / (n_points_dense - 1) as f64)
             .collect::<Vec<f64>>(),
     );
 
-    let ellipdinc_values: Vec<Vec<f64>> = s2p
+    let ellipeinc_values: Vec<Vec<f64>> = s2p
         .iter()
         .map(|&s2pi| {
             m.iter()
                 .map(|&mj| {
                     let phi = s2pi.sqrt().asin();
-                    match ellipdinc(phi, mj) {
+                    match ellipeinc(phi, mj) {
                         Ok(ans) => ans,
                         Err(_) => f64::NAN,
                     }
@@ -54,19 +54,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         })
         .collect();
 
-    let trace = Surface::new(ellipdinc_values)
+    let trace = Surface::new(ellipeinc_values)
         .x(m)
         .y(s2p)
-        .name("D(φ,m)")
+        .name("E(φ,m)")
         .color_scale(ColorScale::Palette(ColorScalePalette::Viridis))
         .cmin(0.0)
-        .cmax(3.5);
+        .cmax(2.0);
 
     let mut plot = Plot::new();
     plot.add_trace(trace);
     plot.set_layout(
         Layout::new()
-            .title("Incomplete Elliptic Integral of the Legendre's Type (D)")
+            .title("Incomplete Elliptic Integral of the Second Kind (E)")
             .width(800)
             .height(600)
             .scene(
@@ -79,10 +79,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     )
                     .z_axis(
                         Axis::new()
-                            .title("D(φ,m)")
+                            .title("E(φ,m)")
                             .show_line(true)
-                            .range(vec![0.0, 3.5]),
-                    ).aspect_ratio(AspectRatio::new().x(1.0).y(1.0))
+                            .range(vec![0.0, 2.5]),
+                    )
+                    .aspect_ratio(AspectRatio::new().x(1.0).y(1.0))
+                    .camera(
+                        Camera::new().center(
+                            CameraCenter::from((-0.006598100101234895, -0.05869146557550941, -0.24330323824088038))
+                        )
+                        .eye(Eye::from((1.5924056739576329, -1.4527144319463543, 0.1895788470619493)))
+                    )
             )
             .legend(
                 plotly::layout::Legend::new()
@@ -91,7 +98,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             )
             .annotations(vec![Annotation::new()
             .text(format!(
-                "Generated using <a href=\"https://docs.rs/ellip/latest/ellip/legendre/fn.ellipdinc.html\" target=\"_blank\">ellipdinc</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",
+                "Generated using <a href=\"https://docs.rs/ellip/latest/ellip/legendre/fn.ellipeinc.html\" target=\"_blank\">ellipeinc</a> from <a href=\"https://crates.io/crates/ellip\" target=\"_blank\">ellip</a> v{}",
                 ellip_version()
             ))
             .x_ref("paper")
@@ -101,9 +108,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .show_arrow(false)]),
     );
 
-    make_html!(plot, "ellipdinc_plot_3d.html");
-    // Current plotly.rs doesn't support exporting 3D plot as image.
-    // The workaround is using the capture function in the html to save a png file.
-    // plot.write_image(figure_path!("ellipdinc_plot_3d.svg"), ImageFormat::SVG, 900, 900, 0.2);
+    make_html!(plot, "ellipeinc_3d.html");
+    write_svg!(plot, "ellipeinc_3d.svg", 800, 600, 1.0);
     Ok(())
 }

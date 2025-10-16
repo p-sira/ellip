@@ -38,13 +38,13 @@ use crate::{
 /// - Returns error if m sin²φ > 1.
 ///
 /// ## Graph
-/// ![Incomplete Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/ellipeinc_plot.svg?raw=true)
+/// ![Incomplete Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/ellipeinc.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipeinc_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/ellipeinc.html)
 ///
-/// ![Incomplete Elliptic Integral of the Second Kind (3D Plot)](https://github.com/p-sira/ellip/blob/main/figures/ellipeinc_plot_3d.png?raw=true)
+/// ![Incomplete Elliptic Integral of the Second Kind (3D Plot)](https://github.com/p-sira/ellip/blob/main/figures/ellipeinc_3d.png?raw=true)
 ///
-/// [Interactive 3D Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipeinc_plot_3d.html)
+/// [Interactive 3D Plot](https://p-sira.github.io/ellippy/_static/figures/ellipeinc_3d.html)
 ///
 /// ## Special Cases
 /// - E(0, m) = 0
