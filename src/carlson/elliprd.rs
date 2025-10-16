@@ -43,7 +43,7 @@ use crate::{
 /// ## Graph
 /// ![Degenerate Symmetric Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprd_plot.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprd_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/elliprd_plot.html)
 ///
 /// ## Special Cases
 /// - RD(x, x, x) = 1/(x sqrt(x))

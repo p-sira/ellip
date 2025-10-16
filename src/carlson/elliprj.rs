@@ -47,7 +47,7 @@ use num_traits::Float;
 /// ## Graph
 /// ![Symmetric Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/elliprj_plot.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/elliprj_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/elliprj_plot.html)
 ///
 /// ## Special Cases
 /// - RJ(x, x, x, x) = 1/(x sqrt(x))

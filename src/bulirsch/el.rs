@@ -30,9 +30,9 @@ use crate::{
 /// - Returns error if kc = 0.
 ///
 /// ## Graph
-/// ![Bulirsch's Incomplete Elliptic Integral of the First Kind](https://github.com/p-sira/ellip/blob/main/figures/el1_plot.svg?raw=true)
+/// ![Bulirsch's Incomplete Elliptic Integral of the First Kind](https://github.com/p-sira/ellip/blob/main/figures/el1.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/el1_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/el1.html)
 ///
 /// ## Special Cases
 /// - el1(0, kc) = 0
@@ -138,9 +138,9 @@ pub fn el1_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> T {
 /// - Returns error if kc = 0.
 ///
 /// ## Graph
-/// ![Bulirsch's Incomplete Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/el2_plot.svg?raw=true)
+/// ![Bulirsch's Incomplete Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/el2.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/el2_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/el2.html)
 ///
 /// ## Special Cases
 /// - el2(0, kc, a, b) = 0
@@ -273,9 +273,9 @@ pub fn el2_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> 
 /// - Returns the Cauchy principal value when 1 + px² < 0
 ///
 /// ## Graph
-/// ![Bulirsch's Incomplete Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/el3_plot.svg?raw=true)
+/// ![Bulirsch's Incomplete Elliptic Integral of the Third Kind](https://github.com/p-sira/ellip/blob/main/figures/el3.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/el3_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/el3.html)
 ///
 /// ## Special Cases
 /// - el3(0, kc, p) = 0
