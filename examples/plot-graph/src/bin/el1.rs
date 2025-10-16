@@ -8,7 +8,7 @@ use std::f64::consts::{FRAC_PI_2, FRAC_PI_3, FRAC_PI_4};
 use ellip::el1;
 use ellip_plot_graph::*;
 use plotly::{
-    ImageFormat, Layout, Plot, Scatter,
+    Layout, Plot, Scatter,
     color::NamedColor,
     common::{Anchor, Line, Mode},
     layout::{Annotation, Axis, Legend},
@@ -84,8 +84,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                  .show_arrow(false)]),
      );
 
-    make_html!(plot, "el1_plot.html");
-    write_svg!(plot, "el1_plot.svg", 1000, 600, 1.0);
-    println!("Done");
+    make_html!(plot, "el1.html");
+    write_svg!(plot, "el1.svg", 1000, 600, 1.0);
     Ok(())
 }

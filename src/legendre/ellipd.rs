@@ -34,9 +34,9 @@ use crate::{carlson::elliprd_unchecked, crate_util::check, StrErr};
 /// - Returns error if m > 1.
 ///
 /// ## Graph
-/// ![Complete Elliptic Integral of Legendre's Type](https://github.com/p-sira/ellip/blob/main/figures/ellipd_plot.svg?raw=true)
+/// ![Complete Elliptic Integral of Legendre's Type](https://github.com/p-sira/ellip/blob/main/figures/ellipd.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/ellipd_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/ellipd.html)
 ///
 /// ## Special Cases
 /// - D(0) = π/4

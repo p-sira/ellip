@@ -28,14 +28,18 @@ macro_rules! make_html {
 #[macro_export]
 macro_rules! write_svg {
     ($plot:ident, $filename:literal, $width:expr, $height:expr, $scale:expr) => {
+        use plotly::ImageFormat;
         println!("Writing image to {}", $filename);
-        $plot.write_image(
-            figure_path!($filename),
-            ImageFormat::SVG,
-            $width,
-            $height,
-            $scale,
-        );
+        $plot
+            .write_image(
+                figure_path!($filename),
+                ImageFormat::SVG,
+                $width,
+                $height,
+                $scale,
+            )
+            .unwrap();
+        println!("Done");
     };
 }
 

@@ -25,9 +25,9 @@ use crate::{carlson::elliprj_unchecked, crate_util::check, ellipf, ellipk, StrEr
 /// - Returns error if phi is infinite.
 ///
 /// ## Graph
-/// ![Heuman Lambda Function](https://github.com/p-sira/ellip/blob/main/figures/heuman_lambda_plot.svg?raw=true)
+/// ![Heuman Lambda Function](https://github.com/p-sira/ellip/blob/main/figures/heuman_lambda.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/heuman_lambda_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/heuman_lambda.html)
 ///
 /// ## Special Cases
 /// - Λ0(nπ/2, m) = n where n ∈ ℤ.

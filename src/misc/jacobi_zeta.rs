@@ -23,9 +23,9 @@ use crate::{carlson::elliprj_unchecked, crate_util::check, ellipk, StrErr};
 /// - Returns error if phi or m is infinite.
 ///
 /// ## Graph
-/// ![Jacobi Zeta Function](https://github.com/p-sira/ellip/blob/main/figures/jacobi_zeta_plot.svg?raw=true)
+/// ![Jacobi Zeta Function](https://github.com/p-sira/ellip/blob/main/figures/jacobi_zeta.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/jacobi_zeta_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/jacobi_zeta.html)
 ///
 /// ## Special Cases
 /// - Z(0, m) = 0

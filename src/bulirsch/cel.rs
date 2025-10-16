@@ -33,9 +33,9 @@ use crate::{
 /// - Returns error if more than one arguments are infinite.
 ///
 /// ## Graph
-/// ![General Complete Elliptic Integral](https://github.com/p-sira/ellip/blob/main/figures/cel_plot.svg?raw=true)
+/// ![General Complete Elliptic Integral](https://github.com/p-sira/ellip/blob/main/figures/cel.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/cel_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/cel.html)
 ///
 /// ## Special Cases
 /// - cel(kc, p, 0, 0) = 0
@@ -147,9 +147,9 @@ pub fn cel_with_const<T: Float, C: BulirschConst<T>>(kc: T, p: T, a: T, b: T) ->
 /// - Returns error if kc = 0.
 ///
 /// ## Graph
-/// ![Bulirsch's Complete Elliptic Integral of the First Kind](https://github.com/p-sira/ellip/blob/main/figures/cel1_plot.svg?raw=true)
+/// ![Bulirsch's Complete Elliptic Integral of the First Kind](https://github.com/p-sira/ellip/blob/main/figures/cel1.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/cel1_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/cel1.html)
 ///
 /// ## Special Cases
 /// - cel1(kc) = 0 for |kc| = ∞
@@ -224,9 +224,9 @@ pub fn cel1_with_const<T: Float, C: BulirschConst<T>>(kc: T) -> Result<T, StrErr
 /// - Returns error if more than one arguments are infinite.
 ///
 /// ## Graph
-/// ![Bulirsch's Complete Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/cel2_plot.svg?raw=true)
+/// ![Bulirsch's Complete Elliptic Integral of the Second Kind](https://github.com/p-sira/ellip/blob/main/figures/cel2.svg?raw=true)
 ///
-/// [Interactive Plot](https://github.com/p-sira/ellip/blob/main/figures/cel2_plot.html)
+/// [Interactive Plot](https://p-sira.github.io/ellippy/_static/figures/cel2.html)
 ///
 /// ## Special Cases
 /// - cel2(kc, 0, 0) = 0
