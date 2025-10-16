@@ -1,5 +1,14 @@
 # Changelog
 ## 0.5
+### 0.5.4
+**Improvements**
+- Serve interactive plots through github.io.
+- Automatically generate 3D plots.
+
+**Others**
+- Upgrade plotly to 0.13.5
+- Use plotly_static instead of kaleido as it is deprecated.
+
 ### 0.5.3
 **Improvements**
 - Improve accuracy of `jacobi_zeta` and `heuman_lambda` by using cos for numerical stability.
