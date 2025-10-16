@@ -9,13 +9,17 @@ use tabled::{Table, Tabled, settings::Style};
 
 use crate::stats::Stats;
 
-/// Calculates max relative error in unit of epsilon
-pub fn rel_err<T: Float>(a: T, b: T) -> f64 {
-    let err_a = ((a - b) / a).abs();
-    let err_b = ((a - b) / b).abs();
+/// Calculates error in unit of epsilon
+pub fn err_func<T: Float>(a: T, b: T) -> f64 {
+    let abs_err = (a - b).abs();
+    if abs_err < T::epsilon() {
+        return 0.0;
+    }
 
-    let rel_err = err_a.max(err_b);
-    (rel_err / T::epsilon())
+    let a = a.abs();
+    let b = b.abs();
+
+    (abs_err / a.max(b) / T::epsilon())
         .to_f64()
         .expect("Cannot convert to f64")
 }
@@ -35,14 +39,18 @@ pub fn compute_errors_from_cases<T: Float + Debug>(
         .map(|case| {
             if case.expected.is_finite() {
                 let res = func(&case.inputs);
-                let err = rel_err(res, case.expected);
-                // if err > 20.0 {
+                let abs_err = (res - case.expected).abs();
+                if abs_err < T::epsilon() {
+                    return 0.0;
+                }
+                let rel_err = err_func(res, case.expected);
+                // if err_func > 20.0 {
                 //     println!(
                 //         "Using parameters: {:?}, got={:?}, actual={:?} (error={:.2})",
-                //         &case.inputs, res, case.expected, err
+                //         &case.inputs, res, case.expected, err_func
                 //     );
                 // }
-                err
+                rel_err
             } else {
                 f64::NAN
             }

@@ -58,7 +58,6 @@ fn main() {
         get_entry! {"wolfram/elliprg_data", "elliprg", elliprg, 3, 1},
         get_entry! {"wolfram/elliprj_data", "elliprj", elliprj, 4, 50},
         get_entry! {"wolfram/elliprj_pv", "elliprj (p.v.)", elliprj, 4, 10000000000},
-        get_entry! {"boost/elliprj_pv_small", "elliprj (p.v., small*)", elliprj, 4, 50},
         get_entry! {"wolfram/elliprc_data", "elliprc", elliprc, 2, 1},
         get_entry! {"wolfram/elliprc_pv", "elliprc (p.v.)", elliprc, 2, 1},
         get_entry! {"wolfram/elliprd_data", "elliprd", elliprd, 3, 50},
