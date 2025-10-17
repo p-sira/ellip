@@ -13,7 +13,7 @@ use ellip_dev_utils::{
     test_report::{Case, format_float, format_performance},
 };
 use itertools::izip;
-use rayon::iter::{IntoParallelRefIterator, ParallelBridge, ParallelIterator};
+use rayon::iter::{IntoParallelRefIterator, IndexedParallelIterator, ParallelIterator};
 use tabled::{Table, Tabled, settings::Style};
 
 const MAX_THRESHOLD: usize = 10000;
@@ -118,6 +118,28 @@ struct Record {
     exit_cond: ExitCond,
 }
 
+macro_rules! par_zip {
+    ($a:expr) => {
+        $a.par_iter()
+    };
+    ($a:expr, $b:expr) => {
+        $a.par_iter().zip($b.par_iter())
+    };
+    ($a:expr, $b:expr, $c:expr) => {
+        $a.par_iter()
+            .zip($b.par_iter())
+            .zip($c.par_iter())
+            .map(|((a, b), c)| (a, b, c))
+    };
+    ($a:expr, $b:expr, $c:expr, $d:expr) => {
+        $a.par_iter()
+            .zip($b.par_iter())
+            .zip($c.par_iter())
+            .zip($d.par_iter())
+            .map(|(((a, b), c), d)| (a, b, c, d))
+    };
+}
+
 macro_rules! generate_benchmarks {
     (@bench_inner $group:expr, $func:ident, $size:expr, $ser:expr, $par:expr $(,)?) => {
             $group.bench_with_input(
@@ -158,7 +180,7 @@ macro_rules! generate_benchmarks {
         generate_benchmarks!(
             @bench_inner $group, $func, $size,
             izip!(&a, &b).map(|(&x, &y)| ellip::$func(x, y).unwrap()).collect(),
-            izip!(&a, &b).par_bridge().map(|(&x, &y)| ellip::$func(x, y).unwrap()).collect(),
+            par_zip!(&a, &b).map(|(&x, &y)| ellip::$func(x, y).unwrap()).collect(),
         );
     }};
     (@bench $group:expr, $func:ident, $test_paths:expr, $size:expr, 3) => {{
@@ -169,7 +191,7 @@ macro_rules! generate_benchmarks {
         generate_benchmarks!(
             @bench_inner $group, $func, $size,
             izip!(&a, &b, &c).map(|(&x, &y, &z)| ellip::$func(x, y, z).unwrap()).collect(),
-            izip!(&a, &b, &c).par_bridge().map(|(&x, &y, &z)| ellip::$func(x, y, z).unwrap()).collect(),
+            par_zip!(&a, &b, &c).map(|(&x, &y, &z)| ellip::$func(x, y, z).unwrap()).collect(),
         );
     }};
     (@bench $group:expr, $func:ident, $test_paths:expr, $size:expr, 4) => {{
@@ -181,7 +203,7 @@ macro_rules! generate_benchmarks {
         generate_benchmarks!(
             @bench_inner $group, $func, $size,
             izip!(&a, &b, &c, &d).map(|(&x, &y, &z, &p)| ellip::$func(x, y, z, p).unwrap()).collect(),
-            izip!(&a, &b, &c, &d).par_bridge().map(|(&x, &y, &z, &p)| ellip::$func(x, y, z, p).unwrap()).collect(),
+            par_zip!(&a, &b, &c, &d).map(|(&x, &y, &z, &p)| ellip::$func(x, y, z, p).unwrap()).collect(),
         );
     }};
     ($($func:ident : $n_args:tt $(: $test_file_name:expr)?),* $(,)?) => {

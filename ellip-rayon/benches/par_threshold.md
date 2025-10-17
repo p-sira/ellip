@@ -1,24 +1,24 @@
 | Function            | Threshold | Parallel Time | Serial Time | Ratio | Exit Condition |
 |---------------------|-----------|---------------|-------------|-------|----------------|
-| ellipk              | 1100      | 70.5 μs       | 80.5 μs     | 0.88  | Min step size  |
-| ellipe              | 900       | 56.1 μs       | 58.6 μs     | 0.96  | Converged      |
-| ellippi             | 8000      | 7.9 ms        | 6.8 ms      | 1.17  | Max threshold  |
-| ellipd              | 600       | 72.9 μs       | 87.2 μs     | 0.84  | Min step size  |
-| ellipf              | 8000      | 8.0 ms        | 3.9 ms      | 2.05  | Max threshold  |
-| ellipeinc           | 8000      | 7.8 ms        | 6.5 ms      | 1.20  | Max threshold  |
-| ellippiinc          | 700       | 754.3 μs      | 833.8 μs    | 0.90  | Converged      |
-| ellippiinc_bulirsch | 8000      | 8.1 ms        | 7.7 ms      | 1.06  | Max threshold  |
-| ellipdinc           | 8000      | 7.6 ms        | 3.9 ms      | 1.97  | Max threshold  |
-| elliprf             | 8000      | 8.3 ms        | 1.8 ms      | 4.70  | Max threshold  |
-| elliprg             | 8000      | 8.7 ms        | 3.9 ms      | 2.21  | Max threshold  |
-| elliprj             | 8000      | 8.6 ms        | 6.4 ms      | 1.33  | Max threshold  |
-| elliprc             | 8000      | 6.9 ms        | 827.1 μs    | 8.39  | Max threshold  |
-| elliprd             | 8000      | 8.3 ms        | 3.0 ms      | 2.81  | Max threshold  |
-| cel                 | 8000      | 7.5 ms        | 1.3 ms      | 5.67  | Max threshold  |
-| cel1                | 1500      | 79.1 μs       | 82.9 μs     | 0.95  | Converged      |
-| cel2                | 8000      | 7.0 ms        | 806.6 μs    | 8.65  | Max threshold  |
-| el1                 | 8000      | 7.3 ms        | 1.5 ms      | 4.99  | Max threshold  |
-| el2                 | 8000      | 8.2 ms        | 2.1 ms      | 4.02  | Max threshold  |
-| el3                 | 8000      | 8.2 ms        | 4.0 ms      | 2.05  | Max threshold  |
-| jacobi_zeta         | 3000      | 3.1 ms        | 3.2 ms      | 0.99  | Converged      |
-| heuman_lambda       | 300       | 95.7 μs       | 96.6 μs     | 0.99  | Converged      |
+| ellipk              | 1000      | 74.5 μs       | 65.4 μs     | 1.14  | Min step size  |
+| ellipe              | 1500      | 91.5 μs       | 99.5 μs     | 0.92  | Converged      |
+| ellippi             | 200       | 33.0 μs       | 34.5 μs     | 0.96  | Converged      |
+| ellipd              | 600       | 68.1 μs       | 87.2 μs     | 0.78  | Min step size  |
+| ellipf              | 400       | 39.0 μs       | 37.6 μs     | 1.04  | Converged      |
+| ellipeinc           | 300       | 34.3 μs       | 30.4 μs     | 1.13  | Min step size  |
+| ellippiinc          | 200       | 35.9 μs       | 36.3 μs     | 0.99  | Converged      |
+| ellippiinc_bulirsch | 300       | 42.1 μs       | 41.7 μs     | 1.01  | Converged      |
+| ellipdinc           | 500       | 45.5 μs       | 48.8 μs     | 0.93  | Converged      |
+| elliprf             | 600       | 85.3 μs       | 131.5 μs    | 0.65  | Min step size  |
+| elliprg             | 500       | 45.8 μs       | 48.9 μs     | 0.94  | Converged      |
+| elliprj             | 300       | 43.2 μs       | 40.5 μs     | 1.07  | Converged      |
+| elliprc             | 800       | 92.5 μs       | 84.4 μs     | 1.10  | Converged      |
+| elliprd             | 500       | 39.5 μs       | 37.2 μs     | 1.06  | Converged      |
+| cel                 | 600       | 68.7 μs       | 99.7 μs     | 0.69  | Min step size  |
+| cel1                | 1500      | 79.8 μs       | 81.5 μs     | 0.98  | Converged      |
+| cel2                | 700       | 69.3 μs       | 70.4 μs     | 0.98  | Converged      |
+| el1                 | 600       | 81.8 μs       | 109.7 μs    | 0.75  | Min step size  |
+| el2                 | 600       | 112.9 μs      | 154.4 μs    | 0.73  | Min step size  |
+| el3                 | 500       | 50.8 μs       | 50.1 μs     | 1.01  | Converged      |
+| jacobi_zeta         | 200       | 37.2 μs       | 43.2 μs     | 0.86  | Min step size  |
+| heuman_lambda       | 200       | 38.7 μs       | 63.7 μs     | 0.61  | Min step size  |

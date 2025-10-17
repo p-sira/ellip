@@ -1,5 +1,10 @@
 # Changelog
 ## 0.5
+### 0.5.6
+**Tests**
+- Update the error definition, combining symmetric relative error and absolute error.
+- Modify Wolfram test data for `elliprj`, preventing close symmetric parameter values in the PV domain. 
+
 ### 0.5.5
 **Minor Fixes**
 - Fix 3D plots URLs.
