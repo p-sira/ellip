@@ -19,7 +19,7 @@ jobs:
         uses: openjournals/openjournals-draft-action@v1.0
         with:
           journal: joss
-          paper-path: paper.md
+          paper-path: paper/paper.md
 
       - name: Upload generated PDF
         uses: actions/upload-artifact@v4
