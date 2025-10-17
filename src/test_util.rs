@@ -114,6 +114,18 @@ macro_rules! compare_test_data_boost {
 
 #[macro_export]
 macro_rules! compare_test_data_wolfram {
+    ($filename:expr, $func:expr, $n_args:tt, $rtol:expr, atol: $atol:expr) => {{
+        use ellip_dev_utils::func_wrapper;
+        func_wrapper!($func, $n_args);
+        compare_test_data_wolfram!(
+            "./tests/data/wolfram",
+            $filename,
+            wrapped_func,
+            f64,
+            $rtol,
+            $atol
+        )
+    }};
     ($filename:expr, $func:expr, $n_args:tt, $rtol:expr) => {{
         use ellip_dev_utils::func_wrapper;
         func_wrapper!($func, $n_args);
