@@ -234,6 +234,8 @@ The following example shows a function for calculating the perimeter of an ellip
 
 $$ P(a, b) = 4 a E(m) = 8aR_G(0,a^2,b^2).$$
 
+Example 1: Ellipse Perimeter Calculation.
+
 ```rust
 use ellip::*;
 
