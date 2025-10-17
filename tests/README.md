@@ -4,7 +4,7 @@ This report presents the accuracy of the ellip crate using **symmetric relative 
 ![Symmetric relative error](https://github.com/p-sira/ellip/blob/main/examples/symmetric_error.svg?raw=true)
 
 Errors are expressed in units of machine epsilon (ε). The test data spans the domain of each function up to **μ** to avoid approaching the function's limit. The reference values are computed using [**Wolfram Engine**](https://www.wolfram.com/engine/). You can find the scripts in the directory [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/). 
-This report is generated on x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.5 at `f64` precision (ε=2.2204460492503131e-16).
+This report is generated on x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.6 at `f64` precision (ε=2.2204460492503131e-16).
 
 ## Legendre's Complete Elliptic Integrals
 
@@ -57,14 +57,12 @@ Bulirsh's elliptic integrals are not natively implemented in Wolfram Engine. Nev
 | elliprf        | 0.33     | 0.00       | 1.41    | 1.57    | 0.19          | 1      |
 | elliprg        | 0.26     | 0.00       | 2.60    | 5.25    | 0.38          | 1      |
 | elliprj        | 0.75     | 0.58       | 6.20    | 7.42    | 1.27          | 50     |
-| elliprj (p.v.) | 1.51e3   | 0.00       | 141.81  | 7.12e5  | 8.29e8        | 1e10   |
+| elliprj (p.v.) | 1.07     | 0.51       | 12.05   | 136.97  | 28.82         | 1000   |
 | elliprc        | 0.20     | 0.00       | 1.20    | 1.96    | 0.14          | 1      |
 | elliprc (p.v.) | 0.14     | 0.00       | 1.75    | 2.82    | 0.15          | 1      |
 | elliprd        | 0.49     | 0.00       | 2.24    | 6.25    | 0.40          | 50     |
 
-*small: Use small argument values, close to the function's limit. Results compared with Boost Math implementation without promoting double, i.e, computed purely using `f64`.
-
-Current implementation of `elliprj` is less numerically stable in p.v. cases, as seen by large errors in the non-small test cases. That said, Ellip's results are consistent with Boost Math when limited to same precision (See [tests/data/boost/carlson.cpp](https://github.com/p-sira/ellip/blob/main/tests/data/boost/carlson.cpp)). Since the function is convergent, such errors can be mitigated when Rust's `f128` is released.
+Note that `elliprj` is numerically unstable in the principal value domain when the symmetric parameter values are close (smaller than 1,000 epsilons).
 
 ## Miscellaneous Functions
 
@@ -76,7 +74,7 @@ Current implementation of `elliprj` is less numerically stable in p.v. cases, as
 
 ## f32 Implementation
 
-Generated on x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.5 at `f32` precision (ε≈1.19e-7).
+Generated on x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.6 at `f32` precision (ε≈1.19e-7).
 
 ### Legendre's Complete Elliptic Integrals
 
@@ -128,7 +126,7 @@ Generated on x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.5 at `f32` p
 | elliprf        | 0.31     | 0.00       | 1.63    | 1.79    | 0.19          | 1      |
 | elliprg        | 0.17     | 0.00       | 1.45    | 2.12    | 0.15          | 1      |
 | elliprj        | 0.70     | 0.56       | 6.84    | 14.15   | 1.62          | 50     |
-| elliprj (p.v.) | 0.00     | 0.00       | 0.00    | 0.00    | 0.00          | 1e10   |
+| elliprj (p.v.) | 115.48   | 0.53       | 11.34   | 1.54e5  | 1.46e7        | 1000   |
 | elliprc        | 0.19     | 0.00       | 1.14    | 1.73    | 0.13          | 1      |
 | elliprc (p.v.) | 0.17     | 0.00       | 1.83    | 2.15    | 0.17          | 1      |
 | elliprd        | 0.41     | 0.00       | 1.85    | 5.82    | 0.32          | 50     |
