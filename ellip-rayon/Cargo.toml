@@ -15,7 +15,8 @@ license = "BSD-3-Clause"
 
 exclude = [
     ".gitignore",
-    "benches/par_threshold.md"
+    "benches/par_threshold.md",
+    "CHANGELOG.md",
 ]
 
 [dependencies]
@@ -28,6 +29,7 @@ rayon = "1.11.0"
 criterion = "0.7.0"
 ellip-dev-utils = { version = "0.1.0", path = "../ellip-dev-utils" }
 glob = "0.3.3"
+regex = "1.12.2"
 serde_json = "1.0.143"
 tabled = "0.20.0"
 
