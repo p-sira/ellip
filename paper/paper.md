@@ -114,7 +114,7 @@ Table 3: Carlson's Symmetric Elliptic Integral Functions of the Module `carlson`
 | Computation using Carlson's duplication theorem [@carlson2025].                                                                                                                                                                     |
 +======================================================+==============================================================================================================================================================================+
 
-Table 4: Miscellaneous Functions Related to Elliptic Integrals of the Module `carlson`
+Table 4: Miscellaneous Functions Related to Elliptic Integrals of the Module `misc`
 
 +------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | **Function**                                         | **Definition** [@reinhardt2025; @bulirsch1969]                                                                                                                               |
@@ -128,7 +128,7 @@ Table 4: Miscellaneous Functions Related to Elliptic Integrals of the Module `ca
 
 Performance is optimized by deferring input validation, i.e., assuming inputs are valid and raising errors upon completing the routine. Ellip-Rayon was released as a companion library for parallelizing large inputs. Python is supported via the EllipPy library, using PyO3 [@pyo3projectandcontributors2025] for Rust-Python binding. The documentation covers all public functions, encompassing their mathematical definitions, domains, graphical representations, special cases, and related functions.
 
-The compilation of Ellip is controlled by feature flags. The `no-std` flag enables Ellip to compile in no-std environments. The `unstable` flag exposes internal functions for advance users, bypassing input validations at the cost of safety guarantees. Lastly, the `test_force_fail` is used for code coverage, where some conditions are unreachable as remnants of defensive programming.
+The compilation of Ellip is controlled by feature flags. The `no-std` flag enables Ellip to compile in no-std environments. The `unstable` flag exposes internal functions for advanced users, bypassing input validations at the cost of safety guarantees. Lastly, the `test_force_fail` is used for code coverage, where some conditions are unreachable as remnants of defensive programming.
 
 # Results
 
@@ -212,19 +212,19 @@ The documentation of Ellip contains examples and graphs. The graphs were rendere
 
 ![**(a)** Legendre's Incomplete Elliptic of the Second Kind $E(\phi, m)$ **(b)** Carlson's Degenerate Elliptic Integral of the Third Kind $R_D(x,y,z)$ **(c)** Jacobi Zeta $Z(\phi, m)$ **(d)** Bulirsch's General Complete Elliptic Integral ${cel}(k_c,p,a,b)$](figures/plots.png)
 
-The following example shows a function for calculating the circumference of an ellipse using the formula derived from @chandrupatla2010, using elliptic integral of the second kind $E$ and Carlson's symmetric integrals $R_G$,
+The following example shows a function for calculating the perimeter of an ellipse using the formula derived from @chandrupatla2010. With $m = 1 - b^2 / a^2$, the formula can be expressed using Legendre's elliptic integral of the second kind $E$ or Carlson's symmetric integrals $R_G$:
 
-$$ P(a, b) = 4 a E(1 - \frac{b^2}{a^2}) = 8aR_G(0,a^2,b^2).$$
+$$ P(a, b) = 4 a E(m) = 8aR_G(0,a^2,b^2).$$
 
 ```rust
 use ellip::*;
 
-fn ellipse_circumference(a: f64, b: f64) -> Result<f64, StrErr> {
+fn ellipse_perimeter(a: f64, b: f64) -> Result<f64, StrErr> {
     Ok(8.0 * elliprg(0.0, a * a, b * b)?)
 }
 
 // Example: ellipse with semi-major axis 5, semi-minor axis 3
-println!("{}", ellipse_circumference(5.0, 3.0).unwrap()); // 25.526998863398124
+println!("{}", ellipse_perimeter(5.0, 3.0).unwrap()); // 25.526998863398124
 ```
 
 # References
