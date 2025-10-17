@@ -1,0 +1,28 @@
+name: Test JOSS Submission
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-paper:
+    runs-on: ubuntu-latest
+    name: Build JOSS PDF
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build JOSS PDF
+        uses: openjournals/openjournals-draft-action@v1.0
+        with:
+          journal: joss
+          paper-path: paper.md
+
+      - name: Upload generated PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: joss-paper
+          path: ./paper.pdf

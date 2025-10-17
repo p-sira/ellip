@@ -1,0 +1,214 @@
+---
+title: 'Ellip: An Elliptic Integral Library for Rust'
+tags:
+  - elliptic integrals
+  - special functions
+  - mathematics
+  - numerical computation
+  - Rust
+authors:
+  - name: Sira Pornsiriprasert
+    orcid: 0000-0002-5636-8870
+    corresponding: true
+    affiliation: "1, 2"
+affiliations:
+  - name: Faculty of Medicine Ramathibodi Hospital, Mahidol University, Thailand
+    ror: 04884sy85
+    index: 1
+  - name: Center for Biomedical and Robotics Technology (BART LAB), Department of Biomedical Engineering, Faculty of Engineering, Mahidol University, Thailand
+    ror: 01znkr924
+    index: 2
+date: 10 October 2025
+bibliography: paper.bib
+---
+
+# Summary
+
+Ellip is an elliptic integral library implemented in Rust. Legendre's, Carlson's, and Bulirsch's forms are provided as generic-typed functions, compatible with no-std environments. The library is extensively tested for accuracy against Wolfram Engine with errors within a few machine epsilons. Ellip contributes to the Rust scientific ecosystem by providing fundamental mathematical functions applicable across mathematics, physics, and engineering.
+
+# Statement of Need
+
+Elliptic integrals are special functions that arise in many areas of mathematics, physics, and engineering. Notably, they are used for computing the lengths of plane curves [@carlson2025], calculating magnetic fields [@derby2010], modeling interactions in string theory [@blumlein2019], solving nonlinear mechanics [@anakhaev2020], and describing two-body scattering dynamics in the field of astrophysics [@bern2022]. 
+
+Rust is a relatively young programming language. It features high-level memory safety without compromising performance [@jung2017], making it particularly suited for embedded scientific computing, where elliptic integrals are increasingly needed. While several programming languages have mature libraries for elliptic integrals, such as SciPy in Python [@virtanen2020], Boost.Math in C++ [@maddock2025], and the GNU Scientific Library in C [@galassi2009], the Rust ecosystem has lacked a comprehensive, well-tested implementation. Although the Russell Lab [@dorivalpedroso2025] in Rust includes Legendre's elliptic integrals, it lacks the commonly used Carlson's symmetric forms.
+
+The Ellip library provides a suite of elliptic integral forms: Legendre's and Carlson's forms. The implementations of the two modules were derived from Boost.Math [@maddock2025]. However, ellip adopts the elliptic parameter $m$ instead of the modulus $k$, where $m = k^2$. This choice extends the domain of validity as $m$ remains real when $k$ is purely imaginary. An example application is the computation of the magnetic field of a cylinder magnet with arbitrary uniform magnetization [@caciagli2018]. 
+
+Additionally, the library covers Bulirsch's forms, which are often not included in standard mathematical libraries, and miscellaneous functions, such as Heuman lambda and Jacobi zeta. All functions are extensively documented and tested, with parallelization available through the companion library Ellip-Rayon and Python support via EllipPy [@pornsiriprasert2025]. 
+
+# Software Implementation
+
+An elliptic integral is an integral of rational function $R$ of $t$ and the square root of polynomial $P(t)$:
+
+$$\int R(t, \sqrt{P(t)}) dt,$$
+
+where $P$ is a cubic or quartic polynomial in $t$ [@byrd1971].
+
+Ellip consists of four modules: legendre, bulirsch, carlson, and misc. The functions are implemented exclusively in Rust, accept generic real numbers provided by the num-traits's Float [@stone2024], and operate entirely on the stack. The functions are outlined in Table 1.
+
+Table 1: Functions Supported by Ellip
+
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Function**                                         | **Definition**                                                                                                                                                               |
++:=====================================================+:============================================================================================================================================================================:+
+| **Legendre's Complete Elliptic Integrals**                                                                                                                                                                                          |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ellipk                                               | $K(m) = \int_0^{\pi/2} \frac{d\theta}{\sqrt{1 - m \sin^2 \theta}}$                                                                                                           |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ellipe                                               | $E(m) = \int_0^{\pi/2} \sqrt{1 - m \sin^2 \theta}\, d\theta$                                                                                                                 |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ellippi                                              | $\Pi(n, m) = \int_0^{\pi/2} \frac{d\theta}{(1 - n \sin^2 \theta)\sqrt{1 - m \sin^2 \theta}}$                                                                                 |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ellipd                                               | $D(m) = \frac{K(m) - E(m)}{m}$                                                                                                                                               |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Legendre's Incomplete Elliptic Integrals**                                                                                                                                                                                        |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ellipf                                               | $F(\phi, m) = \int_0^{\phi} \frac{d\theta}{\sqrt{1 - m \sin^2 \theta}}$                                                                                                      |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ellipeinc                                            | $E(\phi, m) = \int_0^{\phi} \sqrt{1 - m \sin^2 \theta}\, d\theta$                                                                                                            |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ellippiinc                                           | $\Pi(\phi, n, m) = \int_0^{\phi} \frac{d\theta}{(1 - n \sin^2 \theta)\sqrt{1 - m \sin^2 \theta}}$                                                                            |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ellippiinc_bulirsch                                  | Same as $\Pi(\phi, n, m)$                                                                                                                                                    |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| ellipdinc                                            | $D(\phi, m) = \frac{F(\phi, m) - E(\phi, m)}{m}$                                                                                                                             |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Bulirsch's Elliptic Integrals**                                                                                                                                                                                                   |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| cel                                                  | ${cel}(k_c, p, a, b) = \int_0^{\pi/2} \frac{a \cos^2 \theta + b \sin^2 \theta}{(\cos^2 \theta + p \sin^2 \theta)}\frac{d\theta}{\sqrt{\cos^2 \theta + k_c^2 \sin^2 \theta}}$ |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| cel1                                                 | ${cel\it{1}}(k_c) = \int_0^{\pi/2} \frac{d\theta}{\sqrt{\cos^2\theta + k_c^2\sin^2\theta}}$                                                                                  |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| cel2                                                 | ${cel\it{2}}(k_c, a, b) = \int_{0}^{\pi/2}\frac{a + b\,\tan^2\theta}{(1+k_c^2\tan^2\theta)}\frac{d\theta}{\sqrt{1+\tan^2\theta}}$                                            |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| el1                                                  | ${el\it{1}}(x, k_c) = \int_0^{\arctan x} \frac{d\theta}{\sqrt{\cos^2\theta + k_c^2\sin^2\theta}}$                                                                            |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| el2                                                  | ${el\it{2}}(x, k_c, a, b) = \int_{0}^{\arctan x}\frac{a + b\,\tan^2\theta}{(1+k_c^2\tan^2\theta)}\frac{d\theta}{\sqrt{1+\tan^2\theta}}$                                      |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| el3                                                  | ${el\it{3}}(x, k_c, p) = \int_0^{\arctan x} \frac{d\theta}{\left(\cos^2\theta + p\sin^2\theta\right)\,\sqrt{\cos^2\theta + k_c^2\sin^2\theta}}$                              |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Carlson's Symmetric Integrals**                                                                                                                                                                                                   |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| elliprf                                              | $R_F(x, y, z) = \frac{1}{2}\int_0^\infty \frac{dt}{\sqrt{(t+x)(t+y)(t+z)}}$                                                                                                  |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| elliprg                                              | $R_G(x, y, z) = \frac{1}{4}\int_{0}^{\infty}\frac{t\left(\frac{x}{t+x}+\frac{y}{t+y}+\frac{z}{t+z}\right)\,dt} {\sqrt{(t+x)(t+y)(t+z)}}$                                     |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| elliprj                                              | $R_J(x, y, z, p) = \frac{3}{2}\int_0^\infty \frac{dt}{(t+p)\sqrt{(t+x)(t+y)(t+z)}}$                                                                                          |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| elliprc                                              | $R_C(x, y) = \frac{1}{2}\int_0^\infty \frac{dt}{(t+y)\sqrt{t+x}}$                                                                                                            |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| elliprd                                              | $R_D(x, y, z) = \frac{3}{2}\int_0^\infty \frac{dt}{(t+z)\sqrt{(t+x)(t+y)(t+z)}}$                                                                                             |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Miscellaneous Functions**                                                                                                                                                                                                         |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| jacobi_zeta                                          | $Z(\phi, m) = E(\phi, m) - \frac{E(m)\,F(\phi, m)}{K(m)}$                                                                                                                    |
++------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| heuman_lambda                                        | $\Lambda_0(\phi, m) = \frac{F(\phi, 1-m)}{K(1-m)} + \frac{2}{\pi} K(m)\,Z(\phi, 1-m)$                                                                                        |
++======================================================+==============================================================================================================================================================================+
+| Legendre's and Carlson's integrals [@carlson2025]; Bulirsch's integrals and Heuman lambda [@bulirsch1969]; Jacobi zeta [@reinhardt2025]                                                                                             |
++======================================================+==============================================================================================================================================================================+
+
+Performance is optimized by deferring input validation, i.e., assuming inputs are valid and raising errors upon completing the routine. Ellip-Rayon was released as a companion library for parallelizing large inputs. Python is supported via the EllipPy library, using PyO3 [@pyo3projectandcontributors2025] for Rust-Python binding. The documentation covers all public functions, encompassing their mathematical definitions, domains, graphical representations, special cases, and related functions.
+
+The compilation of Ellip is controlled by feature flags. The `no-std` flag enables Ellip to compile in no-std environments. The `unstable` flag exposes internal functions for advance users, bypassing input validations at the cost of safety guarantees. Lastly, the `test_force_fail` is used for code coverage, where some conditions are unreachable as remnants of defensive programming.
+
+# Results
+
+The library has been extensively tested against Wolfram Engine across the supported domains. The results were reported as symmetric relative errors ($\delta$) in units of machine epsilon, as defined by
+
+$$ \delta(a,b) =
+    \begin{cases}
+    0, & \text{if } |a - b| < \epsilon,\\
+    \dfrac{|a-b|}{\max(|a|, |b|)}, & \text{otherwise.}
+    \end{cases} $$,
+
+where $\epsilon = 2.2204460492503131*10^{-16}$.
+
+Test data generation scripts are provided for reproducibility. The error report is automatically generated via continuous integration. The following results were generated on x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.5 at 64-bit precision.
+
+Table 2: Summary of Function Accuracy at 64-bit Precision. 
+
++---------------------+----------------+-------------+-------------------+
+| **Function**        | **Median (ε)** | **Max (ε)** | **Variance (ε²)** |
++:====================+:===============+:============+:==================+
+| **Module `legendre`**                                                  |
++---------------------+----------------+-------------+-------------------+
+| ellipk              | $0.00$         | $108.14$    | $8.39$            |
++---------------------+----------------+-------------+-------------------+
+| ellipe              | $0.00$         | $3.00$      | $0.19$            |
++---------------------+----------------+-------------+-------------------+
+| ellippi             | $0.00$         | $36.35$     | $0.86$            |
++---------------------+----------------+-------------+-------------------+
+| ellipd              | $0.00$         | $2.64$      | $0.27$            |
++---------------------+----------------+-------------+-------------------+
+| ellipf              | $0.00$         | $7.47$      | $0.36$            |
++---------------------+----------------+-------------+-------------------+
+| ellipeinc           | $0.00$         | $24.66$     | $1.87$            |
++---------------------+----------------+-------------+-------------------+
+| ellippiinc          | $0.00$         | $395.31$    | $180.66$          |
++---------------------+----------------+-------------+-------------------+
+| ellippiinc_bulirsch | $0.00$         | $395.31$    | $180.05$          |
++---------------------+----------------+-------------+-------------------+
+| ellipdinc           | $0.00$         | $8.38$      | $0.46$            |
++---------------------+----------------+-------------+-------------------+
+| **Module `bulirsch`**                                                  |
++---------------------+----------------+-------------+-------------------+
+| cel                 | $0.62$         | $36.94$     | $7.88$            |
++---------------------+----------------+-------------+-------------------+
+| cel1                | $0.00$         | $8.68$      | $1.56$            |
++---------------------+----------------+-------------+-------------------+
+| cel2                | $0.00$         | $3.47$      | $0.51$            |
++---------------------+----------------+-------------+-------------------+
+| el1                 | $0.00$         | $1.70$      | $0.08$            |
++---------------------+----------------+-------------+-------------------+
+| el2                 | $0.00$         | $74.60$     | $16.74$           |
++---------------------+----------------+-------------+-------------------+
+| el3                 | $0.00$         | $53.21$     | $17.51$           |
++---------------------+----------------+-------------+-------------------+
+| **Module `carlson`**                                                   |
++---------------------+----------------+-------------+-------------------+
+| elliprf             | $0.00$         | $1.57$      | $0.19$            |
++---------------------+----------------+-------------+-------------------+
+| elliprg             | $0.00$         | $5.25$      | $0.38$            |
++---------------------+----------------+-------------+-------------------+
+| elliprj             | $0.56$         | $136.97$    | $13.93$           |
++---------------------+----------------+-------------+-------------------+
+| elliprc             | $0.00$         | $2.82$      | $0.14$            |
++---------------------+----------------+-------------+-------------------+
+| elliprd             | $0.00$         | $6.25$      | $0.40$            |
++---------------------+----------------+-------------+-------------------+
+| **Module `misc`**                                                      |
++---------------------+----------------+-------------+-------------------+
+| jacobi_zeta         | $0.00$         | $8.66$      | $0.34$            |
++---------------------+----------------+-------------+-------------------+
+| heuman_lambda       | $0.00$         | $2.86$      | $0.24$            |
++=====================+================+=============+===================+
+| Machine epsilon (ε) = $2.2204460492503131*10^{-16}$                    |
++=====================+================+=============+===================+
+
+Numerical errors are typically below one machine epsilon, and generally within tens to hundreds of machine epsilon. Since the functions are convergent, such errors can be mitigated upon the availability of a 128-bit float type in the Rust stable build.
+
+# Usage Example
+
+The documentation of Ellip contains examples and graphs. The graphs were rendered using Plotly [@plotlyinc2025].
+
+![**(a)** Legendre's Incomplete Elliptic of the Second Kind $E(\phi, m)$ **(b)** Carlson's Degenerate Elliptic Integral of the Third Kind $R_D(x,y,z)$ **(c)** Jacobi Zeta $Z(\phi, m)$ **(d)** Bulirsch's General Complete Elliptic Integral ${cel}(k_c,p,a,b)$](figures/plots.png)
+
+The following example shows a function for calculating the circumference of an ellipse using the formula derived from @chandrupatla2010,
+
+$$ P(a, b) = 4 a E(m) = 8aR_G(0,a^2,b^2) $$,
+
+where $m = 1 - b^2 / a^2$.
+
+```rust
+use ellip::*;
+
+fn ellipse_circumference(a: f64, b: f64) -> Result<f64, StrErr> {
+    Ok(8.0 * elliprg(0.0, a * a, b * b)?)
+}
+
+// Example: ellipse with semi-major axis 5, semi-minor axis 3
+println!("{}", ellipse_circumference(5.0, 3.0).unwrap()); // 25.526998863398124
+```
+
+# References
