@@ -2,9 +2,9 @@ name: Test JOSS Submission
 
 on:
   push:
-    branches: [ main ]
+    branches: [ paper ]
   pull_request:
-    branches: [ main ]
+    branches: [ paper ]
   workflow_dispatch:
 
 jobs:
