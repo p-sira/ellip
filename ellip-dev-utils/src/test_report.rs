@@ -39,18 +39,14 @@ pub fn compute_errors_from_cases<T: Float + Debug>(
         .map(|case| {
             if case.expected.is_finite() {
                 let res = func(&case.inputs);
-                let abs_err = (res - case.expected).abs();
-                if abs_err < T::epsilon() {
-                    return 0.0;
-                }
-                let rel_err = err_func(res, case.expected);
-                // if err_func > 20.0 {
+                let error = err_func(res, case.expected);
+                // if e > 20.0 {
                 //     println!(
                 //         "Using parameters: {:?}, got={:?}, actual={:?} (error={:.2})",
-                //         &case.inputs, res, case.expected, err_func
+                //         &case.inputs, res, case.expected, e
                 //     );
                 // }
-                rel_err
+                error
             } else {
                 f64::NAN
             }
