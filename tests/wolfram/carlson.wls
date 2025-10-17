@@ -17,7 +17,7 @@ muRF = epsilon;
 
 muRJ = 50 * epsilon;
 
-muRJPV = 1*^10 * epsilon;
+muRJPV = 1000 * epsilon;
 
 muRJPVSmall = 50 * epsilon;
 
@@ -213,9 +213,9 @@ Export["../data/wolfram/elliprj_data.csv", N[rjNormal], "CSV"];
 
 xRangeRJPV = Union[Subdivide[muRJPV, 2, 5], {0}];
 
-yRangeRJPV = Union[Subdivide[muRJPV, 2, 5], {0}];
+yRangeRJPV = Union[Subdivide[2 * muRJPV, 2 + 2 * muRJPV, 5], {0}];
 
-zRangeRJPV = Union[Subdivide[muRJPV, 2, 5], {0}];
+zRangeRJPV = Union[Subdivide[3 * muRJPV, 2 + 3 * muRJPV, 5], {0}];
 
 pRangeRJPV = Subdivide[-2, -muRJPV, 5];
 
