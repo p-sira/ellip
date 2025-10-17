@@ -54,6 +54,7 @@ Table 1: Functions Supported by Ellip
 | **Legendre's Complete Elliptic Integrals**                                                                                                                                                                                          |
 +------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ellipk                                               | $K(m) = \int_0^{\pi/2} \frac{d\theta}{\sqrt{1 - m \sin^2 \theta}}$                                                                                                           |
+|                                                      |                                                                                                                                                                              |
 +------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ellipe                                               | $E(m) = \int_0^{\pi/2} \sqrt{1 - m \sin^2 \theta}\, d\theta$                                                                                                                 |
 +------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -119,12 +120,12 @@ The library has been extensively tested against Wolfram Engine across the suppor
 $$ \delta(a,b) =
     \begin{cases}
     0, & \text{if } |a - b| < \epsilon,\\
-    \dfrac{|a-b|}{\max(|a|, |b|)}, & \text{otherwise.}
-    \end{cases} $$,
+    \dfrac{|a-b|}{\max(|a|, |b|)}, & \text{otherwise,}
+    \end{cases} $$
 
 where $\epsilon = 2.2204460492503131*10^{-16}$.
 
-Test data generation scripts are provided for reproducibility. The error report is automatically generated via continuous integration. The following results were generated on x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.5 at 64-bit precision.
+Test data generation scripts are provided for reproducibility. The error report is automatically generated via continuous integration. The following results were generated on x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.6 at 64-bit precision.
 
 Table 2: Summary of Function Accuracy at 64-bit Precision. 
 
