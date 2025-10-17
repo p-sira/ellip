@@ -54,7 +54,6 @@ Table 1: Functions Supported by Ellip
 | **Legendre's Complete Elliptic Integrals**                                                                                                                                                                                          |
 +------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ellipk                                               | $K(m) = \int_0^{\pi/2} \frac{d\theta}{\sqrt{1 - m \sin^2 \theta}}$                                                                                                           |
-|                                                      |                                                                                                                                                                              |
 +------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ellipe                                               | $E(m) = \int_0^{\pi/2} \sqrt{1 - m \sin^2 \theta}\, d\theta$                                                                                                                 |
 +------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -195,11 +194,9 @@ The documentation of Ellip contains examples and graphs. The graphs were rendere
 
 ![**(a)** Legendre's Incomplete Elliptic of the Second Kind $E(\phi, m)$ **(b)** Carlson's Degenerate Elliptic Integral of the Third Kind $R_D(x,y,z)$ **(c)** Jacobi Zeta $Z(\phi, m)$ **(d)** Bulirsch's General Complete Elliptic Integral ${cel}(k_c,p,a,b)$](figures/plots.png)
 
-The following example shows a function for calculating the circumference of an ellipse using the formula derived from @chandrupatla2010,
+The following example shows a function for calculating the circumference of an ellipse using the formula derived from @chandrupatla2010, using elliptic integral of the second kind $E$ and Carlson's symmetric integrals $R_G$,
 
-$$ P(a, b) = 4 a E(m) = 8aR_G(0,a^2,b^2) $$,
-
-where $m = 1 - b^2 / a^2$.
+$$ P(a, b) = 4 a E(1 - \frac{b^2}{a^2}) = 8aR_G(0,a^2,b^2).$$
 
 ```rust
 use ellip::*;
