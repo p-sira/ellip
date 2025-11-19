@@ -4,7 +4,11 @@
  */
 
 use ellip::*;
-use ellip_dev_utils::{env::{format_clock_speed, get_env}, get_summary_entry, test_report::generate_summary_table};
+use ellip_dev_utils::{
+    env::{format_clock_speed, get_env},
+    get_summary_entry,
+    test_report::generate_summary_table,
+};
 
 fn main() {
     let env = get_env();
