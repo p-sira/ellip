@@ -231,3 +231,67 @@ macro_rules! get_summary_entry {
         get_summary_entry! {$group, $name, $func, $arg_count, stringify!($func)}
     }};
 }
+
+pub fn format_exp(value: &f64) -> String {
+    if value.is_nan() {
+        "NAN".to_string()
+    } else if *value >= 1e3 {
+        format!("${:.2e}$", value).replace("e", "*10^")
+    } else {
+        format!("${:.2}$", value)
+    }
+}
+
+#[derive(Tabled)]
+pub struct AccuracyEntry<'a> {
+    #[tabled(rename = "**Function**")]
+    name: &'a str,
+    #[tabled(rename = "**Median (ε)**", display = "format_exp")]
+    median: f64,
+    #[tabled(rename = "**Max (ε)**", display = "format_exp")]
+    max: f64,
+    #[tabled(rename = "**Variance (ε²)**", display = "format_exp")]
+    variance: f64,
+}
+
+pub fn generate_accuracy_summary_table(entries: &[(&str, Stats)]) -> String {
+    let rows: Vec<AccuracyEntry> = entries
+        .iter()
+        .map(|(name, stats)| AccuracyEntry {
+            name,
+            median: stats.median,
+            max: stats.max,
+            variance: stats.variance,
+        })
+        .collect();
+
+    Table::new(rows).with(Style::ascii()).to_string()
+}
+
+#[macro_export]
+macro_rules! get_accuracy_entry {
+    ($group:expr, $name:expr, $func:expr, $arg_count:tt, $test_file_name:expr) => {{
+        use ellip_dev_utils::{
+            file, parser, stats,
+            test_report::{self, Case},
+        };
+        use std::path::Path;
+
+        ellip_dev_utils::func_wrapper!($func, f64, $arg_count);
+
+        let test_paths = file::find_test_files($test_file_name, "wolfram");
+        let cases = test_paths
+            .iter()
+            .flat_map(|test_path| parser::read_wolfram_data(test_path.to_str().unwrap()).unwrap())
+            .collect::<Vec<Case<f64>>>();
+        let stats = stats::Stats::from_vec(&test_report::compute_errors_from_cases(
+            &wrapped_func,
+            cases,
+        ));
+
+        ($name, stats)
+    }};
+    ($group:expr, $name:expr, $func:expr, $arg_count:tt) => {{
+        get_accuracy_entry! {$group, $name, $func, $arg_count, stringify!($func)}
+    }};
+}
