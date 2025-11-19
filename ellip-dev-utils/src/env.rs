@@ -23,7 +23,7 @@ pub fn get_env() -> Env {
             .ok()
             .and_then(|s| s.trim().parse::<u64>().ok())
             .map(|khz| khz * 1000) //Hz
-            .unwrap()
+            .unwrap_or(0)
     };
 
     let mut sys = sysinfo::System::new_all();
@@ -86,9 +86,13 @@ pub fn get_env() -> Env {
     }
 }
 
-pub fn format_clock_speed(clock_speed: u64) -> String {
-    if clock_speed > 10_000_000 {
-        format!("{} GHz", clock_speed / 1_000_000_000)
+pub fn format_cpu_with_clock_speed(cpu: &str, clock_speed: u64) -> String {
+    if clock_speed == 0 {
+        return cpu.to_string();
+    }
+
+    if clock_speed > 1_000_000_000 {
+        format!("{} @{:.1} GHz", cpu, (clock_speed / 1_000_000_000) as f64)
     } else {
         format!("{} MHz", clock_speed / 1_000_000)
     }
