@@ -8,10 +8,23 @@ pub struct Env {
     pub platform: String,
     pub ellip_version: String,
     pub cpu: String,
+    /// Clock speed in Hz
+    pub clock_speed: u64,
+    pub total_memory: u64,
 }
 
 pub fn get_env() -> Env {
+    use std::fs;
     use std::process::Command;
+
+    let clock_speed = {
+        // sysfs cpuinfo_max_freq (kHz)
+        fs::read_to_string("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq")
+            .ok()
+            .and_then(|s| s.trim().parse::<u64>().ok())
+            .map(|khz| khz * 1000) //Hz
+            .unwrap()
+    };
 
     let mut sys = sysinfo::System::new_all();
     sys.refresh_all();
@@ -32,6 +45,8 @@ pub fn get_env() -> Env {
             .collect::<Vec<&str>>()[1]
             .to_owned()
     };
+
+    let total_memory = sys.total_memory();
 
     let platform = {
         let output = Command::new("rustc").arg("-vV").output().unwrap().stdout;
@@ -66,5 +81,15 @@ pub fn get_env() -> Env {
         platform,
         ellip_version,
         cpu,
+        clock_speed,
+        total_memory,
+    }
+}
+
+pub fn format_clock_speed(clock_speed: u64) -> String {
+    if clock_speed > 10_000_000 {
+        format!("{} GHz", clock_speed / 1_000_000_000)
+    } else {
+        format!("{} MHz", clock_speed / 1_000_000)
     }
 }
