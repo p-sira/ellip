@@ -160,7 +160,7 @@ $$ \delta(a,b) =
 
 where $\epsilon = 2.2204460492503131*10^{-16}$.
 
-Test data generation scripts are provided for reproducibility. The error report is automatically generated via continuous integration. The following results were generated on x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.6 at 64-bit precision.
+Test data generation scripts are provided for reproducibility. The error report is automatically generated via continuous integration. The following results were generated on AMD Ryzen 5 4600H with Radeon Graphics @3.0 GHz running x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.6 at 64-bit precision.
 
 Table 5: Summary of Function Accuracy at 64-bit Precision. 
 
