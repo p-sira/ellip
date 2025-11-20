@@ -7,9 +7,9 @@
 macro_rules! figure_path {
     ($filename:literal) => {
         if cfg!(feature = "save-to-bin") {
-            concat!["../../figures/bin/", $filename]
+            concat!["figures/bin/", $filename]
         } else {
-            concat!["../../figures/", $filename]
+            concat!["figures/", $filename]
         }
     };
 }

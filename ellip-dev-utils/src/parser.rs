@@ -3,7 +3,6 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-
 use num_traits::Float;
 
 use crate::{StrErr, test_report::Case};
@@ -54,9 +53,7 @@ pub fn read_wolfram_data<T: Float>(file_path: &str) -> Result<Vec<Case<T>>, StrE
     Ok(results)
 }
 
-pub fn read_boost_data<T: Float>(
-    file_path: &str,
-) -> Result<Vec<Case<T>>, StrErr> {
+pub fn read_boost_data<T: Float>(file_path: &str) -> Result<Vec<Case<T>>, StrErr> {
     use std::fs::File;
     use std::io::{BufRead, BufReader};
     use std::path::Path;
@@ -76,7 +73,10 @@ pub fn read_boost_data<T: Float>(
         let case = Case {
             inputs: parts[..parts.len() - 1]
                 .iter()
-                .map(|&v| T::from_str_radix(v, 10).unwrap_or_else(|_| panic!("Cannot parse input(s) as a number")))
+                .map(|&v| {
+                    T::from_str_radix(v, 10)
+                        .unwrap_or_else(|_| panic!("Cannot parse input(s) as a number"))
+                })
                 .collect(),
             expected: T::from_str_radix(parts[parts.len() - 1], 10)
                 .unwrap_or_else(|_| panic!("Cannot parse expected value as a number")),

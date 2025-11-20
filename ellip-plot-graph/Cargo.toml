@@ -1,12 +1,16 @@
 [package]
 name = "ellip-plot-graph"
-version = "0.1.0"
+version.workspace = true
+authors.workspace = true
+
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
 edition = "2024"
-license = "BSD-3-Clause"
 description = "Generate plots for Ellip crate"
 
 [dependencies]
-ellip = { version = "0.5", path = "../.." }
+ellip = { workspace = true}
 plotly = { version = "0.13.5", features = ["static_export_default"] }
 
 [features]

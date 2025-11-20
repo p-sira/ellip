@@ -13,7 +13,7 @@ use ellip_dev_utils::{
     test_report::{Case, format_float, format_performance},
 };
 use itertools::izip;
-use rayon::iter::{IntoParallelRefIterator, IndexedParallelIterator, ParallelIterator};
+use rayon::iter::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use tabled::{Table, Tabled, settings::Style};
 
 const MAX_THRESHOLD: usize = 10000;
