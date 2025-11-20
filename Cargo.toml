@@ -14,8 +14,8 @@ documentation = "https://docs.rs/ellip"
 license = "BSD-3-Clause"
 
 [workspace.dependencies]
-ellip = { version = "0.5", path = "." }
-ellip-dev-utils = { version = "0.5", path = "ellip-dev-utils" }
+ellip = { path = "." }
+ellip-dev-utils = { path = "ellip-dev-utils" }
 
 [package.metadata.release]
 dependent-version = "upgrade"
