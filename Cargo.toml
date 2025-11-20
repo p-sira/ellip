@@ -20,7 +20,6 @@ ellip-dev-utils = { version = "0.5", path = "ellip-dev-utils" }
 [package.metadata.release]
 dependent-version = "upgrade"
 pre-release-hook = ["bash", "scripts/prehook.sh"]
-allow-branch = ["*"]
 
 [package]
 name = "ellip"
