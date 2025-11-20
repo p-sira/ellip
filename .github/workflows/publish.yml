@@ -36,7 +36,7 @@ jobs:
           rustup update stable
           cargo install cargo-release
       - name: Publish all
-        run: cargo release --workspace "${{ steps.version.outputs.version }}" --execute
+        run: cargo release --workspace --no-tag "${{ steps.version.outputs.version }}" --execute
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
       - uses: taiki-e/create-gh-release-action@v1
