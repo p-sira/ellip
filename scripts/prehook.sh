@@ -36,3 +36,4 @@ for BIN in "${BINS[@]}"; do
 done
 
 git add .
+git commit -m "CI, DOC: Generate figures and test reports."
