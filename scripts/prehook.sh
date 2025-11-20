@@ -20,7 +20,7 @@ for BIN in "${BINS[@]}"; do
 
     ATTEMPTS=0
     until [ $ATTEMPTS -ge $MAX_ATTEMPTS ]; do
-        if timeout 180s cargo run -p ellip-plot-graph --bin "$BIN" --features save-to-bin; then
+        if timeout 180s cargo run -p ellip-plot-graph --bin "$BIN"; then
             echo "Plot succeeded"
             break
         else

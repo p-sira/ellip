@@ -17,11 +17,24 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: true
+      - run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
       - name: Extract version from tag
         id: version
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
           echo "version=${TAG#v}" >> $GITHUB_OUTPUT
+      - name: Cache cargo registry and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
       - name: Setup Rust
         run: |
           rustup update stable
