@@ -4,7 +4,7 @@ This report presents the accuracy of the ellip crate using **symmetric relative 
 ![Symmetric relative error](https://github.com/p-sira/ellip/blob/main/examples/symmetric_error.svg?raw=true)
 
 Errors are expressed in units of machine epsilon (ε). The test data spans the domain of each function up to **μ** to avoid approaching the function's limit. The reference values are computed using [**Wolfram Engine**](https://www.wolfram.com/engine/). You can find the scripts in the directory [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/). 
-This report is generated on x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.6 at `f64` precision (ε=2.2204460492503131e-16).
+This report is generated on AMD Ryzen 5 4600H with Radeon Graphics @3.0 GHz running x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.6 at `f64` precision (ε=2.2204460492503131e-16).
 
 ## Legendre's Complete Elliptic Integrals
 
@@ -74,7 +74,7 @@ Note that `elliprj` is numerically unstable in the principal value domain when t
 
 ## f32 Implementation
 
-Generated on x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.6 at `f32` precision (ε≈1.19e-7).
+Generated on AMD Ryzen 5 4600H with Radeon Graphics @3.0 GHz running x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.6 at `f32` precision (ε≈1.19e-7).
 
 ### Legendre's Complete Elliptic Integrals
 

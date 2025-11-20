@@ -1,5 +1,11 @@
 # Changelog
 ## 0.5
+### 0.5.7
+**Others**
+- Use the 'workspace' project structure.
+- All the children packages now follow the version of ellip.
+- Use `cargo-release` for the workflow.
+
 ### 0.5.6
 **Tests**
 - Update the error definition, combining symmetric relative error and absolute error.

@@ -4,7 +4,11 @@
  */
 
 use ellip::*;
-use ellip_dev_utils::{env::get_env, get_entry, test_report::generate_error_table};
+use ellip_dev_utils::{
+    env::{format_cpu_with_clock_speed, get_env},
+    get_entry,
+    test_report::generate_error_table,
+};
 
 fn main() {
     let env = get_env();
@@ -12,12 +16,15 @@ fn main() {
         std::fs::read_to_string("examples/error_report_template.md").expect("Cannot read template");
 
     let env_str = format!(
-        "This report is generated on {} rustc {} using ellip v{} at `f64` precision (ε=2.2204460492503131e-16).",
-        env.platform, env.rust_version, env.ellip_version
+        "This report is generated on {} running {} rustc {} using ellip v{} at `f64` precision (ε=2.2204460492503131e-16).",
+        format_cpu_with_clock_speed(&env.cpu, env.clock_speed), env.platform, env.rust_version, env.ellip_version
     );
     let env_str_f32 = format!(
-        "Generated on {} rustc {} using ellip v{} at `f32` precision (ε≈1.19e-7).",
-        env.platform, env.rust_version, env.ellip_version
+        "Generated on {} running {} rustc {} using ellip v{} at `f32` precision (ε≈1.19e-7).",
+        format_cpu_with_clock_speed(&env.cpu, env.clock_speed),
+        env.platform,
+        env.rust_version,
+        env.ellip_version
     );
     let legendre_complete = generate_error_table(&[
         get_entry! {"wolfram/ellipk_data", "ellipk", ellipk, 1, 1},

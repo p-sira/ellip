@@ -135,13 +135,15 @@ fn main() {
 
     let re = Regex::new(r"(?s)// \{\{BEGIN_IMPL_PAR\}\}.*?// \{\{END_IMPL_PAR\}\}")
         .expect("Invalid regex");
-    let output = re.replace_all(
-        &content,
-        format!(
-            "// {{BEGIN_IMPL_PAR}}\n{}\n// {{END_IMPL_PAR}}",
-            generated_code
-        ),
-    ).to_string();
+    let output = re
+        .replace_all(
+            &content,
+            format!(
+                "// {{BEGIN_IMPL_PAR}}\n{}\n// {{END_IMPL_PAR}}",
+                generated_code
+            ),
+        )
+        .to_string();
     fs::write(lib_path, output).expect("Cannot write to lib.rs");
     println!("// Saved to lib.rs");
 }
