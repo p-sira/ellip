@@ -17,6 +17,8 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: true
+      - name: Fix Git ownership in container
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
