@@ -1,5 +1,9 @@
 # Changelog
 ## 0.5
+### 0.5.8
+**Minor Fixes**
+- Fix the tables in the Testing section of README.
+
 ### 0.5.7
 **Improvements**
 - Add reproducibility section in README.

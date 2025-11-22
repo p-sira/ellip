@@ -7,7 +7,8 @@ trap "echo 'Interrupted'; exit 130" INT
 cargo run --example generate_error_report
 
 # Inject README
-cargo run --example generate_test_summary
+# The benchmark should not be done on GitHub Action, since the environment is not reliable.
+# cargo run --example generate_test_summary
 
 # Generate figures
 mkdir figures/bin
