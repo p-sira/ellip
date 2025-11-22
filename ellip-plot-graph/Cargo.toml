@@ -1,0 +1,20 @@
+[package]
+name = "ellip-plot-graph"
+version.workspace = true
+authors.workspace = true
+
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition = "2024"
+description = "Generate plots for Ellip crate"
+
+[dependencies]
+ellip = { workspace = true}
+plotly = { version = "0.13.5", features = ["static_export_default"] }
+
+[features]
+# Open the generated HTML
+open-html = []
+# Save figure to figures/bin
+save-to-bin = []

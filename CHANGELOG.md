@@ -1,5 +1,19 @@
 # Changelog
 ## 0.5
+### 0.5.7
+**Improvements**
+- Add reproducibility section in README.
+- Improve testing documentation.
+
+**Tests**
+- Add test on macOS and Windows in the CI.
+- Fix the elliprj test for macOS and Windows.
+
+**Others**
+- Use the 'workspace' project structure.
+- All the children packages now follow the version of ellip.
+- Use `cargo-release` for the workflow.
+
 ### 0.5.6
 **Tests**
 - Update the error definition, combining symmetric relative error and absolute error.

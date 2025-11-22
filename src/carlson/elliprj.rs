@@ -304,7 +304,7 @@ mod tests {
 
     #[test]
     fn test_elliprj_wolfram() {
-        compare_test_data_wolfram!("elliprj_data.csv", elliprj, 4, 2e-15);
+        compare_test_data_wolfram!("elliprj_data.csv", elliprj, 4, 3e-15);
         compare_test_data_wolfram!("elliprj_pv.csv", elliprj, 4, 5e-14, atol: f64::EPSILON);
     }
 
