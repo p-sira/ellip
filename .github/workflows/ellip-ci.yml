@@ -15,7 +15,12 @@ env:
 
 jobs:  
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+  
     steps:
     - uses: actions/checkout@v4
     - name: Run clippy
@@ -26,6 +31,11 @@ jobs:
       run: cargo test --features no_std
     - name: Make docs
       run: cargo doc --no-deps
+
+  format:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
     - name: Format code
       if: github.event_name == 'push'
       run: |

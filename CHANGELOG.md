@@ -4,6 +4,9 @@
 **Improvements**
 - Improve testing documentation.
 
+**Tests**
+- Add test on macOS and Windows in the CI.
+
 **Others**
 - Use the 'workspace' project structure.
 - All the children packages now follow the version of ellip.
