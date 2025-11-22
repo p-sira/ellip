@@ -89,101 +89,40 @@ Benchmark on AMD Ryzen 5 4600H with Radeon Graphics @3.0 GHz running x86_64-unkn
 ### Legendre's Elliptic Integrals
 | Function            | Median Error (ε) | Max Error (ε) | Mean Performance |
 |---------------------|------------------|---------------|------------------|
-| ellipk              | 0.00             | 108.14        | NAN              |
-| ellipe              | 0.00             | 3.00          | NAN              |
-| ellipf              | 0.00             | 7.47          | NAN              |
-| ellipeinc           | 0.00             | 24.66         | NAN              |
-| ellippi             | 0.00             | 36.35         | NAN              |
-| ellippiinc          | 0.00             | 395.31        | NAN              |
-| ellippiinc_bulirsch | 0.00             | 395.31        | NAN              |
-| ellipd              | 0.00             | 2.64          | NAN              |
-| ellipdinc           | 0.00             | 8.38          | NAN              |
+| ellipk              | 0.00             | 108.14        | 14.8 ns          |
+| ellipe              | 0.00             | 3.00          | 13.1 ns          |
+| ellipf              | 0.00             | 7.47          | 98.5 ns          |
+| ellipeinc           | 0.00             | 24.66         | 157.6 ns         |
+| ellippi             | 0.00             | 36.35         | 166.1 ns         |
+| ellippiinc          | 0.00             | 395.31        | 232.9 ns         |
+| ellippiinc_bulirsch | 0.00             | 395.31        | 189.2 ns         |
+| ellipd              | 0.00             | 2.64          | 30.0 ns          |
+| ellipdinc           | 0.00             | 8.38          | 98.9 ns          |
 
 ### Bulirsch's Elliptic Integrals
 | Function | Median Error (ε) | Max Error (ε) | Mean Performance |
 |----------|------------------|---------------|------------------|
-| cel      | 0.62             | 36.94         | NAN              |
-| cel1     | 0.00             | 8.68          | NAN              |
-| cel2     | 0.00             | 3.47          | NAN              |
-| el1      | 0.00             | 1.70          | NAN              |
-| el2      | 0.00             | 74.60         | NAN              |
-| el3      | 0.00             | 53.21         | NAN              |
+| cel      | 0.62             | 36.94         | 32.8 ns          |
+| cel1     | 0.00             | 8.68          | 11.2 ns          |
+| cel2     | 0.00             | 3.47          | 21.6 ns          |
+| el1      | 0.00             | 1.70          | 36.7 ns          |
+| el2      | 0.00             | 74.60         | 52.0 ns          |
+| el3      | 0.00             | 53.21         | 103.8 ns         |
 
 ### Carlson's Symmetric Integrals
 | Function | Median Error (ε) | Max Error (ε) | Mean Performance |
 |----------|------------------|---------------|------------------|
-| elliprf  | 0.00             | 1.57          | NAN              |
-| elliprg  | 0.00             | 5.25          | NAN              |
-| elliprj  | 0.56             | 136.97        | NAN              |
-| elliprc  | 0.00             | 2.82          | NAN              |
-| elliprd  | 0.00             | 6.25          | NAN              |
+| elliprf  | 0.00             | 1.57          | 46.1 ns          |
+| elliprg  | 0.00             | 5.25          | 99.1 ns          |
+| elliprj  | 0.56             | 136.97        | 165.5 ns         |
+| elliprc  | 0.00             | 2.82          | 22.5 ns          |
+| elliprd  | 0.00             | 6.25          | 75.9 ns          |
 
 ### Miscellaneous Functions
 | Function      | Median Error (ε) | Max Error (ε) | Mean Performance |
 |---------------|------------------|---------------|------------------|
-| jacobi_zeta   | 0.00             | 8.66          | NAN              |
-| heuman_lambda | 0.00             | 2.86          | NAN              |
-
-## Reproducibility
-
-This section describes how to reproduce the accuracy reports, test datasets, benchmarks, figures, and tables.
-
-### Setup the project
-
-First, clone the repository:
-
-```sh
-git clone https://github.com/p-sira/ellip.git
-cd ellip
-```
-
-Then, build the project:
-
-```sh
-cargo build --workspace
-```
-
-### Run tests
-
-For detailed information on tests, see [tests/README.md](https://github.com/p-sira/ellip/blob/main/tests/README.md).
-
-### Benchmark
-
-Ellip's benchmark collects the test files associated with each function and reports the total execution time:
-
-```sh
-cargo bench
-```
-
-This produces raw benchmark output under `target/criterion/`. Note that the results shown in the README are normalized to per-function call averages. See the [Generate tables](#generate-tables) section for details on generating the summary tables.
-
-### Generate tables
-
-To generate the accuracy table in the [test report](https://github.com/p-sira/ellip/blob/main/tests):
-
-```sh
-cargo run --example generate_error_report
-```
-
-This compares Ellip's results against Wolfram test data and generates the accuracy report.
-
-To generate the test and benchmark summary table as shown in the README, first run `cargo bench` to collect benchmark data. Then run:
-
-```sh
-cargo run --example generate_test_summary
-```
-
-This script compares results against Wolfram data, extracts benchmark results from `target/criterion/`, normalizes them to average time per function call, and summarizes everything in a single table.
-
-### Generate figures
-
-To generate function plots:
-
-```sh
-cargo run -p ellip-plot-graph --bin [function-name]
-```
-
-See available plots in [ellip-plot-graph/src/bin](https://github.com/p-sira/ellip/blob/main/ellip-plot-graph/src/bin/)
+| jacobi_zeta   | 0.00             | 8.66          | 207.7 ns         |
+| heuman_lambda | 0.00             | 2.86          | 333.8 ns         |
 
 ## Reproducibility
 

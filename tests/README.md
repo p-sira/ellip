@@ -28,7 +28,7 @@ The test datasets are not distributed with the crate by default. You may generat
 
 ## f64 Results
 
-This report is generated on AMD EPYC 7763 64-Core Processor running x86_64-unknown-linux-gnu rustc 1.91.1 using ellip v0.5.7 at `f64` precision (ε=2.2204460492503131e-16).
+This report is generated on AMD Ryzen 5 4600H with Radeon Graphics @3.0 GHz running x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.8 at `f64` precision (ε=2.2204460492503131e-16).
 
 ### Legendre's Complete Elliptic Integrals
 
@@ -109,8 +109,8 @@ Generated on AMD Ryzen 5 4600H with Radeon Graphics @3.0 GHz running x86_64-unkn
 | ellipe          | 0.20     | 0.00       | 1.00    | 1.92    | 0.14          | 1     |
 | ellipe (Neg m)  | 0.35     | 0.00       | 1.48    | 1.61    | 0.17          | 1     |
 | ellippi         | 0.52     | 0.53       | 2.46    | 4.22    | 0.37          | 1     |
-| ellippi (Neg m) | 0.48     | 0.55       | 2.05    | 2.92    | 0.27          | 1     |
-| ellippi (p.v.)  | 0.18     | 0.00       | 2.14    | 34.47   | 2.35          | 50    |
+| ellippi (Neg m) | 0.48     | 0.55       | 2.02    | 2.92    | 0.26          | 1     |
+| ellippi (p.v.)  | 0.18     | 0.00       | 2.14    | 34.47   | 2.36          | 50    |
 | ellipd          | 0.51     | 0.00       | 2.56    | 15.09   | 0.92          | 1     |
 | ellipd (Neg m)  | 0.07     | 0.00       | 1.83    | 2.16    | 0.11          | 1     |
 
@@ -123,8 +123,8 @@ Generated on AMD Ryzen 5 4600H with Radeon Graphics @3.0 GHz running x86_64-unkn
 | ellipeinc                   | 0.37     | 0.00       | 4.84    | 24.02   | 1.89          | 1     |
 | ellipeinc (Neg m)           | 0.39     | 0.00       | 2.31    | 3.12    | 0.39          | 1     |
 | ellippiinc                  | 0.53     | 0.00       | 8.72    | 71.78   | 7.85          | 1     |
-| ellippiinc (Neg m)          | 0.65     | 0.00       | 11.93   | 40.74   | 6.12          | 1     |
-| ellippiinc (p.v.)           | 2.99     | 0.00       | 42.49   | 128.05  | 99.46         | 1     |
+| ellippiinc (Neg m)          | 0.64     | 0.00       | 11.93   | 40.74   | 6.10          | 1     |
+| ellippiinc (p.v.)           | 2.97     | 0.00       | 42.49   | 128.05  | 99.10         | 1     |
 | ellippiinc_bulirsch         | 1.16e6   | 0.00       | 1.68e7  | 1.68e7  | 1.82e13       | 1     |
 | ellippiinc_bulirsch (Neg m) | 1.86e6   | 0.00       | 1.68e7  | 1.68e7  | 2.78e13       | 1     |
 | ellipdinc                   | 0.21     | 0.00       | 3.59    | 11.97   | 0.69          | 1     |
@@ -140,7 +140,7 @@ Generated on AMD Ryzen 5 4600H with Radeon Graphics @3.0 GHz running x86_64-unkn
 | cel2       | 0.41     | 0.00       | 2.00    | 2.00    | 0.33          | 1     |
 | el1        | 0.14     | 0.00       | 1.36    | 1.89    | 0.13          | 1     |
 | el2        | 0.19     | 0.00       | 2.58    | 91.18   | 9.95          | 1     |
-| el3        | 0.58     | 0.00       | 7.58    | 17.86   | 2.43          | 50    |
+| el3        | 0.59     | 0.00       | 7.58    | 17.86   | 2.43          | 50    |
 | el3 (p.v.) | 1.06     | 0.00       | 22.73   | 23.50   | 7.98          | 50    |
 
 ### Carlson's Symmetric Elliptic Integrals
@@ -149,10 +149,10 @@ Generated on AMD Ryzen 5 4600H with Radeon Graphics @3.0 GHz running x86_64-unkn
 |----------------|----------|------------|---------|---------|---------------|-------|
 | elliprf        | 0.31     | 0.00       | 1.63    | 1.79    | 0.19          | 1     |
 | elliprg        | 0.17     | 0.00       | 1.45    | 2.12    | 0.15          | 1     |
-| elliprj        | 0.75     | 0.56       | 7.74    | 14.15   | 1.93          | 50    |
-| elliprj (p.v.) | 115.45   | 0.53       | 12.15   | 1.54e5  | 1.46e7        | 1000  |
+| elliprj        | 0.70     | 0.56       | 6.84    | 14.15   | 1.62          | 50    |
+| elliprj (p.v.) | 115.48   | 0.53       | 11.34   | 1.54e5  | 1.46e7        | 1000  |
 | elliprc        | 0.19     | 0.00       | 1.14    | 1.73    | 0.13          | 1     |
-| elliprc (p.v.) | 0.16     | 0.00       | 1.76    | 2.15    | 0.16          | 1     |
+| elliprc (p.v.) | 0.17     | 0.00       | 1.83    | 2.15    | 0.17          | 1     |
 | elliprd        | 0.41     | 0.00       | 1.85    | 5.82    | 0.32          | 50    |
 
 ### Miscellaneous Functions
