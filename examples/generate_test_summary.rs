@@ -4,7 +4,11 @@
  */
 
 use ellip::*;
-use ellip_dev_utils::{env::get_env, get_summary_entry, test_report::generate_summary_table};
+use ellip_dev_utils::{
+    env::{format_cpu_with_clock_speed, get_env},
+    get_summary_entry,
+    test_report::generate_summary_table,
+};
 
 fn main() {
     let env = get_env();
@@ -14,7 +18,7 @@ fn main() {
     let summary_section = [
         &format!(
             "Benchmark on {} running {} rustc {} using ellip v{} at `f64` precision (ε=2.2204460492503131e-16).\n",
-            env.cpu, env.platform, env.rust_version, env.ellip_version
+            format_cpu_with_clock_speed(&env.cpu, env.clock_speed), env.platform, env.rust_version, env.ellip_version
         ),
         "### Legendre's Elliptic Integrals",
         &generate_summary_table(&[
