@@ -4,6 +4,8 @@ This report presents the accuracy of the ellip crate using **symmetric relative 
 ![Symmetric relative error](https://github.com/p-sira/ellip/blob/main/examples/symmetric_error.svg?raw=true)
 
 Errors are expressed in units of machine epsilon (ε). The test data spans the domain of each function up to **μ** to avoid approaching the function's limit. The reference values are computed using [**Wolfram Engine**](https://www.wolfram.com/engine/). You can find the scripts in the directory [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/). 
+
+This report is generated using `cargo run --example generate_error_report`. Meanwhile, to generate the test and benchmark summary as shown in the README, run `cargo bench`, follow by `cargo run --example generate_test_summary`.
 {{ENV}}
 
 ## Legendre's Complete Elliptic Integrals

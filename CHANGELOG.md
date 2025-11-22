@@ -1,6 +1,9 @@
 # Changelog
 ## 0.5
 ### 0.5.7
+**Improvements**
+- Improve testing documentation.
+
 **Others**
 - Use the 'workspace' project structure.
 - All the children packages now follow the version of ellip.
