@@ -46,8 +46,3 @@ jobs:
         run: cargo release --workspace --allow-branch "*" "${{ github.event.inputs.version }}" --no-confirm --execute
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-      - uses: taiki-e/create-gh-release-action@v1
-        with:
-          changelog: CHANGELOG.md
-          allow-missing-changelog: true
-          token: ${{ secrets.GITHUB_TOKEN }}
