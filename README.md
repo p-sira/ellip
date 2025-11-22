@@ -82,9 +82,9 @@ Learn more at [doc.rs](https://docs.rs/ellip).
 
 ## Testing
 
-In the unit tests, the functions are tested against the Boost Math and Wolfram test data. Since Ellip accepts the argument `m` (parameter) instead of `k` (modulus) to allow larger domain support, the full accuracy report uses exclusively the Wolfram data. **The full accuracy report can be found [here](https://github.com/p-sira/ellip/blob/main/tests)**, along with the test data and test generation scripts. The performance benchmark is presented to provide comparison between functions in Ellip. Comparing performance with other libraries is non-trivial, since they accept different domains.
+In the unit tests, the functions are tested against the Boost Math and Wolfram test data. Since Ellip accepts the argument `m` (parameter) instead of `k` (modulus) to allow larger domain support, the full accuracy report uses exclusively the Wolfram data. **The full accuracy report can be found [here](https://github.com/p-sira/ellip/blob/main/tests)**, along with the test data and test generation scripts. The performance benchmark is presented to provide comparison between functions in Ellip. Comparing performance with other libraries is non-trivial, since they accept different domains of input.
 
-Benchmark on AMD Ryzen 5 4600H with Radeon Graphics @3.0 GHz running x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.6 at `f64` precision (ε=2.2204460492503131e-16).
+Benchmark on AMD Ryzen 5 4600H with Radeon Graphics @3.0 GHz running x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.8 at `f64` precision (ε=2.2204460492503131e-16).
 
 ### Legendre's Elliptic Integrals
 | Function            | Median Error (ε) | Max Error (ε) | Mean Performance |
@@ -123,6 +123,67 @@ Benchmark on AMD Ryzen 5 4600H with Radeon Graphics @3.0 GHz running x86_64-unkn
 |---------------|------------------|---------------|------------------|
 | jacobi_zeta   | 0.00             | 8.66          | 207.7 ns         |
 | heuman_lambda | 0.00             | 2.86          | 333.8 ns         |
+
+## Reproducibility
+
+This section describes how to reproduce the accuracy reports, test datasets, benchmarks, figures, and tables.
+
+### Setup the project
+
+First, clone the repository:
+
+```sh
+git clone https://github.com/p-sira/ellip.git
+cd ellip
+```
+
+Then, build the project:
+
+```sh
+cargo build --workspace
+```
+
+### Run tests
+
+For detailed information on tests, see [tests/README.md](https://github.com/p-sira/ellip/blob/main/tests/README.md).
+
+### Benchmark
+
+Ellip's benchmark collects the test files associated with each function and reports the total execution time:
+
+```sh
+cargo bench
+```
+
+This produces raw benchmark output under `target/criterion/`. Note that the results shown in the README are normalized to per-function call averages. See the [Generate tables](#generate-tables) section for details on generating the summary tables.
+
+### Generate tables
+
+To generate the accuracy table in the [test report](https://github.com/p-sira/ellip/blob/main/tests):
+
+```sh
+cargo run --example generate_error_report
+```
+
+This compares Ellip's results against Wolfram test data and generates the accuracy report.
+
+To generate the test and benchmark summary table as shown in the README, first run `cargo bench` to collect benchmark data. Then run:
+
+```sh
+cargo run --example generate_test_summary
+```
+
+This script compares results against Wolfram data, extracts benchmark results from `target/criterion/`, normalizes them to average time per function call, and summarizes everything in a single table.
+
+### Generate figures
+
+To generate function plots:
+
+```sh
+cargo run -p ellip-plot-graph --bin [function-name]
+```
+
+See available plots in [ellip-plot-graph/src/bin](https://github.com/p-sira/ellip/blob/main/ellip-plot-graph/src/bin/)
 
 ---
 
