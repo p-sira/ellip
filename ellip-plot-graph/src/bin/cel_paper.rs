@@ -8,8 +8,7 @@ use ellip_plot_graph::*;
 use plotly::{
     color::NamedColor,
     common::{Font, Line, Mode, Title},
-    layout::Axis,
-    ImageFormat, Layout, Plot, Scatter,
+    layout::Axis, Layout, Plot, Scatter,
 };
 
 macro_rules! get_trace {
