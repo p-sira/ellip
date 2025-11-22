@@ -86,7 +86,7 @@ pub struct ErrorEntry<'a> {
     max: f64,
     #[tabled(rename = "Variance (ε²)", display = "format_float")]
     variance: f64,
-    #[tabled(rename = "μ (ε²)", display = "format_mu")]
+    #[tabled(rename = "μ (ε)", display = "format_mu")]
     mu: u64,
 }
 
