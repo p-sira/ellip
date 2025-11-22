@@ -1,6 +1,6 @@
 # Changelog
 ## 0.5
-### 0.5.8
+### 0.5.9
 **Minor Fixes**
 - Fix the tables in the Testing section of README.
 

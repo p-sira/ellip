@@ -3,13 +3,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version bump'
+        description: 'Version to publish'
         required: true
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
+        type: string
 permissions:
   contents: write
 jobs:

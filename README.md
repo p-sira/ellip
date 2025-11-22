@@ -84,7 +84,7 @@ Learn more at [doc.rs](https://docs.rs/ellip).
 
 In the unit tests, the functions are tested against the Boost Math and Wolfram test data. Since Ellip accepts the argument `m` (parameter) instead of `k` (modulus) to allow larger domain support, the full accuracy report uses exclusively the Wolfram data. **The full accuracy report can be found [here](https://github.com/p-sira/ellip/blob/main/tests)**, along with the test data and test generation scripts. The performance benchmark is presented to provide comparison between functions in Ellip. Comparing performance with other libraries is non-trivial, since they accept different domains of input.
 
-Benchmark on AMD Ryzen 5 4600H with Radeon Graphics @3.0 GHz running x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.8 at `f64` precision (ε=2.2204460492503131e-16).
+Benchmark on AMD Ryzen 5 4600H with Radeon Graphics @3.0 GHz running x86_64-unknown-linux-gnu rustc 1.90.0 using ellip v0.5.9 at `f64` precision (ε=2.2204460492503131e-16).
 
 ### Legendre's Elliptic Integrals
 | Function            | Median Error (ε) | Max Error (ε) | Mean Performance |
