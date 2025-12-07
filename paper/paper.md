@@ -50,8 +50,6 @@ Ellip consists of four modules: legendre, bulirsch, carlson, and misc. The funct
 
 Performance is optimized by deferring input validation, i.e., assuming inputs are valid and raising errors upon completing the routine. Ellip-Rayon was released as a companion library for parallelizing large inputs. Python is supported via the EllipPy library, using PyO3 [@pyo3projectandcontributors2025] for Rust-Python binding. The documentation covers all public functions, encompassing their mathematical definitions, domains, graphical representations, special cases, and related functions.
 
-The compilation of Ellip is controlled by feature flags. The `no-std` flag enables Ellip to compile in no-std environments. The `unstable` flag exposes internal functions for advanced users, bypassing input validations at the cost of safety guarantees. Lastly, the `test_force_fail` is used for code coverage, where some conditions are unreachable as remnants of defensive programming.
-
 Table 1: Legendre's Elliptic Integral Functions of the Module `legendre`
 
 +------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -136,6 +134,8 @@ Table 3: Carlson's Symmetric Elliptic Integral Functions of the Module `carlson`
 +======================================================+==============================================================================================================================================================================+
 | Computation using Carlson's duplication theorem [@carlson2025].                                                                                                                                                                     |
 +======================================================+==============================================================================================================================================================================+
+
+The compilation of Ellip is controlled by feature flags. The `no-std` flag enables Ellip to compile in no-std environments. The `unstable` flag exposes internal functions for advanced users, bypassing input validations at the cost of safety guarantees. Lastly, the `test_force_fail` is used for code coverage, where some conditions are unreachable as remnants of defensive programming.
 
 Table 4: Miscellaneous Functions Related to Elliptic Integrals of the Module `misc`
 
