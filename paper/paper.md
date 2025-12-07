@@ -26,6 +26,8 @@ bibliography: paper.bib
 
 Ellip is an elliptic integral library implemented in Rust. Legendre's, Carlson's, and Bulirsch's forms are provided as generic-typed functions, compatible with no-std environments. The library is extensively tested for accuracy against Wolfram Engine with errors within a few machine epsilons. Ellip contributes to the Rust scientific ecosystem by providing fundamental mathematical functions applicable across mathematics, physics, and engineering.
 
+![Examples of Elliptic Integral Functions Computed with Ellip and Visualized Using Plotly [@plotlyinc2025]. **(a)** Legendre's Incomplete Elliptic of the Second Kind $E(\phi, m)$ **(b)** Carlson's Degenerate Elliptic Integral of the Third Kind $R_D(x,y,z)$ **(c)** Jacobi Zeta $Z(\phi, m)$ **(d)** Bulirsch's General Complete Elliptic Integral ${cel}(k_c,p,a,b)$](figures/plots.png)
+
 # Statement of Need
 
 Elliptic integrals are special functions that arise in many areas of mathematics, physics, and engineering. Notably, they are used for computing the lengths of plane curves [@carlson2025], calculating magnetic fields [@derby2010], modeling interactions in string theory [@blumlein2019], solving nonlinear mechanics [@anakhaev2020], and describing two-body scattering dynamics in the field of astrophysics [@bern2022]. 
@@ -225,10 +227,6 @@ Table 5: Summary of Function Accuracy at 64-bit Precision.
 Numerical errors are typically below one machine epsilon, and generally within tens to hundreds of machine epsilon. Since the functions are convergent, such errors can be mitigated upon the availability of a 128-bit float type in the Rust stable build.
 
 # Usage Example
-
-The documentation of Ellip contains examples and graphs. The graphs were rendered using Plotly [@plotlyinc2025].
-
-![**(a)** Legendre's Incomplete Elliptic of the Second Kind $E(\phi, m)$ **(b)** Carlson's Degenerate Elliptic Integral of the Third Kind $R_D(x,y,z)$ **(c)** Jacobi Zeta $Z(\phi, m)$ **(d)** Bulirsch's General Complete Elliptic Integral ${cel}(k_c,p,a,b)$](figures/plots.png)
 
 The following example shows a function for calculating the perimeter of an ellipse using the formula derived from @chandrupatla2010. With $m = 1 - b^2 / a^2$, the formula can be expressed using Legendre's elliptic integral of the second kind $E$ or Carlson's symmetric integrals $R_G$:
 
