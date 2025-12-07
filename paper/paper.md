@@ -26,7 +26,7 @@ bibliography: paper.bib
 
 Ellip is an elliptic integral library implemented in Rust. Legendre's, Carlson's, and Bulirsch's forms are provided as generic-typed functions, compatible with no-std environments. The library is extensively tested for accuracy against Wolfram Engine with errors within a few machine epsilons. Ellip contributes to the Rust scientific ecosystem by providing fundamental mathematical functions applicable across mathematics, physics, and engineering.
 
-![Examples of Elliptic Integral Functions Computed with Ellip and Visualized Using Plotly [@plotlyinc2025]. **(a)** Legendre's Incomplete Elliptic of the Second Kind $E(\phi, m)$ **(b)** Carlson's Degenerate Elliptic Integral of the Third Kind $R_D(x,y,z)$ **(c)** Jacobi Zeta $Z(\phi, m)$ **(d)** Bulirsch's General Complete Elliptic Integral ${cel}(k_c,p,a,b)$](figures/plots.png)
+![Examples of Elliptic Integral Functions Computed with Ellip and Visualized Using Plotly [@plotlyinc2025]. **(a)** Legendre's Incomplete Elliptic of the Second Kind **(b)** Carlson's Degenerate Elliptic Integral of the Third Kind **(c)** Jacobi Zeta **(d)** Bulirsch's General Complete Elliptic Integral](figures/plots.png)
 
 # Statement of Need
 
