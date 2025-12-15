@@ -46,7 +46,7 @@ $$\int R(t, \sqrt{P(t)}) dt,$$
 
 where $P$ is a cubic or quartic polynomial in $t$ [@byrd1971].
 
-Ellip consists of four modules: legendre, bulirsch, carlson, and misc. The functions are implemented exclusively in Rust, accept generic real numbers provided by the num-traits's Float [@stone2024], and operate entirely on the stack. The functions are outlined in Tables 1, 2, 3, and 4, respectively.
+Ellip consists of four modules: `legendre`, `bulirsch`, `carlson`, and `misc`. The functions are implemented exclusively in Rust, accept generic real numbers provided by num-traits's `float` [@stone2024], and operate entirely on the stack. The functions are outlined in Tables 1, 2, 3, and 4, respectively.
 
 Performance is optimized by deferring input validation, i.e., assuming inputs are valid and raising errors upon completing the routine. Ellip-Rayon was released as a companion library for parallelizing large inputs. Python is supported via the EllipPy library, using PyO3 [@pyo3projectandcontributors2025] for Rust-Python binding. The documentation covers all public functions, encompassing their mathematical definitions, domains, graphical representations, special cases, and related functions.
 
