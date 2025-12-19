@@ -2,7 +2,7 @@
 members = ["ellip-rayon", "ellip-dev-utils", "ellip-plot-graph"]
 
 [workspace.package]
-version = "0.5.9"
+version = "1.0.0"
 authors = ["Sira Pornsiriprasert <code@psira.me>"]
 categories = ["mathematics", "science"]
 keywords = ["special", "elliptic", "integral"]
@@ -14,8 +14,8 @@ documentation = "https://docs.rs/ellip"
 license = "BSD-3-Clause"
 
 [workspace.dependencies]
-ellip = { version = "0.5", path = "." }
-ellip-dev-utils = { version = "0.5", path = "ellip-dev-utils" }
+ellip = { version = "1.0", path = "." }
+ellip-dev-utils = { version = "1.0", path = "ellip-dev-utils" }
 
 [package.metadata.release]
 dependent-version = "upgrade"
