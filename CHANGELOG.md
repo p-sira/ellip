@@ -1,4 +1,8 @@
 # Changelog
+## 1.0
+### 1.0.0
+- First stable release of Ellip.
+
 ## 0.5
 ### 0.5.9
 **Minor Fixes**
