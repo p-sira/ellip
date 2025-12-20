@@ -62,7 +62,7 @@ use crate::{
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
-    match (m * 20.0).to_i8() {
+    match (m * 20.0).to_i64() {
         Some(0) | Some(1) => {
             let coeffs = [
                 1.591003453790792180,

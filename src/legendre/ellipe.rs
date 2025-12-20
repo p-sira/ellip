@@ -77,7 +77,7 @@ pub fn ellipe<T: Float>(m: T) -> Result<T, StrErr> {
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
-    match (m * 20.0).to_i8() {
+    match (m * 20.0).to_i64() {
         Some(0) | Some(1) => {
             let coeffs = [
                 1.550973351780472328,
