@@ -1,5 +1,9 @@
 # Changelog
 ## 1.0
+### 1.0.1
+**Bug Fixes**
+- Fix integer overflow in `ellipk` and `ellipe`.
+
 ### 1.0.0
 - First stable release of Ellip.
 
