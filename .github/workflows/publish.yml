@@ -1,4 +1,5 @@
 name: Publish
+
 on:
   workflow_dispatch:
     inputs:
@@ -6,8 +7,10 @@ on:
         description: 'Version to publish'
         required: true
         type: string
+
 permissions:
   contents: write
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -15,15 +18,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
-      - run: |
+          fetch-depth: 0
+
+      - name: Configure git identity
+        run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
-      - name: Extract version from tag
-        id: version
-        run: |
-          TAG="${GITHUB_REF#refs/tags/}"
-          echo "version=${TAG#v}" >> $GITHUB_OUTPUT
+
       - name: Cache cargo registry and build
         uses: actions/cache@v4
         with:
@@ -34,10 +35,12 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
+
       - name: Setup Rust
         run: |
           rustup update stable
           cargo install cargo-release
+
       - name: Publish all
         run: cargo release --workspace --allow-branch "*" "${{ github.event.inputs.version }}" --no-confirm --execute
         env:
