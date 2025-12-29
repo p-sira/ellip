@@ -268,7 +268,7 @@ const N_MAX_ITERATION: usize = 100;
 const N_MAX_ITERATION: usize = 1;
 
 #[cfg(not(feature = "test_force_fail"))]
-#[cfg(all(test, not(feature = "no_std")))]
+#[cfg(test)]
 mod tests {
     use itertools::Itertools;
 

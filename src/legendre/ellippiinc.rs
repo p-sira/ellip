@@ -389,7 +389,7 @@ pub fn ellippiinc_bulirsch_with_const<T: Float, C: BulirschConst<T>>(
 }
 
 #[cfg(not(feature = "test_force_fail"))]
-#[cfg(all(test, not(feature = "no_std")))]
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::{compare_test_data_boost, compare_test_data_wolfram, ellipeinc, ellippi};

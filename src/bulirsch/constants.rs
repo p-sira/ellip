@@ -82,7 +82,7 @@ pub(crate) struct DefaultPrecision;
 impl_bulirsch_const!(DefaultPrecision, {D: 16, CA: 1e-8, CB: 1e-18, LIM: 1e-12});
 
 #[cfg(not(feature = "test_force_fail"))]
-#[cfg(all(test, not(feature = "no_std")))]
+#[cfg(test)]
 mod tests {
     use super::*;
 

@@ -57,6 +57,7 @@ harness = false
 [features]
 default = []
 unstable = []
+# Deprecated. Has no effect. The feature flag ept for legacy compatibility. Ellip supports no_std by default. 
 no_std = []
 # Used for generating code coverage report only
 test_force_fail = []

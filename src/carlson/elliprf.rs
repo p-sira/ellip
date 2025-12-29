@@ -200,7 +200,7 @@ const N_MAX_ITERATIONS: usize = 11;
 const N_MAX_ITERATIONS: usize = 1;
 
 #[cfg(not(feature = "test_force_fail"))]
-#[cfg(all(test, not(feature = "no_std")))]
+#[cfg(test)]
 mod tests {
     use core::f64;
 

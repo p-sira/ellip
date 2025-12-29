@@ -142,7 +142,7 @@ pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
 }
 
 #[cfg(not(feature = "test_force_fail"))]
-#[cfg(all(test, not(feature = "no_std")))]
+#[cfg(test)]
 mod tests {
     use itertools::Itertools;
 

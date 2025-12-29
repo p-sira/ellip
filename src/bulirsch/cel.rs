@@ -305,7 +305,7 @@ const MAX_ITERATION: i16 = 10;
 const MAX_ITERATION: i16 = 1;
 
 #[cfg(not(feature = "test_force_fail"))]
-#[cfg(all(test, not(feature = "no_std")))]
+#[cfg(test)]
 mod tests {
     use itertools::iproduct;
 
