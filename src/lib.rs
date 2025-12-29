@@ -60,7 +60,6 @@
 //! - [fn@jacobi_zeta]: Jacobi Zeta function (Z).
 //! - [fn@heuman_lambda]: Heuman Lambda function (Λ0).
 //! ## Feature Flags
-//! - `no_std`: Enable `no_std` environment support.
 //! - `unstable`: Enable unstable or untested features that might be changed without notice in the future.
 //! - `test_force_fail`: Used for testing only. Force tests to reach code unreachable under normal circumstances.
 //!
