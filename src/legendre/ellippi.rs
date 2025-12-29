@@ -173,7 +173,7 @@ pub fn ellippi_vc<T: Float>(n: T, m: T, vc: T) -> T {
 }
 
 #[cfg(not(feature = "test_force_fail"))]
-#[cfg(all(test, not(feature = "no_std")))]
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::{compare_test_data_boost, compare_test_data_wolfram};

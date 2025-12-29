@@ -1,5 +1,9 @@
 # Changelog
 ## 1.0
+### 1.0.2
+- Ellip is `no_std` by default.
+- Deprecate `no_std` feature flag.
+
 ### 1.0.1
 **Bug Fixes**
 - Fix integer overflow in `ellipk` and `ellipe`.

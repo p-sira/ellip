@@ -168,7 +168,7 @@ fn ellipe_wrapper<T: Float>(m: T) -> Result<T, StrErr> {
 }
 
 #[cfg(not(feature = "test_force_fail"))]
-#[cfg(all(test, not(feature = "no_std")))]
+#[cfg(test)]
 mod tests {
     use crate::compare_test_data_boost;
 

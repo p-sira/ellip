@@ -114,7 +114,7 @@ fn jacobi_zeta_unchecked_k<T: Float>(phi: T, m: T, k: T) -> T {
 }
 
 #[cfg(not(feature = "test_force_fail"))]
-#[cfg(all(test, not(feature = "no_std")))]
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::compare_test_data_wolfram;

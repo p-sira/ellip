@@ -2,7 +2,7 @@
 members = ["ellip-rayon", "ellip-dev-utils", "ellip-plot-graph"]
 
 [workspace.package]
-version = "1.0.1"
+version = "1.0.2"
 authors = ["Sira Pornsiriprasert <code@psira.me>"]
 categories = ["mathematics", "science"]
 keywords = ["special", "elliptic", "integral"]
@@ -57,6 +57,7 @@ harness = false
 [features]
 default = []
 unstable = []
+# Deprecated. Has no effect. The feature flag ept for legacy compatibility. Ellip supports no_std by default. 
 no_std = []
 # Used for generating code coverage report only
 test_force_fail = []

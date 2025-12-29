@@ -3,7 +3,7 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-#![cfg_attr(feature = "no_std", no_std)]
+#![cfg_attr(not(test), no_std)]
 #![cfg_attr(feature = "test_force_fail", allow(unused))]
 #![allow(clippy::excessive_precision)]
 //! # Ellip - Elliptic integrals for Rust
@@ -135,5 +135,5 @@ mod polyeval;
 use polyeval::polyeval;
 pub mod util;
 
-#[cfg(all(test, not(feature = "no_std")))]
+#[cfg(test)]
 mod test_util;
