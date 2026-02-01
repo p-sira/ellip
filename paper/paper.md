@@ -246,4 +246,8 @@ fn ellipse_perimeter(a: f64, b: f64) -> Result<f64, StrErr> {
 println!("{}", ellipse_perimeter(5.0, 3.0).unwrap()); // 25.526998863398124
 ```
 
+# Acknowledgment
+
+I thank the SciPy, Cephes Math Library, Boost Math Library, and Russell Lab contributors for their design inspirations, technical references, and commitment to making mathematical libraries freely available to all.
+
 # References
