@@ -1,0 +1,30 @@
+cff-version: "1.2.0"
+authors:
+- family-names: Pornsiriprasert
+  given-names: Sira
+  orcid: "https://orcid.org/0000-0002-5636-8870"
+contact:
+- family-names: Pornsiriprasert
+  given-names: Sira
+  orcid: "https://orcid.org/0000-0002-5636-8870"
+doi: 10.5281/zenodo.17990805
+message: If you use this software, please cite our article in the
+  Journal of Open Source Software.
+preferred-citation:
+  authors:
+  - family-names: Pornsiriprasert
+    given-names: Sira
+    orcid: "https://orcid.org/0000-0002-5636-8870"
+  date-published: 2026-02-03
+  doi: 10.21105/joss.09386
+  issn: 2475-9066
+  issue: 118
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 9386
+  title: "Ellip: An Elliptic Integral Library for Rust"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.09386"
+  volume: 11
+title: "Ellip: An Elliptic Integral Library for Rust"

@@ -84,6 +84,27 @@
 //! - NIST Digital Library, [Chapter 22 Jacobian Elliptic Functions](https://dlmf.nist.gov/22) (Reinhardt and Walker, 2025).
 //!
 //! Unicode-style mathematical notation are created using [Diagon](https://github.com/ArthurSonzogni/Diagon).
+//!
+//! # Citation
+//! The paper describing Ellip is published in the [Journal of Open Source Software](https://joss.theoj.org/papers/10.21105/joss.09386). If Ellip is helpful to your work, please consider citing it:
+//!
+//! ```text
+//! Pornsiriprasert, S., (2026). Ellip: An Elliptic Integral Library for Rust. Journal of Open Source Software, 11(118), 9386, https://doi.org/10.21105/joss.09386
+//! ```
+//!
+//! Bibtex format:
+//!
+//! ```bibtex
+//! @article{Pornsiriprasert2026,
+//!     doi = {10.21105/joss.09386},
+//!    url = {https://doi.org/10.21105/joss.09386},
+//!    year = {2026},
+//!    publisher = {The Open Journal},
+//!    volume = {11}, number = {118}, pages = {9386},
+//!    author = {Pornsiriprasert, Sira},
+//!    title = {Ellip: An Elliptic Integral Library for Rust},
+//!    journal = {Journal of Open Source Software} }
+//! ```
 
 num_lazy::declare_nums! {@constant T}
 num_lazy::declare_nums! {@special T}

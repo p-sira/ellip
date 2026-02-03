@@ -625,7 +625,7 @@ checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
 
 [[package]]
 name = "ellip"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "criterion",
  "csv",
@@ -638,7 +638,7 @@ dependencies = [
 
 [[package]]
 name = "ellip-dev-utils"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "csv",
  "glob",
@@ -652,7 +652,7 @@ dependencies = [
 
 [[package]]
 name = "ellip-plot-graph"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "ellip",
  "plotly",
@@ -660,7 +660,7 @@ dependencies = [
 
 [[package]]
 name = "ellip-rayon"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "criterion",
  "ellip",
