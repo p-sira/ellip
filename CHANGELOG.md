@@ -1,5 +1,8 @@
 # Changelog
 ## 1.0
+### 1.0.3
+- Add DOI link to the published paper in JOSS.
+
 ### 1.0.2
 - Ellip is `no_std` by default.
 - Deprecate `no_std` feature flag.
