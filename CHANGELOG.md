@@ -1,5 +1,8 @@
 # Changelog
 ## 1.0
+### 1.0.4
+- Update dependencies.
+
 ### 1.0.3
 - Add DOI link to the published paper in JOSS.
 
