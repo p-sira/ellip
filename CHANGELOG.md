@@ -1,5 +1,8 @@
 # Changelog
 ## 1.0
+### 1.0.5
+- Refactor the example in README.
+
 ### 1.0.4
 - Update dependencies.
 
