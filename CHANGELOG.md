@@ -1,8 +1,9 @@
 # Changelog
 ## 1.0
 ### 1.0.5
+- Fix `no_std` support. Update `num-lazy` to v0.4.0.
 - Refactor the example in README.
-- Add "no-std" category for crates.io.
+- Add `no-std` category for crates.io.
 
 ### 1.0.4
 - Update dependencies.
