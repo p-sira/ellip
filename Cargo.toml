@@ -4,7 +4,7 @@ members = ["ellip-rayon", "ellip-dev-utils", "ellip-plot-graph"]
 [workspace.package]
 version = "1.0.4"
 authors = ["Sira Pornsiriprasert <code@psira.me>"]
-categories = ["mathematics", "science"]
+categories = ["mathematics", "science", "no-std"]
 keywords = ["special", "elliptic", "integral"]
 
 homepage = "https://github.com/p-sira/ellip"
