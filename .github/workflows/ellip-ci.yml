@@ -30,6 +30,23 @@ jobs:
     - name: Make docs
       run: cargo doc --no-deps
 
+  test-no-std:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install no_std target
+        run: rustup target add thumbv7m-none-eabi
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-nostd-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+      - name: Test no_std
+        run: cargo test --target thumbv7m-none-eabi
+
   format:
     needs: test
     runs-on: ubuntu-latest
