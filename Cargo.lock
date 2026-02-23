@@ -1688,9 +1688,9 @@ checksum = "cf97ec579c3c42f953ef76dbf8d55ac91fb219dde70e49aa4a6b7d74e9919050"
 
 [[package]]
 name = "num-lazy"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae0667ea2bcc74cbfa6c9d34effb390ef45e989ea8c1418ae049b1cbc29d43f5"
+checksum = "01a2717bb23dbaae60d5f169a0e29b1cc09f3fd6b676f32bedff0bdb9465bec2"
 
 [[package]]
 name = "num-traits"
