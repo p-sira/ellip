@@ -2,6 +2,7 @@
 ## 1.0
 ### 1.0.5
 - Refactor the example in README.
+- Add "no-std" category for crates.io.
 
 ### 1.0.4
 - Update dependencies.
