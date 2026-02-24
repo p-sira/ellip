@@ -41,7 +41,7 @@ include = ["/src", "/tests/README.md", "/LICENSE"]
 
 [dependencies]
 num-lazy = "0.4.1"
-num-traits = { version = "0.2.19", default-features = false, features = ["libm"] }
+num-traits = { version = "0.2.19", default-features = false }
 numeric_literals = "0.2.0"
 
 [dev-dependencies]
