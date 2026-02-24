@@ -2,6 +2,7 @@
 ## 1.1
 ### 1.1.0
 - **`std` feature flag:** Enable to use `std` instead of `libm` as the math backend.
+- Reduce package size.
 
 ## 1.0
 ### 1.0.5
