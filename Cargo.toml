@@ -2,9 +2,9 @@
 members = ["ellip-rayon", "ellip-dev-utils", "ellip-plot-graph"]
 
 [workspace.package]
-version = "1.0.4"
+version = "1.0.5"
 authors = ["Sira Pornsiriprasert <code@psira.me>"]
-categories = ["mathematics", "science"]
+categories = ["mathematics", "science", "no-std"]
 keywords = ["special", "elliptic", "integral"]
 
 homepage = "https://github.com/p-sira/ellip"
@@ -40,8 +40,8 @@ edition = "2021"
 include = ["/src", "/tests/README.md", "/LICENSE"]
 
 [dependencies]
-num-lazy = "0.3.0"
-num-traits = "0.2"
+num-lazy = "0.4.1"
+num-traits = { version = "0.2.19", default-features = false, features = ["libm"] }
 numeric_literals = "0.2.0"
 
 [dev-dependencies]
@@ -57,7 +57,7 @@ harness = false
 [features]
 default = []
 unstable = []
-# Deprecated. Has no effect. The feature flag ept for legacy compatibility. Ellip supports no_std by default. 
+# Deprecated. Has no effect. The feature flag kept for legacy compatibility. Ellip supports no_std by default. 
 no_std = []
 # Used for generating code coverage report only
 test_force_fail = []
