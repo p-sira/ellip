@@ -1,4 +1,9 @@
 # Changelog
+## 1.1
+### 1.1.0
+- **`std` feature flag:** Enable to use `std` instead of `libm` as the math backend.
+- Reduce package size.
+
 ## 1.0
 ### 1.0.5
 - **Fix `no_std`**: Update `num-lazy` to v0.4.1 and `num-traits` to v0.2.19.
