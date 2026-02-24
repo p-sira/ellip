@@ -25,8 +25,10 @@ jobs:
     - uses: actions/checkout@v4
     - name: Run clippy
       run: cargo clippy 
-    - name: Test
-      run: cargo test -- --show-output
+    - name: Test no_std
+      run: cargo test
+    - name: Test std
+      run: cargo test --no-default-features --features=std
     - name: Make docs
       run: cargo doc --no-deps
 
