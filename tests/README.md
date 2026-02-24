@@ -28,7 +28,7 @@ The test datasets are not distributed with the crate by default. You may generat
 
 ## f64 Results
 
-This report is generated on AMD EPYC 7763 64-Core Processor running x86_64-unknown-linux-gnu rustc 1.93.0 using ellip v1.0.4 at `f64` precision (ε=2.2204460492503131e-16).
+This report is generated on AMD EPYC 7763 64-Core Processor running x86_64-unknown-linux-gnu rustc 1.93.1 using ellip v1.0.5 at `f64` precision (ε=2.2204460492503131e-16).
 
 ### Legendre's Complete Elliptic Integrals
 
@@ -98,7 +98,7 @@ Note that `elliprj` is numerically unstable in the principal value domain when t
 
 ## f32 Results
 
-Generated on AMD EPYC 7763 64-Core Processor running x86_64-unknown-linux-gnu rustc 1.93.0 using ellip v1.0.4 at `f32` precision (ε≈1.19e-7).
+Generated on AMD EPYC 7763 64-Core Processor running x86_64-unknown-linux-gnu rustc 1.93.1 using ellip v1.0.5 at `f32` precision (ε≈1.19e-7).
 
 ### Legendre's Complete Elliptic Integrals
 
