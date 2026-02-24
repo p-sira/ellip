@@ -15,7 +15,7 @@ license = "BSD-3-Clause"
 
 [workspace.dependencies]
 ellip = { version = "1.1", path = "." }
-ellip-dev-utils = { version = "1.0", path = "ellip-dev-utils" }
+ellip-dev-utils = { version = "1.1", path = "ellip-dev-utils" }
 
 [package.metadata.release]
 dependent-version = "upgrade"
