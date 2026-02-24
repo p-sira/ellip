@@ -18,7 +18,10 @@
         <img src="https://img.shields.io/badge/Docs-docs.rs-blue" alt="Documentation">
     </a>
     <a href="https://codecov.io/github/p-sira/ellip" > 
-        <img src="https://codecov.io/github/p-sira/ellip/graph/badge.svg?token=JVM89PIP5K"/> 
+        <img src="https://codecov.io/github/p-sira/ellip/graph/badge.svg?token=JVM89PIP5K"> 
+    </a>
+    <a style="border-width:0" href="https://doi.org/10.21105/joss.09386">
+        <img src="https://joss.theoj.org/papers/10.21105/joss.09386/status.svg" alt="DOI badge">
     </a>
 </p>
 
@@ -37,17 +40,17 @@ Start by installing Ellip.
 >> cargo add ellip
 ```
 
-Let's compute the circumference of an ellipse.
+Let's compute the perimeter of an ellipse.
 
 ```rust
 use ellip::*;
 
-fn ellipse_length(a: f64, b: f64) -> Result<f64, StrErr> {
+fn ellipse_perimeter(a: f64, b: f64) -> Result<f64, StrErr> {
     Ok(8.0 * elliprg(0.0, a * a, b * b)?)
 }
 
-let ans = ellipse_length(5.0, 3.0).unwrap();
-ellip::util::assert_close(ans, 25.526998863398124, 1e-15);
+// Example: ellipse with semi-major axis 5, semi-minor axis 3
+println!("{}", ellipse_perimeter(5.0, 3.0).unwrap()); // 25.526998863398124
 ```
 
 Learn more at [doc.rs](https://docs.rs/ellip).
@@ -146,6 +149,28 @@ cargo run -p ellip-plot-graph --bin [function-name]
 ```
 
 See available plots in [ellip-plot-graph/src/bin](https://github.com/p-sira/ellip/blob/main/ellip-plot-graph/src/bin/)
+
+## Citation
+
+The paper describing Ellip is published in the [Journal of Open Source Software](https://joss.theoj.org/papers/10.21105/joss.09386). If Ellip is helpful to your work, please consider citing it:
+
+```text
+Pornsiriprasert, S., (2026). Ellip: An Elliptic Integral Library for Rust. Journal of Open Source Software, 11(118), 9386, https://doi.org/10.21105/joss.09386
+```
+
+Bibtex format:
+
+```bibtex
+@article{Pornsiriprasert2026,
+    doi = {10.21105/joss.09386}, 
+    url = {https://doi.org/10.21105/joss.09386}, 
+    year = {2026}, 
+    publisher = {The Open Journal}, 
+    volume = {11}, number = {118}, pages = {9386},
+    author = {Pornsiriprasert, Sira}, 
+    title = {Ellip: An Elliptic Integral Library for Rust}, 
+    journal = {Journal of Open Source Software} } 
+```
 
 ---
 
