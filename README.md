@@ -5,22 +5,22 @@
 </h1>
 
 <p align="center">
-    <a href="https://opensource.org/license/BSD-3-clause">
+    <a href="https://opensource.org/license/BSD-3-clause" style="text-decoration: none">
         <img src="https://img.shields.io/badge/License-BSD--3--Clause-brightgreen.svg" alt="License">
     </a>
-    <a href="https://crates.io/crates/ellip">
+    <a href="https://crates.io/crates/ellip" style="text-decoration: none">
         <img src="https://img.shields.io/crates/v/ellip" alt="Crate">
     </a>
-    <a href="https://crates.io/crates/ellip">
+    <a href="https://crates.io/crates/ellip" style="text-decoration: none">
         <img src="https://img.shields.io/crates/d/ellip" alt="Total Downloads">
     </a>
-    <a href="https://docs.rs/ellip">
+    <a href="https://docs.rs/ellip" style="text-decoration: none">
         <img src="https://img.shields.io/badge/Docs-docs.rs-blue" alt="Documentation">
     </a>
-    <a href="https://codecov.io/github/p-sira/ellip" > 
+    <a href="https://codecov.io/github/p-sira/ellip" style="text-decoration: none" > 
         <img src="https://codecov.io/github/p-sira/ellip/graph/badge.svg?token=JVM89PIP5K"> 
     </a>
-    <a style="border-width:0" href="https://doi.org/10.21105/joss.09386">
+    <a style="border-width:0" href="https://doi.org/10.21105/joss.09386" style="text-decoration: none">
         <img src="https://joss.theoj.org/papers/10.21105/joss.09386/status.svg" alt="DOI badge">
     </a>
 </p>
