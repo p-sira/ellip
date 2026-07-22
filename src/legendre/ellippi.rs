@@ -138,6 +138,11 @@ pub fn ellippi_unchecked<T: Float>(n: T, m: T) -> T {
             return ellipk(m).unwrap_or(nan!());
         }
         // n < 0: ellippi(n,m)
+        // On the diagonal, Π(n, n) = E(n) / (1 - n) (https://dlmf.nist.gov/19.6.E1).
+        // The A&S 17.7.17 form below divides by m - n, so handle m = n directly.
+        if m == n {
+            return ellipe(m).unwrap_or(nan!()) / (1.0 - m);
+        }
         // Apply A&S 17.7.17
         let nn = (m - n) / (1.0 - n);
         let nm1 = (1.0 - m) / (1.0 - n);
@@ -196,6 +201,33 @@ mod tests {
     #[test]
     fn test_ellippi_wolfram_pv() {
         compare_test_data_wolfram!("ellippi_pv.csv", ellippi, 2, 1e-14);
+    }
+
+    #[test]
+    fn test_ellippi_negative_diagonal() {
+        // Pi(n, n) = E(n) / (1 - n) for n < 1. Previously errored for n = m < 0 because
+        // the A&S 17.7.17 branch divides by m - n. Reference values from mpmath.
+        use crate::util::assert_close;
+        assert_close(ellippi(-0.5, -0.5).unwrap(), 1.1678475171298786, 1e-14);
+        assert_close(ellippi(-2.0, -2.0).unwrap(), 0.72814604758206706, 1e-14);
+        assert_close(ellippi(-10.0, -10.0).unwrap(), 0.33083073076525165, 1e-14);
+        assert_close(ellippi(-100.0, -100.0).unwrap(), 0.10108179128529279, 1e-14);
+        assert_close(
+            ellippi(-1000.0, -1000.0).unwrap(),
+            0.031675528525186074,
+            1e-14,
+        );
+        // Consistency with the closed form and with the (already handled) n = m > 0 diagonal.
+        assert_close(
+            ellippi(-0.5, -0.5).unwrap(),
+            ellipe(-0.5).unwrap() / 1.5,
+            1e-14,
+        );
+        assert_close(
+            ellippi(0.5, 0.5).unwrap(),
+            ellipe(0.5).unwrap() / 0.5,
+            1e-14,
+        );
     }
 
     #[test]
