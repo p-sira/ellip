@@ -168,7 +168,9 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
             }
 
             result = sign * ellippiinc_vc(rphi, n, m, nc)?;
-            if mm > 0.0 && nc > 0.0 {
+            // Add the whole-period term for every characteristic, including n > 1
+            // (nc = 1 - n < 0), where ellippi_vc returns the Cauchy principal value.
+            if mm > 0.0 {
                 result = result + mm * ellippi_vc(n, m, nc);
             }
         }
@@ -486,6 +488,62 @@ mod tests {
             ellippiinc(0.5, 0.5, NAN),
             Err("ellippiinc: Arguments cannot be NAN.")
         );
+    }
+
+    #[test]
+    fn test_ellippiinc_pv_period_reduction() {
+        // phi > pi/2 with n > 1: the whole-period term Pi(n, m) (a Cauchy principal
+        // value when n > 1) must be added. Reference values from mpmath (real part).
+        use crate::util::assert_close;
+        use std::f64::consts::PI;
+        assert_close(
+            ellippiinc(1.8, 2.0, 0.5).unwrap(),
+            -0.64674706139956679,
+            1e-13,
+        );
+        assert_close(
+            ellippiinc(2.5, 2.0, 0.5).unwrap(),
+            -1.6381653646511639,
+            1e-13,
+        );
+        assert_close(
+            ellippiinc(PI, 2.0, 0.5).unwrap(),
+            -0.62708936693036821,
+            1e-13,
+        );
+        assert_close(
+            ellippiinc(2.0 * PI, 2.0, 0.5).unwrap(),
+            -1.2541787338607364,
+            1e-13,
+        );
+        assert_close(
+            ellippiinc(4.0, 2.0, 0.5).unwrap(),
+            0.73728081706497557,
+            1e-13,
+        );
+        assert_close(
+            ellippiinc(3.0, 5.0, 0.3).unwrap(),
+            -0.25933770747965593,
+            1e-13,
+        );
+        assert_close(
+            ellippiinc(5.0, 3.0, 0.7).unwrap(),
+            -1.2918432212584487,
+            1e-13,
+        );
+        assert_close(
+            ellippiinc(PI, 2.0, -1.0).unwrap(),
+            0.44341914376644227,
+            1e-13,
+        );
+        // Period-doubling identity Pi(pi, n, m) = 2 Pi(n, m) (oracle-free check).
+        for &(n, m) in &[(2.0, 0.5), (5.0, 0.3), (1.5, 0.9), (0.5, 0.5), (-0.5, 0.3)] {
+            assert_close(
+                ellippiinc(PI, n, m).unwrap(),
+                2.0 * ellippi(n, m).unwrap(),
+                1e-13,
+            );
+        }
     }
 
     #[test]
