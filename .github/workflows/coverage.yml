@@ -16,7 +16,7 @@ jobs:
       - name: Generate code coverage
         run: cargo llvm-cov -p ellip --lcov --output-path lcov.info --ignore-filename-regex 'benches/.*|examples/.*|src/test_util\.rs|ellip-dev-utils/.*'
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: lcov.info
@@ -35,7 +35,7 @@ jobs:
       - name: Generate code coverage
         run: cargo llvm-cov run --example generate_error_report --lcov --output-path lcov.info --ignore-filename-regex 'ellip-dev-utils/.*'
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: lcov.info
@@ -54,7 +54,7 @@ jobs:
       - name: Generate code coverage
         run: cargo llvm-cov -p ellip --lcov --output-path lcov.info test --tests --features test_force_fail --no-default-features --ignore-filename-regex 'benches/.*|examples/.*|src/test_util\.rs|ellip-dev-utils/.*'
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: lcov.info
