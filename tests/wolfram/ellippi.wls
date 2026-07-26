@@ -47,3 +47,14 @@ ellipPiPV = Flatten[Table[{n, m, EllipticPi[SetPrecision[n, 30], SetPrecision[
 ellipPiPV = Select[ellipPiPV, Element[#[[3]], Reals]&];
 
 Export["../data/wolfram/ellippi_pv.csv", N[ellipPiPV], "CSV"];
+
+(* Elliptic integrals of the Third Kind - Negative Diagonal & Near Diagonal *)
+
+nDiag = Subdivide[-5, -0.01, 20];
+
+ellipPiDiag = Flatten[Table[{n, m, EllipticPi[SetPrecision[n, 30], SetPrecision[
+    m, 30]]}, {n, nDiag}, {m, {n, n + epsilon, n - epsilon, n + 100 * epsilon, n - 100 * epsilon}}], 1];
+
+ellipPiDiag = Select[ellipPiDiag, Element[#[[3]], Reals]&];
+
+Export["../data/wolfram/ellippi_near_diag.csv", N[ellipPiDiag], "CSV"];

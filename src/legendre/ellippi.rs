@@ -204,6 +204,11 @@ mod tests {
     }
 
     #[test]
+    fn test_ellippi_wolfram_near_diag() {
+        compare_test_data_wolfram!("ellippi_near_diag.csv", ellippi, 2, 5e-14);
+    }
+
+    #[test]
     fn test_ellippi_negative_diagonal() {
         // Pi(n, n) = E(n) / (1 - n) for n < 1. Previously errored for n = m < 0 because
         // the A&S 17.7.17 branch divides by m - n. Reference values from mpmath.
