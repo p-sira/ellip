@@ -143,6 +143,14 @@ pub fn ellippi_unchecked<T: Float>(n: T, m: T) -> T {
         if m == n {
             return ellipe(m).unwrap_or(nan!()) / (1.0 - m);
         }
+        // Near the diagonal, A&S 17.7.17 suffers from catastrophic cancellation in m - n.
+        // Fall back to the direct Carlson form for near-diagonal cases, which avoids
+        // the division by m - n. For large |n| off the diagonal, A&S is much more
+        // accurate and avoids catastrophic cancellation between R_F and R_J.
+        if (m - n).abs() < n.abs() {
+            return ellippi_vc(n, m, 1.0 - n);
+        }
+
         // Apply A&S 17.7.17
         let nn = (m - n) / (1.0 - n);
         let nm1 = (1.0 - m) / (1.0 - n);
