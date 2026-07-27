@@ -2,7 +2,7 @@
 members = ["ellip-rayon", "ellip-dev-utils", "ellip-plot-graph"]
 
 [workspace.package]
-version = "1.1.0"
+version = "1.1.1"
 authors = ["Sira Pornsiriprasert <code@psira.me>"]
 categories = ["mathematics", "science", "no-std"]
 keywords = ["special", "elliptic", "integral"]
