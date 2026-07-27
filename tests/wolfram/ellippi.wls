@@ -13,7 +13,7 @@ muPV = 50 * epsilon;
 
 mNormal = Subdivide[0, 1 - mu, 50];
 
-ns = Subdivide[0, 1 - mu, 20];
+ns = Join[Subdivide[-5, -0.01, 10], Subdivide[0, 1 - mu, 20]];
 
 (* Elliptic integrals of the Third Kind - Normal domain *)
 
@@ -31,6 +31,13 @@ mNeg = Subdivide[-5, -0.001, 50];
 ellipPiNeg = Flatten[Table[{n, m, EllipticPi[SetPrecision[n, 30], SetPrecision[
     m, 30]]}, {n, ns}, {m, mNeg}], 1];
 
+(* Include exact near-diagonal tests for catastrophic cancellation checks *)
+nDiag = Subdivide[-5, -0.01, 20];
+
+ellipPiDiag = Flatten[Table[{n, m, EllipticPi[SetPrecision[n, 30], SetPrecision[
+    m, 30]]}, {n, nDiag}, {m, {n, n + epsilon, n - epsilon, n + 100 * epsilon, n - 100 * epsilon}}], 1];
+
+ellipPiNeg = Join[ellipPiNeg, ellipPiDiag];
 ellipPiNeg = Select[ellipPiNeg, Element[#[[3]], Reals]&];
 
 Export["../data/wolfram/ellippi_neg.csv", N[ellipPiNeg], "CSV"];

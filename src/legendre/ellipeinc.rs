@@ -138,7 +138,10 @@ pub fn ellipeinc_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         rphi = pi_2!() - rphi;
     }
 
-    let mut result = if m > 0.0 && rphi.powi(3) * m / 6.0 < epsilon!() * rphi.abs() {
+    let mut result = if rphi == 0.0 || (m > 0.0 && rphi.powi(3) * m / 6.0 < epsilon!() * rphi.abs())
+    {
+        // rphi == 0 at phi = k*pi: the reduced-angle part is 0, so skip the Carlson block
+        // (which would divide by sin²(rphi) = 0) and keep only the m*mm*E(m) period term.
         // See http://functions.wolfram.com/EllipticIntegrals/EllipticE2/06/01/03/0001/
         s * rphi
     } else {
@@ -177,6 +180,25 @@ mod tests {
     #[test]
     fn test_ellipeinc() {
         compare_test_data_boost!("ellipeinc_data.txt", ellipeinc, 2, 5e-16);
+    }
+
+    #[test]
+    fn test_ellipeinc_multiple_of_pi() {
+        // E(k*pi, m) = 2k E(m); previously errored for m not in {0, 1} because the
+        // reduced angle is 0 (sin^2 = 0). Reference values from mpmath.
+        use crate::util::assert_close;
+        use std::f64::consts::PI;
+        assert_close(ellipeinc(PI, 0.5).unwrap(), 2.7012877620953509, 1e-14);
+        assert_close(ellipeinc(2.0 * PI, 0.5).unwrap(), 5.4025755241907018, 1e-14);
+        assert_close(ellipeinc(3.0 * PI, 0.5).unwrap(), 8.1038632862860526, 1e-14);
+        assert_close(ellipeinc(-PI, 0.5).unwrap(), -2.7012877620953509, 1e-14);
+        assert_close(ellipeinc(PI, -0.5).unwrap(), 3.5035425513896356, 1e-14);
+        assert_close(ellipeinc(PI, -10.0).unwrap(), 7.2782760768355362, 1e-14);
+        assert_close(ellipeinc(PI, 0.9999).unwrap(), 2.0005491648613258, 1e-14);
+        // Period-doubling identity E(pi, m) = 2 E(m) (oracle-free check).
+        for &m in &[0.5, -0.5, 0.9999, 0.1] {
+            assert_close(ellipeinc(PI, m).unwrap(), 2.0 * ellipe(m).unwrap(), 1e-14);
+        }
     }
 
     #[test]

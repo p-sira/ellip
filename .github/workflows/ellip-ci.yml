@@ -5,37 +5,37 @@ permissions:
 
 on:
   push:
-    branches: [ "main", "dev" ]
+    branches: ["main", "dev"]
   pull_request:
-    branches: [ "main", "dev" ]
+    branches: ["main", "dev"]
   workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
 
-jobs:  
+jobs:
   test:
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest, ubuntu-24.04-arm]
     runs-on: ${{ matrix.os }}
-  
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Run clippy
-      run: cargo clippy 
-    - name: Test no_std
-      run: cargo test
-    - name: Test std
-      run: cargo test --no-default-features --features=std
-    - name: Make docs
-      run: cargo doc --no-deps
+      - uses: actions/checkout@v7
+      - name: Run clippy
+        run: cargo clippy
+      - name: Test no_std
+        run: cargo test
+      - name: Test std
+        run: cargo test --no-default-features --features=std
+      - name: Make docs
+        run: cargo doc --no-deps
 
   check-no-std:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install no_std target
         run: rustup target add thumbv7m-none-eabi
       - name: Cache cargo
@@ -53,15 +53,15 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Format code
-      if: github.event_name == 'push'
-      run: |
-        BRANCH=$(echo "${{ github.ref }}" | sed 's|refs/heads/||')
-        cargo fmt
-        git config --global user.name 'github-actions'
-        git config --global user.email 'github-actions@github.com'
-        git add .
-        git diff --cached --quiet || git commit -m "FMT: CI cargo fmt"
-        git pull --rebase origin "$BRANCH"
-        git push
+      - uses: actions/checkout@v7
+      - name: Format code
+        if: github.event_name == 'push'
+        run: |
+          BRANCH=$(echo "${{ github.ref }}" | sed 's|refs/heads/||')
+          cargo fmt
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add .
+          git diff --cached --quiet || git commit -m "FMT: CI cargo fmt"
+          git pull --rebase origin "$BRANCH"
+          git push
