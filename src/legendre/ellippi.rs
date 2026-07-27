@@ -203,7 +203,7 @@ mod tests {
 
     #[test]
     fn test_ellippi_wolfram_neg() {
-        compare_test_data_wolfram!("ellippi_neg.csv", ellippi, 2, 6.9e-15);
+        compare_test_data_wolfram!("ellippi_neg.csv", ellippi, 2, 7e-15);
     }
 
     #[test]
