@@ -147,7 +147,7 @@ pub fn ellippi_unchecked<T: Float>(n: T, m: T) -> T {
         // Fall back to the direct Carlson form for near-diagonal cases, which avoids
         // the division by m - n. For large |n| off the diagonal, A&S is much more
         // accurate and avoids catastrophic cancellation between R_F and R_J.
-        if (m - n).abs() < n.abs() {
+        if (m - n).abs() < 0.05 * n.abs() {
             return ellippi_vc(n, m, 1.0 - n);
         }
 
