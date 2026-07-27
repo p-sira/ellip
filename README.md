@@ -5,22 +5,22 @@
 </h1>
 
 <p align="center">
-    <a href="https://opensource.org/license/BSD-3-clause" style="text-decoration: none">
+    <a href="https://opensource.org/license/BSD-3-clause">
         <img src="https://img.shields.io/badge/License-BSD--3--Clause-brightgreen.svg" alt="License">
     </a>
-    <a href="https://crates.io/crates/ellip" style="text-decoration: none">
+    <a href="https://crates.io/crates/ellip">
         <img src="https://img.shields.io/crates/v/ellip" alt="Crate">
     </a>
-    <a href="https://crates.io/crates/ellip" style="text-decoration: none">
+    <a href="https://crates.io/crates/ellip">
         <img src="https://img.shields.io/crates/d/ellip" alt="Total Downloads">
     </a>
-    <a href="https://docs.rs/ellip" style="text-decoration: none">
+    <a href="https://docs.rs/ellip">
         <img src="https://img.shields.io/badge/Docs-docs.rs-blue" alt="Documentation">
     </a>
-    <a href="https://codecov.io/github/p-sira/ellip" style="text-decoration: none" > 
+    <a href="https://codecov.io/github/p-sira/ellip" > 
         <img src="https://codecov.io/github/p-sira/ellip/graph/badge.svg?token=JVM89PIP5K"> 
     </a>
-    <a style="border-width:0" href="https://doi.org/10.21105/joss.09386" style="text-decoration: none">
+    <a style="border-width:0" href="https://doi.org/10.21105/joss.09386">
         <img src="https://joss.theoj.org/papers/10.21105/joss.09386/status.svg" alt="DOI badge">
     </a>
 </p>
@@ -97,45 +97,45 @@ Learn more at [doc.rs](https://docs.rs/ellip).
 
 In the unit tests, the functions are tested against the Boost Math and Wolfram test data. Since Ellip accepts the argument `m` (parameter) instead of `k` (modulus) to allow larger domain support, the full accuracy report uses exclusively the Wolfram data. **The full accuracy report can be found [here](https://github.com/p-sira/ellip/blob/main/tests)**, along with the test data and test generation scripts. The performance benchmark is presented to provide comparison between functions in Ellip. Comparing performance with other libraries is non-trivial, since they accept different domains of input.
 
-Benchmark on AMD Ryzen 5 4600H with Radeon Graphics @3.0 GHz running `x86_64-unknown-linux-gnu rustc 1.90.0` using ellip v1.1.0 with `libm` at `f64` precision (ε≈2.22e-16).
+Benchmark on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unknown-linux-gnu rustc 1.90.0` using ellip v1.1.1 with `libm` at `f64` precision (ε≈2.22e-16).
 
 ### Legendre's Elliptic Integrals
 | Function            | Median Error (ε) | Max Error (ε) | Mean Performance |
 |---------------------|------------------|---------------|------------------|
-| ellipk              | 0.00             | 108.14        | 14.7 ns          |
+| ellipk              | 0.00             | 108.14        | 14.8 ns          |
 | ellipe              | 0.00             | 3.00          | 13.1 ns          |
-| ellipf              | 0.00             | 7.47          | 98.4 ns          |
-| ellipeinc           | 0.00             | 24.66         | 158.5 ns         |
-| ellippi             | 0.00             | 36.35         | 165.6 ns         |
-| ellippiinc          | 0.00             | 395.31        | 233.5 ns         |
-| ellippiinc_bulirsch | 0.00             | 395.31        | 187.7 ns         |
+| ellipf              | 0.00             | 7.47          | 98.6 ns          |
+| ellipeinc           | 0.00             | 24.66         | 161.4 ns         |
+| ellippi             | 0.00             | 36.35         | 171.4 ns         |
+| ellippiinc          | 0.00             | 395.31        | 233.3 ns         |
+| ellippiinc_bulirsch | 0.00             | 395.31        | 190.9 ns         |
 | ellipd              | 0.00             | 2.64          | 30.2 ns          |
-| ellipdinc           | 0.00             | 8.38          | 99.0 ns          |
+| ellipdinc           | 0.00             | 8.38          | 98.3 ns          |
 
 ### Bulirsch's Elliptic Integrals
 | Function | Median Error (ε) | Max Error (ε) | Mean Performance |
 |----------|------------------|---------------|------------------|
-| cel      | 0.62             | 36.94         | 32.8 ns          |
+| cel      | 0.62             | 36.94         | 32.9 ns          |
 | cel1     | 0.00             | 8.68          | 11.1 ns          |
-| cel2     | 0.00             | 3.47          | 21.5 ns          |
-| el1      | 0.00             | 1.70          | 36.5 ns          |
-| el2      | 0.00             | 74.60         | 51.6 ns          |
-| el3      | 0.00             | 53.21         | 103.1 ns         |
+| cel2     | 0.00             | 3.47          | 21.6 ns          |
+| el1      | 0.00             | 1.70          | 36.3 ns          |
+| el2      | 0.00             | 74.60         | 52.2 ns          |
+| el3      | 0.00             | 53.21         | 102.7 ns         |
 
 ### Carlson's Symmetric Integrals
 | Function | Median Error (ε) | Max Error (ε) | Mean Performance |
 |----------|------------------|---------------|------------------|
-| elliprf  | 0.00             | 1.57          | 45.7 ns          |
-| elliprg  | 0.00             | 5.25          | 99.0 ns          |
-| elliprj  | 0.56             | 136.97        | 187.0 ns         |
+| elliprf  | 0.00             | 1.57          | 46.1 ns          |
+| elliprg  | 0.00             | 5.25          | 99.1 ns          |
+| elliprj  | 0.56             | 136.97        | 187.5 ns         |
 | elliprc  | 0.00             | 2.82          | 22.4 ns          |
-| elliprd  | 0.00             | 6.25          | 74.6 ns          |
+| elliprd  | 0.00             | 6.25          | 75.0 ns          |
 
 ### Miscellaneous Functions
 | Function      | Median Error (ε) | Max Error (ε) | Mean Performance |
 |---------------|------------------|---------------|------------------|
-| jacobi_zeta   | 0.00             | 8.66          | 207.0 ns         |
-| heuman_lambda | 0.00             | 2.86          | 339.3 ns         |
+| jacobi_zeta   | 0.00             | 8.66          | 208.0 ns         |
+| heuman_lambda | 0.00             | 2.86          | 334.1 ns         |
 
 ## Reproducibility
 

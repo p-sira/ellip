@@ -28,7 +28,7 @@ The test datasets are not distributed with the crate by default. You may generat
 
 ## f64 Results
 
-This report is generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unknown-linux-gnu rustc 1.90.0` using ellip v1.1.0 with `libm` at `f64` precision (ε≈2.22e-16).
+This report is generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unknown-linux-gnu rustc 1.90.0` using ellip v1.1.1 with `libm` at `f64` precision (ε≈2.22e-16).
 
 ### Legendre's Complete Elliptic Integrals
 
@@ -39,7 +39,7 @@ This report is generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz runn
 | ellipe          | 0.30     | 0.00       | 1.82    | 3.00    | 0.18          | 1     |
 | ellipe (Neg m)  | 0.42     | 0.51       | 1.64    | 1.95    | 0.20          | 1     |
 | ellippi         | 0.47     | 0.00       | 2.12    | 21.08   | 1.69          | 1     |
-| ellippi (Neg m) | 0.46     | 0.00       | 2.46    | 3.56    | 0.39          | 1     |
+| ellippi (Neg m) | 0.94     | 0.50       | 11.51   | 31.04   | 5.66          | 1     |
 | ellippi (p.v.)  | 0.17     | 0.00       | 2.11    | 36.35   | 2.56          | 50    |
 | ellipd          | 0.44     | 0.00       | 1.96    | 2.43    | 0.32          | 1     |
 | ellipd (Neg m)  | 0.10     | 0.00       | 1.87    | 2.64    | 0.16          | 1     |
@@ -98,7 +98,7 @@ Note that `elliprj` is numerically unstable in the principal value domain when t
 
 ## f32 Results
 
-Generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unknown-linux-gnu rustc 1.90.0` using ellip v1.1.0 with `libm` at `f32` precision (ε≈1.19e-7).
+Generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unknown-linux-gnu rustc 1.90.0` using ellip v1.1.1 with `libm` at `f32` precision (ε≈1.19e-7).
 
 ### Legendre's Complete Elliptic Integrals
 
