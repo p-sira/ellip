@@ -348,9 +348,9 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
     //     };
     // }
 
-    // This cutpoint is empirical
     let phi = x.atan();
-    if p.abs() <= 1e-10 && m != 1.0 {
+    // This identity is exact only for p = 0. Small p can still give large p*x².
+    if p == 0.0 && m != 1.0 {
         // http://functions.wolfram.com/08.06.03.0008.01
         let sp2 = phi.sin() * phi.sin();
         let mut result = (1.0 - m * sp2).sqrt() * x - ellipeinc(phi, m)?;
@@ -792,4 +792,29 @@ crate::test_force_unreachable! {
     assert_eq!(el1_with_const::<f64, DefaultPrecision>(0.5, 0.5), Err("el1: Failed to converge."));
     assert_eq!(el2_with_const::<f64, DefaultPrecision>(0.5, 0.5, 0.5, 0.5), Err("el2: Failed to converge."));
     assert_eq!(el3_with_const::<f64, DefaultPrecision>(0.5, 0.5, 0.5), Err("el3: Failed to converge."));
+}
+
+#[cfg(all(test, not(feature = "test_force_fail")))]
+mod audit_a03 {
+    // Regression for audit finding A3: https://github.com/p-sira/ellip/pull/117
+    use crate::*;
+    #[allow(dead_code)]
+    fn close(actual: f64, expected: f64, rtol: f64) {
+        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
+        assert!(
+            (actual - expected).abs() <= rtol * expected.abs(),
+            "actual={actual:.17e}, expected={expected:.17e}"
+        );
+    }
+    #[test]
+    fn small_nonzero_characteristic() {
+        for x in [1e6, -1e6] {
+            close(
+                el3(x, 0.5, 1e-11).unwrap(),
+                x.signum() * 799749.3224180657,
+                3e-14,
+            );
+        }
+        close(el3(1.0, 0.5, 0.0).unwrap(), 1.1006047874101814, 3e-14);
+    }
 }
