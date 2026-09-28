@@ -74,7 +74,7 @@ pub fn heuman_lambda<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 pub fn heuman_lambda_unchecked<T: Float>(phi: T, m: T) -> T {
     if m <= 0.0 {
         if m == 0.0 {
-            return phi.sin();
+            return crate::ellipeinc(phi, T::one()).unwrap_or(nan!());
         }
         return nan!();
     }
@@ -85,6 +85,19 @@ pub fn heuman_lambda_unchecked<T: Float>(phi: T, m: T) -> T {
     }
 
     let mc = 1.0 - m;
+    if mc == 1.0 {
+        // Preserve m as the complementary parameter: 1 - mc has rounded to zero.
+        // Reduce periods before evaluating the principal Carlson forms.
+        let periods = (phi / pi!()).round();
+        let rphi = phi - periods * pi!();
+        let sinp = rphi.sin();
+        let cosp = rphi.cos();
+        let p = m + mc * cosp * cosp;
+        let k_mc = crate::carlson::elliprf_unchecked(0.0, m, 1.0);
+        let f = sinp * crate::carlson::elliprf_unchecked(cosp * cosp, p, 1.0);
+        let zeta = mc * sinp * cosp * p.sqrt() * elliprj_unchecked(0.0, m, 1.0, p) / (3.0 * k_mc);
+        return 2.0 * periods + f / k_mc + ellipk(m).unwrap_or(nan!()) * zeta / pi_2!();
+    }
 
     let f = ellipf(phi, mc).unwrap_or(nan!());
     let k_m = ellipk(m).unwrap_or(nan!());
@@ -171,4 +184,33 @@ mod tests {
 #[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(heuman_lambda(0.5, 0.5), Err("heuman_lambda: Unexpected error."));
+}
+
+#[cfg(all(test, not(feature = "test_force_fail")))]
+mod audit_a12 {
+    // Regression for audit finding A12: https://github.com/p-sira/ellip/pull/126
+    use crate::*;
+    #[allow(dead_code)]
+    fn close(actual: f64, expected: f64, rtol: f64) {
+        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
+        assert!(
+            (actual - expected).abs() <= rtol * expected.abs(),
+            "actual={actual:.17e}, expected={expected:.17e}"
+        );
+    }
+    #[test]
+    fn zero_and_tiny_parameters_keep_periods() {
+        for m in [0.0, 1e-20] {
+            close(heuman_lambda(1.0, m).unwrap(), 0.8414709848078965, 2e-15);
+            for n in [-4.0, -2.0, 1.0, 2.0, 4.0] {
+                close(
+                    heuman_lambda(n * std::f64::consts::FRAC_PI_2, m).unwrap(),
+                    n,
+                    2e-15,
+                );
+            }
+            close(heuman_lambda(4.0, m).unwrap(), 2.7568024953079282, 2e-15);
+            close(heuman_lambda(-4.0, m).unwrap(), -2.7568024953079282, 2e-15);
+        }
+    }
 }
