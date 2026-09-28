@@ -94,6 +94,17 @@ pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, StrErr> {
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprc_unchecked<T: Float>(x: T, y: T) -> T {
+    // Homogeneity keeps products in duplication and special cases in range.
+    // Separate rescaling factors: scale*sqrt(scale) can itself overflow.
+    let scale = x.abs().max(y.abs());
+    let limit = T::max_value().sqrt().sqrt().sqrt();
+    if scale.is_finite() && scale > 0.0 && (scale > limit || scale < 1.0 / limit)
+        // Do not turn nonzero arguments into singular zeros at extreme ratios.
+        && [x, y].iter().all(|&v| v == 0.0 || v / scale != 0.0)
+    {
+        return elliprc_unchecked(x / scale, y / scale) / scale.sqrt();
+    }
+
     let_mut!(x, y);
     let mut prefix = 1.0;
     // for y < 0, the integral is singular, return Cauchy principal value
@@ -172,6 +183,16 @@ mod tests {
         // Infs: should return 0
         assert_eq!(elliprc(INFINITY, 1.0).unwrap(), 0.0);
         assert_eq!(elliprc(1.0, INFINITY).unwrap(), 0.0);
+    }
+
+    // Regression for audit finding A8: https://github.com/p-sira/ellip/pull/122
+    #[test]
+    fn test_elliprc_extreme_scale_homogeneity() {
+        for scale in [1e-200_f64, 1e-100, 1e100, 1e200] {
+            let actual = elliprc(scale, 2.0 * scale).unwrap() * scale.sqrt();
+            let expected = elliprc(1.0, 2.0).unwrap();
+            assert!((actual - expected).abs() <= 3e-15 * expected.abs());
+        }
     }
 }
 

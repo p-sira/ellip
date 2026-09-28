@@ -9,6 +9,7 @@
 - Validate checked elliptic-integral inputs before recursion and period reduction (https://github.com/p-sira/ellip/pull/119).
 - `jacobi_zeta`: Preserve values near special angles (https://github.com/p-sira/ellip/pull/120).
 - `el3`: Return finite elementary and real principal values when `kc = 1` (https://github.com/p-sira/ellip/pull/121).
+- Carlson integrals: Normalize extreme argument scales to preserve representable results (https://github.com/p-sira/ellip/pull/122).
 - `ellippiinc`: Fix incorrect result when `φ > π/2` and `n > 1` (https://github.com/p-sira/ellip/pull/111).
 - `ellipeinc`: Fix `NaN` error when `φ` is a multiple of `π` and `m ∉ {0, 1}` (https://github.com/p-sira/ellip/pull/111).
 - `ellippi`: Fix `NaN` errors on the diagonal `n = m` when `n < 0` (https://github.com/p-sira/ellip/pull/111).

@@ -90,6 +90,17 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn elliprf_unchecked<T: Float>(x: T, y: T, z: T) -> T {
+    // Homogeneity keeps products in duplication and special cases in range.
+    // Separate rescaling factors: scale*sqrt(scale) can itself overflow.
+    let scale = x.abs().max(y.abs()).max(z.abs());
+    let limit = T::max_value().sqrt().sqrt().sqrt();
+    if scale.is_finite() && scale > 0.0 && (scale > limit || scale < 1.0 / limit)
+        // Do not turn nonzero arguments into singular zeros at extreme ratios.
+        && [x, y, z].iter().all(|&v| v == 0.0 || v / scale != 0.0)
+    {
+        return elliprf_unchecked(x / scale, y / scale, z / scale) / scale.sqrt();
+    }
+
     // Special cases from http://dlmf.nist.gov/19.20#i
     if x == y {
         if x == z {
@@ -299,6 +310,20 @@ mod tests {
     fn test_elliprf_rejects_negative_repeated_arguments() {
         for (x, y, z) in [(-1.0, -1.0, 1.0), (1.0, -1.0, -1.0), (-1.0, 1.0, -1.0)] {
             assert!(elliprf(x, y, z).is_err());
+        }
+    }
+
+    // Regression for audit finding A8: https://github.com/p-sira/ellip/pull/122
+    #[test]
+    fn test_elliprf_extreme_scales() {
+        let actual = elliprf(1e308, 5e307, 2e307).unwrap();
+        let expected = 1.4067138665800056e-154;
+        assert!(actual.is_finite());
+        assert!((actual - expected).abs() <= 2e-15 * expected);
+        for scale in [1e-200_f64, 1e-100, 1e100, 1e200] {
+            let actual = elliprf(scale, 2.0 * scale, 3.0 * scale).unwrap() * scale.sqrt();
+            let expected = elliprf(1.0, 2.0, 3.0).unwrap();
+            assert!((actual - expected).abs() <= 3e-15 * expected.abs());
         }
     }
 }
