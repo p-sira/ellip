@@ -11,8 +11,11 @@ use num_traits::Float;
 ///
 /// Panics if the assertion is failed.
 pub fn assert_close<T: Float>(actual: T, expected: T, rtol: T) {
-    let relative = (actual - expected).abs() / expected;
-    if relative > rtol {
+    let relative = (actual - expected).abs() / expected.abs();
+    let valid_tolerance = rtol.is_finite() && rtol >= T::zero();
+    let close =
+        actual == expected || (actual.is_finite() && expected.is_finite() && relative <= rtol);
+    if !valid_tolerance || !close {
         panic!(
             "Assertion failed: expected = {}, got = {}, relative = {}, rtol = {}",
             expected.to_f64().unwrap(),
@@ -37,5 +40,45 @@ mod tests {
     #[test]
     fn test_assert_close_success() {
         assert_close(1.0, 1.0 + 1e-6, 1e-6);
+    }
+}
+
+#[cfg(all(test, not(feature = "test_force_fail")))]
+mod audit_a15 {
+    // Regression for audit finding A15: https://github.com/p-sira/ellip/pull/129
+    use crate::*;
+    #[allow(dead_code)]
+    fn close(actual: f64, expected: f64, rtol: f64) {
+        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
+        assert!(
+            (actual - expected).abs() <= rtol * expected.abs(),
+            "actual={actual:.17e}, expected={expected:.17e}"
+        );
+    }
+    #[test]
+    fn reject_invalid_comparisons() {
+        for (actual, expected, tol) in [
+            (100.0, -1.0, 1e-15),
+            (f64::NAN, 1.0, 1e-15),
+            (1.0, f64::NAN, 1e-15),
+            (1.0, 0.0, 1e-15),
+            (f64::INFINITY, 1.0, 1e-15),
+            (1.0, f64::INFINITY, 1e-15),
+            (f64::INFINITY, f64::NEG_INFINITY, 1e-15),
+            (1.0, 1.0, f64::NAN),
+            (1.0, 1.0, -1.0),
+        ] {
+            assert!(
+                std::panic::catch_unwind(|| util::assert_close(actual, expected, tol)).is_err(),
+                "accepted {actual}, {expected}, {tol}"
+            );
+        }
+    }
+    #[test]
+    fn accept_exact_and_signed_values() {
+        for x in [-1.0, 0.0, -0.0, 1.0, f64::INFINITY, f64::NEG_INFINITY] {
+            util::assert_close(x, x, 0.0);
+        }
+        util::assert_close(-1.0 - 1e-8, -1.0, 2e-8);
     }
 }

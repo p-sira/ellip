@@ -163,13 +163,7 @@ macro_rules! compare_test_data_wolfram {
 #[macro_export]
 macro_rules! assert_close {
     ($expected: expr, $actual: expr, $rtol: expr) => {
-        let relative = ($actual - $expected).abs() / $expected;
-        if relative > $rtol || $actual.is_nan() {
-            panic!(
-                "Assertion failed: expected = {:?}, got = {:?}, relative = {:?}, rtol = {:?}",
-                $expected, $actual, relative, $rtol
-            )
-        }
+        $crate::util::assert_close($actual, $expected, $rtol);
     };
 }
 
@@ -201,4 +195,22 @@ pub fn linspace(start: f64, end: f64, num: usize) -> Vec<f64> {
     }
 
     result
+}
+
+#[cfg(all(test, not(feature = "test_force_fail")))]
+mod assertion_regression_tests {
+    // Regression for audit finding A15: https://github.com/p-sira/ellip/pull/129
+    #[test]
+    fn macro_rejects_negative_reference_errors_and_nan() {
+        assert!(std::panic::catch_unwind(|| {
+            crate::assert_close!(-1.0_f64, 100.0_f64, 1e-15);
+        })
+        .is_err());
+        assert!(std::panic::catch_unwind(|| {
+            crate::assert_close!(f64::NAN, 1.0_f64, 1e-15);
+        })
+        .is_err());
+        crate::assert_close!(-1.0_f64, -1.0_f64, 0.0);
+        crate::assert_close!(0.0_f64, 0.0_f64, 0.0);
+    }
 }
