@@ -327,14 +327,26 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
 
     if kc == 1.0 {
         // A&S 17.7.20:
-        if n < 1.0 {
+        if p == 0.0 {
+            return Ok(x);
+        }
+        if p > 0.0 {
             let vcr = p.sqrt();
             return Ok((vcr * x).atan() / vcr);
         } else {
             // v > 1:
             let vcr = (-p).sqrt();
             let arg = vcr * x;
-            return Ok((arg.ln_1p() - (-arg).ln_1p()) / (2.0 * vcr));
+            if arg.abs() == 1.0 {
+                return Err("el3: 1 + px² cannot be zero.");
+            }
+            // Real Cauchy principal value on either side of the pole.
+            let log_ratio = if arg.abs() < 1.0 {
+                arg.ln_1p() - (-arg).ln_1p()
+            } else {
+                (1.0 / arg).ln_1p() - (-1.0 / arg).ln_1p()
+            };
+            return Ok(log_ratio / (2.0 * vcr));
         }
     }
 
@@ -776,7 +788,7 @@ mod tests {
             (0.5.sqrt() * 4.0).atan() / 0.5.sqrt()
         );
         // kc = 1, p <= 0: el3(x, 1, p) = (ln(1+vx) - ln(1-vx)) / (2v); v = sqrt(-p)
-        assert_close!(el3(4.0, 1.0, -0.5).unwrap(), 5.0, 1e-15);
+        assert_close!(0.5225504573804798, el3(0.5, 1.0, -0.5).unwrap(), 1e-15);
         // 1 + px² = 0: should return Err
         assert_eq!(el3(1.0, 0.5, -1.0), Err("el3: 1 + px² cannot be zero."));
         // x = nan, kc = nan, or p = nan: should return Err
@@ -816,5 +828,34 @@ mod audit_a03 {
             );
         }
         close(el3(1.0, 0.5, 0.0).unwrap(), 1.1006047874101814, 3e-14);
+    }
+}
+
+#[cfg(all(test, not(feature = "test_force_fail")))]
+mod audit_a07 {
+    // Regression for audit finding A7: https://github.com/p-sira/ellip/pull/121
+    use crate::*;
+    #[allow(dead_code)]
+    fn close(actual: f64, expected: f64, rtol: f64) {
+        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
+        assert!(
+            (actual - expected).abs() <= rtol * expected.abs(),
+            "actual={actual:.17e}, expected={expected:.17e}"
+        );
+    }
+    #[test]
+    fn elementary_real_values() {
+        for x in [1.0, -1.0, 2.0, -2.0] {
+            assert_eq!(el3(x, 1.0, 0.0).unwrap(), x);
+        }
+        for x in [2.0, -2.0] {
+            close(
+                el3(x, 1.0, -1.0).unwrap(),
+                x.signum() * 0.5493061443340548,
+                2e-15,
+            );
+        }
+        assert!(el3(1.0, 1.0, -1.0).is_err());
+        close(el3(1.0, 1.0, 1e-20).unwrap(), 1.0, 1e-15);
     }
 }
