@@ -68,14 +68,14 @@ use crate::{
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
-    let ans = elliprf_unchecked(x, y, z);
-    if ans.is_finite() {
-        return Ok(ans);
-    }
     check!(@nan, elliprf, [x, y, z]);
     check!(@neg, elliprf, [x, y, z]);
     check!(@multi_zero, elliprf, [x, y, z]);
     case!(@any [x, y, z] == inf!(), T::zero());
+    let ans = elliprf_unchecked(x, y, z);
+    if ans.is_finite() {
+        return Ok(ans);
+    }
     Err("elliprf: Failed to converge.")
 }
 
@@ -292,6 +292,14 @@ mod tests {
         assert_eq!(elliprf(INFINITY, 1.0, 1.0).unwrap(), 0.0);
         assert_eq!(elliprf(1.0, INFINITY, 1.0).unwrap(), 0.0);
         assert_eq!(elliprf(1.0, 1.0, INFINITY).unwrap(), 0.0);
+    }
+
+    // Regression for audit finding A5: https://github.com/p-sira/ellip/pull/119
+    #[test]
+    fn test_elliprf_rejects_negative_repeated_arguments() {
+        for (x, y, z) in [(-1.0, -1.0, 1.0), (1.0, -1.0, -1.0), (-1.0, 1.0, -1.0)] {
+            assert!(elliprf(x, y, z).is_err());
+        }
     }
 }
 

@@ -73,6 +73,11 @@ use crate::{
 /// - The MathWorks, Inc. “ellipticF.” Accessed April 21, 2025. <https://www.mathworks.com/help/symbolic/sym.ellipticf.html>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
+    check!(@nan, ellipf, [phi, m]);
+    // Period reduction must not hide a pole or an interval of complex values.
+    if m >= 1.0 && (phi.abs() >= pi_2!() || m * phi.sin().powi(2) >= 1.0) {
+        return Err("ellipf: m sin²φ must be smaller than one.");
+    }
     let sign = phi.signum();
     let phi = phi.abs();
 
@@ -218,6 +223,16 @@ mod tests {
         );
         // m = -inf: F(phi, -inf) = 0.0
         assert_eq!(ellipf(0.5, NEG_INFINITY).unwrap(), 0.0);
+    }
+
+    // Regression for audit finding A5: https://github.com/p-sira/ellip/pull/119
+    #[test]
+    fn test_ellipf_validates_before_period_reduction() {
+        for phi in [std::f64::consts::PI, -std::f64::consts::PI, 1e20] {
+            assert!(ellipf(phi, 1.0).is_err());
+            assert!(ellipf(phi, 2.0).is_err());
+        }
+        assert!(ellipf(0.5_f64, 1.0).unwrap().is_finite());
     }
 }
 

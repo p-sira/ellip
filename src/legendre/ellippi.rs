@@ -71,7 +71,17 @@ use crate::{
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
-    if n >= 1.0 {
+    check!(@nan, ellippi, [n, m]);
+    if m > 1.0 {
+        return Err("ellippi: m must not be greater than 1.");
+    }
+    if n == 1.0 {
+        return Err("ellippi: n cannot be 1.");
+    }
+    if m == 1.0 {
+        return Ok((1.0 - n).signum() * inf!());
+    }
+    if n > 1.0 {
         if n > 1.0 {
             // n -> 1+
             // https://dlmf.nist.gov/19.6.E6
@@ -294,6 +304,29 @@ mod tests {
         assert_eq!(
             ellippi(0.5, INFINITY),
             Err("ellippi: m must not be greater than 1.")
+        );
+    }
+
+    // Regression for audit finding A5: https://github.com/p-sira/ellip/pull/119
+    #[test]
+    fn test_ellippi_invalid_input_does_not_abort() {
+        assert!(ellippi(f64::NAN, 0.5).is_err());
+        assert!(ellippi(2.0, f64::NAN).is_err());
+        if std::env::var("ELLIP_A05_PI_CHILD").is_ok() {
+            assert!(ellippi(2.0, 2.0).is_err());
+            return;
+        }
+        let status = std::process::Command::new(std::env::current_exe().unwrap())
+            .args([
+                "--exact",
+                "legendre::ellippi::tests::test_ellippi_invalid_input_does_not_abort",
+            ])
+            .env("ELLIP_A05_PI_CHILD", "1")
+            .status()
+            .unwrap();
+        assert!(
+            status.success(),
+            "invalid Pi input aborted or failed: {status}"
         );
     }
 }

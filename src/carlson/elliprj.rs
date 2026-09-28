@@ -73,16 +73,16 @@ use num_traits::Float;
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
-    let ans = elliprj_unchecked(x, y, z, p);
-
-    if ans.is_finite() {
-        return Ok(ans);
-    }
     check!(@nan, elliprj, [x, y, z, p]);
     check!(@zero, elliprj, [p]);
     check!(@neg, elliprj, "x, y, and z must be non-negative.", [x, y, z]);
     check!(@multi_zero, elliprj, [x, y, z]);
     case!(@any [x, y, z, p] == inf!(), T::zero());
+    let ans = elliprj_unchecked(x, y, z, p);
+
+    if ans.is_finite() {
+        return Ok(ans);
+    }
     Err("elliprj: Failed to converge.")
 }
 
@@ -374,13 +374,33 @@ mod tests {
         // y < -1
         assert!(elliprc1p(-1.1).is_finite());
     }
+
+    // Regression for audit finding A5: https://github.com/p-sira/ellip/pull/119
+    #[test]
+    fn test_elliprj_invalid_input_does_not_abort() {
+        if std::env::var("ELLIP_A05_RJ_CHILD").is_ok() {
+            assert!(elliprj(0.0, 0.0, 1.0, 0.0).is_err());
+            return;
+        }
+        let status = std::process::Command::new(std::env::current_exe().unwrap())
+            .args([
+                "--exact",
+                "carlson::elliprj::tests::test_elliprj_invalid_input_does_not_abort",
+            ])
+            .env("ELLIP_A05_RJ_CHILD", "1")
+            .status()
+            .unwrap();
+        assert!(
+            status.success(),
+            "invalid RJ input aborted or failed: {status}"
+        );
+    }
 }
 
 #[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(elliprj(0.2, 0.5, 1e300, 1.0), Err("elliprj: Failed to converge."));
 }
-
 #[cfg(all(test, not(feature = "test_force_fail")))]
 mod audit_a02 {
     // Regression for audit finding A2: https://github.com/p-sira/ellip/pull/116
