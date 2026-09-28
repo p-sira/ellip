@@ -275,45 +275,33 @@ mod tests {
         let expected = 1e-25_f32 as f64;
         assert!((actual - expected).abs() <= 3e-7 * expected);
     }
+
+    // Regression for audit finding A14: https://github.com/p-sira/ellip/pull/128
+    #[test]
+    fn test_extreme_negative_parameter_is_odd_and_periodic() {
+        crate::assert_close!(
+            ellipeinc(-1.0, -f64::MAX).unwrap(),
+            -6.1635383887574824e153,
+            3e-15
+        );
+        for phi in [1.0, 4.0, 7.0] {
+            let positive = ellipeinc(phi, -f64::MAX).unwrap();
+            crate::assert_close!(ellipeinc(-phi, -f64::MAX).unwrap(), -positive, 2e-15);
+        }
+        crate::assert_close!(
+            ellipeinc(std::f64::consts::PI, -f64::MAX).unwrap(),
+            2.0 * f64::MAX.sqrt(),
+            2e-15
+        );
+        crate::assert_close!(
+            ellipeinc(2.0 * std::f64::consts::PI, -f64::MAX).unwrap(),
+            4.0 * f64::MAX.sqrt(),
+            2e-15
+        );
+    }
 }
 
 #[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(ellipeinc(0.5, 0.2), Err("ellipeinc: Unexpected error."));
-}
-
-#[cfg(all(test, not(feature = "test_force_fail")))]
-mod audit_a14 {
-    // Regression for audit finding A14: https://github.com/p-sira/ellip/pull/128
-    use crate::*;
-    #[allow(dead_code)]
-    fn close(actual: f64, expected: f64, rtol: f64) {
-        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
-        assert!(
-            (actual - expected).abs() <= rtol * expected.abs(),
-            "actual={actual:.17e}, expected={expected:.17e}"
-        );
-    }
-    #[test]
-    fn extreme_negative_parameter_is_odd_and_periodic() {
-        close(
-            ellipeinc(-1.0, -f64::MAX).unwrap(),
-            -6.1635383887574824e153,
-            3e-15,
-        );
-        for phi in [1.0, 4.0, 7.0] {
-            let positive = ellipeinc(phi, -f64::MAX).unwrap();
-            close(ellipeinc(-phi, -f64::MAX).unwrap(), -positive, 2e-15);
-        }
-        close(
-            ellipeinc(std::f64::consts::PI, -f64::MAX).unwrap(),
-            2.0 * f64::MAX.sqrt(),
-            2e-15,
-        );
-        close(
-            ellipeinc(2.0 * std::f64::consts::PI, -f64::MAX).unwrap(),
-            4.0 * f64::MAX.sqrt(),
-            2e-15,
-        );
-    }
 }

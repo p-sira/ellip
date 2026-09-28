@@ -41,22 +41,10 @@ mod tests {
     fn test_assert_close_success() {
         assert_close(1.0, 1.0 + 1e-6, 1e-6);
     }
-}
 
-#[cfg(all(test, not(feature = "test_force_fail")))]
-mod audit_a15 {
     // Regression for audit finding A15: https://github.com/p-sira/ellip/pull/129
-    use crate::*;
-    #[allow(dead_code)]
-    fn close(actual: f64, expected: f64, rtol: f64) {
-        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
-        assert!(
-            (actual - expected).abs() <= rtol * expected.abs(),
-            "actual={actual:.17e}, expected={expected:.17e}"
-        );
-    }
     #[test]
-    fn reject_invalid_comparisons() {
+    fn test_reject_invalid_comparisons() {
         for (actual, expected, tol) in [
             (100.0, -1.0, 1e-15),
             (f64::NAN, 1.0, 1e-15),
@@ -69,16 +57,17 @@ mod audit_a15 {
             (1.0, 1.0, -1.0),
         ] {
             assert!(
-                std::panic::catch_unwind(|| util::assert_close(actual, expected, tol)).is_err(),
+                std::panic::catch_unwind(|| crate::util::assert_close(actual, expected, tol))
+                    .is_err(),
                 "accepted {actual}, {expected}, {tol}"
             );
         }
     }
     #[test]
-    fn accept_exact_and_signed_values() {
+    fn test_accept_exact_and_signed_values() {
         for x in [-1.0, 0.0, -0.0, 1.0, f64::INFINITY, f64::NEG_INFINITY] {
-            util::assert_close(x, x, 0.0);
+            crate::util::assert_close(x, x, 0.0);
         }
-        util::assert_close(-1.0 - 1e-8, -1.0, 2e-8);
+        crate::util::assert_close(-1.0 - 1e-8, -1.0, 2e-8);
     }
 }

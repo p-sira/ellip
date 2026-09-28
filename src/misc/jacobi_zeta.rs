@@ -166,46 +166,34 @@ mod tests {
             Err("jacobi_zeta: m cannot be infinite.")
         );
     }
-}
 
-#[cfg(feature = "test_force_fail")]
-crate::test_force_unreachable! {
-    assert_eq!(jacobi_zeta(0.5, 0.5), Err("jacobi_zeta: Unexpected error."));
-}
-
-#[cfg(all(test, not(feature = "test_force_fail")))]
-mod audit_a06 {
     // Regression for audit finding A6: https://github.com/p-sira/ellip/pull/120
-    use crate::*;
-    #[allow(dead_code)]
-    fn close(actual: f64, expected: f64, rtol: f64) {
-        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
-        assert!(
-            (actual - expected).abs() <= rtol * expected.abs(),
-            "actual={actual:.17e}, expected={expected:.17e}"
-        );
-    }
     #[test]
-    fn neighborhoods_are_not_flat() {
-        close(
+    fn test_neighborhoods_are_not_flat() {
+        crate::assert_close!(
             jacobi_zeta(1e-9, 0.5).unwrap(),
             2.715267094777682e-10,
-            2e-15,
+            2e-15
         );
-        close(
+        crate::assert_close!(
             jacobi_zeta(-1e-9, 0.5).unwrap(),
             -2.715267094777682e-10,
-            2e-15,
+            2e-15
         );
         for offset in [-1e-9, 1e-9] {
             let phi = std::f64::consts::FRAC_PI_2 + offset;
-            close(
+            crate::assert_close!(
                 jacobi_zeta(phi, 1.0).unwrap(),
                 -offset.signum() * phi.sin(),
-                1e-15,
+                1e-15
             );
         }
         assert_eq!(jacobi_zeta(std::f64::consts::FRAC_PI_2, 0.5).unwrap(), 0.0);
         assert!(jacobi_zeta(0.0, 2.0).is_err());
     }
+}
+
+#[cfg(feature = "test_force_fail")]
+crate::test_force_unreachable! {
+    assert_eq!(jacobi_zeta(0.5, 0.5), Err("jacobi_zeta: Unexpected error."));
 }

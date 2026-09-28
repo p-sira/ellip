@@ -634,70 +634,43 @@ mod tests {
             Err("ellippiinc: Arguments cannot be NAN.")
         );
     }
-}
 
-#[cfg(feature = "test_force_fail")]
-crate::test_force_unreachable! {
-    assert_eq!(ellippiinc_bulirsch(0.5, 0.5, 0.5), Err("ellippiinc: Unexpected error."));
-}
-
-#[cfg(all(test, not(feature = "test_force_fail")))]
-mod audit_a01 {
     // Regression for audit finding A1: https://github.com/p-sira/ellip/pull/115
-    use crate::{ellippiinc, ellippiinc_bulirsch};
-
-    fn close(actual: f64, expected: f64, rtol: f64) {
-        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
-        assert!((actual - expected).abs() <= rtol * expected.abs());
-    }
-
     #[test]
-    fn amplitude_periods() {
-        close(
+    fn test_amplitude_periods() {
+        crate::assert_close!(
             ellippiinc_bulirsch(2.0, 0.5, 0.5).unwrap(),
             3.8198568874384073,
-            2e-15,
+            2e-15
         );
         for phi in [std::f64::consts::PI, -std::f64::consts::PI, 7.0, -7.0] {
-            close(ellippiinc_bulirsch(phi, 0.0, 0.0).unwrap(), phi, 2e-15);
-            close(
+            crate::assert_close!(ellippiinc_bulirsch(phi, 0.0, 0.0).unwrap(), phi, 2e-15);
+            crate::assert_close!(
                 ellippiinc_bulirsch(phi, 0.5, 0.5).unwrap(),
                 ellippiinc(phi, 0.5, 0.5).unwrap(),
-                2e-15,
+                2e-15
             );
         }
         for phi in [std::f32::consts::FRAC_PI_2, -std::f32::consts::FRAC_PI_2] {
-            close(
+            crate::assert_close!(
                 ellippiinc_bulirsch(phi, 0.5, 0.5).unwrap() as f64,
                 (phi.signum() as f64) * 2.7012878857298321,
-                3e-7,
+                3e-7
             );
         }
     }
-}
 
-#[cfg(all(test, not(feature = "test_force_fail")))]
-mod audit_a11 {
     // Regression for audit finding A11: https://github.com/p-sira/ellip/pull/125
-    use crate::*;
-    #[allow(dead_code)]
-    fn close(actual: f64, expected: f64, rtol: f64) {
-        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
-        assert!(
-            (actual - expected).abs() <= rtol * expected.abs(),
-            "actual={actual:.17e}, expected={expected:.17e}"
-        );
-    }
     #[test]
-    fn coincident_unit_parameters_before_pole() {
+    fn test_coincident_unit_parameters_before_pole() {
         for phi in [0.5, -0.5] {
-            close(
+            crate::assert_close!(
                 ellippiinc(phi, 1.0, 1.0).unwrap(),
                 phi.signum() * 0.5723732364688604,
-                2e-15,
+                2e-15
             );
         }
-        close(ellippiinc(1e-12, 1.0, 1.0).unwrap(), 1e-12, 2e-15);
+        crate::assert_close!(ellippiinc(1e-12, 1.0, 1.0).unwrap(), 1e-12, 2e-15);
         assert_eq!(ellippiinc(0.0, 1.0, 1.0).unwrap(), 0.0);
         for phi in [
             std::f64::consts::FRAC_PI_2,
@@ -707,4 +680,9 @@ mod audit_a11 {
             assert!(ellippiinc(phi, 1.0, 1.0).is_err());
         }
     }
+}
+
+#[cfg(feature = "test_force_fail")]
+crate::test_force_unreachable! {
+    assert_eq!(ellippiinc_bulirsch(0.5, 0.5, 0.5), Err("ellippiinc: Unexpected error."));
 }

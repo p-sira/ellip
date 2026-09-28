@@ -798,6 +798,36 @@ mod tests {
         assert_eq!(el3(0.5, NAN, 0.5), Err("el3: Arguments cannot be NAN."));
         assert_eq!(el3(0.5, 0.5, NAN), Err("el3: Arguments cannot be NAN."));
     }
+
+    // Regression for audit finding A3: https://github.com/p-sira/ellip/pull/117
+    #[test]
+    fn test_small_nonzero_characteristic() {
+        for x in [1e6, -1e6] {
+            assert_close!(
+                el3(x, 0.5, 1e-11).unwrap(),
+                x.signum() * 799749.3224180657,
+                3e-14
+            );
+        }
+        assert_close!(el3(1.0, 0.5, 0.0).unwrap(), 1.1006047874101814, 3e-14);
+    }
+
+    // Regression for audit finding A7: https://github.com/p-sira/ellip/pull/121
+    #[test]
+    fn test_elementary_real_values() {
+        for x in [1.0, -1.0, 2.0, -2.0] {
+            assert_eq!(el3(x, 1.0, 0.0).unwrap(), x);
+        }
+        for x in [2.0, -2.0] {
+            assert_close!(
+                el3(x, 1.0, -1.0).unwrap(),
+                x.signum() * 0.5493061443340548,
+                2e-15
+            );
+        }
+        assert!(el3(1.0, 1.0, -1.0).is_err());
+        assert_close!(el3(1.0, 1.0, 1e-20).unwrap(), 1.0, 1e-15);
+    }
 }
 
 #[cfg(feature = "test_force_fail")]
@@ -806,58 +836,4 @@ crate::test_force_unreachable! {
     assert_eq!(el1_with_const::<f64, DefaultPrecision>(0.5, 0.5), Err("el1: Failed to converge."));
     assert_eq!(el2_with_const::<f64, DefaultPrecision>(0.5, 0.5, 0.5, 0.5), Err("el2: Failed to converge."));
     assert_eq!(el3_with_const::<f64, DefaultPrecision>(0.5, 0.5, 0.5), Err("el3: Failed to converge."));
-}
-
-#[cfg(all(test, not(feature = "test_force_fail")))]
-mod audit_a03 {
-    // Regression for audit finding A3: https://github.com/p-sira/ellip/pull/117
-    use crate::*;
-    #[allow(dead_code)]
-    fn close(actual: f64, expected: f64, rtol: f64) {
-        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
-        assert!(
-            (actual - expected).abs() <= rtol * expected.abs(),
-            "actual={actual:.17e}, expected={expected:.17e}"
-        );
-    }
-    #[test]
-    fn small_nonzero_characteristic() {
-        for x in [1e6, -1e6] {
-            close(
-                el3(x, 0.5, 1e-11).unwrap(),
-                x.signum() * 799749.3224180657,
-                3e-14,
-            );
-        }
-        close(el3(1.0, 0.5, 0.0).unwrap(), 1.1006047874101814, 3e-14);
-    }
-}
-
-#[cfg(all(test, not(feature = "test_force_fail")))]
-mod audit_a07 {
-    // Regression for audit finding A7: https://github.com/p-sira/ellip/pull/121
-    use crate::*;
-    #[allow(dead_code)]
-    fn close(actual: f64, expected: f64, rtol: f64) {
-        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
-        assert!(
-            (actual - expected).abs() <= rtol * expected.abs(),
-            "actual={actual:.17e}, expected={expected:.17e}"
-        );
-    }
-    #[test]
-    fn elementary_real_values() {
-        for x in [1.0, -1.0, 2.0, -2.0] {
-            assert_eq!(el3(x, 1.0, 0.0).unwrap(), x);
-        }
-        for x in [2.0, -2.0] {
-            close(
-                el3(x, 1.0, -1.0).unwrap(),
-                x.signum() * 0.5493061443340548,
-                2e-15,
-            );
-        }
-        assert!(el3(1.0, 1.0, -1.0).is_err());
-        close(el3(1.0, 1.0, 1e-20).unwrap(), 1.0, 1e-15);
-    }
 }

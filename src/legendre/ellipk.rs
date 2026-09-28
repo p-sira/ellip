@@ -358,31 +358,19 @@ mod tests {
         // m = -inf: K(-inf) = 0
         assert_eq!(ellipk(NEG_INFINITY).unwrap(), 0.0);
     }
+
+    // Regression for audit finding A10: https://github.com/p-sira/ellip/pull/124
+    #[test]
+    fn test_large_negative_parameters() {
+        crate::assert_close!(ellipk(-1e18).unwrap(), 2.2109560198066302e-8, 2e-15);
+        crate::assert_close!(ellipk(-1e100).unwrap(), 1.1651554901082218e-48, 3e-15);
+        crate::assert_close!(ellipk(-f64::MAX).unwrap(), 2.6572401146362276e-152, 3e-15);
+        assert_eq!(ellipk(f64::NEG_INFINITY).unwrap(), 0.0);
+        assert!(ellipk(f64::NAN).is_err());
+    }
 }
 
 #[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(ellipk(f64::INFINITY), Err("ellipk: Unexpected error."));
-}
-
-#[cfg(all(test, not(feature = "test_force_fail")))]
-mod audit_a10 {
-    // Regression for audit finding A10: https://github.com/p-sira/ellip/pull/124
-    use crate::*;
-    #[allow(dead_code)]
-    fn close(actual: f64, expected: f64, rtol: f64) {
-        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
-        assert!(
-            (actual - expected).abs() <= rtol * expected.abs(),
-            "actual={actual:.17e}, expected={expected:.17e}"
-        );
-    }
-    #[test]
-    fn large_negative_parameters() {
-        close(ellipk(-1e18).unwrap(), 2.2109560198066302e-8, 2e-15);
-        close(ellipk(-1e100).unwrap(), 1.1651554901082218e-48, 3e-15);
-        close(ellipk(-f64::MAX).unwrap(), 2.6572401146362276e-152, 3e-15);
-        assert_eq!(ellipk(f64::NEG_INFINITY).unwrap(), 0.0);
-        assert!(ellipk(f64::NAN).is_err());
-    }
 }

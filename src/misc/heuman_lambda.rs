@@ -179,38 +179,26 @@ mod tests {
             Err("heuman_lambda: phi cannot be infinite.")
         );
     }
+
+    // Regression for audit finding A12: https://github.com/p-sira/ellip/pull/126
+    #[test]
+    fn test_zero_and_tiny_parameters_keep_periods() {
+        for m in [0.0, 1e-20] {
+            crate::assert_close!(heuman_lambda(1.0, m).unwrap(), 0.8414709848078965, 2e-15);
+            for n in [-4.0, -2.0, 1.0, 2.0, 4.0] {
+                crate::assert_close!(
+                    heuman_lambda(n * std::f64::consts::FRAC_PI_2, m).unwrap(),
+                    n,
+                    2e-15
+                );
+            }
+            crate::assert_close!(heuman_lambda(4.0, m).unwrap(), 2.7568024953079282, 2e-15);
+            crate::assert_close!(heuman_lambda(-4.0, m).unwrap(), -2.7568024953079282, 2e-15);
+        }
+    }
 }
 
 #[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(heuman_lambda(0.5, 0.5), Err("heuman_lambda: Unexpected error."));
-}
-
-#[cfg(all(test, not(feature = "test_force_fail")))]
-mod audit_a12 {
-    // Regression for audit finding A12: https://github.com/p-sira/ellip/pull/126
-    use crate::*;
-    #[allow(dead_code)]
-    fn close(actual: f64, expected: f64, rtol: f64) {
-        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
-        assert!(
-            (actual - expected).abs() <= rtol * expected.abs(),
-            "actual={actual:.17e}, expected={expected:.17e}"
-        );
-    }
-    #[test]
-    fn zero_and_tiny_parameters_keep_periods() {
-        for m in [0.0, 1e-20] {
-            close(heuman_lambda(1.0, m).unwrap(), 0.8414709848078965, 2e-15);
-            for n in [-4.0, -2.0, 1.0, 2.0, 4.0] {
-                close(
-                    heuman_lambda(n * std::f64::consts::FRAC_PI_2, m).unwrap(),
-                    n,
-                    2e-15,
-                );
-            }
-            close(heuman_lambda(4.0, m).unwrap(), 2.7568024953079282, 2e-15);
-            close(heuman_lambda(-4.0, m).unwrap(), -2.7568024953079282, 2e-15);
-        }
-    }
 }

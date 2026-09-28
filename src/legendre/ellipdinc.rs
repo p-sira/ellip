@@ -198,42 +198,30 @@ mod tests {
         // m = -inf: D(phi, -inf) = 0.0
         assert_eq!(ellipdinc(0.5, NEG_INFINITY).unwrap(), 0.0);
     }
+
+    // Regression for audit finding A13: https://github.com/p-sira/ellip/pull/127
+    #[test]
+    fn test_finite_negative_tail() {
+        crate::assert_close!(
+            ellipdinc(1.0, -1e307).unwrap(),
+            1.4536917485840985e-154,
+            3e-15
+        );
+        crate::assert_close!(
+            ellipdinc(-1.0, -1e307).unwrap(),
+            -1.4536917485840985e-154,
+            3e-15
+        );
+        crate::assert_close!(
+            ellipdinc(std::f64::consts::PI, -1e307).unwrap(),
+            2.0 / 1e307_f64.sqrt(),
+            3e-15
+        );
+        assert_eq!(ellipdinc(1.0, f64::NEG_INFINITY).unwrap(), 0.0);
+    }
 }
 
 #[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(ellipdinc(0.5, 0.5), Err("ellipdinc: Unexpected error."));
-}
-
-#[cfg(all(test, not(feature = "test_force_fail")))]
-mod audit_a13 {
-    // Regression for audit finding A13: https://github.com/p-sira/ellip/pull/127
-    use crate::*;
-    #[allow(dead_code)]
-    fn close(actual: f64, expected: f64, rtol: f64) {
-        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
-        assert!(
-            (actual - expected).abs() <= rtol * expected.abs(),
-            "actual={actual:.17e}, expected={expected:.17e}"
-        );
-    }
-    #[test]
-    fn finite_negative_tail() {
-        close(
-            ellipdinc(1.0, -1e307).unwrap(),
-            1.4536917485840985e-154,
-            3e-15,
-        );
-        close(
-            ellipdinc(-1.0, -1e307).unwrap(),
-            -1.4536917485840985e-154,
-            3e-15,
-        );
-        close(
-            ellipdinc(std::f64::consts::PI, -1e307).unwrap(),
-            2.0 / 1e307_f64.sqrt(),
-            3e-15,
-        );
-        assert_eq!(ellipdinc(1.0, f64::NEG_INFINITY).unwrap(), 0.0);
-    }
 }

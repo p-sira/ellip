@@ -327,42 +327,30 @@ mod tests {
             "invalid Pi input aborted or failed: {status}"
         );
     }
+
+    // Regression for audit finding A4: https://github.com/p-sira/ellip/pull/118
+    #[test]
+    fn test_finite_below_singular_boundary() {
+        let u = f64::from_bits(1.0f64.to_bits() - 1);
+        crate::assert_close!(ellippi(u, 0.0).unwrap(), 149078413.4323951, 2e-15);
+        crate::assert_close!(ellippi(0.0, u).unwrap(), 19.75469464595844, 2e-15);
+        assert!(ellippi(1.0, 0.0).is_err());
+        assert_eq!(ellippi(0.0, 1.0).unwrap(), f64::INFINITY);
+        let u = f32::from_bits(1.0f32.to_bits() - 1);
+        crate::assert_close!(
+            ellippi(u, 0.0).unwrap() as f64,
+            (std::f32::consts::FRAC_PI_2 / (1.0 - u).sqrt()) as f64,
+            4e-7
+        );
+        crate::assert_close!(
+            ellippi(0.0, u).unwrap() as f64,
+            ellipk(u).unwrap() as f64,
+            4e-7
+        );
+    }
 }
 
 #[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(ellippi(0.5, 0.5), Err("ellippi: Unexpected error."));
-}
-
-#[cfg(all(test, not(feature = "test_force_fail")))]
-mod audit_a04 {
-    // Regression for audit finding A4: https://github.com/p-sira/ellip/pull/118
-    use crate::*;
-    #[allow(dead_code)]
-    fn close(actual: f64, expected: f64, rtol: f64) {
-        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
-        assert!(
-            (actual - expected).abs() <= rtol * expected.abs(),
-            "actual={actual:.17e}, expected={expected:.17e}"
-        );
-    }
-    #[test]
-    fn finite_below_singular_boundary() {
-        let u = f64::from_bits(1.0f64.to_bits() - 1);
-        close(ellippi(u, 0.0).unwrap(), 149078413.4323951, 2e-15);
-        close(ellippi(0.0, u).unwrap(), 19.75469464595844, 2e-15);
-        assert!(ellippi(1.0, 0.0).is_err());
-        assert_eq!(ellippi(0.0, 1.0).unwrap(), f64::INFINITY);
-        let u = f32::from_bits(1.0f32.to_bits() - 1);
-        close(
-            ellippi(u, 0.0).unwrap() as f64,
-            (std::f32::consts::FRAC_PI_2 / (1.0 - u).sqrt()) as f64,
-            4e-7,
-        );
-        close(
-            ellippi(0.0, u).unwrap() as f64,
-            ellipk(u).unwrap() as f64,
-            4e-7,
-        );
-    }
 }
