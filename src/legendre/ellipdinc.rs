@@ -67,8 +67,17 @@ use num_traits::Float;
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
-    if m < 1e-2 * min_val!() {
+    if m == neg_inf!() {
         return Ok(0.0);
+    }
+    if m < 1e-2 * min_val!() && phi.is_finite() {
+        // D(phi,-a) tends to integral |sin(theta)| / sqrt(a).
+        // The omitted absolute term is O(log(a)/(a*sqrt(a))) per period,
+        // below the smallest subnormal at this cutoff for f32 and f64.
+        let amplitude = phi.abs();
+        let periods = (amplitude / pi!()).floor();
+        let half_sin = ((amplitude % pi!()) / 2.0).sin();
+        return Ok(phi.signum() * (2.0 * (periods + half_sin * half_sin) / (-m).sqrt()));
     }
 
     let sign = phi.signum();
@@ -194,4 +203,37 @@ mod tests {
 #[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(ellipdinc(0.5, 0.5), Err("ellipdinc: Unexpected error."));
+}
+
+#[cfg(all(test, not(feature = "test_force_fail")))]
+mod audit_a13 {
+    // Regression for audit finding A13: https://github.com/p-sira/ellip/pull/127
+    use crate::*;
+    #[allow(dead_code)]
+    fn close(actual: f64, expected: f64, rtol: f64) {
+        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
+        assert!(
+            (actual - expected).abs() <= rtol * expected.abs(),
+            "actual={actual:.17e}, expected={expected:.17e}"
+        );
+    }
+    #[test]
+    fn finite_negative_tail() {
+        close(
+            ellipdinc(1.0, -1e307).unwrap(),
+            1.4536917485840985e-154,
+            3e-15,
+        );
+        close(
+            ellipdinc(-1.0, -1e307).unwrap(),
+            -1.4536917485840985e-154,
+            3e-15,
+        );
+        close(
+            ellipdinc(std::f64::consts::PI, -1e307).unwrap(),
+            2.0 / 1e307_f64.sqrt(),
+            3e-15,
+        );
+        assert_eq!(ellipdinc(1.0, f64::NEG_INFINITY).unwrap(), 0.0);
+    }
 }
