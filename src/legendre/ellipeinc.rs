@@ -138,8 +138,7 @@ pub fn ellipeinc_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         rphi = pi_2!() - rphi;
     }
 
-    let mut result = if rphi == 0.0 || (m > 0.0 && rphi.powi(3) * m / 6.0 < epsilon!() * rphi.abs())
-    {
+    let mut result = if rphi == 0.0 || (m.is_finite() && (m.abs() * rphi) * rphi < epsilon!()) {
         // rphi == 0 at phi = k*pi: the reduced-angle part is 0, so skip the Carlson block
         // (which would divide by sin²(rphi) = 0) and keep only the m*mm*E(m) period term.
         // See http://functions.wolfram.com/EllipticIntegrals/EllipticE2/06/01/03/0001/
@@ -254,6 +253,21 @@ mod tests {
         );
         // m = -inf: E(phi, -inf) = inf
         assert_eq!(ellipeinc(0.5, NEG_INFINITY).unwrap(), INFINITY);
+    }
+
+    // Regression for audit finding A9: https://github.com/p-sira/ellip/pull/123
+    #[test]
+    fn test_ellipeinc_tiny_amplitudes() {
+        for phi in [1e-160_f64, -1e-160, 1e-300, -1e-300] {
+            for m in [-0.5, 0.5] {
+                let actual = ellipeinc(phi, m).unwrap();
+                assert!(actual.is_finite());
+                assert!((actual - phi).abs() <= 2e-15 * phi.abs());
+            }
+        }
+        let actual = ellipeinc(1e-25_f32, -0.5).unwrap() as f64;
+        let expected = 1e-25_f32 as f64;
+        assert!((actual - expected).abs() <= 3e-7 * expected);
     }
 }
 
