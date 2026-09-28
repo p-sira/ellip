@@ -13,6 +13,7 @@
 - Incomplete F/E: Avoid intermediate range loss at tiny and large amplitudes (https://github.com/p-sira/ellip/pull/123).
 - `ellipk`: Accept finite negative parameters outside the polynomial selector range (https://github.com/p-sira/ellip/pull/124).
 - `ellippiinc`: Handle `n = m = 1` before the first pole (https://github.com/p-sira/ellip/pull/125).
+- `heuman_lambda`: Preserve amplitude periods for zero and tiny positive parameters (https://github.com/p-sira/ellip/pull/126).
 - `ellippiinc`: Fix incorrect result when `φ > π/2` and `n > 1` (https://github.com/p-sira/ellip/pull/111).
 - `ellipeinc`: Fix `NaN` error when `φ` is a multiple of `π` and `m ∉ {0, 1}` (https://github.com/p-sira/ellip/pull/111).
 - `ellippi`: Fix `NaN` errors on the diagonal `n = m` when `n < 0` (https://github.com/p-sira/ellip/pull/111).
