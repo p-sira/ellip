@@ -1,6 +1,6 @@
 #![cfg(not(feature = "test_force_fail"))]
 // Regression for audit finding A1; references use exact binary inputs at 100+ digits.
-use ellip::*;
+use crate::*;
 #[allow(dead_code)]
 fn close(actual: f64, expected: f64, rtol: f64) {
     assert!(actual.is_finite(), "actual={actual}, expected={expected}");

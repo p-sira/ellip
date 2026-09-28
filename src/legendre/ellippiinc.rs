@@ -632,3 +632,7 @@ mod tests {
 crate::test_force_unreachable! {
     assert_eq!(ellippiinc_bulirsch(0.5, 0.5, 0.5), Err("ellippiinc: Unexpected error."));
 }
+
+#[cfg(all(test, not(feature = "test_force_fail")))]
+#[path = "../../tests/audit/audit_a01.rs"]
+mod audit_a01;
