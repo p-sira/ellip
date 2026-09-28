@@ -113,7 +113,12 @@ pub fn ellipeinc_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     // E(phi, m) -> sqrt(-m) int(sin(theta)) d(theta), theta=[0,phi]
     // E(phi, m) -> sqrt(-m) (1-cos(phi))
     if m <= -max_val!() {
-        return Ok((1.0 - phi.cos()) * (-m).sqrt());
+        // Integrate |sin(theta)|, retaining the full periods and oddness.
+        let periods = (phi / pi!()).floor();
+        let rphi = phi % pi!();
+        let half_sin = (rphi / 2.0).sin();
+        let area = 2.0 * (periods + half_sin * half_sin);
+        return Ok(invert * area * (-m).sqrt());
     }
 
     if m == 1.0 {
@@ -247,9 +252,10 @@ mod tests {
             Err("ellipeinc: m sin²φ must be smaller than one.")
         );
         // m -> -inf: E(phi, m) = (1-cos(phi)) sqrt(-m)
-        assert_eq!(
+        crate::util::assert_close(
             ellipeinc(0.5, -MAX).unwrap(),
-            (1.0 - 0.5.cos()) * MAX.sqrt()
+            (1.0 - 0.5.cos()) * MAX.sqrt(),
+            1e-15,
         );
         // m = -inf: E(phi, -inf) = inf
         assert_eq!(ellipeinc(0.5, NEG_INFINITY).unwrap(), INFINITY);
@@ -274,4 +280,40 @@ mod tests {
 #[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(ellipeinc(0.5, 0.2), Err("ellipeinc: Unexpected error."));
+}
+
+#[cfg(all(test, not(feature = "test_force_fail")))]
+mod audit_a14 {
+    // Regression for audit finding A14: https://github.com/p-sira/ellip/pull/128
+    use crate::*;
+    #[allow(dead_code)]
+    fn close(actual: f64, expected: f64, rtol: f64) {
+        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
+        assert!(
+            (actual - expected).abs() <= rtol * expected.abs(),
+            "actual={actual:.17e}, expected={expected:.17e}"
+        );
+    }
+    #[test]
+    fn extreme_negative_parameter_is_odd_and_periodic() {
+        close(
+            ellipeinc(-1.0, -f64::MAX).unwrap(),
+            -6.1635383887574824e153,
+            3e-15,
+        );
+        for phi in [1.0, 4.0, 7.0] {
+            let positive = ellipeinc(phi, -f64::MAX).unwrap();
+            close(ellipeinc(-phi, -f64::MAX).unwrap(), -positive, 2e-15);
+        }
+        close(
+            ellipeinc(std::f64::consts::PI, -f64::MAX).unwrap(),
+            2.0 * f64::MAX.sqrt(),
+            2e-15,
+        );
+        close(
+            ellipeinc(2.0 * std::f64::consts::PI, -f64::MAX).unwrap(),
+            4.0 * f64::MAX.sqrt(),
+            2e-15,
+        );
+    }
 }
