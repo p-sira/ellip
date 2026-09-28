@@ -7,6 +7,7 @@
 - `el3`: Retain small nonzero characteristic parameters at large amplitudes (https://github.com/p-sira/ellip/pull/117).
 - `ellippi`: Keep representable inputs below singular boundaries finite (https://github.com/p-sira/ellip/pull/118).
 - Validate checked elliptic-integral inputs before recursion and period reduction (https://github.com/p-sira/ellip/pull/119).
+- `jacobi_zeta`: Preserve values near special angles (https://github.com/p-sira/ellip/pull/120).
 - `ellippiinc`: Fix incorrect result when `φ > π/2` and `n > 1` (https://github.com/p-sira/ellip/pull/111).
 - `ellipeinc`: Fix `NaN` error when `φ` is a multiple of `π` and `m ∉ {0, 1}` (https://github.com/p-sira/ellip/pull/111).
 - `ellippi`: Fix `NaN` errors on the diagonal `n = m` when `n < 0` (https://github.com/p-sira/ellip/pull/111).
