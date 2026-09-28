@@ -71,6 +71,9 @@ pub fn jacobi_zeta<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn jacobi_zeta_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
+    if m > 1.0 {
+        return Err("jacobi_zeta: m must not be greater than 1.");
+    }
     let sign = phi.signum();
     let phi = phi.abs();
 
@@ -78,7 +81,7 @@ pub fn jacobi_zeta_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     let cosp = phi.cos();
 
     let nphi = (phi / (pi_2!())).round();
-    Ok(if (phi - nphi * pi_2!()).abs() < epsilon!().sqrt() {
+    Ok(if phi.is_finite() && phi == nphi * pi_2!() {
         // Z(nπ/2, m) when n is an integer.
         0.0
     } else if m >= 1.0 {
@@ -168,4 +171,41 @@ mod tests {
 #[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(jacobi_zeta(0.5, 0.5), Err("jacobi_zeta: Unexpected error."));
+}
+
+#[cfg(all(test, not(feature = "test_force_fail")))]
+mod audit_a06 {
+    // Regression for audit finding A6: https://github.com/p-sira/ellip/pull/120
+    use crate::*;
+    #[allow(dead_code)]
+    fn close(actual: f64, expected: f64, rtol: f64) {
+        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
+        assert!(
+            (actual - expected).abs() <= rtol * expected.abs(),
+            "actual={actual:.17e}, expected={expected:.17e}"
+        );
+    }
+    #[test]
+    fn neighborhoods_are_not_flat() {
+        close(
+            jacobi_zeta(1e-9, 0.5).unwrap(),
+            2.715267094777682e-10,
+            2e-15,
+        );
+        close(
+            jacobi_zeta(-1e-9, 0.5).unwrap(),
+            -2.715267094777682e-10,
+            2e-15,
+        );
+        for offset in [-1e-9, 1e-9] {
+            let phi = std::f64::consts::FRAC_PI_2 + offset;
+            close(
+                jacobi_zeta(phi, 1.0).unwrap(),
+                -offset.signum() * phi.sin(),
+                1e-15,
+            );
+        }
+        assert_eq!(jacobi_zeta(std::f64::consts::FRAC_PI_2, 0.5).unwrap(), 0.0);
+        assert!(jacobi_zeta(0.0, 2.0).is_err());
+    }
 }
