@@ -159,8 +159,9 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
             if x == p {
                 // RJ(x,x,x,x)
                 return 1.0 / (x * x.sqrt());
-            } else {
-                // RJ(x,x,x,p)
+            } else if p.max(x) / p.min(x) > 1.2 {
+                // Away from p = x the elementary formula is well conditioned.
+                // Nearby, use duplication to avoid subtracting equal RC values.
                 return (3.0 / (x - p)) * (elliprc_unchecked(x, p) - 1.0 / x.sqrt());
             }
         } else {
@@ -378,4 +379,40 @@ mod tests {
 #[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(elliprj(0.2, 0.5, 1e300, 1.0), Err("elliprj: Failed to converge."));
+}
+
+#[cfg(all(test, not(feature = "test_force_fail")))]
+mod audit_a02 {
+    // Regression for audit finding A2: https://github.com/p-sira/ellip/pull/116
+    use crate::elliprj;
+
+    fn close(actual: f64, expected: f64, rtol: f64) {
+        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
+        assert!((actual - expected).abs() <= rtol * expected.abs());
+    }
+
+    #[test]
+    fn near_equal_arguments() {
+        for (p, expected) in [
+            (f64::from_bits(1.0f64.to_bits() + 1), 0.9999999999999999),
+            (1.000000000001, 0.9999999999993999),
+            (f64::from_bits(1.0f64.to_bits() - 1), 1.0),
+        ] {
+            let actual = elliprj(1.0, 1.0, 1.0, p).unwrap();
+            close(actual, expected, 8e-16);
+            if p > 1.0 {
+                assert!(actual <= 1.0);
+            }
+        }
+        close(
+            elliprj(2.0, 2.0, 2.0, 2.000000000002).unwrap(),
+            0.35355339059306163,
+            1e-15,
+        );
+        close(
+            elliprj(1.0f32, 1.0, 1.0, f32::from_bits(1.0f32.to_bits() + 1)).unwrap() as f64,
+            1.0,
+            3e-7,
+        );
+    }
 }
