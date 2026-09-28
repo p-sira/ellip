@@ -364,7 +364,7 @@ pub fn ellippiinc_bulirsch_with_const<T: Float, C: BulirschConst<T>>(
 
     // el3 cannot handle complex kc and PV domain
     let sphi = phi.sin();
-    if m >= 1.0 || n * sphi * sphi >= 1.0 {
+    if phi.abs() >= pi_2!() || m >= 1.0 || n * sphi * sphi >= 1.0 {
         return ellippiinc(phi, n, m);
     }
 
@@ -631,4 +631,39 @@ mod tests {
 #[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(ellippiinc_bulirsch(0.5, 0.5, 0.5), Err("ellippiinc: Unexpected error."));
+}
+
+#[cfg(all(test, not(feature = "test_force_fail")))]
+mod audit_a01 {
+    // Regression for audit finding A1: https://github.com/p-sira/ellip/pull/115
+    use crate::{ellippiinc, ellippiinc_bulirsch};
+
+    fn close(actual: f64, expected: f64, rtol: f64) {
+        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
+        assert!((actual - expected).abs() <= rtol * expected.abs());
+    }
+
+    #[test]
+    fn amplitude_periods() {
+        close(
+            ellippiinc_bulirsch(2.0, 0.5, 0.5).unwrap(),
+            3.8198568874384073,
+            2e-15,
+        );
+        for phi in [std::f64::consts::PI, -std::f64::consts::PI, 7.0, -7.0] {
+            close(ellippiinc_bulirsch(phi, 0.0, 0.0).unwrap(), phi, 2e-15);
+            close(
+                ellippiinc_bulirsch(phi, 0.5, 0.5).unwrap(),
+                ellippiinc(phi, 0.5, 0.5).unwrap(),
+                2e-15,
+            );
+        }
+        for phi in [std::f32::consts::FRAC_PI_2, -std::f32::consts::FRAC_PI_2] {
+            close(
+                ellippiinc_bulirsch(phi, 0.5, 0.5).unwrap() as f64,
+                (phi.signum() as f64) * 2.7012878857298321,
+                3e-7,
+            );
+        }
+    }
 }
