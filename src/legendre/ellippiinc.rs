@@ -364,7 +364,7 @@ pub fn ellippiinc_bulirsch_with_const<T: Float, C: BulirschConst<T>>(
 
     // el3 cannot handle complex kc and PV domain
     let sphi = phi.sin();
-    if m >= 1.0 || n * sphi * sphi >= 1.0 {
+    if phi.abs() >= pi_2!() || m >= 1.0 || n * sphi * sphi >= 1.0 {
         return ellippiinc(phi, n, m);
     }
 
