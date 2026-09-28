@@ -118,6 +118,19 @@ fn elliprc1p<T: Float>(y: T) -> T {
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
+    // Homogeneity keeps products in duplication and special cases in range.
+    // Separate rescaling factors: scale*sqrt(scale) can itself overflow.
+    let scale = x.abs().max(y.abs()).max(z.abs()).max(p.abs());
+    let limit = T::max_value().sqrt().sqrt().sqrt();
+    if scale.is_finite() && scale > 0.0 && (scale > limit || scale < 1.0 / limit)
+        // Do not turn nonzero arguments into singular zeros at extreme ratios.
+        && [x, y, z, p].iter().all(|&v| v == 0.0 || v / scale != 0.0)
+    {
+        return elliprj_unchecked(x / scale, y / scale, z / scale, p / scale)
+            / scale
+            / scale.sqrt();
+    }
+
     let_mut!(x, y, z);
     // for p < 0, the integral is singular, return Cauchy principal value
     if p <= 0.0 {
@@ -394,6 +407,22 @@ mod tests {
             status.success(),
             "invalid RJ input aborted or failed: {status}"
         );
+    }
+
+    // Regression for audit finding A8: https://github.com/p-sira/ellip/pull/122
+    #[test]
+    fn test_elliprj_extreme_scales() {
+        let actual = elliprj(1e110, 2e110, 3e110, 4e110).unwrap();
+        let expected = 2.3984809974956775e-166;
+        assert!(actual.is_finite());
+        assert!((actual - expected).abs() <= 2e-15 * expected);
+        for scale in [1e-200_f64, 1e-100, 1e100, 1e200] {
+            let actual = elliprj(scale, 2.0 * scale, 3.0 * scale, 4.0 * scale).unwrap()
+                * scale
+                * scale.sqrt();
+            let expected = elliprj(1.0, 2.0, 3.0, 4.0).unwrap();
+            assert!((actual - expected).abs() <= 3e-15 * expected.abs());
+        }
     }
 }
 
