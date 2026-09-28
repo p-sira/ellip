@@ -788,6 +788,8 @@ mod tests {
             (0.5.sqrt() * 4.0).atan() / 0.5.sqrt()
         );
         // kc = 1, p <= 0: el3(x, 1, p) = (ln(1+vx) - ln(1-vx)) / (2v); v = sqrt(-p)
+        // Corrected while fixing audit finding A15:
+        // https://github.com/p-sira/ellip/pull/129
         assert_close!(0.5225504573804798, el3(0.5, 1.0, -0.5).unwrap(), 1e-15);
         // 1 + px² = 0: should return Err
         assert_eq!(el3(1.0, 0.5, -1.0), Err("el3: 1 + px² cannot be zero."));
