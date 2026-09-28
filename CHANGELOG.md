@@ -15,6 +15,7 @@
 - `ellippiinc`: Handle `n = m = 1` before the first pole (https://github.com/p-sira/ellip/pull/125).
 - `heuman_lambda`: Preserve amplitude periods for zero and tiny positive parameters (https://github.com/p-sira/ellip/pull/126).
 - `ellipdinc`: Preserve representable tails for extreme finite negative parameters (https://github.com/p-sira/ellip/pull/127).
+- `ellipeinc`: Restore oddness and periods in the extreme-negative-parameter limit (https://github.com/p-sira/ellip/pull/128).
 - `ellippiinc`: Fix incorrect result when `φ > π/2` and `n > 1` (https://github.com/p-sira/ellip/pull/111).
 - `ellipeinc`: Fix `NaN` error when `φ` is a multiple of `π` and `m ∉ {0, 1}` (https://github.com/p-sira/ellip/pull/111).
 - `ellippi`: Fix `NaN` errors on the diagonal `n = m` when `n < 0` (https://github.com/p-sira/ellip/pull/111).
