@@ -71,7 +71,7 @@ use crate::{
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
-    if n > 1.0 - epsilon!() {
+    if n >= 1.0 {
         if n > 1.0 {
             // n -> 1+
             // https://dlmf.nist.gov/19.6.E6
@@ -95,7 +95,7 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
         return Ok(ans);
     }
     check!(@nan, ellippi, [n, m]);
-    if m > 1.0 - epsilon!() {
+    if m >= 1.0 {
         if m > 1.0 {
             return Err("ellippi: m must not be greater than 1.");
         }
@@ -126,7 +126,7 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
 #[inline]
 pub fn ellippi_unchecked<T: Float>(n: T, m: T) -> T {
     if n <= 0.0 {
-        if 1.0 - m < epsilon!() {
+        if m == 1.0 {
             return -inf!();
         }
         if n == 0.0 {
@@ -266,8 +266,12 @@ mod tests {
         assert_eq!(ellippi(2.0, 1.0).unwrap(), NEG_INFINITY);
         assert_eq!(ellippi(0.5, 1.0).unwrap(), INFINITY);
         assert_eq!(ellippi(-2.0, 1.0).unwrap(), INFINITY);
-        // n -> 1-: Π(n, m) = inf
-        assert_eq!(ellippi(1.0 - 0.5 * EPSILON, 0.5).unwrap(), INFINITY);
+        // The last representable n below 1 is still finite (100-digit reference).
+        crate::util::assert_close(
+            ellippi(1.0 - 0.5 * EPSILON, 0.5).unwrap(),
+            210828713.28594348,
+            2e-15,
+        );
         // n -> 1+: Π(n, m) = K(m) - E(m) / (1-m)
         assert_eq!(
             ellippi(1.0 + EPSILON, 0.5).unwrap(),
@@ -297,4 +301,37 @@ mod tests {
 #[cfg(feature = "test_force_fail")]
 crate::test_force_unreachable! {
     assert_eq!(ellippi(0.5, 0.5), Err("ellippi: Unexpected error."));
+}
+
+#[cfg(all(test, not(feature = "test_force_fail")))]
+mod audit_a04 {
+    // Regression for audit finding A4: https://github.com/p-sira/ellip/pull/118
+    use crate::*;
+    #[allow(dead_code)]
+    fn close(actual: f64, expected: f64, rtol: f64) {
+        assert!(actual.is_finite(), "actual={actual}, expected={expected}");
+        assert!(
+            (actual - expected).abs() <= rtol * expected.abs(),
+            "actual={actual:.17e}, expected={expected:.17e}"
+        );
+    }
+    #[test]
+    fn finite_below_singular_boundary() {
+        let u = f64::from_bits(1.0f64.to_bits() - 1);
+        close(ellippi(u, 0.0).unwrap(), 149078413.4323951, 2e-15);
+        close(ellippi(0.0, u).unwrap(), 19.75469464595844, 2e-15);
+        assert!(ellippi(1.0, 0.0).is_err());
+        assert_eq!(ellippi(0.0, 1.0).unwrap(), f64::INFINITY);
+        let u = f32::from_bits(1.0f32.to_bits() - 1);
+        close(
+            ellippi(u, 0.0).unwrap() as f64,
+            (std::f32::consts::FRAC_PI_2 / (1.0 - u).sqrt()) as f64,
+            4e-7,
+        );
+        close(
+            ellippi(0.0, u).unwrap() as f64,
+            ellipk(u).unwrap() as f64,
+            4e-7,
+        );
+    }
 }
