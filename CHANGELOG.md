@@ -1,6 +1,6 @@
 # Changelog
 ## 1.1
-### 1.1.1
+### 1.1.2
 **Bug Fixes**
 - `ellippiinc_bulirsch`: Preserve complete amplitude periods (https://github.com/p-sira/ellip/pull/115).
 - `elliprj`: Avoid cancellation when the arguments are nearly equal (https://github.com/p-sira/ellip/pull/116).
@@ -18,6 +18,9 @@
 - `ellipeinc`: Restore oddness and periods in the extreme-negative-parameter limit (https://github.com/p-sira/ellip/pull/128).
 - Test utilities: Reject NaNs, infinities, invalid tolerances, and wrong negative references in relative comparisons (https://github.com/p-sira/ellip/pull/129).
 - Test infrastructure: Resolve reference datasets from the crate root and fail if they cannot be read (https://github.com/p-sira/ellip/pull/130).
+
+### 1.1.1
+**Bug Fixes**
 - `ellippiinc`: Fix incorrect result when `φ > π/2` and `n > 1` (https://github.com/p-sira/ellip/pull/111).
 - `ellipeinc`: Fix `NaN` error when `φ` is a multiple of `π` and `m ∉ {0, 1}` (https://github.com/p-sira/ellip/pull/111).
 - `ellippi`: Fix `NaN` errors on the diagonal `n = m` when `n < 0` (https://github.com/p-sira/ellip/pull/111).
