@@ -82,21 +82,10 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
         return Ok((1.0 - n).signum() * inf!());
     }
     if n > 1.0 {
-        if n > 1.0 {
-            // n -> 1+
-            // https://dlmf.nist.gov/19.6.E6
-            if n <= 1.0 + epsilon!() {
-                return Ok(ellipk(m)? - ellipe(m)? / (1.0 - m));
-            }
-
-            // Use Cauchy principal value
-            // https://dlmf.nist.gov/19.25.E4
-            return Ok(-3.0.recip() * m / n * elliprj_unchecked(0.0, 1.0 - m, 1.0, 1.0 - m / n));
-        }
-        if n == 1.0 {
-            return Err("ellippi: n cannot be 1.");
-        }
-        return Ok(inf!());
+        // Use the Cauchy principal value. The n -> 1+ limit is not uniform as
+        // m -> 1-, so the direct Carlson form is required at that corner.
+        // https://dlmf.nist.gov/19.25.E4
+        return Ok(-3.0.recip() * m / n * elliprj_unchecked(0.0, 1.0 - m, 1.0, 1.0 - m / n));
     }
 
     let ans = ellippi_unchecked(n, m);
@@ -280,10 +269,11 @@ mod tests {
             210828713.28594348,
             2e-15,
         );
-        // n -> 1+: Π(n, m) = K(m) - E(m) / (1-m)
-        assert_eq!(
+        // The nearest representable n > 1 remains finite.
+        crate::util::assert_close(
             ellippi(1.0 + EPSILON, 0.5).unwrap(),
-            ellipk(0.5).unwrap() - ellipe(0.5).unwrap() / 0.5
+            -0.8472130847939789,
+            2e-15,
         );
         // Π(0, 0) = pi/2
         assert_eq!(ellippi(0.0, 0.0).unwrap(), FRAC_PI_2);
@@ -347,6 +337,19 @@ mod tests {
             ellipk(u).unwrap() as f64,
             4e-7
         );
+    }
+
+    #[test]
+    fn test_principal_value_at_simultaneous_branch_limits() {
+        // Exact-binary, 80-digit Wolfram references. This corner used the nonuniform
+        // n -> 1+ limit and lost most significant digits when m also approached 1.
+        let n = f64::from_bits(1.0f64.to_bits() + 1);
+        let m = f64::from_bits(1.0f64.to_bits() - 1);
+        crate::assert_close!(ellippi(n, m).unwrap(), -4_214_834_719_445_440.5, 3e-15);
+
+        let n = f32::from_bits(1.0f32.to_bits() + 1);
+        let m = f32::from_bits(1.0f32.to_bits() - 1);
+        crate::assert_close!(ellippi(n, m).unwrap() as f64, -7_850_737.0, 4e-7);
     }
 }
 
