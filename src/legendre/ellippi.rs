@@ -339,6 +339,7 @@ mod tests {
         );
     }
 
+    // Regression for branch-limit margin analysis: https://github.com/p-sira/ellip/pull/132
     #[test]
     fn test_principal_value_at_simultaneous_branch_limits() {
         // Exact-binary, 80-digit Wolfram references. This corner used the nonuniform
