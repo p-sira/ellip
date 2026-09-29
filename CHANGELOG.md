@@ -1,5 +1,26 @@
 # Changelog
 ## 1.1
+### 1.1.2
+**Bug Fixes**
+- `ellippiinc_bulirsch`: Preserve complete amplitude periods (https://github.com/p-sira/ellip/pull/115).
+- `elliprj`: Avoid cancellation when the arguments are nearly equal (https://github.com/p-sira/ellip/pull/116).
+- `el3`: Retain small nonzero characteristic parameters at large amplitudes (https://github.com/p-sira/ellip/pull/117).
+- `ellippi`: Keep representable inputs below singular boundaries finite (https://github.com/p-sira/ellip/pull/118).
+- Validate checked elliptic-integral inputs before recursion and period reduction (https://github.com/p-sira/ellip/pull/119).
+- `jacobi_zeta`: Preserve values near special angles (https://github.com/p-sira/ellip/pull/120).
+- `el3`: Return finite elementary and real principal values when `kc = 1` (https://github.com/p-sira/ellip/pull/121).
+- Carlson integrals: Normalize extreme argument scales to preserve representable results (https://github.com/p-sira/ellip/pull/122).
+- Incomplete F/E: Avoid intermediate range loss at tiny and large amplitudes (https://github.com/p-sira/ellip/pull/123).
+- `ellipk`: Accept finite negative parameters outside the polynomial selector range (https://github.com/p-sira/ellip/pull/124).
+- `ellippiinc`: Handle `n = m = 1` before the first pole (https://github.com/p-sira/ellip/pull/125).
+- `heuman_lambda`: Preserve amplitude periods for zero and tiny positive parameters (https://github.com/p-sira/ellip/pull/126).
+- `ellipdinc`: Preserve representable tails for extreme finite negative parameters (https://github.com/p-sira/ellip/pull/127).
+- `ellipeinc`: Restore oddness and periods in the extreme-negative-parameter limit (https://github.com/p-sira/ellip/pull/128).
+- Test utilities: Reject NaNs, infinities, invalid tolerances, and wrong negative references in relative comparisons (https://github.com/p-sira/ellip/pull/129).
+- Test infrastructure: Resolve reference datasets from the crate root and fail if they cannot be read (https://github.com/p-sira/ellip/pull/130).
+- `ellippi`: Preserve principal values when `n` and `m` simultaneously approach 1 (https://github.com/p-sira/ellip/pull/132).
+- Test data: Reduce branch margins to one epsilon where Wolfram verification confirms stable results; retain 1,000 epsilons for principal-value `elliprj` (https://github.com/p-sira/ellip/pull/132).
+
 ### 1.1.1
 **Bug Fixes**
 - `ellippiinc`: Fix incorrect result when `φ > π/2` and `n > 1` (https://github.com/p-sira/ellip/pull/111).

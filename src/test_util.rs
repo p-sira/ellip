@@ -102,12 +102,18 @@ macro_rules! compare_test_data_boost {
         use ellip_dev_utils::parser;
         use std::path::Path;
 
-        let path = Path::new("./tests/data/boost").join($filename);
+        let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/data/boost")
+            .join($filename);
         match parser::read_boost_data(&path.to_str().unwrap()) {
             Ok(cases) => {
                 compare_test_data!($func, cases, $t, $rtol, $atol);
             }
-            Err(_) => (),
+            Err(err) => panic!(
+                "Failed to read reference dataset {}: {}",
+                path.display(),
+                err
+            ),
         };
     }};
 }
@@ -149,12 +155,18 @@ macro_rules! compare_test_data_wolfram {
             use ellip_dev_utils::parser;
             use std::path::Path;
 
-            let path = Path::new($path).join($filename);
+            let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join($path)
+                .join($filename);
             match parser::read_wolfram_data(&path.to_str().unwrap()) {
                 Ok(cases) => {
                     compare_test_data!($func, cases, $t, $rtol, $atol);
                 }
-                Err(_) => (),
+                Err(err) => panic!(
+                    "Failed to read reference dataset {}: {}",
+                    path.display(),
+                    err
+                ),
             };
         }
     }};
@@ -163,13 +175,7 @@ macro_rules! compare_test_data_wolfram {
 #[macro_export]
 macro_rules! assert_close {
     ($expected: expr, $actual: expr, $rtol: expr) => {
-        let relative = ($actual - $expected).abs() / $expected;
-        if relative > $rtol || $actual.is_nan() {
-            panic!(
-                "Assertion failed: expected = {:?}, got = {:?}, relative = {:?}, rtol = {:?}",
-                $expected, $actual, relative, $rtol
-            )
-        }
+        $crate::util::assert_close($actual, $expected, $rtol);
     };
 }
 
@@ -201,4 +207,62 @@ pub fn linspace(start: f64, end: f64, num: usize) -> Vec<f64> {
     }
 
     result
+}
+
+#[cfg(all(test, not(feature = "test_force_fail")))]
+mod assertion_regression_tests {
+    // Regression for audit finding A15: https://github.com/p-sira/ellip/pull/129
+    #[test]
+    fn macro_rejects_negative_reference_errors_and_nan() {
+        assert!(std::panic::catch_unwind(|| {
+            crate::assert_close!(-1.0_f64, 100.0_f64, 1e-15);
+        })
+        .is_err());
+        assert!(std::panic::catch_unwind(|| {
+            crate::assert_close!(f64::NAN, 1.0_f64, 1e-15);
+        })
+        .is_err());
+        crate::assert_close!(-1.0_f64, -1.0_f64, 0.0);
+        crate::assert_close!(0.0_f64, 0.0_f64, 0.0);
+    }
+}
+
+#[cfg(all(test, not(feature = "test_force_fail")))]
+mod dataset_regression_tests {
+    // Regression for audit finding A16: https://github.com/p-sira/ellip/pull/130
+    fn identity(input: &[f64]) -> f64 {
+        input[0]
+    }
+
+    // Regression for audit finding A16: https://github.com/p-sira/ellip/pull/130
+    #[test]
+    #[should_panic(expected = "missing-audit-a16.txt")]
+    fn missing_boost_dataset_fails() {
+        crate::compare_test_data_boost!("missing-audit-a16.txt", identity, 1e-15);
+    }
+
+    // Regression for audit finding A16: https://github.com/p-sira/ellip/pull/130
+    #[test]
+    #[should_panic(expected = "missing-audit-a16.csv")]
+    fn missing_wolfram_dataset_fails() {
+        crate::compare_test_data_wolfram!(
+            "tests/data/wolfram",
+            "missing-audit-a16.csv",
+            identity,
+            f64,
+            1e-15,
+            0.0
+        );
+    }
+
+    // Regression for audit finding A16: https://github.com/p-sira/ellip/pull/130
+    #[test]
+    fn datasets_load_outside_checkout() {
+        let status = std::process::Command::new(std::env::current_exe().unwrap())
+            .args(["--exact", "carlson::elliprc::tests::test_elliprc"])
+            .current_dir(std::env::temp_dir())
+            .status()
+            .unwrap();
+        assert!(status.success());
+    }
 }

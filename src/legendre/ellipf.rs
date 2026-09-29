@@ -73,17 +73,25 @@ use crate::{
 /// - The MathWorks, Inc. “ellipticF.” Accessed April 21, 2025. <https://www.mathworks.com/help/symbolic/sym.ellipticf.html>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
+    check!(@nan, ellipf, [phi, m]);
+    if m == 0.0 {
+        return Ok(phi);
+    }
+    // Period reduction must not hide a pole or an interval of complex values.
+    if m >= 1.0 && (phi.abs() >= pi_2!() || m * phi.sin().powi(2) >= 1.0) {
+        return Err("ellipf: m sin²φ must be smaller than one.");
+    }
     let sign = phi.signum();
     let phi = phi.abs();
 
     // Large phis
     if phi > 1.0 / epsilon!() {
-        if phi >= max_val!() {
+        if phi.is_infinite() {
             return Ok(sign * inf!());
         }
         // Phi is so large that phi%pi is necessarily zero (or garbage),
         // just return the second part of the duplication formula:
-        return Ok(sign * 2.0 * phi * ellipk_precise_unchecked(m) / pi!());
+        return Ok(sign * phi * (ellipk_precise_unchecked(m) / pi_2!()));
     }
 
     // Carlson's algorithm works only for |phi| <= pi/2,
@@ -124,7 +132,12 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     } else {
         c
     };
-    ans = s * elliprf_unchecked(c_minus_one, arg2, c);
+    ans = if c.is_infinite() {
+        // Homogeneous form avoids forming csc²(phi) for tiny amplitudes.
+        s * sphi * elliprf_unchecked(c2p, 1.0 - (m * sphi) * sphi, 1.0)
+    } else {
+        s * elliprf_unchecked(c_minus_one, arg2, c)
+    };
 
     // It should not be possible for s2p to be less than MIN value.
     // if s2p > min_val!() {
@@ -218,6 +231,39 @@ mod tests {
         );
         // m = -inf: F(phi, -inf) = 0.0
         assert_eq!(ellipf(0.5, NEG_INFINITY).unwrap(), 0.0);
+    }
+
+    // Regression for audit finding A5: https://github.com/p-sira/ellip/pull/119
+    #[test]
+    fn test_ellipf_validates_before_period_reduction() {
+        for phi in [std::f64::consts::PI, -std::f64::consts::PI, 1e20] {
+            assert!(ellipf(phi, 1.0).is_err());
+            assert!(ellipf(phi, 2.0).is_err());
+        }
+        assert!(ellipf(0.5_f64, 1.0).unwrap().is_finite());
+    }
+
+    // Regression for audit finding A9: https://github.com/p-sira/ellip/pull/123
+    #[test]
+    fn test_ellipf_tiny_and_large_amplitudes() {
+        let close = |actual: f64, expected: f64, rtol: f64| {
+            assert!(actual.is_finite(), "actual={actual}, expected={expected}");
+            assert!((actual - expected).abs() <= rtol * expected.abs());
+        };
+        for phi in [1e-160, -1e-160, 1e-300, -1e-300] {
+            for m in [-0.5, 0.5] {
+                close(ellipf(phi, m).unwrap(), phi, 2e-15);
+            }
+        }
+        for phi in [1e308, -1e308, f64::MAX, -f64::MAX] {
+            assert_eq!(ellipf(phi, 0.0).unwrap(), phi);
+        }
+        close(ellipf(1e308, -0.5).unwrap(), 9.012862993604472e307, 3e-15);
+        close(
+            ellipf(1e-25_f32, 0.5).unwrap() as f64,
+            1e-25_f32 as f64,
+            3e-7,
+        );
     }
 }
 

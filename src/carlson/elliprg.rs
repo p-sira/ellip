@@ -86,6 +86,17 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
+    // Homogeneity keeps products in duplication and special cases in range.
+    // Separate rescaling factors: scale*sqrt(scale) can itself overflow.
+    let scale = x.abs().max(y.abs()).max(z.abs());
+    let limit = T::max_value().sqrt().sqrt().sqrt();
+    if scale.is_finite() && scale > 0.0 && (scale > limit || scale < 1.0 / limit)
+        // Do not turn nonzero arguments into singular zeros at extreme ratios.
+        && [x, y, z].iter().all(|&v| v == 0.0 || v / scale != 0.0)
+    {
+        return elliprg_unchecked(x / scale, y / scale, z / scale) * scale.sqrt();
+    }
+
     let_mut!(x, y, z);
     if x < y {
         swap(&mut x, &mut y);
@@ -228,5 +239,26 @@ mod tests {
             elliprg(1.0, 1.0, INFINITY),
             Err("elliprg: Arguments must be finite.")
         );
+    }
+
+    // Regression for audit finding A8: https://github.com/p-sira/ellip/pull/122
+    #[test]
+    fn test_elliprg_extreme_scales() {
+        for (scale, expected) in [
+            (1e200_f64, 1.4018470999908951e100),
+            (1e-200_f64, 1.4018470999908951e-100),
+        ] {
+            let actual = elliprg(scale, 2.0 * scale, 3.0 * scale).unwrap();
+            assert!(actual.is_finite());
+            assert!((actual - expected).abs() <= 2e-15 * expected);
+        }
+        for scale in [1e-200_f64, 1e-100, 1e100, 1e200] {
+            let actual = elliprg(scale, 2.0 * scale, 3.0 * scale).unwrap() / scale.sqrt();
+            let expected = elliprg(1.0, 2.0, 3.0).unwrap();
+            assert!((actual - expected).abs() <= 3e-15 * expected.abs());
+        }
+        let actual = elliprg(1e30_f32, 2e30, 3e30).unwrap() as f64;
+        let expected = 1.4018470999908951e15;
+        assert!((actual - expected).abs() <= 5e-7 * expected);
     }
 }

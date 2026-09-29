@@ -113,7 +113,12 @@ pub fn ellipeinc_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     // E(phi, m) -> sqrt(-m) int(sin(theta)) d(theta), theta=[0,phi]
     // E(phi, m) -> sqrt(-m) (1-cos(phi))
     if m <= -max_val!() {
-        return Ok((1.0 - phi.cos()) * (-m).sqrt());
+        // Integrate |sin(theta)|, retaining the full periods and oddness.
+        let periods = (phi / pi!()).floor();
+        let rphi = phi % pi!();
+        let half_sin = (rphi / 2.0).sin();
+        let area = 2.0 * (periods + half_sin * half_sin);
+        return Ok(invert * area * (-m).sqrt());
     }
 
     if m == 1.0 {
@@ -138,8 +143,7 @@ pub fn ellipeinc_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         rphi = pi_2!() - rphi;
     }
 
-    let mut result = if rphi == 0.0 || (m > 0.0 && rphi.powi(3) * m / 6.0 < epsilon!() * rphi.abs())
-    {
+    let mut result = if rphi == 0.0 || (m.is_finite() && (m.abs() * rphi) * rphi < epsilon!()) {
         // rphi == 0 at phi = k*pi: the reduced-angle part is 0, so skip the Carlson block
         // (which would divide by sin²(rphi) = 0) and keep only the m*mm*E(m) period term.
         // See http://functions.wolfram.com/EllipticIntegrals/EllipticE2/06/01/03/0001/
@@ -248,12 +252,52 @@ mod tests {
             Err("ellipeinc: m sin²φ must be smaller than one.")
         );
         // m -> -inf: E(phi, m) = (1-cos(phi)) sqrt(-m)
-        assert_eq!(
+        crate::util::assert_close(
             ellipeinc(0.5, -MAX).unwrap(),
-            (1.0 - 0.5.cos()) * MAX.sqrt()
+            (1.0 - 0.5.cos()) * MAX.sqrt(),
+            1e-15,
         );
         // m = -inf: E(phi, -inf) = inf
         assert_eq!(ellipeinc(0.5, NEG_INFINITY).unwrap(), INFINITY);
+    }
+
+    // Regression for audit finding A9: https://github.com/p-sira/ellip/pull/123
+    #[test]
+    fn test_ellipeinc_tiny_amplitudes() {
+        for phi in [1e-160_f64, -1e-160, 1e-300, -1e-300] {
+            for m in [-0.5, 0.5] {
+                let actual = ellipeinc(phi, m).unwrap();
+                assert!(actual.is_finite());
+                assert!((actual - phi).abs() <= 2e-15 * phi.abs());
+            }
+        }
+        let actual = ellipeinc(1e-25_f32, -0.5).unwrap() as f64;
+        let expected = 1e-25_f32 as f64;
+        assert!((actual - expected).abs() <= 3e-7 * expected);
+    }
+
+    // Regression for audit finding A14: https://github.com/p-sira/ellip/pull/128
+    #[test]
+    fn test_extreme_negative_parameter_is_odd_and_periodic() {
+        crate::assert_close!(
+            ellipeinc(-1.0, -f64::MAX).unwrap(),
+            -6.1635383887574824e153,
+            3e-15
+        );
+        for phi in [1.0, 4.0, 7.0] {
+            let positive = ellipeinc(phi, -f64::MAX).unwrap();
+            crate::assert_close!(ellipeinc(-phi, -f64::MAX).unwrap(), -positive, 2e-15);
+        }
+        crate::assert_close!(
+            ellipeinc(std::f64::consts::PI, -f64::MAX).unwrap(),
+            2.0 * f64::MAX.sqrt(),
+            2e-15
+        );
+        crate::assert_close!(
+            ellipeinc(2.0 * std::f64::consts::PI, -f64::MAX).unwrap(),
+            4.0 * f64::MAX.sqrt(),
+            2e-15
+        );
     }
 }
 

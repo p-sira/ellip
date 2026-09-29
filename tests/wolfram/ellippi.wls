@@ -9,7 +9,9 @@ epsilon = 2.2204460492503131*^-16;
 
 mu = epsilon;
 
-muPV = 50 * epsilon;
+muPV = epsilon;
+
+exact[x_] := N[Rationalize[x, 0], 80];
 
 mNormal = Subdivide[0, 1 - mu, 50];
 
@@ -48,8 +50,8 @@ nPV = Subdivide[1 + muPV, 10, 20];
 
 mPV = Subdivide[0, 1 - muPV, 25];
 
-ellipPiPV = Flatten[Table[{n, m, EllipticPi[SetPrecision[n, 30], SetPrecision[
-    m, 30]]}, {n, nPV}, {m, mPV}], 1];
+ellipPiPV = Flatten[Table[{n, m, EllipticPi[exact[n], exact[m]]},
+    {n, nPV}, {m, mPV}], 1];
 
 ellipPiPV = Select[ellipPiPV, Element[#[[3]], Reals]&];
 

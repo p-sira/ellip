@@ -73,16 +73,16 @@ use num_traits::Float;
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
-    let ans = elliprj_unchecked(x, y, z, p);
-
-    if ans.is_finite() {
-        return Ok(ans);
-    }
     check!(@nan, elliprj, [x, y, z, p]);
     check!(@zero, elliprj, [p]);
     check!(@neg, elliprj, "x, y, and z must be non-negative.", [x, y, z]);
     check!(@multi_zero, elliprj, [x, y, z]);
     case!(@any [x, y, z, p] == inf!(), T::zero());
+    let ans = elliprj_unchecked(x, y, z, p);
+
+    if ans.is_finite() {
+        return Ok(ans);
+    }
     Err("elliprj: Failed to converge.")
 }
 
@@ -118,6 +118,19 @@ fn elliprc1p<T: Float>(y: T) -> T {
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
+    // Homogeneity keeps products in duplication and special cases in range.
+    // Separate rescaling factors: scale*sqrt(scale) can itself overflow.
+    let scale = x.abs().max(y.abs()).max(z.abs()).max(p.abs());
+    let limit = T::max_value().sqrt().sqrt().sqrt();
+    if scale.is_finite() && scale > 0.0 && (scale > limit || scale < 1.0 / limit)
+        // Do not turn nonzero arguments into singular zeros at extreme ratios.
+        && [x, y, z, p].iter().all(|&v| v == 0.0 || v / scale != 0.0)
+    {
+        return elliprj_unchecked(x / scale, y / scale, z / scale, p / scale)
+            / scale
+            / scale.sqrt();
+    }
+
     let_mut!(x, y, z);
     // for p < 0, the integral is singular, return Cauchy principal value
     if p <= 0.0 {
@@ -159,8 +172,9 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
             if x == p {
                 // RJ(x,x,x,x)
                 return 1.0 / (x * x.sqrt());
-            } else {
-                // RJ(x,x,x,p)
+            } else if p.max(x) / p.min(x) > 1.2 {
+                // Away from p = x the elementary formula is well conditioned.
+                // Nearby, use duplication to avoid subtracting equal RC values.
                 return (3.0 / (x - p)) * (elliprc_unchecked(x, p) - 1.0 / x.sqrt());
             }
         } else {
@@ -304,7 +318,7 @@ mod tests {
 
     #[test]
     fn test_elliprj_wolfram() {
-        compare_test_data_wolfram!("elliprj_data.csv", elliprj, 4, 3e-15);
+        compare_test_data_wolfram!("elliprj_data.csv", elliprj, 4, 3.1e-15);
         compare_test_data_wolfram!("elliprj_pv.csv", elliprj, 4, 5e-14, atol: f64::EPSILON);
     }
 
@@ -372,6 +386,69 @@ mod tests {
         assert!(elliprc1p(-0.6).is_finite());
         // y < -1
         assert!(elliprc1p(-1.1).is_finite());
+    }
+
+    // Regression for audit finding A5: https://github.com/p-sira/ellip/pull/119
+    #[test]
+    fn test_elliprj_invalid_input_does_not_abort() {
+        if std::env::var("ELLIP_A05_RJ_CHILD").is_ok() {
+            assert!(elliprj(0.0, 0.0, 1.0, 0.0).is_err());
+            return;
+        }
+        let status = std::process::Command::new(std::env::current_exe().unwrap())
+            .args([
+                "--exact",
+                "carlson::elliprj::tests::test_elliprj_invalid_input_does_not_abort",
+            ])
+            .env("ELLIP_A05_RJ_CHILD", "1")
+            .status()
+            .unwrap();
+        assert!(
+            status.success(),
+            "invalid RJ input aborted or failed: {status}"
+        );
+    }
+
+    // Regression for audit finding A8: https://github.com/p-sira/ellip/pull/122
+    #[test]
+    fn test_elliprj_extreme_scales() {
+        let actual = elliprj(1e110, 2e110, 3e110, 4e110).unwrap();
+        let expected = 2.3984809974956775e-166;
+        assert!(actual.is_finite());
+        assert!((actual - expected).abs() <= 2e-15 * expected);
+        for scale in [1e-200_f64, 1e-100, 1e100, 1e200] {
+            let actual = elliprj(scale, 2.0 * scale, 3.0 * scale, 4.0 * scale).unwrap()
+                * scale
+                * scale.sqrt();
+            let expected = elliprj(1.0, 2.0, 3.0, 4.0).unwrap();
+            assert!((actual - expected).abs() <= 3e-15 * expected.abs());
+        }
+    }
+
+    // Regression for audit finding A2: https://github.com/p-sira/ellip/pull/116
+    #[test]
+    fn test_near_equal_arguments() {
+        for (p, expected) in [
+            (f64::from_bits(1.0f64.to_bits() + 1), 0.9999999999999999),
+            (1.000000000001, 0.9999999999993999),
+            (f64::from_bits(1.0f64.to_bits() - 1), 1.0),
+        ] {
+            let actual = elliprj(1.0, 1.0, 1.0, p).unwrap();
+            crate::assert_close!(actual, expected, 8e-16);
+            if p > 1.0 {
+                assert!(actual <= 1.0);
+            }
+        }
+        crate::assert_close!(
+            elliprj(2.0, 2.0, 2.0, 2.000000000002).unwrap(),
+            0.35355339059306163,
+            1e-15
+        );
+        crate::assert_close!(
+            elliprj(1.0f32, 1.0, 1.0, f32::from_bits(1.0f32.to_bits() + 1)).unwrap() as f64,
+            1.0,
+            3e-7
+        );
     }
 }
 

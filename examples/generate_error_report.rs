@@ -33,7 +33,7 @@ fn main() {
         get_entry! {"wolfram/ellipe_neg", "ellipe (Neg m)", ellipe, 1, 1},
         get_entry! {"wolfram/ellippi_data", "ellippi", ellippi, 2, 1},
         get_entry! {"wolfram/ellippi_neg", "ellippi (Neg m)", ellippi, 2, 1},
-        get_entry! {"wolfram/ellippi_pv", "ellippi (p.v.)", ellippi, 2, 50},
+        get_entry! {"wolfram/ellippi_pv", "ellippi (p.v.)", ellippi, 2, 1},
         get_entry! {"wolfram/ellipd_data", "ellipd", ellipd, 1, 1},
         get_entry! {"wolfram/ellipd_neg", "ellipd (Neg m)", ellipd, 1, 1},
     ]);
@@ -57,17 +57,17 @@ fn main() {
         get_entry! {"wolfram/cel2_data", "cel2", cel2, 3, 1},
         get_entry! {"wolfram/el1_data", "el1", el1, 2, 1},
         get_entry! {"wolfram/el2_data", "el2", el2, 4, 1},
-        get_entry! {"wolfram/el3_data", "el3", el3, 3, 50},
-        get_entry! {"wolfram/el3_pv", "el3 (p.v.)", el3, 3, 50},
+        get_entry! {"wolfram/el3_data", "el3", el3, 3, 1},
+        get_entry! {"wolfram/el3_pv", "el3 (p.v.)", el3, 3, 1},
     ]);
     let carlson = generate_error_table(&[
         get_entry! {"wolfram/elliprf_data", "elliprf", elliprf, 3, 1},
         get_entry! {"wolfram/elliprg_data", "elliprg", elliprg, 3, 1},
-        get_entry! {"wolfram/elliprj_data", "elliprj", elliprj, 4, 50},
+        get_entry! {"wolfram/elliprj_data", "elliprj", elliprj, 4, 1},
         get_entry! {"wolfram/elliprj_pv", "elliprj (p.v.)", elliprj, 4, 1000},
         get_entry! {"wolfram/elliprc_data", "elliprc", elliprc, 2, 1},
         get_entry! {"wolfram/elliprc_pv", "elliprc (p.v.)", elliprc, 2, 1},
-        get_entry! {"wolfram/elliprd_data", "elliprd", elliprd, 3, 50},
+        get_entry! {"wolfram/elliprd_data", "elliprd", elliprd, 3, 1},
     ]);
     let misc = generate_error_table(&[
         get_entry! {"wolfram/jacobi_zeta_data", "jacobi_zeta", jacobi_zeta, 2, 1},

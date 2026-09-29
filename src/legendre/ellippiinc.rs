@@ -122,6 +122,14 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
     }
 
     if n == 1.0 {
+        if m == 1.0 {
+            if phi.abs() >= pi_2!() {
+                return Err("ellippiinc: The result is complex.");
+            }
+            // Integral of sec³(theta), with asinh(tan(phi)) stable at zero.
+            let t = phi.tan();
+            return Ok((t / phi.cos() + t.asinh()) / 2.0);
+        }
         if m == 0.0 {
             return Ok(phi.tan());
         }
@@ -364,7 +372,7 @@ pub fn ellippiinc_bulirsch_with_const<T: Float, C: BulirschConst<T>>(
 
     // el3 cannot handle complex kc and PV domain
     let sphi = phi.sin();
-    if m >= 1.0 || n * sphi * sphi >= 1.0 {
+    if phi.abs() >= pi_2!() || m >= 1.0 || n * sphi * sphi >= 1.0 {
         return ellippiinc(phi, n, m);
     }
 
@@ -625,6 +633,52 @@ mod tests {
             ellippiinc_bulirsch(0.5, 0.5, NAN),
             Err("ellippiinc: Arguments cannot be NAN.")
         );
+    }
+
+    // Regression for audit finding A1: https://github.com/p-sira/ellip/pull/115
+    #[test]
+    fn test_amplitude_periods() {
+        crate::assert_close!(
+            ellippiinc_bulirsch(2.0, 0.5, 0.5).unwrap(),
+            3.8198568874384073,
+            2e-15
+        );
+        for phi in [std::f64::consts::PI, -std::f64::consts::PI, 7.0, -7.0] {
+            crate::assert_close!(ellippiinc_bulirsch(phi, 0.0, 0.0).unwrap(), phi, 2e-15);
+            crate::assert_close!(
+                ellippiinc_bulirsch(phi, 0.5, 0.5).unwrap(),
+                ellippiinc(phi, 0.5, 0.5).unwrap(),
+                2e-15
+            );
+        }
+        for phi in [std::f32::consts::FRAC_PI_2, -std::f32::consts::FRAC_PI_2] {
+            crate::assert_close!(
+                ellippiinc_bulirsch(phi, 0.5, 0.5).unwrap() as f64,
+                (phi.signum() as f64) * 2.7012878857298321,
+                3e-7
+            );
+        }
+    }
+
+    // Regression for audit finding A11: https://github.com/p-sira/ellip/pull/125
+    #[test]
+    fn test_coincident_unit_parameters_before_pole() {
+        for phi in [0.5, -0.5] {
+            crate::assert_close!(
+                ellippiinc(phi, 1.0, 1.0).unwrap(),
+                phi.signum() * 0.5723732364688604,
+                2e-15
+            );
+        }
+        crate::assert_close!(ellippiinc(1e-12, 1.0, 1.0).unwrap(), 1e-12, 2e-15);
+        assert_eq!(ellippiinc(0.0, 1.0, 1.0).unwrap(), 0.0);
+        for phi in [
+            std::f64::consts::FRAC_PI_2,
+            std::f64::consts::PI,
+            -std::f64::consts::PI,
+        ] {
+            assert!(ellippiinc(phi, 1.0, 1.0).is_err());
+        }
     }
 }
 
