@@ -9,17 +9,19 @@ epsilon = 1.1920929*^-7;
 
 muRC = epsilon;
 
-muRD = 50 * epsilon;
+muRD = epsilon;
 
 muRG = epsilon;
 
 muRF = epsilon;
 
-muRJ = 50 * epsilon;
+muRJ = epsilon;
 
 muRJPV = 1000 * epsilon;
 
 muRJPVSmall = 50 * epsilon;
+
+exact[x_] := N[Rationalize[First[Normal[NumericArray[{x}, "Real32"]]], 0], 80];
 
 (* Carlson RC - Degenerate symmetric elliptic integral of RF *)
 
@@ -74,8 +76,7 @@ rdNormal =
     Select[
         Table[
             With[{x = data[[1]], y = data[[2]], z = data[[3]]},
-                {x, y, z, CarlsonRD[SetPrecision[x, 30], SetPrecision[
-                    y, 30], SetPrecision[z, 30]]}
+                {x, y, z, CarlsonRD[exact[x], exact[y], exact[z]]}
             ]
             ,
             {data, validRD}
@@ -197,8 +198,7 @@ rjNormal =
         Table[
             With[{x = data[[1]], y = data[[2]], z = data[[3]], p = data
                 [[4]]},
-                {x, y, z, p, CarlsonRJ[SetPrecision[x, 30], SetPrecision[
-                    y, 30], SetPrecision[z, 30], SetPrecision[p, 30]]}
+                {x, y, z, p, CarlsonRJ[exact[x], exact[y], exact[z], exact[p]]}
             ]
             ,
             {data, validRJ}

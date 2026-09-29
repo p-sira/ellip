@@ -18,6 +18,8 @@
 - `ellipeinc`: Restore oddness and periods in the extreme-negative-parameter limit (https://github.com/p-sira/ellip/pull/128).
 - Test utilities: Reject NaNs, infinities, invalid tolerances, and wrong negative references in relative comparisons (https://github.com/p-sira/ellip/pull/129).
 - Test infrastructure: Resolve reference datasets from the crate root and fail if they cannot be read (https://github.com/p-sira/ellip/pull/130).
+- `ellippi`: Preserve principal values when `n` and `m` simultaneously approach 1 (https://github.com/p-sira/ellip/pull/132).
+- Test data: Reduce branch margins to one epsilon where Wolfram verification confirms stable results; retain 1,000 epsilons for principal-value `elliprj` (https://github.com/p-sira/ellip/pull/132).
 
 ### 1.1.1
 **Bug Fixes**

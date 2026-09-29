@@ -11,7 +11,9 @@ muEL1 = epsilon;
 
 muEL2 = epsilon;
 
-muEL3 = 50 * epsilon;
+muEL3 = epsilon;
+
+exact[x_] := N[Rationalize[x, 0], 80];
 
 (* Bulirsch's Incomplete Elliptic integrals of the First Kind *)
 
@@ -53,8 +55,7 @@ pRange = Subdivide[muEL3, 1.0, 10];
 pRangePV = Subdivide[-3.0, -1.1, 10];
 
 EL3[x_, kc_, p_] :=
-  EllipticPi[SetPrecision[1 - p, 30], SetPrecision[ArcTan[x], 30], SetPrecision[
-    1 - kc * kc, 30]];
+  EllipticPi[1 - exact[p], ArcTan[exact[x]], 1 - exact[kc]^2];
 
 validKcPX =
   Select[

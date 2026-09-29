@@ -15,7 +15,7 @@ Ellip uses three sources of reference values:
 
 The [Boost dataset](https://github.com/boostorg/math/tree/develop/test/) is included in the repository at [tests/data/boost/](https://github.com/p-sira/ellip/blob/main/tests/data/boost/).
 
-The accuracy report shown here uses only the Wolfram dataset, as it provides uniform coverage across the domain of each function. The Wolfram reference values are generated using the scripts in [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/). Each script samples inputs across the valid domain of the corresponding function, avoiding singularities by stopping short of the branch limit **μ**. This ensures meaningful reference values and prevents non-informative cases, such as large outputs that diverges toward infinity, where the observed error is dominated by floating-point limits.
+The accuracy report shown here uses only the Wolfram dataset, as it provides uniform coverage across the domain of each function. The Wolfram reference values are generated using the scripts in [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/). Each script samples inputs across the valid domain of the corresponding function, excluding exact singularities by stopping short of the branch limit **μ**. A margin of 1ε exercises the branch-adjacent floating-point regime. The larger margin retained for principal-value `elliprj` avoids severe cancellation when its symmetric parameters nearly coincide.
 
 To generate the Wolfram test data:
 
@@ -47,7 +47,7 @@ Bulirsh's elliptic integrals are not natively implemented in Wolfram Engine. Nev
 
 {{CARLSON}}
 
-Note that `elliprj` is numerically unstable in the principal value domain when the symmetric parameter values are close (smaller than 1,000 epsilons).
+Principal-value `elliprj` is numerically unstable when the symmetric parameter values are closer than 1,000 epsilons, so that dataset retains μ = 1,000ε.
 
 ### Miscellaneous Functions
 
