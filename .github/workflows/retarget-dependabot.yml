@@ -1,0 +1,17 @@
+name: Retarget Dependabot PRs to dev
+on:
+    pull_request_target:
+        types: [opened]
+permissions:
+    pull-requests: write
+    contents: write
+jobs:
+    retarget:
+        if: github.actor == 'dependabot[bot]'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Change base branch to dev
+              run: |
+                  gh pr edit "${{ github.event.pull_request.number }}" --base dev
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
