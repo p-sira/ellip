@@ -229,9 +229,7 @@ pub(crate) fn elliprf_rd_unchecked<T: Float>(x: T, y: T, z: T) -> (T, T) {
                 let e3 = x_c * y_c * z_c;
                 rf_res = (1.0
                     + e3 * (1.0 / 14.0 + 3.0 * e3 / 104.0)
-                    + e2 * (-0.1 + e2 / 24.0
-                        - (3.0 * e3) / 44.0
-                        - 5.0 * e2 * e2 / 208.0
+                    + e2 * (-0.1 + e2 / 24.0 - (3.0 * e3) / 44.0 - 5.0 * e2 * e2 / 208.0
                         + e2 * e3 / 16.0))
                     / an_rf.sqrt();
                 rf_done = true;
