@@ -3,6 +3,7 @@
 ### 1.1.3
 **Performance Improvements**
 - `el3`: Defer `x.atan()` evaluation to branches that require amplitude reduction (https://github.com/p-sira/ellip/pull/134).
+- `elliprg`: Fuse RF and RD evaluations into a single duplication loop, sharing square-root steps (https://github.com/p-sira/ellip/pull/135).
 
 ### 1.1.2
 **Bug Fixes**
@@ -24,9 +25,6 @@
 - Test infrastructure: Resolve reference datasets from the crate root and fail if they cannot be read (https://github.com/p-sira/ellip/pull/130).
 - `ellippi`: Preserve principal values when `n` and `m` simultaneously approach 1 (https://github.com/p-sira/ellip/pull/132).
 - Test data: Reduce branch margins to one epsilon where Wolfram verification confirms stable results; retain 1,000 epsilons for principal-value `elliprj` (https://github.com/p-sira/ellip/pull/132).
-
-**Performance Improvements**
-- `elliprg`: Fuse RF and RD evaluations into a single duplication loop, sharing square-root steps.
 
 ### 1.1.1
 **Bug Fixes**
