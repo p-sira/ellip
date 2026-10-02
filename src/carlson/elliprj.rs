@@ -15,7 +15,7 @@ use core::mem::swap;
 use crate::{
     carlson::{elliprc_unchecked, elliprd_unchecked, elliprf_unchecked},
     crate_util::{case, check, declare, let_mut},
-    StrErr,
+    polyeval, StrErr,
 };
 use num_traits::Float;
 
@@ -95,14 +95,18 @@ fn elliprc1p<T: Float>(y: T) -> T {
     if y.abs() <= 0.01 {
         // Taylor series of Rc(1, 1+y) around y=0:
         // 1 - y/3 + y^2/5 - y^3/7 + y^4/9 - y^5/11 + y^6/13 - y^7/15 + y^8/17
-        return 1.0
-            - y * (1.0 / 3.0
-                - y * (1.0 / 5.0
-                    - y * (1.0 / 7.0
-                        - y * (1.0 / 9.0
-                            - y * (1.0 / 11.0
-                                - y * (1.0 / 13.0
-                                    - y * (1.0 / 15.0 - y / 17.0)))))));
+        let coeffs = [
+            1.0,
+            -1.0 / 3.0,
+            1.0 / 5.0,
+            -1.0 / 7.0,
+            1.0 / 9.0,
+            -1.0 / 11.0,
+            1.0 / 13.0,
+            -1.0 / 15.0,
+            1.0 / 17.0,
+        ];
+        return polyeval(y, &coeffs);
     }
 
     if y > 0.0 {
