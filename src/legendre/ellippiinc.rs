@@ -379,7 +379,7 @@ pub fn ellippiinc_bulirsch_with_const<T: Float, C: BulirschConst<T>>(
     let x = phi.tan();
     let kc = (T::one() - m).sqrt();
     let p = T::one() - n;
-    let result = crate::bulirsch::el::el3_with_const::<T, C>(x, kc, p);
+    let result = crate::bulirsch::el3::el3_with_const::<T, C>(x, kc, p);
     if result.is_ok() {
         return result;
     }

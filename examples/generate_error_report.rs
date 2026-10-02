@@ -26,6 +26,14 @@ fn main() {
         env.rust_version,
         env.ellip_version
     );
+
+    fn ellipke_k<T: num_traits::Float>(m: T) -> Option<T> {
+        ellipke(m).ok().map(|(k, _)| k)
+    }
+    fn ellipke_e<T: num_traits::Float>(m: T) -> Option<T> {
+        ellipke(m).ok().map(|(_, e)| e)
+    }
+
     let legendre_complete = generate_error_table(&[
         get_entry! {"wolfram/ellipk_data", "ellipk", ellipk, 1, 1},
         get_entry! {"wolfram/ellipk_neg", "ellipk (Neg m)", ellipk, 1, 1},
@@ -36,6 +44,8 @@ fn main() {
         get_entry! {"wolfram/ellippi_pv", "ellippi (p.v.)", ellippi, 2, 1},
         get_entry! {"wolfram/ellipd_data", "ellipd", ellipd, 1, 1},
         get_entry! {"wolfram/ellipd_neg", "ellipd (Neg m)", ellipd, 1, 1},
+        get_entry! {"wolfram/ellipk_data", "ellipk (k)", ellipke_k, 1, 1},
+        get_entry! {"wolfram/ellipe_data", "ellipe (e)", ellipke_e, 1, 1},
     ]);
     let legendre_incomplete = generate_error_table(&[
         get_entry! {"wolfram/ellipf_data", "ellipf", ellipf, 2, 1},
@@ -55,6 +65,8 @@ fn main() {
         get_entry! {"wolfram/cel_pv", "cel (p.v.)", cel, 4, 1},
         get_entry! {"wolfram/cel1_data", "cel1", cel1, 1, 1},
         get_entry! {"wolfram/cel2_data", "cel2", cel2, 3, 1},
+        get_entry! {"wolfram/cel3_data", "cel3", cel3, 2, 1},
+        get_entry! {"wolfram/cel3_pv", "cel3 (p.v.)", cel3, 2, 1},
         get_entry! {"wolfram/el1_data", "el1", el1, 2, 1},
         get_entry! {"wolfram/el2_data", "el2", el2, 4, 1},
         get_entry! {"wolfram/el3_data", "el3", el3, 3, 1},
