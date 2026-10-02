@@ -38,19 +38,7 @@ use crate::{crate_util::check, polyeval, StrErr};
 /// ```
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn ellipke<T: Float>(m: T) -> Result<(T, T), StrErr> {
-    check!(@nan, ellipke, [m]);
-
-    if m > 1.0 {
-        return Err("ellipke: m must not be greater than 1.");
-    }
-    if m == 1.0 {
-        return Ok((inf!(), 1.0));
-    }
-    if m == neg_inf!() {
-        return Ok((0.0, inf!()));
-    }
-
-    if m < 0.0 {
+    if m < 0.0 && m.is_finite() {
         let c = (1.0 - m).sqrt();
         let m1 = m / (m - 1.0);
         if m1 >= 0.9 {

@@ -118,7 +118,7 @@ pub fn cel3_with_const<T: Float, C: BulirschConst<T>>(kc: T, p: T) -> Result<T, 
         if (g - kc).abs() > g * C::ca() {
             kc = 2.0
                 * if e.is_infinite() {
-                    kc.sqrt() * m.sqrt()
+                    kc.sqrt() * g.sqrt()
                 } else {
                     e.sqrt()
                 };
@@ -184,8 +184,9 @@ mod tests {
         let val_tiny = cel3(1e-300, 0.5).unwrap();
         assert!(val_tiny.is_finite() && val_tiny > 0.0);
 
-        // cel3(1e300, 0.5) correctly returns Failed to converge, not Ok(0.0) from mutated kc
-        assert_eq!(cel3(1e300, 0.5), Err("cel3: Failed to converge."));
+        assert!(cel3(1e300, 0.5).is_ok());
+        let val_huge = cel3(1e300, 0.5).unwrap();
+        assert!(val_huge.is_finite() && val_huge > 0.0);
     }
 
     #[test]
@@ -220,8 +221,16 @@ mod tests {
             }
         }
 
+        // f32 negative p with kc^2 overflowing to infinity
+        for &kc in &[1e20_f32, 1e30_f32] {
+            let res = cel3(kc, -2.0_f32);
+            assert!(res.is_ok());
+            let val = res.unwrap();
+            assert!(val.is_finite() && val > 0.0);
+        }
+
         // Logarithmically spaced extremes
-        for &kc in &[1e-300, 1e-100, 1e-50, 1e-10, 1e-1, 1.0, 10.0, 100.0] {
+        for &kc in &[1e-300, 1e-100, 1e-50, 1e-10, 1e-1, 1.0, 10.0, 100.0, 1e300] {
             let res = cel3(kc, 0.5);
             assert!(res.is_ok());
             let val = res.unwrap();
@@ -233,6 +242,14 @@ mod tests {
             let res = cel3(0.5, p);
             assert!(res.is_ok());
             assert!(res.unwrap().is_finite());
+        }
+
+        // Negative p with kc^2 overflowing to infinity
+        for &kc in &[1e160, 1e200, 1e250] {
+            let res = cel3(kc, -2.0);
+            assert!(res.is_ok());
+            let val = res.unwrap();
+            assert!(val.is_finite() && val > 0.0);
         }
     }
 }
