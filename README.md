@@ -20,6 +20,7 @@
     <a href="https://codecov.io/github/p-sira/ellip" > 
         <img src="https://codecov.io/github/p-sira/ellip/graph/badge.svg?token=JVM89PIP5K"> 
     </a>
+    <a href="https://app.codspeed.io/p-sira/ellip?utm_source=badge"><img src="https://img.shields.io/endpoint?url=https://codspeed.io/badge.json" alt="CodSpeed"/></a>
     <a style="border-width:0" href="https://doi.org/10.21105/joss.09386">
         <img src="https://joss.theoj.org/papers/10.21105/joss.09386/status.svg" alt="DOI badge">
     </a>
