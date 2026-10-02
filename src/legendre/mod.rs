@@ -5,6 +5,7 @@
 
 //! Elliptic integral functions in Legendre's form.
 
+mod coeffs;
 mod ellipd;
 mod ellipdinc;
 mod ellipe;

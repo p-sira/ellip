@@ -72,6 +72,10 @@ macro_rules! wrap_functions {
         )*
     };
 
+    (@call ellipke, $inp:ident, 1) => {{
+        let (k, e) = ellip::ellipke($inp[0]).unwrap();
+        k + e
+    }};
     (@call $func:ident, $inp:ident, 1) => { ellip::$func($inp[0]).unwrap() };
     (@call $func:ident, $inp:ident, 2) => { ellip::$func($inp[0], $inp[1]).unwrap() };
     (@call $func:ident, $inp:ident, 3) => { ellip::$func($inp[0], $inp[1], $inp[2]).unwrap() };
@@ -118,9 +122,9 @@ macro_rules! generate_benchmarks {
     };
 }
 
-generate_benchmarks! {legendre, [ellipk:1, ellipe:1, ellipf:2, ellipeinc:2, ellippi:2, ellippiinc:3, ellippiinc_bulirsch:3:"ellippiinc", ellipd:1, ellipdinc: 2]}
+generate_benchmarks! {legendre, [ellipk:1, ellipe:1, ellipke:1:"ellipk", ellipf:2, ellipeinc:2, ellippi:2, ellippiinc:3, ellippiinc_bulirsch:3:"ellippiinc", ellipd:1, ellipdinc: 2]}
 generate_benchmarks! {carlson, [elliprf:3, elliprg:3, elliprj:4, elliprc:2, elliprd:3]}
-generate_benchmarks! {bulirsch, [cel:4, cel1:1, cel2:3, el1:2, el2:4, el3:3]}
+generate_benchmarks! {bulirsch, [cel:4, cel1:1, cel2:3, cel3:2:"cel", el1:2, el2:4, el3:3]}
 generate_benchmarks! {misc, [jacobi_zeta:2, heuman_lambda:2]}
 
 criterion_group!(benches, legendre, carlson, bulirsch, misc);

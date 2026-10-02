@@ -154,8 +154,7 @@ fn unit_diametric_cylinder_baseline(r: f64, phi: f64, z: f64, z0: f64) -> [f64; 
             + zm * (rm2 - zm2) / am * ellpi_m
             - zp * (rm2 - zp2) / ap * ellpi_p);
     let bz = -f64::cos(phi) / (4.0 * PI * r)
-        * (2.0 * am * elle_m - 2.0 * ap * elle_p
-            + 2.0 / am * (1.0 + r2 + zm2) * ellk_m
+        * (2.0 * am * elle_m - 2.0 * ap * elle_p + 2.0 / am * (1.0 + r2 + zm2) * ellk_m
             - 2.0 / ap * (1.0 + r2 + zp2) * ellk_p
             + 2.0 * rp * one_over_rm * (zm2 / am * ellpi_m - zp2 / ap * ellpi_p));
 
@@ -199,8 +198,7 @@ fn unit_diametric_cylinder_specialized(r: f64, phi: f64, z: f64, z0: f64) -> [f6
             + zm * (rm2 - zm2) / am * ellpi_m
             - zp * (rm2 - zp2) / ap * ellpi_p);
     let bz = -f64::cos(phi) / (4.0 * PI * r)
-        * (2.0 * am * elle_m - 2.0 * ap * elle_p
-            + 2.0 / am * (1.0 + r2 + zm2) * ellk_m
+        * (2.0 * am * elle_m - 2.0 * ap * elle_p + 2.0 / am * (1.0 + r2 + zm2) * ellk_m
             - 2.0 / ap * (1.0 + r2 + zp2) * ellk_p
             + 2.0 * rp * one_over_rm * (zm2 / am * ellpi_m - zp2 / ap * ellpi_p));
 
@@ -243,8 +241,14 @@ fn main() {
     let stats_cr = Stats::from_vec(&cr_errs);
     let stats_cz = Stats::from_vec(&cz_errs);
     println!("Accuracy (units of eps):");
-    println!("  Cr: Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps", stats_cr.mean, stats_cr.p99, stats_cr.max);
-    println!("  Cz: Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps", stats_cz.mean, stats_cz.p99, stats_cz.max);
+    println!(
+        "  Cr: Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps",
+        stats_cr.mean, stats_cr.p99, stats_cr.max
+    );
+    println!(
+        "  Cz: Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps",
+        stats_cz.mean, stats_cz.p99, stats_cz.max
+    );
 
     // Timing
     let iters = 5;
@@ -261,7 +265,9 @@ fn main() {
         }
         std::hint::black_box(dummy);
         let elapsed = start.elapsed().as_secs_f64();
-        if elapsed < base_time { base_time = elapsed; }
+        if elapsed < base_time {
+            base_time = elapsed;
+        }
     }
 
     let mut spec_time = f64::INFINITY;
@@ -276,7 +282,9 @@ fn main() {
         }
         std::hint::black_box(dummy);
         let elapsed = start.elapsed().as_secs_f64();
-        if elapsed < spec_time { spec_time = elapsed; }
+        if elapsed < spec_time {
+            spec_time = elapsed;
+        }
     }
 
     let base_ns = base_time * 1e9 / n_samples as f64;
@@ -309,8 +317,14 @@ fn main() {
     let stats_k = Stats::from_vec(&k_errs);
     let stats_e = Stats::from_vec(&e_errs);
     println!("Accuracy vs ellipk / ellipe (units of eps):");
-    println!("  K: Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps", stats_k.mean, stats_k.p99, stats_k.max);
-    println!("  E: Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps", stats_e.mean, stats_e.p99, stats_e.max);
+    println!(
+        "  K: Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps",
+        stats_k.mean, stats_k.p99, stats_k.max
+    );
+    println!(
+        "  E: Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps",
+        stats_e.mean, stats_e.p99, stats_e.max
+    );
 
     let mut base_time = f64::INFINITY;
     for _ in 0..iters {
@@ -323,7 +337,9 @@ fn main() {
         }
         std::hint::black_box(dummy);
         let elapsed = start.elapsed().as_secs_f64();
-        if elapsed < base_time { base_time = elapsed; }
+        if elapsed < base_time {
+            base_time = elapsed;
+        }
     }
 
     let mut spec_time = f64::INFINITY;
@@ -336,7 +352,9 @@ fn main() {
         }
         std::hint::black_box(dummy);
         let elapsed = start.elapsed().as_secs_f64();
-        if elapsed < spec_time { spec_time = elapsed; }
+        if elapsed < spec_time {
+            spec_time = elapsed;
+        }
     }
 
     let base_ns = base_time * 1e9 / n_samples as f64;
@@ -367,7 +385,10 @@ fn main() {
     }
     let stats_cel3 = Stats::from_vec(&cel3_errs);
     println!("Accuracy (units of eps):");
-    println!("  Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps", stats_cel3.mean, stats_cel3.p99, stats_cel3.max);
+    println!(
+        "  Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps",
+        stats_cel3.mean, stats_cel3.p99, stats_cel3.max
+    );
 
     let mut base_time = f64::INFINITY;
     for _ in 0..iters {
@@ -381,7 +402,9 @@ fn main() {
         }
         std::hint::black_box(dummy);
         let elapsed = start.elapsed().as_secs_f64();
-        if elapsed < base_time { base_time = elapsed; }
+        if elapsed < base_time {
+            base_time = elapsed;
+        }
     }
 
     let mut spec_time = f64::INFINITY;
@@ -396,7 +419,9 @@ fn main() {
         }
         std::hint::black_box(dummy);
         let elapsed = start.elapsed().as_secs_f64();
-        if elapsed < spec_time { spec_time = elapsed; }
+        if elapsed < spec_time {
+            spec_time = elapsed;
+        }
     }
 
     let base_ns = base_time * 1e9 / n_samples as f64;
@@ -434,9 +459,18 @@ fn main() {
     }
     let stats_ax_br = Stats::from_vec(&br_errs);
     let stats_ax_bz = Stats::from_vec(&bz_errs);
-    println!("Accuracy across {} grid points (units of eps):", total_points);
-    println!("  Br: Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps", stats_ax_br.mean, stats_ax_br.p99, stats_ax_br.max);
-    println!("  Bz: Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps", stats_ax_bz.mean, stats_ax_bz.p99, stats_ax_bz.max);
+    println!(
+        "Accuracy across {} grid points (units of eps):",
+        total_points
+    );
+    println!(
+        "  Br: Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps",
+        stats_ax_br.mean, stats_ax_br.p99, stats_ax_br.max
+    );
+    println!(
+        "  Bz: Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps",
+        stats_ax_bz.mean, stats_ax_bz.p99, stats_ax_bz.max
+    );
 
     let mut base_time = f64::INFINITY;
     for _ in 0..iters {
@@ -448,7 +482,9 @@ fn main() {
         }
         std::hint::black_box(dummy);
         let elapsed = start.elapsed().as_secs_f64();
-        if elapsed < base_time { base_time = elapsed; }
+        if elapsed < base_time {
+            base_time = elapsed;
+        }
     }
 
     let mut spec_time = f64::INFINITY;
@@ -461,15 +497,25 @@ fn main() {
         }
         std::hint::black_box(dummy);
         let elapsed = start.elapsed().as_secs_f64();
-        if elapsed < spec_time { spec_time = elapsed; }
+        if elapsed < spec_time {
+            spec_time = elapsed;
+        }
     }
 
     let base_ns = base_time * 1e9 / total_points as f64;
     let spec_ns = spec_time * 1e9 / total_points as f64;
     let speedup_axial = base_ns / spec_ns;
     println!("Performance ({} field evaluations):", total_points);
-    println!("  Baseline: {:.2} ns/eval ({:.2} ms total)", base_ns, base_time * 1e3);
-    println!("  Specialized: {:.2} ns/eval ({:.2} ms total)", spec_ns, spec_time * 1e3);
+    println!(
+        "  Baseline: {:.2} ns/eval ({:.2} ms total)",
+        base_ns,
+        base_time * 1e3
+    );
+    println!(
+        "  Specialized: {:.2} ns/eval ({:.2} ms total)",
+        spec_ns,
+        spec_time * 1e3
+    );
     println!("  Speedup: {:.2}x\n", speedup_axial);
 
     // -------------------------------------------------------------------------
@@ -490,10 +536,22 @@ fn main() {
     let stats_dia_br = Stats::from_vec(&br_dia_errs);
     let stats_dia_bphi = Stats::from_vec(&bphi_dia_errs);
     let stats_dia_bz = Stats::from_vec(&bz_dia_errs);
-    println!("Accuracy across {} grid points (units of eps):", total_points);
-    println!("  Br:   Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps", stats_dia_br.mean, stats_dia_br.p99, stats_dia_br.max);
-    println!("  Bphi: Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps", stats_dia_bphi.mean, stats_dia_bphi.p99, stats_dia_bphi.max);
-    println!("  Bz:   Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps", stats_dia_bz.mean, stats_dia_bz.p99, stats_dia_bz.max);
+    println!(
+        "Accuracy across {} grid points (units of eps):",
+        total_points
+    );
+    println!(
+        "  Br:   Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps",
+        stats_dia_br.mean, stats_dia_br.p99, stats_dia_br.max
+    );
+    println!(
+        "  Bphi: Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps",
+        stats_dia_bphi.mean, stats_dia_bphi.p99, stats_dia_bphi.max
+    );
+    println!(
+        "  Bz:   Mean = {:.2} eps, P99 = {:.2} eps, Max = {:.2} eps",
+        stats_dia_bz.mean, stats_dia_bz.p99, stats_dia_bz.max
+    );
 
     let mut base_time = f64::INFINITY;
     for _ in 0..iters {
@@ -505,7 +563,9 @@ fn main() {
         }
         std::hint::black_box(dummy);
         let elapsed = start.elapsed().as_secs_f64();
-        if elapsed < base_time { base_time = elapsed; }
+        if elapsed < base_time {
+            base_time = elapsed;
+        }
     }
 
     let mut spec_time = f64::INFINITY;
@@ -518,23 +578,42 @@ fn main() {
         }
         std::hint::black_box(dummy);
         let elapsed = start.elapsed().as_secs_f64();
-        if elapsed < spec_time { spec_time = elapsed; }
+        if elapsed < spec_time {
+            spec_time = elapsed;
+        }
     }
 
     let base_ns = base_time * 1e9 / total_points as f64;
     let spec_ns = spec_time * 1e9 / total_points as f64;
     let speedup_diametric = base_ns / spec_ns;
     println!("Performance ({} field evaluations):", total_points);
-    println!("  Baseline: {:.2} ns/eval ({:.2} ms total)", base_ns, base_time * 1e3);
-    println!("  Specialized: {:.2} ns/eval ({:.2} ms total)", spec_ns, spec_time * 1e3);
+    println!(
+        "  Baseline: {:.2} ns/eval ({:.2} ms total)",
+        base_ns,
+        base_time * 1e3
+    );
+    println!(
+        "  Specialized: {:.2} ns/eval ({:.2} ms total)",
+        spec_ns,
+        spec_time * 1e3
+    );
     println!("  Speedup: {:.2}x\n", speedup_diametric);
 
     println!("===============================================================================");
     println!(" SUMMARY OF SPEEDUPS:");
-    println!("  cel_axial vs 2x cel:               {:.2}x", speedup_cel_axial);
-    println!("  ellipke vs (ellipk + ellipe):      {:.2}x", speedup_ellipke);
+    println!(
+        "  cel_axial vs 2x cel:               {:.2}x",
+        speedup_cel_axial
+    );
+    println!(
+        "  ellipke vs (ellipk + ellipe):      {:.2}x",
+        speedup_ellipke
+    );
     println!("  cel3 vs cel:                       {:.2}x", speedup_cel3);
     println!("  End-to-end Axial Cylinder B:       {:.2}x", speedup_axial);
-    println!("  End-to-end Diametric Cylinder B:   {:.2}x", speedup_diametric);
+    println!(
+        "  End-to-end Diametric Cylinder B:   {:.2}x",
+        speedup_diametric
+    );
     println!("===============================================================================");
 }

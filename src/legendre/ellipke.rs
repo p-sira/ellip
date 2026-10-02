@@ -5,14 +5,8 @@
 
 use num_traits::Float;
 
-use crate::{
-    crate_util::check,
-    legendre::{
-        ellipe::_ellipe,
-        ellipk::{_ellipk, ellipk_precise_unchecked},
-    },
-    StrErr,
-};
+use super::coeffs::{self, *};
+use crate::{crate_util::check, polyeval, StrErr};
 
 /// Computes [complete elliptic integrals of the first and second kind](https://dlmf.nist.gov/19.2.E8) simultaneously.
 ///
@@ -57,14 +51,14 @@ pub fn ellipke<T: Float>(m: T) -> Result<(T, T), StrErr> {
     }
 
     if m < 0.0 {
-        if m < -1e3 {
-            let k = ellipk_precise_unchecked(m);
-            let c = (1.0 - m).sqrt();
-            let e = c * _ellipe(m / (m - 1.0))?;
-            return Ok((k, e));
-        }
         let c = (1.0 - m).sqrt();
         let m1 = m / (m - 1.0);
+        if m1 >= 0.9 {
+            // Complementary parameter mc1 = 1 - m1 = 1 / (1 - m) = 1 / c^2.
+            // Passing y0 = 1 / c directly avoids catastrophic cancellation near 1.
+            let (k1, e1) = ellipke_agm_from_y0(1.0 / c);
+            return Ok((k1 / c, c * e1));
+        }
         let (k1, e1) = _ellipke(m1)?;
         return Ok((k1 / c, c * e1));
     }
@@ -75,29 +69,110 @@ pub fn ellipke<T: Float>(m: T) -> Result<(T, T), StrErr> {
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 fn _ellipke<T: Float>(m: T) -> Result<(T, T), StrErr> {
-    if m >= 0.9 && m < 1.0 {
-        return Ok(ellipke_agm(m));
+    match (m * 20.0).to_i64() {
+        Some(0) | Some(1) => {
+            let delta = m - 0.05;
+            Ok((
+                polyeval(delta, &coeffs::to_t(K_0_1)),
+                polyeval(delta, &coeffs::to_t(E_0_1)),
+            ))
+        }
+        Some(2) | Some(3) => {
+            let delta = m - 0.15;
+            Ok((
+                polyeval(delta, &coeffs::to_t(K_2_3)),
+                polyeval(delta, &coeffs::to_t(E_2_3)),
+            ))
+        }
+        Some(4) | Some(5) => {
+            let delta = m - 0.25;
+            Ok((
+                polyeval(delta, &coeffs::to_t(K_4_5)),
+                polyeval(delta, &coeffs::to_t(E_4_5)),
+            ))
+        }
+        Some(6) | Some(7) => {
+            let delta = m - 0.35;
+            Ok((
+                polyeval(delta, &coeffs::to_t(K_6_7)),
+                polyeval(delta, &coeffs::to_t(E_6_7)),
+            ))
+        }
+        Some(8) | Some(9) => {
+            let delta = m - 0.45;
+            Ok((
+                polyeval(delta, &coeffs::to_t(K_8_9)),
+                polyeval(delta, &coeffs::to_t(E_8_9)),
+            ))
+        }
+        Some(10) | Some(11) => {
+            let delta = m - 0.55;
+            Ok((
+                polyeval(delta, &coeffs::to_t(K_10_11)),
+                polyeval(delta, &coeffs::to_t(E_10_11)),
+            ))
+        }
+        Some(12) | Some(13) => {
+            let delta = m - 0.65;
+            Ok((
+                polyeval(delta, &coeffs::to_t(K_12_13)),
+                polyeval(delta, &coeffs::to_t(E_12_13)),
+            ))
+        }
+        Some(14) | Some(15) => {
+            let delta = m - 0.75;
+            Ok((
+                polyeval(delta, &coeffs::to_t(K_14_15)),
+                polyeval(delta, &coeffs::to_t(E_14_15)),
+            ))
+        }
+        Some(16) => {
+            let delta = m - 0.825;
+            Ok((
+                polyeval(delta, &coeffs::to_t(K_16)),
+                polyeval(delta, &coeffs::to_t(E_16)),
+            ))
+        }
+        Some(17) => {
+            let delta = m - 0.875;
+            Ok((
+                polyeval(delta, &coeffs::to_t(K_17)),
+                polyeval(delta, &coeffs::to_t(E_17)),
+            ))
+        }
+        Some(_) => {
+            if m < 1.0 {
+                Ok(ellipke_agm(m))
+            } else if m == 1.0 {
+                Ok((inf!(), 1.0))
+            } else {
+                Err("ellipke: m must not be greater than 1.")
+            }
+        }
+        None => {
+            check!(@nan, ellipke, [m]);
+            if m == neg_inf!() {
+                return Ok((0.0, inf!()));
+            }
+            if m > 1.0 {
+                return Err("ellipke: m must not be greater than 1.");
+            }
+            Err("ellipke: Unexpected error.")
+        }
     }
-
-    Ok((_ellipk(m)?, _ellipe(m)?))
 }
 
-/// Dedicated fused AGM kernel for near-one evaluations (`0.9 <= m < 1.0`).
+/// Dedicated fused AGM kernel initialized from complementary parameter y0 = sqrt(1 - m).
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub(crate) fn ellipke_agm<T: Float>(m: T) -> (T, T) {
-    let mut xn = T::one();
-    let mut yn = (1.0 - m).sqrt();
-    let x0 = xn;
-    let y0 = yn;
+pub(crate) fn ellipke_agm_from_y0<T: Float>(y0: T) -> (T, T) {
+    let x0 = T::one();
+    let mut xn = x0;
+    let mut yn = y0;
     let mut sum = 0.0;
     let mut sum_pow = 0.25;
 
-    let tol = if core::mem::size_of::<T>() <= 4 {
-        1e-3
-    } else {
-        1e-7
-    };
+    let tol = T::epsilon().sqrt();
 
     for _ in 0..32 {
         let diff = (xn - yn).abs();
@@ -118,6 +193,12 @@ pub(crate) fn ellipke_agm<T: Float>(m: T) -> (T, T) {
     let k = pi!() / (s * corr);
     let e = ((x0 + y0) * (x0 + y0) / 4.0 - sum) * (pi!() / s);
     (k, e)
+}
+
+/// Dedicated fused AGM kernel for near-one evaluations (`0.9 <= m < 1.0`).
+#[inline]
+pub(crate) fn ellipke_agm<T: Float>(m: T) -> (T, T) {
+    ellipke_agm_from_y0((T::one() - m).sqrt())
 }
 
 #[cfg(test)]
@@ -182,5 +263,59 @@ mod tests {
         compare_test_data_wolfram!("ellipe_data.csv", ellipke_e, 1, 5e-15);
         compare_test_data_wolfram!("ellipk_neg.csv", ellipke_k, 1, 5e-15);
         compare_test_data_wolfram!("ellipe_neg.csv", ellipke_e, 1, 5e-15);
+    }
+
+    #[test]
+    fn test_ellipke_f32_negative_accuracy() {
+        let (k_f64, e_f64) = ellipke(-1000.0_f64).unwrap();
+        let (k_f32, e_f32) = ellipke(-1000.0_f32).unwrap();
+
+        let rel_err_k = ((k_f32 as f64) - k_f64).abs() / k_f64;
+        let rel_err_e = ((e_f32 as f64) - e_f64).abs() / e_f64;
+
+        // Previously at m = -1000, rel_err_k was ~2.94e-6 due to cancellation near 1.
+        // With complementary parameter passed directly, relative error is within single precision (~2e-7).
+        assert!(
+            rel_err_k < 5e-7,
+            "K relative error in f32 too high: {}",
+            rel_err_k
+        );
+        assert!(
+            rel_err_e < 5e-7,
+            "E relative error in f32 too high: {}",
+            rel_err_e
+        );
+    }
+
+    #[test]
+    fn test_ellipke_boundaries_and_extremes() {
+        // Branch boundaries: m = 0.0, 0.9 (poly/AGM boundary), -9.0 (negative poly/AGM boundary), 1.0
+        for &m in &[
+            -1e30, -1e20, -1e10, -1000.0, -9.0, -8.999, -1.0, -0.001, 0.0, 0.5, 0.8999, 0.9, 0.95,
+            0.9999,
+        ] {
+            let (k, e) = ellipke(m).unwrap();
+            let k_ref = ellipk(m).unwrap();
+            let e_ref = ellipe(m).unwrap();
+            assert_close(k, k_ref, 1e-12);
+            assert_close(e, e_ref, 1e-12);
+        }
+
+        // f32 extremes and boundaries
+        for &m in &[
+            -1e30_f32,
+            -1e10_f32,
+            -1000.0_f32,
+            -9.0_f32,
+            -1.0_f32,
+            0.0_f32,
+            0.5_f32,
+            0.9_f32,
+            0.999_f32,
+        ] {
+            let (k, e) = ellipke(m).unwrap();
+            assert!(k.is_finite() && k > 0.0);
+            assert!(e.is_finite() && e > 0.0);
+        }
     }
 }
