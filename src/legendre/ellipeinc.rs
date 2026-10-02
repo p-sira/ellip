@@ -149,11 +149,13 @@ pub fn ellipeinc_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         // See http://functions.wolfram.com/EllipticIntegrals/EllipticE2/06/01/03/0001/
         s * rphi
     } else {
-        let s2p = rphi.sin() * rphi.sin();
+        let s_phi = rphi.sin();
+        let s2p = s_phi * s_phi;
         if m * s2p >= 1.0 {
             return Err("ellipeinc: m sin²φ must be smaller than one.");
         }
-        let c2p = 1.0 - s2p;
+        let c_phi = rphi.cos();
+        let c2p = c_phi * c_phi;
         let c = 1.0 / s2p;
         let cm1 = c2p / s2p;
         let (rf, rd) = elliprf_rd_unchecked(cm1, c, c - m);
