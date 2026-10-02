@@ -6,6 +6,7 @@
 - `elliprg`: Fuse RF and RD evaluations into a single duplication loop, sharing square-root steps (https://github.com/p-sira/ellip/pull/135).
 - `ellipeinc`: Reuse trigonometric components and use fused RF/RD kernel (https://github.com/p-sira/ellip/pull/136).
 - `elliprj`: Evaluate 8-term Taylor series for `elliprc1p` when `|y| <= 0.01` via `polyeval` (https://github.com/p-sira/ellip/pull/137).
+- `cel`: Share common reciprocal `1.0 / pp` inside Bulirsch iteration loop (https://github.com/p-sira/ellip/pull/138).
 
 ### 1.1.2
 **Bug Fixes**
