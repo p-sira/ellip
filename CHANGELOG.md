@@ -1,5 +1,9 @@
 # Changelog
 ## 1.1
+### 1.1.3
+**Performance Improvements**
+- `el3`: Defer `x.atan()` evaluation to branches that require amplitude reduction (https://github.com/p-sira/ellip/pull/134).
+
 ### 1.1.2
 **Bug Fixes**
 - `ellippiinc_bulirsch`: Preserve complete amplitude periods (https://github.com/p-sira/ellip/pull/115).

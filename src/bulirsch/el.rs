@@ -360,9 +360,9 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
     //     };
     // }
 
-    let phi = x.atan();
     // This identity is exact only for p = 0. Small p can still give large p*x².
     if p == 0.0 && m != 1.0 {
+        let phi = x.atan();
         // http://functions.wolfram.com/08.06.03.0008.01
         let sp2 = phi.sin() * phi.sin();
         let mut result = (1.0 - m * sp2).sqrt() * x - ellipeinc(phi, m)?;
@@ -372,6 +372,7 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
     }
 
     if kc.abs() < C::lim_kc_p() && p > C::lim_kc_p() {
+        let phi = x.atan();
         return ellippiinc(phi, n, m);
     }
 
@@ -626,6 +627,7 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
         break;
     }
 
+    let phi = x.atan();
     let ans = ellippiinc(phi, n, m);
     if ans.is_ok() {
         return ans;
