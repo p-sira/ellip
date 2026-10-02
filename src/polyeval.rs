@@ -58,3 +58,74 @@ pub(crate) fn polyeval<T: Float>(x: T, coeff: &[T]) -> T {
     coeff.iter().rev().for_each(|&k| ans = ans * x + k);
     ans
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn horner_eval<T: Float>(x: T, coeff: &[T]) -> T {
+        let mut ans = T::zero();
+        coeff.iter().rev().for_each(|&k| ans = ans * x + k);
+        ans
+    }
+
+    #[test]
+    fn test_polyeval_degree_12() {
+        let coeff = [
+            1.5, -2.0, 0.5, 3.2, -1.1, 0.8, -0.4, 1.2, -0.9, 0.3, -0.1, 0.05,
+        ];
+        for &x in &[0.0, 0.5, -0.5, 1.0, -1.0, 0.123, -0.876] {
+            let actual = polyeval(x, &coeff);
+            let expected = horner_eval(x, &coeff);
+            assert!((actual - expected).abs() <= 1e-14 * expected.abs().max(1.0));
+        }
+    }
+
+    #[test]
+    fn test_polyeval_degree_6() {
+        let coeff = [1.2, -0.8, 2.5, -1.4, 0.6, -0.2];
+        for &x in &[0.0, 0.5, -0.5, 1.0, -1.0, 0.42, -0.73] {
+            let actual = polyeval(x, &coeff);
+            let expected = horner_eval(x, &coeff);
+            assert!((actual - expected).abs() <= 1e-15 * expected.abs().max(1.0));
+        }
+    }
+
+    #[test]
+    fn test_polyeval_fallback_lengths() {
+        // Empty
+        assert_eq!(polyeval(2.0, &[]), 0.0);
+
+        // Constant (len 1)
+        assert_eq!(polyeval(2.0, &[3.5]), 3.5);
+
+        // Linear (len 2)
+        assert_eq!(polyeval(2.0, &[1.0, 2.0]), 5.0);
+
+        // Quadratic (len 3)
+        assert_eq!(polyeval(2.0, &[1.0, 2.0, 3.0]), 17.0);
+
+        // Degree 4 (len 5)
+        let coeff5 = [1.0, 2.0, 3.0, 4.0, 5.0];
+        assert_eq!(polyeval(2.0, &coeff5), horner_eval(2.0, &coeff5));
+
+        // Degree 6 (len 7)
+        let coeff7 = [1.0, -1.0, 2.0, -2.0, 3.0, -3.0, 4.0];
+        assert_eq!(polyeval(1.5, &coeff7), horner_eval(1.5, &coeff7));
+
+        // Degree 12 (len 13)
+        let coeff13 = [1.0; 13];
+        assert_eq!(polyeval(0.5, &coeff13), horner_eval(0.5, &coeff13));
+    }
+
+    #[test]
+    fn test_polyeval_f32() {
+        let coeff = [1.0f32, 2.0, 3.0, 4.0, 5.0, 6.0];
+        assert_eq!(polyeval(0.5f32, &coeff), horner_eval(0.5f32, &coeff));
+
+        let coeff12 = [0.1f32; 12];
+        let diff = (polyeval(0.5f32, &coeff12) - horner_eval(0.5f32, &coeff12)).abs();
+        assert!(diff <= 1e-6);
+    }
+}
+
