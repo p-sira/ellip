@@ -59,8 +59,12 @@ use crate::{
 /// # References
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-pub fn el1<T: Float + BulirschConst<T>>(x: T, kc: T) -> Result<T, StrErr> {
-    el1_with_const::<T, T>(x, kc)
+pub fn el1<T: Float>(x: T, kc: T) -> Result<T, StrErr> {
+    if core::mem::size_of::<T>() <= 4 {
+        el1_with_const::<T, f32>(x, kc)
+    } else {
+        el1_with_const::<T, f64>(x, kc)
+    }
 }
 
 /// Computes [el1]. Control the precision using [BulirschConst].
@@ -176,8 +180,12 @@ pub fn el1_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> T {
 /// # References
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-pub fn el2<T: Float + BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
-    el2_with_const::<T, T>(x, kc, a, b)
+pub fn el2<T: Float>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
+    if core::mem::size_of::<T>() <= 4 {
+        el2_with_const::<T, f32>(x, kc, a, b)
+    } else {
+        el2_with_const::<T, f64>(x, kc, a, b)
+    }
 }
 
 /// Computes [el2]. Control the precision using [BulirschConst].
@@ -309,8 +317,12 @@ pub fn el2_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> 
 /// # References
 /// - Bulirsch, R. “Numerical Calculation of Elliptic Integrals and Elliptic Functions. III.” Numerische Mathematik 13, no. 4 (August 1, 1969): 305–15. <https://doi.org/10.1007/BF02165405>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-pub fn el3<T: Float + BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrErr> {
-    el3_with_const::<T, T>(x, kc, p)
+pub fn el3<T: Float>(x: T, kc: T, p: T) -> Result<T, StrErr> {
+    if core::mem::size_of::<T>() <= 4 {
+        el3_with_const::<T, f32>(x, kc, p)
+    } else {
+        el3_with_const::<T, f64>(x, kc, p)
+    }
 }
 
 /// Computes [el3]. Control the precision using [BulirschConst].

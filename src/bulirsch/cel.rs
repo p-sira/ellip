@@ -65,8 +65,12 @@ use crate::{
 /// # References
 /// - Bulirsch, R. “Numerical Calculation of Elliptic Integrals and Elliptic Functions. III.” Numerische Mathematik 13, no. 4 (August 1, 1969): 305–15. <https://doi.org/10.1007/BF02165405>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-pub fn cel<T: Float + BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
-    cel_with_const::<T, T>(kc, p, a, b)
+pub fn cel<T: Float>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
+    if core::mem::size_of::<T>() <= 4 {
+        cel_with_const::<T, f32>(kc, p, a, b)
+    } else {
+        cel_with_const::<T, f64>(kc, p, a, b)
+    }
 }
 
 /// Computes [cel]. Control the precision using [BulirschConst].
@@ -184,8 +188,12 @@ pub fn cel_with_const<T: Float, C: BulirschConst<T>>(kc: T, p: T, a: T, b: T) ->
 /// # References
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-pub fn cel1<T: Float + BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
-    cel1_with_const::<T, T>(kc)
+pub fn cel1<T: Float>(kc: T) -> Result<T, StrErr> {
+    if core::mem::size_of::<T>() <= 4 {
+        cel1_with_const::<T, f32>(kc)
+    } else {
+        cel1_with_const::<T, f64>(kc)
+    }
 }
 
 /// Computes [cel1]. Control the precision using [BulirschConst].
@@ -266,8 +274,12 @@ pub fn cel1_with_const<T: Float, C: BulirschConst<T>>(kc: T) -> Result<T, StrErr
 /// # References
 /// - Bulirsch, Roland. “Numerical Calculation of Elliptic Integrals and Elliptic Functions.” Numerische Mathematik 7, no. 1 (February 1, 1965): 78–90. <https://doi.org/10.1007/BF01397975>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-pub fn cel2<T: Float + BulirschConst<T>>(kc: T, a: T, b: T) -> Result<T, StrErr> {
-    cel2_with_const::<T, T>(kc, a, b)
+pub fn cel2<T: Float>(kc: T, a: T, b: T) -> Result<T, StrErr> {
+    if core::mem::size_of::<T>() <= 4 {
+        cel2_with_const::<T, f32>(kc, a, b)
+    } else {
+        cel2_with_const::<T, f64>(kc, a, b)
+    }
 }
 
 /// Computes [cel2]. Control the precision using [BulirschConst].
@@ -349,8 +361,12 @@ pub fn cel2_with_const<T: Float, C: BulirschConst<T>>(kc: T, a: T, b: T) -> Resu
 ///
 /// assert_close(cel3(0.5, 0.25).unwrap(), 4.844224110273839, 1e-15);
 /// ```
-pub fn cel3<T: Float + BulirschConst<T>>(kc: T, p: T) -> Result<T, StrErr> {
-    cel3_with_const::<T, T>(kc, p)
+pub fn cel3<T: Float>(kc: T, p: T) -> Result<T, StrErr> {
+    if core::mem::size_of::<T>() <= 4 {
+        cel3_with_const::<T, f32>(kc, p)
+    } else {
+        cel3_with_const::<T, f64>(kc, p)
+    }
 }
 
 /// Computes [cel3]. Control the precision using [BulirschConst].
