@@ -14,7 +14,7 @@
 use num_traits::Float;
 
 use crate::{
-    carlson::{elliprd_unchecked, elliprf_unchecked},
+    carlson::elliprf_rd_unchecked,
     crate_util::check,
     ellipe, StrErr,
 };
@@ -153,11 +153,12 @@ pub fn ellipeinc_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         if m * s2p >= 1.0 {
             return Err("ellipeinc: m sin²φ must be smaller than one.");
         }
-        let c2p = rphi.cos() * rphi.cos();
+        let c2p = 1.0 - s2p;
         let c = 1.0 / s2p;
         let cm1 = c2p / s2p;
-        s * ((1.0 - m) * elliprf_unchecked(cm1, c - m, c)
-            + m * (1.0 - m) * elliprd_unchecked(cm1, c, c - m) / 3.0
+        let (rf, rd) = elliprf_rd_unchecked(cm1, c, c - m);
+        s * ((1.0 - m) * rf
+            + m * (1.0 - m) * rd / 3.0
             + m * (cm1 / (c * (c - m))).sqrt())
     };
 

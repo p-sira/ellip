@@ -4,6 +4,7 @@
 **Performance Improvements**
 - `el3`: Defer `x.atan()` evaluation to branches that require amplitude reduction (https://github.com/p-sira/ellip/pull/134).
 - `elliprg`: Fuse RF and RD evaluations into a single duplication loop, sharing square-root steps (https://github.com/p-sira/ellip/pull/135).
+- `ellipeinc`: Reuse trigonometric components and use fused RF/RD kernel.
 
 ### 1.1.2
 **Bug Fixes**
