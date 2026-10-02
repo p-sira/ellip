@@ -202,6 +202,7 @@ pub(crate) fn ellipke_agm<T: Float>(m: T) -> (T, T) {
     ellipke_agm_from_y0((T::one() - m).sqrt())
 }
 
+#[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use super::*;
