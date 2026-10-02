@@ -15,7 +15,7 @@ use core::mem::swap;
 use crate::{
     carlson::{elliprc_unchecked, elliprd_unchecked, elliprf_unchecked},
     crate_util::{case, check, declare, let_mut},
-    StrErr,
+    polyeval, StrErr,
 };
 use num_traits::Float;
 
@@ -92,6 +92,23 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
 fn elliprc1p<T: Float>(y: T) -> T {
     // We can skip y = -1 check since the call from elliprj already did the check.
     // for 1 + y < 0, the integral is singular, return Cauchy principal value
+    if y.abs() <= 0.01 {
+        // Taylor series of Rc(1, 1+y) around y=0:
+        // 1 - y/3 + y^2/5 - y^3/7 + y^4/9 - y^5/11 + y^6/13 - y^7/15 + y^8/17
+        let coeffs = [
+            1.0,
+            -1.0 / 3.0,
+            1.0 / 5.0,
+            -1.0 / 7.0,
+            1.0 / 9.0,
+            -1.0 / 11.0,
+            1.0 / 13.0,
+            -1.0 / 15.0,
+            1.0 / 17.0,
+        ];
+        return polyeval(y, &coeffs);
+    }
+
     if y > 0.0 {
         y.sqrt().atan() / y.sqrt()
     } else if y == 0.0 {
