@@ -1,4 +1,10 @@
 # Changelog
+## 1.2
+### 1.2.0
+**New Features & Performance Improvements**
+- `ellipke`: Add simultaneous evaluation of complete elliptic integrals of the first and second kind $K(m)$ and $E(m)$. Employs imaginary modulus transformation to evaluate negative parameters via shared polynomials instead of iterative AGM, and fuses AGM iteration for near-one evaluations.
+- `cel3`: Add specialized complete elliptic integral of the third kind in Bulirsch's form, `cel3(kc, p) = cel(kc, p, 1, 1)`.
+
 ## 1.1
 ### 1.1.3
 **Performance Improvements**

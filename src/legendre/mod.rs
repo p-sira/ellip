@@ -11,6 +11,7 @@ mod ellipe;
 mod ellipeinc;
 mod ellipf;
 mod ellipk;
+mod ellipke;
 mod ellippi;
 mod ellippiinc;
 
@@ -20,6 +21,7 @@ pub use ellipe::ellipe;
 pub use ellipeinc::ellipeinc;
 pub use ellipf::ellipf;
 pub use ellipk::ellipk;
+pub use ellipke::ellipke;
 pub use ellippi::ellippi;
 pub use ellippiinc::{ellippiinc, ellippiinc_bulirsch, ellippiinc_bulirsch_with_const};
 

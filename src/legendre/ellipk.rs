@@ -66,6 +66,12 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
     if m < 0.0 && m.is_finite() {
         return ellipk_precise(m);
     }
+    _ellipk(m)
+}
+
+#[inline]
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+pub(crate) fn _ellipk<T: Float>(m: T) -> Result<T, StrErr> {
     match (m * 20.0).to_i64() {
         Some(0) | Some(1) => {
             let coeffs = [

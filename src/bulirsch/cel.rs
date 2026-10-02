@@ -311,6 +311,114 @@ pub fn cel2_with_const<T: Float, C: BulirschConst<T>>(kc: T, a: T, b: T) -> Resu
     Err("cel2: Failed to converge.")
 }
 
+/// Computes [complete elliptic integral of the third kind in Bulirsch's form](https://dlmf.nist.gov/19.2#iii).
+/// ```text
+///                     π/2
+///                    ⌠                     dϑ
+/// cel3(kc, p)     =  ⎮ ─────────────────────────────────────────────── ⋅ dϑ
+///                    ⎮                         ______________________
+///                    ⌡ (cos²(ϑ) + p sin²(ϑ)) ╲╱ cos²(ϑ) + kc² sin²(ϑ)
+///                   0
+/// ```
+///
+/// ## Parameters
+/// - `kc`: complementary modulus. `kc ∈ ℝ`, `kc ≠ 0`.
+/// - `p ∈ ℝ`, `p ≠ 0`
+///
+/// ## Domain
+/// - Returns error if `kc = 0` or `p = 0`.
+/// - Returns the Cauchy principal value for `p < 0`.
+/// - Returns error if more than one arguments are infinite.
+///
+/// ## Graph
+/// ![Complete Elliptic Integral of the Third Kind in Bulirsch's Form](https://github.com/p-sira/ellip/blob/main/figures/cel.svg?raw=true)
+///
+/// ## Special Cases
+/// - `cel3(kc, 1) = cel1(kc)`
+/// - `cel3(kc, p) = 0` for `|kc| = ∞`
+/// - `cel3(kc, p) = 0` for `|p| = ∞`
+///
+/// # Related Functions
+/// With `kc² = 1 - m` and `p = 1 - n`,
+/// - [ellippi](crate::ellippi)(n, m) = [cel](crate::cel)(kc, p, 1, 1) = [cel3](crate::cel3)(kc, p)
+/// - [cel3](crate::cel3)(kc, 1) = [cel1](crate::cel1)(kc) = [ellipk](crate::ellipk)(m)
+///
+/// # Examples
+/// ```
+/// use ellip::{cel3, util::assert_close};
+///
+/// assert_close(cel3(0.5, 0.25).unwrap(), 4.844224110273839, 1e-15);
+/// ```
+pub fn cel3<T: Float + BulirschConst<T>>(kc: T, p: T) -> Result<T, StrErr> {
+    cel3_with_const::<T, T>(kc, p)
+}
+
+/// Computes [cel3]. Control the precision using [BulirschConst].
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[inline]
+pub fn cel3_with_const<T: Float, C: BulirschConst<T>>(kc: T, p: T) -> Result<T, StrErr> {
+    check!(@nan, cel3, [kc, p]);
+    check!(@zero, cel3, [kc, p]);
+
+    if p == 1.0 {
+        return cel1_with_const::<T, C>(kc);
+    }
+
+    let mut kc = kc.abs();
+    let mut aa: T;
+    let mut bb: T;
+    let mut pp: T = p;
+    declare!(mut [f, q, g]);
+
+    let mut e = kc;
+    let mut m = 1.0;
+
+    if pp > 0.0 {
+        aa = 1.0;
+        pp = pp.sqrt();
+        bb = 1.0 / pp;
+    } else {
+        f = kc * kc;
+        q = 1.0 - f;
+        g = 1.0 - pp;
+        f = f - pp;
+        q = (1.0 - pp) * q;
+        pp = (f / g).sqrt();
+        aa = 0.0;
+        bb = -q / (g * g * pp);
+    }
+
+    let mut ans = T::nan();
+    for _ in 0..MAX_ITERATION {
+        f = aa;
+        let inv_pp = 1.0 / pp;
+        aa = bb * inv_pp + aa;
+        g = e * inv_pp;
+        bb = 2.0 * (f * g + bb);
+        pp = g + pp;
+        g = m;
+        m = kc + m;
+
+        if (g - kc).abs() > g * C::ca() {
+            kc = 2.0 * e.sqrt();
+            e = kc * m;
+            continue;
+        }
+
+        ans = pi_2!() * (aa * m + bb) / (m * (m + pp));
+        break;
+    }
+
+    if ans.is_finite() {
+        return Ok(ans);
+    }
+    check!(@nan, cel3, [kc, p]);
+    check!(@multi, cel3, "infinite", is_infinite, [kc, p]);
+    case!(@any [kc.abs(), p.abs()] == inf!(), T::zero());
+    Err("cel3: Failed to converge.")
+}
+
+
 #[cfg(not(feature = "test_force_fail"))]
 const MAX_ITERATION: i16 = 10;
 #[cfg(feature = "test_force_fail")]
@@ -469,6 +577,37 @@ mod tests {
         assert_eq!(cel2(0.5, NAN, 1.0), Err("cel2: Arguments cannot be NAN."));
         assert_eq!(cel2(0.5, 1.0, NAN), Err("cel2: Arguments cannot be NAN."));
     }
+
+    #[test]
+    fn test_cel3() {
+        for kc in linspace(0.05, 5.0, 20) {
+            // p = 1 matches cel1
+            assert_close! {cel3(kc, 1.0).unwrap(), cel1(kc).unwrap(), 1e-15};
+
+            for p in linspace(0.05, 5.0, 20) {
+                let actual = cel3(kc, p).unwrap();
+                let expected = cel(kc, p, 1.0, 1.0).unwrap();
+                assert_close! {actual, expected, 1e-15};
+            }
+
+            for p in linspace(-5.0, -0.05, 20) {
+                let actual = cel3(kc, p).unwrap();
+                let expected = cel(kc, p, 1.0, 1.0).unwrap();
+                assert_close! {actual, expected, 1e-14};
+            }
+        }
+    }
+
+    #[test]
+    fn test_cel3_special_cases() {
+        use std::f64::{INFINITY, NAN, NEG_INFINITY};
+        assert_eq!(cel3(0.0, 1.0), Err("cel3: kc cannot be zero."));
+        assert_eq!(cel3(1.0, 0.0), Err("cel3: p cannot be zero."));
+        assert_eq!(cel3(INFINITY, 1.0).unwrap(), 0.0);
+        assert_eq!(cel3(NEG_INFINITY, 1.0).unwrap(), 0.0);
+        assert_eq!(cel3(1.0, INFINITY).unwrap(), 0.0);
+        assert_eq!(cel3(NAN, 1.0), Err("cel3: Arguments cannot be NAN."));
+    }
 }
 
 #[cfg(feature = "test_force_fail")]
@@ -476,4 +615,5 @@ crate::test_force_unreachable! {
     assert_eq!(cel(1e300, 0.2, 0.5, 0.5), Err("cel: Failed to converge."));
     assert_eq!(cel1(1e300), Err("cel1: Failed to converge."));
     assert_eq!(cel2(1e300, 0.5, 0.5), Err("cel2: Failed to converge."));
+    assert_eq!(cel3(1e300, 0.5), Err("cel3: Failed to converge."));
 }

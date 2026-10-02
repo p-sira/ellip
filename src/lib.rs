@@ -35,6 +35,7 @@
 //! ## Legendre's complete integrals
 //! - [fn@ellipk]: Complete elliptic integral of the first kind (K).
 //! - [fn@ellipe]: Complete elliptic integral of the second kind (E).
+//! - [fn@ellipke]: Simultaneous computation of the complete elliptic integrals of the first and second kind (K and E).
 //! - [fn@ellippi]: Complete elliptic integral of the third kind (Π).
 //! - [fn@ellipd]: Complete elliptic integral of Legendre's type (D).
 //! ## Legendre's incomplete integrals
@@ -47,6 +48,7 @@
 //! - [fn@cel]: General complete elliptic integral in Bulirsch's form.
 //! - [fn@cel1]: Complete elliptic integral of the first kind in Bulirsch's form.
 //! - [fn@cel2]: Complete elliptic integral of the second kind in Bulirsch's form.
+//! - [fn@cel3]: Complete elliptic integral of the third kind in Bulirsch's form.
 //! - [fn@el1]: Incomplete elliptic integral of the first kind in Bulirsch's form.
 //! - [fn@el2]: Incomplete elliptic integral of the second kind in Bulirsch's form.
 //! - [fn@el3]: Incomplete elliptic integral of the third kind in Bulirsch's form.
@@ -119,6 +121,7 @@ pub mod legendre;
 pub use legendre::ellipd;
 pub use legendre::ellipe;
 pub use legendre::ellipk;
+pub use legendre::ellipke;
 pub use legendre::ellippi;
 
 // Legendre's incomplete integrals
@@ -133,6 +136,7 @@ pub mod bulirsch;
 pub use bulirsch::cel;
 pub use bulirsch::cel1;
 pub use bulirsch::cel2;
+pub use bulirsch::cel3;
 pub use bulirsch::el1;
 pub use bulirsch::el2;
 pub use bulirsch::el3;

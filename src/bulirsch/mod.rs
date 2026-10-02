@@ -9,8 +9,8 @@ mod cel;
 mod constants;
 pub(crate) mod el;
 
-pub use cel::{cel, cel1, cel2};
-pub use cel::{cel1_with_const, cel2_with_const, cel_with_const};
+pub use cel::{cel, cel1, cel2, cel3};
+pub use cel::{cel1_with_const, cel2_with_const, cel3_with_const, cel_with_const};
 pub use el::{el1, el2, el3};
 pub use el::{el1_with_const, el2_with_const, el3_with_const};
 
