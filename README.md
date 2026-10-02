@@ -119,7 +119,7 @@ Benchmark on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unk
 | cel      | 0.63             | 36.94         | 31.0 ns          |
 | cel1     | 0.00             | 8.68          | 11.9 ns          |
 | cel2     | 0.00             | 3.47          | 21.8 ns          |
-| cel3     | 0.00             | 6.88          | 259.3 ns         |
+| cel3     | 0.00             | 6.88          | 26.4 ns          |
 | el1      | 0.00             | 1.70          | 36.4 ns          |
 | el2      | 0.00             | 74.60         | 52.4 ns          |
 | el3      | 0.00             | 18.65         | 82.6 ns          |
