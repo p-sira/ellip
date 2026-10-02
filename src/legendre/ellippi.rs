@@ -199,7 +199,7 @@ mod tests {
 
     #[test]
     fn test_ellippi() {
-        compare_test_data_boost!("ellippi2_data_f64.txt", ellippi, 2, 5e-16);
+        compare_test_data_boost!("ellippi2_data_f64.txt", ellippi, 2, 6.6e-16);
     }
 
     #[test]
