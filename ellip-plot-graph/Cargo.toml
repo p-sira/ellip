@@ -10,8 +10,8 @@ edition = "2024"
 description = "Generate plots for Ellip crate"
 
 [dependencies]
-ellip = { workspace = true}
-plotly = { version = "0.13.5", features = ["static_export_default"] }
+ellip = { workspace = true }
+plotly = { version = "0.14", features = ["static_export_default"] }
 
 [features]
 # Open the generated HTML
