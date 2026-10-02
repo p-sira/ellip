@@ -22,6 +22,12 @@ use num_traits::Float;
 /// Evaluate polynomial with coefficients in reverse order (C_0 + C_1 x + C_2 x^2 + ...)
 #[inline]
 pub(crate) fn polyeval<T: Float>(x: T, coeff: &[T]) -> T {
+    let coeff = if core::mem::size_of::<T>() <= 4 && coeff.len() == 12 {
+        &coeff[..6]
+    } else {
+        coeff
+    };
+
     if coeff.len() == 12 {
         let x2 = x * x;
         let x4 = x2 * x2;
@@ -70,7 +76,6 @@ pub(crate) fn polyeval<T: Float>(x: T, coeff: &[T]) -> T {
         let q0 = p0 + p1 * x2;
         return q0 + p2 * x4;
     }
-
     let mut ans = T::zero();
     coeff.iter().rev().for_each(|&k| ans = ans * x + k);
     ans
@@ -151,7 +156,7 @@ mod tests {
         assert_eq!(polyeval(0.5f32, &coeff), horner_eval(0.5f32, &coeff));
 
         let coeff12 = [0.1f32; 12];
-        let diff = (polyeval(0.5f32, &coeff12) - horner_eval(0.5f32, &coeff12)).abs();
+        let diff = (polyeval(0.5f32, &coeff12) - horner_eval(0.5f32, &coeff12[..6])).abs();
         assert!(diff <= 1e-6);
     }
 }
