@@ -154,6 +154,7 @@ fn _ellipke<T: Float>(m: T) -> Result<(T, T), StrErr> {
             if m == neg_inf!() {
                 return Ok((0.0, inf!()));
             }
+            #[cfg(not(feature = "test_force_fail"))]
             if m > 1.0 {
                 return Err("ellipke: m must not be greater than 1.");
             }
@@ -216,6 +217,29 @@ mod tests {
         let (k0, e0) = ellipke(0.0).unwrap();
         assert_close(k0, std::f64::consts::FRAC_PI_2, 1e-15);
         assert_close(e0, std::f64::consts::FRAC_PI_2, 1e-15);
+
+        // m < 1.0 (valid path falling through to ellipke_agm)
+        let (k, e) = ellipke(0.95_f64).unwrap();
+        assert!(k > 0.0 && e > 0.0);
+        // m == 1.0
+        assert_eq!(ellipke(1.0_f64).unwrap(), (f64::INFINITY, 1.0));
+        // m > 1.0 (finite number fitting in i64 bounds)
+        assert_eq!(
+            ellipke(1.1_f64).unwrap_err(),
+            "ellipke: m must not be greater than 1."
+        );
+        // m is NaN (handled by check! macro)
+        assert_eq!(
+            ellipke(f64::NAN).unwrap_err().to_lowercase(),
+            "ellipke: arguments cannot be nan."
+        );
+        // m == -inf
+        assert_eq!(ellipke(f64::NEG_INFINITY).unwrap(), (0.0, f64::INFINITY));
+        // m > 1.0
+        assert_eq!(
+            ellipke(f64::INFINITY).unwrap_err(),
+            "ellipke: m must not be greater than 1."
+        );
     }
 
     #[test]
@@ -318,4 +342,9 @@ mod tests {
             assert!(e.is_finite() && e > 0.0);
         }
     }
+}
+
+#[cfg(feature = "test_force_fail")]
+crate::test_force_unreachable! {
+    assert_eq!(_ellipke(f64::INFINITY), Err("ellipke: Unexpected error."));
 }
