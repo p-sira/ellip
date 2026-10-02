@@ -5,6 +5,9 @@
 - `ellipke`: Add simultaneous evaluation of complete elliptic integrals of the first and second kind $K(m)$ and $E(m)$. Employs imaginary modulus transformation to evaluate negative parameters via shared polynomials instead of iterative AGM, and fuses AGM iteration for near-one evaluations ([#147](https://github.com/p-sira/ellip/pull/147)).
 - `cel3`: Add specialized complete elliptic integral of the third kind in Bulirsch's form, `cel3(kc, p) = cel(kc, p, 1, 1)` ([#147](https://github.com/p-sira/ellip/pull/147)).
 
+**Improvements**
+- `cel`, `cel1`, `cel2`, `cel3`, `el1`, `el2`, `el3`: Remove `BulirschConst<T>` bound from default entry points. Precision constants are now selected automatically via `core::mem::size_of::<T>()` — `f32` constants for 4-byte floats, `f64` constants otherwise — making the functions callable with any `Float` type without requiring a manual `BulirschConst` impl.
+
 ## 1.1
 ### 1.1.3
 **Performance Improvements**
