@@ -25,6 +25,9 @@
 - `ellippi`: Preserve principal values when `n` and `m` simultaneously approach 1 (https://github.com/p-sira/ellip/pull/132).
 - Test data: Reduce branch margins to one epsilon where Wolfram verification confirms stable results; retain 1,000 epsilons for principal-value `elliprj` (https://github.com/p-sira/ellip/pull/132).
 
+**Performance Improvements**
+- `elliprg`: Fuse RF and RD evaluations into a single duplication loop, sharing square-root steps.
+
 ### 1.1.1
 **Bug Fixes**
 - `ellippiinc`: Fix incorrect result when `φ > π/2` and `n > 1` (https://github.com/p-sira/ellip/pull/111).
