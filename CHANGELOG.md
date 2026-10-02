@@ -13,6 +13,7 @@
 - `ellipe`: Use a dedicated AGM kernel for near-one evaluations instead of `elliprg` (https://github.com/p-sira/ellip/pull/142).
 - `ellipk`: Apply early stopping criterion with quadratic correction in AGM iteration (https://github.com/p-sira/ellip/pull/143).
 - `ellippi`: Eliminate catastrophic cancellation and redundant calculations for negative parameters via analytic simplification of A&S 17.7.17 (https://github.com/p-sira/ellip/pull/144).
+- `el1`: Short-circuit evaluations for zero amplitude angle and eliminate redundant AGM iterations (https://github.com/p-sira/ellip/pull/145).
 
 ### 1.1.2
 **Bug Fixes**
