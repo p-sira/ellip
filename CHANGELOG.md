@@ -1,53 +1,53 @@
 # Changelog
 ## 1.2
 ### 1.2.0
-**New Features & Performance Improvements**
-- `ellipke`: Add simultaneous evaluation of complete elliptic integrals of the first and second kind $K(m)$ and $E(m)$. Employs imaginary modulus transformation to evaluate negative parameters via shared polynomials instead of iterative AGM, and fuses AGM iteration for near-one evaluations.
-- `cel3`: Add specialized complete elliptic integral of the third kind in Bulirsch's form, `cel3(kc, p) = cel(kc, p, 1, 1)`.
+**New Features**
+- `ellipke`: Add simultaneous evaluation of complete elliptic integrals of the first and second kind $K(m)$ and $E(m)$. Employs imaginary modulus transformation to evaluate negative parameters via shared polynomials instead of iterative AGM, and fuses AGM iteration for near-one evaluations ([#147](https://github.com/p-sira/ellip/pull/147)).
+- `cel3`: Add specialized complete elliptic integral of the third kind in Bulirsch's form, `cel3(kc, p) = cel(kc, p, 1, 1)` ([#147](https://github.com/p-sira/ellip/pull/147)).
 
 ## 1.1
 ### 1.1.3
 **Performance Improvements**
-- `el3`: Defer `x.atan()` evaluation to branches that require amplitude reduction (https://github.com/p-sira/ellip/pull/134).
-- `elliprg`: Fuse RF and RD evaluations into a single duplication loop, sharing square-root steps (https://github.com/p-sira/ellip/pull/135).
-- `ellipeinc`: Reuse trigonometric components and use fused RF/RD kernel (https://github.com/p-sira/ellip/pull/136).
-- `elliprj`: Evaluate 8-term Taylor series for `elliprc1p` when `|y| <= 0.01` via `polyeval` (https://github.com/p-sira/ellip/pull/137).
-- `cel`: Share common reciprocal `1.0 / pp` inside Bulirsch iteration loop (https://github.com/p-sira/ellip/pull/138).
-- `cel`: Specialize `p == 1` calls to `cel2` and `cel1` (https://github.com/p-sira/ellip/pull/139).
-- `polyeval`: Implement Estrin tree evaluation scheme to parallelize polynomial execution stages (https://github.com/p-sira/ellip/pull/140).
-- `ellipk` / `ellipe`: Use 6-term truncated polynomials for `f32` precision (https://github.com/p-sira/ellip/pull/141).
-- `ellipe`: Use a dedicated AGM kernel for near-one evaluations instead of `elliprg` (https://github.com/p-sira/ellip/pull/142).
-- `ellipk`: Apply early stopping criterion with quadratic correction in AGM iteration (https://github.com/p-sira/ellip/pull/143).
-- `ellippi`: Eliminate catastrophic cancellation and redundant calculations for negative parameters via analytic simplification of A&S 17.7.17 (https://github.com/p-sira/ellip/pull/144).
-- `el1`: Short-circuit evaluations for zero amplitude angle and eliminate redundant AGM iterations (https://github.com/p-sira/ellip/pull/145).
+- `el3`: Defer `x.atan()` evaluation to branches that require amplitude reduction ([#134](https://github.com/p-sira/ellip/pull/134)).
+- `elliprg`: Fuse RF and RD evaluations into a single duplication loop, sharing square-root steps ([#135](https://github.com/p-sira/ellip/pull/135)).
+- `ellipeinc`: Reuse trigonometric components and use fused RF/RD kernel ([#136](https://github.com/p-sira/ellip/pull/136)).
+- `elliprj`: Evaluate 8-term Taylor series for `elliprc1p` when `|y| <= 0.01` via `polyeval` ([#137](https://github.com/p-sira/ellip/pull/137)).
+- `cel`: Share common reciprocal `1.0 / pp` inside Bulirsch iteration loop ([#138](https://github.com/p-sira/ellip/pull/138)).
+- `cel`: Specialize `p == 1` calls to `cel2` and `cel1` ([#139](https://github.com/p-sira/ellip/pull/139)).
+- `polyeval`: Implement Estrin tree evaluation scheme to parallelize polynomial execution stages ([#140](https://github.com/p-sira/ellip/pull/140)).
+- `ellipk` / `ellipe`: Use 6-term truncated polynomials for `f32` precision ([#141](https://github.com/p-sira/ellip/pull/141)).
+- `ellipe`: Use a dedicated AGM kernel for near-one evaluations instead of `elliprg` ([#142](https://github.com/p-sira/ellip/pull/142)).
+- `ellipk`: Apply early stopping criterion with quadratic correction in AGM iteration ([#143](https://github.com/p-sira/ellip/pull/143)).
+- `ellippi`: Eliminate catastrophic cancellation and redundant calculations for negative parameters via analytic simplification of A&S 17.7.17 ([#144](https://github.com/p-sira/ellip/pull/144)).
+- `el1`: Short-circuit evaluations for zero amplitude angle and eliminate redundant AGM iterations ([#145](https://github.com/p-sira/ellip/pull/145)).
 
 ### 1.1.2
 **Bug Fixes**
-- `ellippiinc_bulirsch`: Preserve complete amplitude periods (https://github.com/p-sira/ellip/pull/115).
-- `elliprj`: Avoid cancellation when the arguments are nearly equal (https://github.com/p-sira/ellip/pull/116).
-- `el3`: Retain small nonzero characteristic parameters at large amplitudes (https://github.com/p-sira/ellip/pull/117).
-- `ellippi`: Keep representable inputs below singular boundaries finite (https://github.com/p-sira/ellip/pull/118).
-- Validate checked elliptic-integral inputs before recursion and period reduction (https://github.com/p-sira/ellip/pull/119).
-- `jacobi_zeta`: Preserve values near special angles (https://github.com/p-sira/ellip/pull/120).
-- `el3`: Return finite elementary and real principal values when `kc = 1` (https://github.com/p-sira/ellip/pull/121).
-- Carlson integrals: Normalize extreme argument scales to preserve representable results (https://github.com/p-sira/ellip/pull/122).
-- Incomplete F/E: Avoid intermediate range loss at tiny and large amplitudes (https://github.com/p-sira/ellip/pull/123).
-- `ellipk`: Accept finite negative parameters outside the polynomial selector range (https://github.com/p-sira/ellip/pull/124).
-- `ellippiinc`: Handle `n = m = 1` before the first pole (https://github.com/p-sira/ellip/pull/125).
-- `heuman_lambda`: Preserve amplitude periods for zero and tiny positive parameters (https://github.com/p-sira/ellip/pull/126).
-- `ellipdinc`: Preserve representable tails for extreme finite negative parameters (https://github.com/p-sira/ellip/pull/127).
-- `ellipeinc`: Restore oddness and periods in the extreme-negative-parameter limit (https://github.com/p-sira/ellip/pull/128).
-- Test utilities: Reject NaNs, infinities, invalid tolerances, and wrong negative references in relative comparisons (https://github.com/p-sira/ellip/pull/129).
-- Test infrastructure: Resolve reference datasets from the crate root and fail if they cannot be read (https://github.com/p-sira/ellip/pull/130).
-- `ellippi`: Preserve principal values when `n` and `m` simultaneously approach 1 (https://github.com/p-sira/ellip/pull/132).
-- Test data: Reduce branch margins to one epsilon where Wolfram verification confirms stable results; retain 1,000 epsilons for principal-value `elliprj` (https://github.com/p-sira/ellip/pull/132).
+- `ellippiinc_bulirsch`: Preserve complete amplitude periods ([#115](https://github.com/p-sira/ellip/pull/115)).
+- `elliprj`: Avoid cancellation when the arguments are nearly equal ([#116](https://github.com/p-sira/ellip/pull/116)).
+- `el3`: Retain small nonzero characteristic parameters at large amplitudes ([#117](https://github.com/p-sira/ellip/pull/117)).
+- `ellippi`: Keep representable inputs below singular boundaries finite ([#118](https://github.com/p-sira/ellip/pull/118)).
+- Validate checked elliptic-integral inputs before recursion and period reduction ([#119](https://github.com/p-sira/ellip/pull/119)).
+- `jacobi_zeta`: Preserve values near special angles ([#120](https://github.com/p-sira/ellip/pull/120)).
+- `el3`: Return finite elementary and real principal values when `kc = 1` ([#121](https://github.com/p-sira/ellip/pull/121)).
+- Carlson integrals: Normalize extreme argument scales to preserve representable results ([#122](https://github.com/p-sira/ellip/pull/122)).
+- Incomplete F/E: Avoid intermediate range loss at tiny and large amplitudes ([#123](https://github.com/p-sira/ellip/pull/123)).
+- `ellipk`: Accept finite negative parameters outside the polynomial selector range ([#124](https://github.com/p-sira/ellip/pull/124)).
+- `ellippiinc`: Handle `n = m = 1` before the first pole ([#125](https://github.com/p-sira/ellip/pull/125)).
+- `heuman_lambda`: Preserve amplitude periods for zero and tiny positive parameters ([#126](https://github.com/p-sira/ellip/pull/126)).
+- `ellipdinc`: Preserve representable tails for extreme finite negative parameters ([#127](https://github.com/p-sira/ellip/pull/127)).
+- `ellipeinc`: Restore oddness and periods in the extreme-negative-parameter limit ([#128](https://github.com/p-sira/ellip/pull/128)).
+- Test utilities: Reject NaNs, infinities, invalid tolerances, and wrong negative references in relative comparisons ([#129](https://github.com/p-sira/ellip/pull/129)).
+- Test infrastructure: Resolve reference datasets from the crate root and fail if they cannot be read ([#130](https://github.com/p-sira/ellip/pull/130)).
+- `ellippi`: Preserve principal values when `n` and `m` simultaneously approach 1 ([#132](https://github.com/p-sira/ellip/pull/132)).
+- Test data: Reduce branch margins to one epsilon where Wolfram verification confirms stable results; retain 1,000 epsilons for principal-value `elliprj` ([#132](https://github.com/p-sira/ellip/pull/132)).
 
 ### 1.1.1
 **Bug Fixes**
-- `ellippiinc`: Fix incorrect result when `φ > π/2` and `n > 1` (https://github.com/p-sira/ellip/pull/111).
-- `ellipeinc`: Fix `NaN` error when `φ` is a multiple of `π` and `m ∉ {0, 1}` (https://github.com/p-sira/ellip/pull/111).
-- `ellippi`: Fix `NaN` errors on the diagonal `n = m` when `n < 0` (https://github.com/p-sira/ellip/pull/111).
-- `ellippi`: Fix catastrophic cancellation in near diagonal cases (https://github.com/p-sira/ellip/pull/113).
+- `ellippiinc`: Fix incorrect result when `φ > π/2` and `n > 1` ([#111](https://github.com/p-sira/ellip/pull/111)).
+- `ellipeinc`: Fix `NaN` error when `φ` is a multiple of `π` and `m ∉ {0, 1}` ([#111](https://github.com/p-sira/ellip/pull/111)).
+- `ellippi`: Fix `NaN` errors on the diagonal `n = m` when `n < 0` ([#111](https://github.com/p-sira/ellip/pull/111)).
+- `ellippi`: Fix catastrophic cancellation in near diagonal cases ([#113](https://github.com/p-sira/ellip/pull/113)).
 
 ### 1.1.0
 - **`std` feature flag:** Enable to use `std` instead of `libm` as the math backend.
