@@ -10,6 +10,7 @@
 - `cel`: Specialize `p == 1` calls to `cel2` and `cel1` (https://github.com/p-sira/ellip/pull/139).
 - `polyeval`: Implement Estrin tree evaluation scheme to parallelize polynomial execution stages (https://github.com/p-sira/ellip/pull/140).
 - `ellipk` / `ellipe`: Use 6-term truncated polynomials for `f32` precision (https://github.com/p-sira/ellip/pull/141).
+- `ellipe`: Use a dedicated AGM kernel for near-one evaluations instead of `elliprg` (https://github.com/p-sira/ellip/pull/142).
 
 ### 1.1.2
 **Bug Fixes**
