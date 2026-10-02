@@ -98,8 +98,9 @@ pub fn cel_with_const<T: Float, C: BulirschConst<T>>(kc: T, p: T, a: T, b: T) ->
     let mut ans = T::nan();
     for _ in 0..MAX_ITERATION {
         f = aa;
-        aa = bb / pp + aa;
-        g = e / pp;
+        let inv_pp = 1.0 / pp;
+        aa = bb * inv_pp + aa;
+        g = e * inv_pp;
         bb = 2.0 * (f * g + bb);
         pp = g + pp;
         g = m;
