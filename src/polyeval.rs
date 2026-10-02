@@ -160,4 +160,3 @@ mod tests {
         assert!(diff <= 1e-6);
     }
 }
-
