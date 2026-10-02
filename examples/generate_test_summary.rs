@@ -15,6 +15,10 @@ fn main() {
     let template = std::fs::read_to_string("examples/README_template.md")
         .expect("Cannot read README template");
 
+    fn ellipke<T: num_traits::Float>(m: T) -> Option<T> {
+        ellip::ellipke(m).map(|(k, _)| k).ok()
+    }
+
     let summary_section = [
         &format!(
             "Benchmark on {} running `{} rustc {}` using ellip v{} with `libm` at `f64` precision (ε≈2.22e-16).\n",
@@ -31,6 +35,7 @@ fn main() {
             get_summary_entry! {"legendre", "ellippiinc_bulirsch", ellippiinc_bulirsch, 3, "ellippiinc"},
             get_summary_entry!("legendre", "ellipd", ellipd, 1),
             get_summary_entry!("legendre", "ellipdinc", ellipdinc, 2),
+            get_summary_entry! {"legendre", "ellipke", ellipke, 1, "ellipk"},
         ]),
         "",
         "### Bulirsch's Elliptic Integrals",
@@ -38,6 +43,7 @@ fn main() {
             get_summary_entry!("bulirsch", "cel", cel, 4),
             get_summary_entry!("bulirsch", "cel1", cel1, 1),
             get_summary_entry!("bulirsch", "cel2", cel2, 3),
+            get_summary_entry!("bulirsch", "cel3", cel3, 2),
             get_summary_entry!("bulirsch", "el1", el1, 2),
             get_summary_entry!("bulirsch", "el2", el2, 4),
             get_summary_entry!("bulirsch", "el3", el3, 3),
