@@ -13,11 +13,7 @@
 
 use num_traits::Float;
 
-use crate::{
-    carlson::elliprf_rd_unchecked,
-    crate_util::check,
-    ellipe, StrErr,
-};
+use crate::{carlson::elliprf_rd_unchecked, crate_util::check, ellipe, StrErr};
 
 /// Computes [incomplete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E5).
 /// ```text
@@ -159,9 +155,7 @@ pub fn ellipeinc_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         let c = 1.0 / s2p;
         let cm1 = c2p / s2p;
         let (rf, rd) = elliprf_rd_unchecked(cm1, c, c - m);
-        s * ((1.0 - m) * rf
-            + m * (1.0 - m) * rd / 3.0
-            + m * (cm1 / (c * (c - m))).sqrt())
+        s * ((1.0 - m) * rf + m * (1.0 - m) * rd / 3.0 + m * (cm1 / (c * (c - m))).sqrt())
     };
 
     if mm != 0.0 {
