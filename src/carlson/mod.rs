@@ -17,10 +17,11 @@ pub use elliprf::elliprf;
 pub use elliprg::elliprg;
 pub use elliprj::elliprj;
 
+#[allow(unused_imports)]
 #[cfg(not(feature = "unstable"))]
 pub(crate) use {
     elliprc::elliprc_unchecked, elliprd::elliprd_unchecked, elliprf::elliprf_unchecked,
-    elliprg::elliprg_unchecked, elliprj::elliprj_unchecked,
+    elliprg::elliprf_rd_unchecked, elliprg::elliprg_unchecked, elliprj::elliprj_unchecked,
 };
 
 #[cfg(feature = "unstable")]
