@@ -28,19 +28,19 @@ The test datasets are not distributed with the crate by default. You may generat
 
 ## f64 Results
 
-This report is generated on AMD EPYC 9V74 80-Core Processor running `x86_64-unknown-linux-gnu rustc 1.98.1` using ellip v1.1.2 with `libm` at `f64` precision (ε≈2.22e-16).
+This report is generated on AMD EPYC 7763 64-Core Processor running `x86_64-unknown-linux-gnu rustc 1.99.0` using ellip v1.1.3 with `libm` at `f64` precision (ε≈2.22e-16).
 
 ### Legendre's Complete Elliptic Integrals
 
 | Function        | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε) |
 |-----------------|----------|------------|---------|---------|---------------|-------|
-| ellipk          | 0.27     | 0.00       | 1.51    | 20.95   | 0.81          | 1     |
-| ellipk (Neg m)  | 0.32     | 0.00       | 1.46    | 1.99    | 0.19          | 1     |
-| ellipe          | 0.30     | 0.00       | 1.82    | 3.00    | 0.18          | 1     |
+| ellipk          | 0.32     | 0.00       | 1.51    | 20.95   | 0.81          | 1     |
+| ellipk (Neg m)  | 0.32     | 0.00       | 1.42    | 1.99    | 0.19          | 1     |
+| ellipe          | 0.32     | 0.00       | 1.82    | 3.00    | 0.18          | 1     |
 | ellipe (Neg m)  | 0.42     | 0.51       | 1.64    | 1.95    | 0.20          | 1     |
 | ellippi         | 0.47     | 0.00       | 2.12    | 21.08   | 1.69          | 1     |
-| ellippi (Neg m) | 0.94     | 0.50       | 11.51   | 31.04   | 5.66          | 1     |
-| ellippi (p.v.)  | 0.10     | 0.00       | 2.02    | 3.37    | 0.15          | 1     |
+| ellippi (Neg m) | 0.33     | 0.00       | 1.83    | 2.96    | 0.23          | 1     |
+| ellippi (p.v.)  | 0.10     | 0.00       | 2.09    | 2.81    | 0.15          | 1     |
 | ellipd          | 0.44     | 0.00       | 1.96    | 2.43    | 0.32          | 1     |
 | ellipd (Neg m)  | 0.10     | 0.00       | 1.87    | 2.64    | 0.16          | 1     |
 
@@ -50,12 +50,12 @@ This report is generated on AMD EPYC 9V74 80-Core Processor running `x86_64-unkn
 |-----------------------------|----------|------------|---------|---------|---------------|-------|
 | ellipf                      | 0.33     | 0.00       | 2.39    | 7.47    | 0.42          | 1     |
 | ellipf (Neg m)              | 0.28     | 0.00       | 1.95    | 3.00    | 0.26          | 1     |
-| ellipeinc                   | 0.51     | 0.00       | 7.50    | 24.66   | 2.69          | 1     |
-| ellipeinc (Neg m)           | 0.50     | 0.00       | 2.68    | 3.38    | 0.54          | 1     |
-| ellippiinc                  | 0.89     | 0.00       | 14.58   | 165.83  | 49.26         | 1     |
-| ellippiinc (Neg m)          | 0.59     | 0.00       | 8.53    | 25.98   | 3.87          | 1     |
-| ellippiinc (p.v.)           | 7.27     | 1.76       | 110.88  | 395.31  | 738.07        | 1     |
-| ellippiinc_bulirsch         | 0.99     | 0.00       | 14.58   | 165.83  | 49.40         | 1     |
+| ellipeinc                   | 0.51     | 0.00       | 7.50    | 24.66   | 2.70          | 1     |
+| ellipeinc (Neg m)           | 0.51     | 0.00       | 2.68    | 3.38    | 0.55          | 1     |
+| ellippiinc                  | 0.90     | 0.00       | 14.58   | 165.83  | 49.28         | 1     |
+| ellippiinc (Neg m)          | 0.59     | 0.00       | 8.53    | 25.98   | 3.88          | 1     |
+| ellippiinc (p.v.)           | 7.23     | 1.77       | 110.88  | 395.31  | 737.00        | 1     |
+| ellippiinc_bulirsch         | 0.99     | 0.00       | 14.58   | 165.83  | 49.42         | 1     |
 | ellippiinc_bulirsch (Neg m) | 0.48     | 0.00       | 5.14    | 15.94   | 1.68          | 1     |
 | ellipdinc                   | 0.21     | 0.00       | 3.62    | 8.38    | 0.56          | 1     |
 | ellipdinc (Neg m)           | 0.12     | 0.00       | 2.98    | 4.20    | 0.29          | 1     |
@@ -65,8 +65,8 @@ Bulirsh's elliptic integrals are not natively implemented in Wolfram Engine. Nev
 
 | Function   | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε) |
 |------------|----------|------------|---------|---------|---------------|-------|
-| cel        | 0.75     | 0.65       | 3.47    | 28.60   | 2.04          | 1     |
-| cel (p.v.) | 1.09     | 0.59       | 19.25   | 36.94   | 13.66         | 1     |
+| cel        | 0.67     | 0.62       | 3.06    | 5.14    | 0.56          | 1     |
+| cel (p.v.) | 1.16     | 0.65       | 20.06   | 36.94   | 13.83         | 1     |
 | cel1       | 0.54     | 0.00       | 7.82    | 8.68    | 1.56          | 1     |
 | cel2       | 0.50     | 0.00       | 2.73    | 3.47    | 0.51          | 1     |
 | el1        | 0.09     | 0.00       | 1.09    | 1.70    | 0.08          | 1     |
@@ -80,8 +80,8 @@ Bulirsh's elliptic integrals are not natively implemented in Wolfram Engine. Nev
 |----------------|----------|------------|---------|---------|---------------|-------|
 | elliprf        | 0.33     | 0.00       | 1.41    | 1.57    | 0.19          | 1     |
 | elliprg        | 0.26     | 0.00       | 2.60    | 5.25    | 0.38          | 1     |
-| elliprj        | 0.80     | 0.60       | 6.66    | 13.54   | 1.84          | 1     |
-| elliprj (p.v.) | 1.07     | 0.51       | 12.05   | 136.97  | 28.82         | 1000  |
+| elliprj        | 0.81     | 0.60       | 6.66    | 13.54   | 1.85          | 1     |
+| elliprj (p.v.) | 1.08     | 0.51       | 12.05   | 136.97  | 32.85         | 1000  |
 | elliprc        | 0.20     | 0.00       | 1.20    | 1.96    | 0.14          | 1     |
 | elliprc (p.v.) | 0.14     | 0.00       | 1.75    | 2.82    | 0.15          | 1     |
 | elliprd        | 0.42     | 0.00       | 1.96    | 3.56    | 0.29          | 1     |
@@ -92,25 +92,25 @@ Principal-value `elliprj` is numerically unstable when the symmetric parameter v
 
 | Function            | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε) |
 |---------------------|----------|------------|---------|---------|---------------|-------|
-| jacobi_zeta         | 0.07     | 0.00       | 3.12    | 7.59    | 0.32          | 1     |
-| jacobi_zeta (Neg m) | 0.07     | 0.00       | 3.87    | 8.66    | 0.36          | 1     |
-| heuman_lambda       | 0.37     | 0.00       | 1.82    | 2.86    | 0.24          | 1     |
+| jacobi_zeta         | 0.07     | 0.00       | 2.99    | 8.43    | 0.32          | 1     |
+| jacobi_zeta (Neg m) | 0.08     | 0.00       | 3.87    | 8.66    | 0.37          | 1     |
+| heuman_lambda       | 0.40     | 0.00       | 2.19    | 2.77    | 0.30          | 1     |
 
 ## f32 Results
 
-Generated on AMD EPYC 9V74 80-Core Processor running `x86_64-unknown-linux-gnu rustc 1.98.1` using ellip v1.1.2 with `libm` at `f32` precision (ε≈1.19e-7).
+Generated on AMD EPYC 7763 64-Core Processor running `x86_64-unknown-linux-gnu rustc 1.99.0` using ellip v1.1.3 with `libm` at `f32` precision (ε≈1.19e-7).
 
 ### Legendre's Complete Elliptic Integrals
 
 | Function        | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε) |
 |-----------------|----------|------------|---------|---------|---------------|-------|
-| ellipk          | 0.25     | 0.00       | 1.80    | 12.46   | 0.49          | 1     |
-| ellipk (Neg m)  | 0.31     | 0.00       | 1.29    | 1.72    | 0.18          | 1     |
-| ellipe          | 0.20     | 0.00       | 1.00    | 1.92    | 0.14          | 1     |
+| ellipk          | 0.28     | 0.00       | 1.80    | 12.46   | 0.48          | 1     |
+| ellipk (Neg m)  | 0.33     | 0.00       | 1.33    | 1.98    | 0.19          | 1     |
+| ellipe          | 0.21     | 0.00       | 1.00    | 1.92    | 0.14          | 1     |
 | ellipe (Neg m)  | 0.35     | 0.00       | 1.48    | 1.61    | 0.17          | 1     |
-| ellippi         | 0.52     | 0.53       | 2.46    | 4.22    | 0.37          | 1     |
-| ellippi (Neg m) | 0.48     | 0.55       | 2.05    | 2.92    | 0.27          | 1     |
-| ellippi (p.v.)  | 0.09     | 0.00       | 1.70    | 2.72    | 0.11          | 1     |
+| ellippi         | 0.52     | 0.53       | 2.41    | 4.22    | 0.37          | 1     |
+| ellippi (Neg m) | 0.48     | 0.56       | 2.02    | 2.92    | 0.26          | 1     |
+| ellippi (p.v.)  | 0.09     | 0.00       | 1.70    | 2.88    | 0.12          | 1     |
 | ellipd          | 0.51     | 0.00       | 2.56    | 15.09   | 0.92          | 1     |
 | ellipd (Neg m)  | 0.07     | 0.00       | 1.83    | 2.16    | 0.11          | 1     |
 
@@ -118,15 +118,15 @@ Generated on AMD EPYC 9V74 80-Core Processor running `x86_64-unknown-linux-gnu r
 
 | Function                    | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε) |
 |-----------------------------|----------|------------|---------|---------|---------------|-------|
-| ellipf                      | 0.23     | 0.00       | 1.95    | 5.20    | 0.25          | 1     |
+| ellipf                      | 0.23     | 0.00       | 1.95    | 5.20    | 0.26          | 1     |
 | ellipf (Neg m)              | 0.20     | 0.00       | 1.56    | 3.54    | 0.19          | 1     |
 | ellipeinc                   | 0.37     | 0.00       | 4.84    | 24.02   | 1.89          | 1     |
 | ellipeinc (Neg m)           | 0.39     | 0.00       | 2.31    | 3.12    | 0.39          | 1     |
-| ellippiinc                  | 0.53     | 0.00       | 8.72    | 71.78   | 7.85          | 1     |
+| ellippiinc                  | 0.54     | 0.00       | 8.72    | 71.78   | 7.84          | 1     |
 | ellippiinc (Neg m)          | 0.65     | 0.00       | 11.93   | 40.74   | 6.12          | 1     |
-| ellippiinc (p.v.)           | 2.99     | 0.00       | 42.49   | 128.05  | 99.46         | 1     |
+| ellippiinc (p.v.)           | 3.06     | 0.00       | 42.49   | 128.05  | 100.38        | 1     |
 | ellippiinc_bulirsch         | 0.78     | 0.00       | 12.14   | 71.78   | 9.16          | 1     |
-| ellippiinc_bulirsch (Neg m) | 0.57     | 0.00       | 5.12    | 40.74   | 4.92          | 1     |
+| ellippiinc_bulirsch (Neg m) | 0.56     | 0.00       | 5.64    | 40.74   | 4.92          | 1     |
 | ellipdinc                   | 0.21     | 0.00       | 3.59    | 11.97   | 0.69          | 1     |
 | ellipdinc (Neg m)           | 0.10     | 0.00       | 2.13    | 4.44    | 0.21          | 1     |
 
@@ -134,8 +134,8 @@ Generated on AMD EPYC 9V74 80-Core Processor running `x86_64-unknown-linux-gnu r
 
 | Function   | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε) |
 |------------|----------|------------|---------|---------|---------------|-------|
-| cel        | 0.55     | 0.00       | 2.44    | 9.41    | 0.59          | 1     |
-| cel (p.v.) | 0.70     | 0.56       | 6.48    | 13.37   | 1.54          | 1     |
+| cel        | 0.64     | 0.54       | 2.88    | 6.27    | 0.60          | 1     |
+| cel (p.v.) | 0.73     | 0.59       | 5.67    | 14.33   | 1.57          | 1     |
 | cel1       | 0.37     | 0.00       | 1.58    | 1.59    | 0.18          | 1     |
 | cel2       | 0.41     | 0.00       | 2.00    | 2.00    | 0.33          | 1     |
 | el1        | 0.14     | 0.00       | 1.36    | 1.89    | 0.13          | 1     |
@@ -159,6 +159,6 @@ Generated on AMD EPYC 9V74 80-Core Processor running `x86_64-unknown-linux-gnu r
 
 | Function            | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε) |
 |---------------------|----------|------------|---------|---------|---------------|-------|
-| jacobi_zeta         | 0.02     | 0.00       | 0.42    | 3.99    | 0.06          | 1     |
-| jacobi_zeta (Neg m) | 0.02     | 0.00       | 0.00    | 4.52    | 0.08          | 1     |
-| heuman_lambda       | 0.40     | 0.00       | 1.98    | 2.80    | 0.29          | 1     |
+| jacobi_zeta         | 0.02     | 0.00       | 0.00    | 3.19    | 0.05          | 1     |
+| jacobi_zeta (Neg m) | 0.03     | 0.00       | 0.00    | 4.52    | 0.10          | 1     |
+| heuman_lambda       | 0.45     | 0.00       | 2.11    | 2.80    | 0.33          | 1     |
