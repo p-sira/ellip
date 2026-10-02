@@ -137,20 +137,27 @@ pub fn ellippi_unchecked<T: Float>(n: T, m: T) -> T {
             return ellipk(m).unwrap_or(nan!());
         }
         // n < 0: ellippi(n,m)
-        // On the diagonal, Π(n, n) = E(n) / (1 - n) (https://dlmf.nist.gov/19.6.E1).
-        // The A&S 17.7.17 form below divides by m - n, so handle m = n directly.
-        if m == n {
-            return ellipe(m).unwrap_or(nan!()) / (1.0 - m);
-        }
-        // Near the diagonal, A&S 17.7.17 suffers from catastrophic cancellation in m - n.
-        // Fall back to the direct Carlson form for near-diagonal cases, which avoids
-        // the division by m - n. For large |n| off the diagonal, A&S is much more
-        // accurate and avoids catastrophic cancellation between R_F and R_J.
-        if (m - n).abs() < 0.05 * n.abs() {
-            return ellippi_vc(n, m, 1.0 - n);
+        // When n < 0 and m < 0, standard A&S 17.7.17 suffers from catastrophic cancellation in m - n.
+        // Substituting Π((m-n)/(1-n), m) = K(m) + (m-n)/(3(1-n)) R_J into A&S 17.7.17:
+        //   Π(n, m) = -n(1-m)/((1-n)(m-n)) [K(m) + (m-n)/(3(1-n)) R_J] + m/(m-n) K(m)
+        // The (m - n) denominator cancels out algebraically:
+        //   [m/(m-n) - n(1-m)/((1-n)(m-n))] K(m) = 1/(1-n) K(m)
+        // Leaving the cancellation-free, purely additive form:
+        //   Π(n, m) = 1/(1-n) K(m) - n(1-m)/(3(1-n)²) R_J(0, 1-m, 1, (1-m)/(1-n))
+        // Valid for all n < 0 and m < 0, eliminating division by (m - n) and near-diagonal cancellation.
+        if m < 0.0 {
+            if m == n {
+                return ellipe(m).unwrap_or(nan!()) / (1.0 - m);
+            }
+            let one_minus_n = 1.0 - n;
+            let one_minus_m = 1.0 - m;
+            let p = one_minus_m / one_minus_n;
+            let km = ellipk(m).unwrap_or(nan!());
+            let rj = elliprj_unchecked(0.0, one_minus_m, 1.0, p);
+            return km / one_minus_n + (-n) * one_minus_m / (3.0 * one_minus_n * one_minus_n) * rj;
         }
 
-        // Apply A&S 17.7.17
+        // Apply A&S 17.7.17 for n < 0 and m >= 0
         let nn = (m - n) / (1.0 - n);
         let nm1 = (1.0 - m) / (1.0 - n);
 
