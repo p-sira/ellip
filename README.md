@@ -20,7 +20,6 @@
     <a href="https://codecov.io/github/p-sira/ellip" > 
         <img src="https://codecov.io/github/p-sira/ellip/graph/badge.svg?token=JVM89PIP5K"> 
     </a>
-    <a href="https://app.codspeed.io/p-sira/ellip?utm_source=badge"><img src="https://img.shields.io/endpoint?url=https://codspeed.io/badge.json" alt="CodSpeed"/></a>
     <a style="border-width:0" href="https://doi.org/10.21105/joss.09386">
         <img src="https://joss.theoj.org/papers/10.21105/joss.09386/status.svg" alt="DOI badge">
     </a>
@@ -98,20 +97,21 @@ Learn more at [doc.rs](https://docs.rs/ellip).
 
 In the unit tests, the functions are tested against the Boost Math and Wolfram test data. Since Ellip accepts the argument `m` (parameter) instead of `k` (modulus) to allow larger domain support, the full accuracy report uses exclusively the Wolfram data. **The full accuracy report can be found [here](https://github.com/p-sira/ellip/blob/main/tests)**, along with the test data and test generation scripts. The performance benchmark is presented to provide comparison between functions in Ellip. Comparing performance with other libraries is non-trivial, since they accept different domains of input.
 
-Benchmark on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unknown-linux-gnu rustc 1.98.1` using ellip v1.1.3 with `libm` at `f64` precision (ε≈2.22e-16).
+Benchmark on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unknown-linux-gnu rustc 1.98.1` using ellip v1.2.0 with `libm` at `f64` precision (ε≈2.22e-16).
 
 ### Legendre's Elliptic Integrals
 | Function            | Median Error (ε) | Max Error (ε) | Mean Performance |
 |---------------------|------------------|---------------|------------------|
-| ellipk              | 0.00             | 20.95         | 13.9 ns          |
-| ellipe              | 0.00             | 3.00          | 12.1 ns          |
-| ellipf              | 0.00             | 7.47          | 105.1 ns         |
-| ellipeinc           | 0.00             | 24.66         | 143.8 ns         |
-| ellippi             | 0.00             | 21.08         | 130.6 ns         |
-| ellippiinc          | 0.00             | 395.31        | 197.2 ns         |
-| ellippiinc_bulirsch | 0.00             | 395.31        | 160.7 ns         |
-| ellipd              | 0.00             | 2.64          | 30.0 ns          |
-| ellipdinc           | 0.00             | 8.38          | 103.0 ns         |
+| ellipk              | 0.00             | 20.95         | 14.0 ns          |
+| ellipe              | 0.00             | 3.00          | 12.2 ns          |
+| ellipf              | 0.00             | 7.47          | 105.8 ns         |
+| ellipeinc           | 0.00             | 24.66         | 145.7 ns         |
+| ellippi             | 0.00             | 21.08         | 134.4 ns         |
+| ellippiinc          | 0.00             | 395.31        | 206.1 ns         |
+| ellippiinc_bulirsch | 0.00             | 395.31        | 162.8 ns         |
+| ellipd              | 0.00             | 2.64          | 32.5 ns          |
+| ellipdinc           | 0.00             | 8.38          | 106.6 ns         |
+| ellipke             | 0.00             | 20.95         | 16.8 ns          |
 
 ### Bulirsch's Elliptic Integrals
 | Function | Median Error (ε) | Max Error (ε) | Mean Performance |
@@ -119,6 +119,7 @@ Benchmark on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unk
 | cel      | 0.63             | 36.94         | 31.0 ns          |
 | cel1     | 0.00             | 8.68          | 11.9 ns          |
 | cel2     | 0.00             | 3.47          | 21.8 ns          |
+| cel3     | 0.00             | 6.88          | 259.3 ns         |
 | el1      | 0.00             | 1.70          | 36.4 ns          |
 | el2      | 0.00             | 74.60         | 52.4 ns          |
 | el3      | 0.00             | 18.65         | 82.6 ns          |

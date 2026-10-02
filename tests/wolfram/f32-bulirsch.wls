@@ -17,6 +17,8 @@ muCel1 = 1 * epsilon;
 
 muCel2 = 1 * epsilon;
 
+muCel3 = 1 * epsilon;
+
 (* Bulirsch's General Complete Elliptic integrals *)
 
 kcRange = Union[Subdivide[-2, -muCel, 5], Subdivide[muCel, 2, 5]];
@@ -62,6 +64,28 @@ cel2 = Select[Flatten[Table[{kc, a, b, ResourceFunction["BulirschCEL"
     Reals]&];
 
 Export["../data/f32/wolfram/cel2_data.csv", N[cel2], "CSV"];
+
+(* Bulirsch's Complete Elliptic integrals of the Third Kind *)
+
+(* cel3(kc, p) = EllipticPi[1 - p, 1 - kc^2] *)
+
+kcRange = Union[Subdivide[-2, -muCel3, 10], Subdivide[muCel3, 2, 10]];
+
+pRange = Subdivide[muCel3, 1, 10];
+
+pRangePV = Subdivide[-1, -muCel3, 10];
+
+cel3Data = Select[Flatten[Table[{kc, p, EllipticPi[SetPrecision[1 - p, 30],
+    SetPrecision[1 - kc * kc, 30]]}, {kc, kcRange}, {p, pRange}], 1],
+    Element[#[[3]], Reals]&];
+
+cel3PV = Select[Flatten[Table[{kc, p, EllipticPi[SetPrecision[1 - p, 30],
+    SetPrecision[1 - kc * kc, 30]]}, {kc, kcRange}, {p, pRangePV}], 1],
+    Element[#[[3]], Reals]&];
+
+Export["../data/f32/wolfram/cel3_data.csv", N[cel3Data], "CSV"];
+
+Export["../data/f32/wolfram/cel3_pv.csv", N[cel3PV], "CSV"];
 
 (* ----- Bulirsch's Incomplete Elliptic integrals ----- *)
 
