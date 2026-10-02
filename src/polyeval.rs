@@ -42,6 +42,23 @@ pub(crate) fn polyeval<T: Float>(x: T, coeff: &[T]) -> T {
         return r0 + q2 * x8;
     }
 
+    if coeff.len() == 9 {
+        let x2 = x * x;
+        let x4 = x2 * x2;
+        let x8 = x4 * x4;
+
+        let p0 = coeff[0] + coeff[1] * x;
+        let p1 = coeff[2] + coeff[3] * x;
+        let p2 = coeff[4] + coeff[5] * x;
+        let p3 = coeff[6] + coeff[7] * x;
+
+        let q0 = p0 + p1 * x2;
+        let q1 = p2 + p3 * x2;
+
+        let r0 = q0 + q1 * x4;
+        return r0 + coeff[8] * x8;
+    }
+
     if coeff.len() == 6 {
         let x2 = x * x;
         let x4 = x2 * x2;
@@ -78,6 +95,16 @@ mod tests {
             let actual = polyeval(x, &coeff);
             let expected = horner_eval(x, &coeff);
             assert!((actual - expected).abs() <= 1e-14 * expected.abs().max(1.0));
+        }
+    }
+
+    #[test]
+    fn test_polyeval_degree_8() {
+        let coeff = [1.0, -0.33, 0.2, -0.14, 0.11, -0.09, 0.07, -0.06, 0.05];
+        for &x in &[0.0, 0.5, -0.5, 1.0, -1.0, 0.01, -0.01, 0.35] {
+            let actual = polyeval(x, &coeff);
+            let expected = horner_eval(x, &coeff);
+            assert!((actual - expected).abs() <= 1e-15 * expected.abs().max(1.0));
         }
     }
 
