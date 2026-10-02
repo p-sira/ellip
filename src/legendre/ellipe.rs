@@ -13,7 +13,7 @@
 
 use num_traits::Float;
 
-use crate::{carlson::elliprg_unchecked, crate_util::check, polyeval, StrErr};
+use crate::{crate_util::check, polyeval, StrErr};
 
 /// Computes [complete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E8).
 /// ```text
@@ -286,7 +286,22 @@ fn ellipe_precise<T: Float>(m: T) -> Result<T, StrErr> {
         return Err("ellipe: m must not be greater than 1.");
     }
 
-    Ok(2.0 * elliprg_unchecked(0.0, 1.0 - m, 1.0))
+    let mut xn = T::one();
+    let mut yn = (1.0 - m).sqrt();
+    let x0 = xn;
+    let y0 = yn;
+    let mut sum = 0.0;
+    let mut sum_pow = 0.25;
+
+    while (xn - yn).abs() >= 2.7 * epsilon!() * xn.abs() {
+        let t = (xn * yn).sqrt();
+        xn = (xn + yn) / 2.0;
+        yn = t;
+        sum_pow = sum_pow * 2.0;
+        sum = sum + sum_pow * (xn - yn) * (xn - yn);
+    }
+    let rf = pi!() / (xn + yn);
+    Ok(((x0 + y0) * (x0 + y0) / 4.0 - sum) * rf)
 }
 
 #[cfg(not(feature = "test_force_fail"))]

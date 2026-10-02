@@ -13,11 +13,7 @@
 
 use num_traits::Float;
 
-use crate::{
-    carlson::{elliprd_unchecked, elliprf_unchecked},
-    crate_util::check,
-    ellipe, StrErr,
-};
+use crate::{carlson::elliprf_rd_unchecked, crate_util::check, ellipe, StrErr};
 
 /// Computes [incomplete elliptic integral of the second kind](https://dlmf.nist.gov/19.2.E5).
 /// ```text
@@ -149,16 +145,17 @@ pub fn ellipeinc_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         // See http://functions.wolfram.com/EllipticIntegrals/EllipticE2/06/01/03/0001/
         s * rphi
     } else {
-        let s2p = rphi.sin() * rphi.sin();
+        let s_phi = rphi.sin();
+        let s2p = s_phi * s_phi;
         if m * s2p >= 1.0 {
             return Err("ellipeinc: m sin²φ must be smaller than one.");
         }
-        let c2p = rphi.cos() * rphi.cos();
+        let c_phi = rphi.cos();
+        let c2p = c_phi * c_phi;
         let c = 1.0 / s2p;
         let cm1 = c2p / s2p;
-        s * ((1.0 - m) * elliprf_unchecked(cm1, c - m, c)
-            + m * (1.0 - m) * elliprd_unchecked(cm1, c, c - m) / 3.0
-            + m * (cm1 / (c * (c - m))).sqrt())
+        let (rf, rd) = elliprf_rd_unchecked(cm1, c, c - m);
+        s * ((1.0 - m) * rf + m * (1.0 - m) * rd / 3.0 + m * (cm1 / (c * (c - m))).sqrt())
     };
 
     if mm != 0.0 {

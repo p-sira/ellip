@@ -1,5 +1,20 @@
 # Changelog
 ## 1.1
+### 1.1.3
+**Performance Improvements**
+- `el3`: Defer `x.atan()` evaluation to branches that require amplitude reduction (https://github.com/p-sira/ellip/pull/134).
+- `elliprg`: Fuse RF and RD evaluations into a single duplication loop, sharing square-root steps (https://github.com/p-sira/ellip/pull/135).
+- `ellipeinc`: Reuse trigonometric components and use fused RF/RD kernel (https://github.com/p-sira/ellip/pull/136).
+- `elliprj`: Evaluate 8-term Taylor series for `elliprc1p` when `|y| <= 0.01` via `polyeval` (https://github.com/p-sira/ellip/pull/137).
+- `cel`: Share common reciprocal `1.0 / pp` inside Bulirsch iteration loop (https://github.com/p-sira/ellip/pull/138).
+- `cel`: Specialize `p == 1` calls to `cel2` and `cel1` (https://github.com/p-sira/ellip/pull/139).
+- `polyeval`: Implement Estrin tree evaluation scheme to parallelize polynomial execution stages (https://github.com/p-sira/ellip/pull/140).
+- `ellipk` / `ellipe`: Use 6-term truncated polynomials for `f32` precision (https://github.com/p-sira/ellip/pull/141).
+- `ellipe`: Use a dedicated AGM kernel for near-one evaluations instead of `elliprg` (https://github.com/p-sira/ellip/pull/142).
+- `ellipk`: Apply early stopping criterion with quadratic correction in AGM iteration (https://github.com/p-sira/ellip/pull/143).
+- `ellippi`: Eliminate catastrophic cancellation and redundant calculations for negative parameters via analytic simplification of A&S 17.7.17 (https://github.com/p-sira/ellip/pull/144).
+- `el1`: Short-circuit evaluations for zero amplitude angle and eliminate redundant AGM iterations (https://github.com/p-sira/ellip/pull/145).
+
 ### 1.1.2
 **Bug Fixes**
 - `ellippiinc_bulirsch`: Preserve complete amplitude periods (https://github.com/p-sira/ellip/pull/115).

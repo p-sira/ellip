@@ -2,7 +2,7 @@
 members = ["ellip-rayon", "ellip-dev-utils", "ellip-plot-graph"]
 
 [workspace.package]
-version = "1.1.2"
+version = "1.1.3"
 authors = ["Sira Pornsiriprasert <code@psira.me>"]
 categories = ["mathematics", "science", "no-std"]
 keywords = ["special", "elliptic", "integral"]
@@ -48,7 +48,7 @@ numeric_literals = "0.2.0"
 criterion = { version = "5", package = "codspeed-criterion-compat" }
 csv = "1.3.1"
 ellip-dev-utils = { workspace = true }
-itertools = "0.14"
+itertools = "0.15"
 
 [[bench]]
 name = "bench"

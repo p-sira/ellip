@@ -75,6 +75,17 @@ pub fn cel<T: Float + BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T, St
 pub fn cel_with_const<T: Float, C: BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
     check!(@zero, cel, [kc, p]);
 
+    if p == 1.0 {
+        let res = if a == 1.0 && b == 1.0 {
+            cel1_with_const::<T, C>(kc)
+        } else {
+            cel2_with_const::<T, C>(kc, a, b)
+        };
+        if let Ok(v) = res {
+            return Ok(v);
+        }
+    }
+
     let mut kc = kc.abs();
     declare!(mut [pp = p, aa = a, bb = b, f, q, g]);
 
@@ -98,8 +109,9 @@ pub fn cel_with_const<T: Float, C: BulirschConst<T>>(kc: T, p: T, a: T, b: T) ->
     let mut ans = T::nan();
     for _ in 0..MAX_ITERATION {
         f = aa;
-        aa = bb / pp + aa;
-        g = e / pp;
+        let inv_pp = 1.0 / pp;
+        aa = bb * inv_pp + aa;
+        g = e * inv_pp;
         bb = 2.0 * (f * g + bb);
         pp = g + pp;
         g = m;

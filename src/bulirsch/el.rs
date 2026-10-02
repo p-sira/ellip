@@ -67,6 +67,11 @@ pub fn el1<T: Float + BulirschConst<T>>(x: T, kc: T) -> Result<T, StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn el1_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> Result<T, StrErr> {
+    if x == 0.0 {
+        check!(@nan, el1, [x, kc]);
+        check!(@zero, el1, [kc]);
+        return Ok(0.0);
+    }
     let ans = el1_unchecked::<T, C>(x, kc);
     if ans.is_finite() {
         return Ok(ans);
@@ -87,6 +92,9 @@ pub fn el1_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> Result<T, S
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub fn el1_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> T {
+    if x == 0.0 {
+        return 0.0;
+    }
     declare!(mut [y = x.recip().abs(), kc = kc.abs(), m = T::one(), l = 0, e, g]);
 
     for _ in 0..N_MAX_ITERATIONS {
@@ -360,9 +368,9 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
     //     };
     // }
 
-    let phi = x.atan();
     // This identity is exact only for p = 0. Small p can still give large p*x².
     if p == 0.0 && m != 1.0 {
+        let phi = x.atan();
         // http://functions.wolfram.com/08.06.03.0008.01
         let sp2 = phi.sin() * phi.sin();
         let mut result = (1.0 - m * sp2).sqrt() * x - ellipeinc(phi, m)?;
@@ -372,6 +380,7 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
     }
 
     if kc.abs() < C::lim_kc_p() && p > C::lim_kc_p() {
+        let phi = x.atan();
         return ellippiinc(phi, n, m);
     }
 
@@ -626,6 +635,7 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
         break;
     }
 
+    let phi = x.atan();
     let ans = ellippiinc(phi, n, m);
     if ans.is_ok() {
         return ans;
@@ -691,7 +701,7 @@ mod tests {
         // kc = inf: el1(x, inf) = 0
         assert_eq!(el1(0.5, INFINITY).unwrap(), 0.0);
         // y = 0 branch in the loop
-        assert_close!(el1(1.0, 1.0).unwrap(), 0.7853981633974483, 1e-15);
+        assert_close!(el1(1.0, 1.0).unwrap(), std::f64::consts::FRAC_PI_4, 1e-15);
         // x = nan or kc = nan: should return Err
         assert_eq!(el1(NAN, 0.5), Err("el1: Arguments cannot be NAN."));
         assert_eq!(el1(0.5, NAN), Err("el1: Arguments cannot be NAN."));

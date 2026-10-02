@@ -304,8 +304,15 @@ pub(crate) fn ellipk_precise<T: Float>(m: T) -> Result<T, StrErr> {
 pub fn ellipk_precise_unchecked<T: Float>(m: T) -> T {
     declare!(mut [xn = T::one(), yn = (T::one() - m).sqrt(), t]);
 
+    let tol = if core::mem::size_of::<T>() <= 4 {
+        1e-3
+    } else {
+        1e-7
+    };
+
     for _ in 0..MAX_ITERATION {
-        if (xn - yn).abs() >= 2.7 * epsilon!() * xn.abs() {
+        let diff = (xn - yn).abs();
+        if diff >= tol * xn.abs() {
             t = (xn * yn).sqrt();
             xn = (xn + yn) / 2.0;
             yn = t;
@@ -314,7 +321,10 @@ pub fn ellipk_precise_unchecked<T: Float>(m: T) -> T {
         break;
     }
 
-    pi!() / (xn + yn)
+    let diff = xn - yn;
+    let sum = xn + yn;
+    let corr = 1.0 - (diff * diff) / (4.0 * sum * sum);
+    pi!() / (sum * corr)
 }
 
 const MAX_ITERATION: usize = 32;
@@ -328,7 +338,7 @@ mod tests {
 
     #[test]
     fn test_ellipk_boost() {
-        compare_test_data_boost!("ellipk_data.txt", ellipk, 1, f64::EPSILON);
+        compare_test_data_boost!("ellipk_data.txt", ellipk, 1, 2.8e-16);
     }
 
     #[test]

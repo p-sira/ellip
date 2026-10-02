@@ -8,7 +8,7 @@ use core::mem::swap;
 use num_traits::Float;
 
 use crate::{
-    carlson::{elliprc_unchecked, elliprd_unchecked, elliprf_unchecked},
+    carlson::elliprc_unchecked,
     crate_util::{check, let_mut},
     StrErr,
 };
@@ -147,10 +147,112 @@ pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
         return ((x0 + y0) * (x0 + y0) / 4.0 - sum) * rf / 2.0;
     }
 
-    (z * elliprf_unchecked(x, y, z) - (x - z) * (y - z) * elliprd_unchecked(x, y, z) / 3.0
-        + (x * y / z).sqrt())
-        / 2.0
+    let (rf, rd) = elliprf_rd_unchecked(x, y, z);
+    (z * rf - (x - z) * (y - z) * rd / 3.0 + (x * y / z).sqrt()) / 2.0
 }
+
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[inline]
+pub(crate) fn elliprf_rd_unchecked<T: Float>(x: T, y: T, z: T) -> (T, T) {
+    let mut xn = x;
+    let mut yn = y;
+    let mut zn = z;
+    let a0_rf = (xn + yn + zn) / 3.0;
+    let a0_rd = (xn + yn + 3.0 * zn) / 5.0;
+    let mut an_rf = a0_rf;
+    let mut an_rd = a0_rd;
+    let eps = epsilon!();
+    let mut q_rf = (3.0 * eps).powf(-1.0 / 8.0)
+        * an_rf
+            .abs()
+            .max((an_rf - x).abs())
+            .max((an_rf - y).abs())
+            .max((an_rf - z).abs());
+    let mut q_rd = (eps / 4.0).powf(-1.0 / 8.0) * (an_rd - x).max(an_rd - y).max(an_rd - z) * 1.2;
+
+    let mut fn_rf = 1.0;
+    let mut fn_rd = 1.0;
+    let mut rd_sum = 0.0;
+    let mut rf_res = nan!();
+    let mut rd_res = nan!();
+    let mut rf_done = false;
+    let mut rd_done = false;
+
+    for _ in 0..N_MAX_ITERATIONS {
+        let rx = xn.sqrt();
+        let ry = yn.sqrt();
+        let rz = zn.sqrt();
+        let lambda = rx * ry + rx * rz + ry * rz;
+
+        if !rd_done {
+            rd_sum = rd_sum + fn_rd / (rz * (zn + lambda));
+            an_rd = (an_rd + lambda) / 4.0;
+            fn_rd = fn_rd / 4.0;
+            q_rd = q_rd / 4.0;
+            if q_rd < an_rd {
+                let x_c = fn_rd * (a0_rd - x) / an_rd;
+                let y_c = fn_rd * (a0_rd - y) / an_rd;
+                let z_c = -(x_c + y_c) / 3.0;
+                let xyz = x_c * y_c * z_c;
+                let z2 = z_c * z_c;
+                let z3 = z2 * z_c;
+                let e2 = x_c * y_c - 6.0 * z2;
+                let e3 = 3.0 * xyz - 8.0 * z3;
+                let e4 = 3.0 * (xyz - z3) * z_c;
+                let e5 = xyz * z2;
+                let inv_an_1_5 = an_rd.powf(-1.5);
+                rd_res = fn_rd
+                    * inv_an_1_5
+                    * (1.0 - 3.0 * e2 / 14.0 + e3 / 6.0 + 9.0 * e2 * e2 / 88.0
+                        - 3.0 * e4 / 22.0
+                        - 9.0 * e2 * e3 / 52.0
+                        + 3.0 * e5 / 26.0
+                        - e2 * e2 * e2 / 16.0
+                        + 3.0 * e3 * e3 / 40.0
+                        + 3.0 * e2 * e4 / 20.0
+                        + 45.0 * e2 * e2 * e3 / 272.0
+                        - 9.0 * (e3 * e4 + e2 * e5) / 68.0)
+                    + 3.0 * rd_sum;
+                rd_done = true;
+            }
+        }
+
+        if !rf_done {
+            an_rf = (an_rf + lambda) / 4.0;
+            q_rf = q_rf / 4.0;
+            fn_rf = fn_rf * 4.0;
+            if q_rf < an_rf.abs() {
+                let x_c = (a0_rf - x) / (an_rf * fn_rf);
+                let y_c = (a0_rf - y) / (an_rf * fn_rf);
+                let z_c = -x_c - y_c;
+                let e2 = x_c * y_c - z_c * z_c;
+                let e3 = x_c * y_c * z_c;
+                rf_res = (1.0
+                    + e3 * (1.0 / 14.0 + 3.0 * e3 / 104.0)
+                    + e2 * (-0.1 + e2 / 24.0 - (3.0 * e3) / 44.0 - 5.0 * e2 * e2 / 208.0
+                        + e2 * e3 / 16.0))
+                    / an_rf.sqrt();
+                rf_done = true;
+            }
+        }
+
+        if rf_done && rd_done {
+            break;
+        }
+
+        xn = (xn + lambda) / 4.0;
+        yn = (yn + lambda) / 4.0;
+        zn = (zn + lambda) / 4.0;
+    }
+
+    (rf_res, rd_res)
+}
+
+#[cfg(not(feature = "test_force_fail"))]
+const N_MAX_ITERATIONS: usize = 50;
+
+#[cfg(feature = "test_force_fail")]
+const N_MAX_ITERATIONS: usize = 1;
 
 #[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
