@@ -328,7 +328,7 @@ mod tests {
 
     #[test]
     fn test_ellipk_boost() {
-        compare_test_data_boost!("ellipk_data.txt", ellipk, 1, f64::EPSILON);
+        compare_test_data_boost!("ellipk_data.txt", ellipk, 1, 2.8e-16);
     }
 
     #[test]

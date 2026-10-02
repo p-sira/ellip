@@ -8,6 +8,7 @@
 - `elliprj`: Evaluate 8-term Taylor series for `elliprc1p` when `|y| <= 0.01` via `polyeval` (https://github.com/p-sira/ellip/pull/137).
 - `cel`: Share common reciprocal `1.0 / pp` inside Bulirsch iteration loop (https://github.com/p-sira/ellip/pull/138).
 - `cel`: Specialize `p == 1` calls to `cel2` and `cel1` (https://github.com/p-sira/ellip/pull/139).
+- `polyeval`: Implement Estrin tree evaluation scheme to parallelize polynomial execution stages (https://github.com/p-sira/ellip/pull/140).
 
 ### 1.1.2
 **Bug Fixes**
