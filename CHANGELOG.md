@@ -11,6 +11,7 @@
 - `polyeval`: Implement Estrin tree evaluation scheme to parallelize polynomial execution stages (https://github.com/p-sira/ellip/pull/140).
 - `ellipk` / `ellipe`: Use 6-term truncated polynomials for `f32` precision (https://github.com/p-sira/ellip/pull/141).
 - `ellipe`: Use a dedicated AGM kernel for near-one evaluations instead of `elliprg` (https://github.com/p-sira/ellip/pull/142).
+- `ellipk`: Apply early stopping criterion with quadratic correction in AGM iteration (https://github.com/p-sira/ellip/pull/143).
 
 ### 1.1.2
 **Bug Fixes**
