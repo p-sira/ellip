@@ -27,5 +27,5 @@ pub(crate) use {
 #[cfg(feature = "unstable")]
 pub use {
     elliprc::elliprc_unchecked, elliprd::elliprd_unchecked, elliprf::elliprf_unchecked,
-    elliprg::elliprg_unchecked, elliprj::elliprj_unchecked,
+    elliprg::elliprf_rd_unchecked, elliprg::elliprg_unchecked, elliprj::elliprj_unchecked,
 };
