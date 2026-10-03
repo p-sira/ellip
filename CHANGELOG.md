@@ -1,5 +1,9 @@
 # Changelog
 ## 1.2
+### 1.2.2
+**Bug Fixes**
+- Fix `elliprg::elliprf_rd_unchecked` visibility with unstable feature flag.
+
 ### 1.2.1
 **Bug Fixes**
 - Fix missing `elliprg::elliprf_rd_unchecked` in unstable builds.
