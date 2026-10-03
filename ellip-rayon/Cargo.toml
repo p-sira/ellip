@@ -1,7 +1,6 @@
 [package]
 name = "ellip-rayon"
-version = "1.2.2"
-# version.workspace = true
+version.workspace = true
 authors.workspace = true
 categories.workspace = true
 keywords.workspace = true
