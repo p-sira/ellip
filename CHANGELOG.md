@@ -1,5 +1,9 @@
 # Changelog
 ## 1.2
+### 1.2.1
+**Bug Fixes**
+- Fix missing `elliprg::elliprf_rd_unchecked` in unstable builds.
+
 ### 1.2.0
 **New Features**
 - `ellipke`: Add simultaneous evaluation of complete elliptic integrals of the first and second kind $K(m)$ and $E(m)$. Employs imaginary modulus transformation to evaluate negative parameters via shared polynomials instead of iterative AGM, and fuses AGM iteration for near-one evaluations ([#147](https://github.com/p-sira/ellip/pull/147)).
