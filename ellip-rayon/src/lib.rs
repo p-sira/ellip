@@ -77,15 +77,18 @@ macro_rules! impl_par {
             $arg.iter().map(|&a| ellip::$fn(a)).collect()
         }
     };
-    ($fn:ident, [$arg:ident], 1, $threshold:expr) => {
+    (@ret_typed $ty:ty, $fn:ident, [$arg:ident], 1, $threshold:expr) => {
         #[doc=concat!["Computes [", stringify!($fn), "](ellip::", stringify!($fn), ") in parallel."]]
-        pub fn $fn($arg: &[f64]) -> Result<Vec<f64>, StrErr> {
+        pub fn $fn($arg: &[f64]) -> Result<Vec<$ty>, StrErr> {
             if $arg.len() < $threshold {
                 $arg.iter().map(|&a| ellip::$fn(a)).collect()
             } else {
                 $arg.par_iter().map(|&a| ellip::$fn(a)).collect()
             }
         }
+    };
+    ($fn:ident, [$arg:ident], 1, $threshold:expr) => {
+        impl_par!(@ret_typed f64, $fn, [$arg], 1, $threshold);
     };
     ($fn:ident, [$first:ident, $($args:ident),*], $n_arg:tt) => {
         #[doc=concat!["Computes [", stringify!($fn), "](ellip::", stringify!($fn), ") in parallel."]]
@@ -117,27 +120,29 @@ macro_rules! impl_par {
 
 // {BEGIN_IMPL_PAR}
 // Generated threshold values from benchmark results
-impl_par!(ellipk, [m], 1, 1000);
-impl_par!(ellipe, [m], 1, 1500);
-impl_par!(ellipf, [phi, m], 2, 400);
-impl_par!(ellipeinc, [phi, m], 2, 300);
+impl_par!(ellipk, [m], 1, 3000);
+impl_par!(ellipe, [m], 1, 3300);
+impl_par!(ellipf, [phi, m], 2, 300);
+impl_par!(ellipeinc, [phi, m], 2, 200);
 impl_par!(ellippi, [n, m], 2, 200);
 impl_par!(ellippiinc, [phi, n, m], 3, 200);
 impl_par!(ellippiinc_bulirsch, [phi, n, m], 3, 300);
-impl_par!(ellipd, [m], 1, 600);
-impl_par!(ellipdinc, [phi, m], 2, 500);
-impl_par!(cel, [kc, p, a, b], 4, 600);
-impl_par!(cel1, [kc], 1, 1500);
-impl_par!(cel2, [kc, a, b], 3, 700);
-impl_par!(el1, [x, kc], 2, 600);
-impl_par!(el2, [x, kc, a, b], 4, 600);
-impl_par!(el3, [x, kc, p], 3, 500);
-impl_par!(elliprf, [x, y, z], 3, 600);
-impl_par!(elliprg, [x, y, z], 3, 500);
+impl_par!(ellipd, [m], 1, 1300);
+impl_par!(ellipdinc, [phi, m], 2, 300);
+impl_par!(@ret_typed (f64, f64), ellipke, [m], 1, 3000);
+impl_par!(cel, [kc, p, a, b], 4, 1500);
+impl_par!(cel1, [kc], 1, 3700);
+impl_par!(cel2, [kc, a, b], 3, 2100);
+impl_par!(cel3, [kc, p], 2, 1400);
+impl_par!(el1, [x, kc], 2, 900);
+impl_par!(el2, [x, kc, a, b], 4, 700);
+impl_par!(el3, [x, kc, p], 3, 400);
+impl_par!(elliprf, [x, y, z], 3, 700);
+impl_par!(elliprg, [x, y, z], 3, 400);
 impl_par!(elliprj, [x, y, z, p], 4, 300);
-impl_par!(elliprc, [x, y], 2, 800);
-impl_par!(elliprd, [x, y, z], 3, 500);
+impl_par!(elliprc, [x, y], 2, 1400);
+impl_par!(elliprd, [x, y, z], 3, 400);
 impl_par!(jacobi_zeta, [phi, m], 2, 200);
-impl_par!(heuman_lambda, [phi, m], 2, 200);
+impl_par!(heuman_lambda, [phi, m], 2, 100);
 
 // {END_IMPL_PAR}

@@ -72,10 +72,12 @@ fn generate_lib_rs_code(results: &[BenchmarkResult]) -> String {
         ("ellippiinc_bulirsch", "[phi, n, m], 3"),
         ("ellipd", "[m], 1"),
         ("ellipdinc", "[phi, m], 2"),
+        ("ellipke", "[m], 1"),
         // Bulirsch's Integrals
         ("cel", "[kc, p, a, b], 4"),
         ("cel1", "[kc], 1"),
         ("cel2", "[kc, a, b], 3"),
+        ("cel3", "[kc, p], 2"),
         ("el1", "[x, kc], 2"),
         ("el2", "[x, kc, a, b], 4"),
         ("el3", "[x, kc, p], 3"),
@@ -102,7 +104,7 @@ fn generate_lib_rs_code(results: &[BenchmarkResult]) -> String {
 }
 
 fn main() {
-    let md_file_path = Path::new("benches/par_threshold.md");
+    let md_file_path = Path::new("ellip-rayon/benches/par_threshold.md");
 
     if !md_file_path.exists() {
         eprintln!("Error: {} not found", md_file_path.display());
@@ -125,7 +127,7 @@ fn main() {
     let generated_code = generate_lib_rs_code(&results);
     println!("{generated_code}");
 
-    let lib_path = Path::new("src/lib.rs");
+    let lib_path = Path::new("ellip-rayon/src/lib.rs");
 
     if !lib_path.exists() {
         eprintln!("Error: {} not found", lib_path.display());
