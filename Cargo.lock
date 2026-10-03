@@ -877,7 +877,7 @@ dependencies = [
 
 [[package]]
 name = "ellip-rayon"
-version = "1.2.2-rc.1"
+version = "1.2.2"
 dependencies = [
  "criterion",
  "ellip",
