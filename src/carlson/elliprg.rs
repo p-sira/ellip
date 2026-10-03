@@ -153,7 +153,7 @@ pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
 
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
-pub(crate) fn elliprf_rd_unchecked<T: Float>(x: T, y: T, z: T) -> (T, T) {
+pub fn elliprf_rd_unchecked<T: Float>(x: T, y: T, z: T) -> (T, T) {
     let mut xn = x;
     let mut yn = y;
     let mut zn = z;
