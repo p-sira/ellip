@@ -125,7 +125,9 @@ pub fn elliprd_unchecked<T: Float>(x: T, y: T, z: T) -> T {
         }
     }
 
-    if x == 0.0 {
+    // Large y/z makes the AGM identity subtract nearly equal terms. Keep its
+    // faster path at moderate ratios and use positive duplication sums otherwise.
+    if x == 0.0 && y <= 16.0 * z {
         let x0 = y.sqrt();
         let y0 = z.sqrt();
         let mut xn = x0;
@@ -215,6 +217,44 @@ mod tests {
 
     fn _elliprd(inp: &[f64]) -> f64 {
         elliprd(inp[0], inp[1], inp[2]).unwrap()
+    }
+
+    #[test]
+    fn test_elliprd_rounding_edges() {
+        // 120-digit references at exact f64 inputs.
+        for (y, expected) in [
+            (1.0 - f64::EPSILON, 2.3561944901923453),
+            (1.0, 2.356194490192345),
+            (1.0 + f64::EPSILON, 2.356194490192345),
+            (16.0 - 16.0 * f64::EPSILON, 0.7177818732824233),
+            (16.0, 0.7177818732824233),
+            (16.0 + 16.0 * f64::EPSILON, 0.7177818732824232),
+            (1e8, 0.0002999999863550477),
+            (1e32, 3e-16),
+            (1e100, 3e-50),
+        ] {
+            for scale in [2.0_f64.powi(-200), 1.0, 2.0_f64.powi(200)] {
+                for (x, y) in [(0.0, y), (y, 0.0)] {
+                    let actual = elliprd(x * scale, y * scale, scale).unwrap();
+                    crate::util::assert_close(
+                        actual * scale * scale.sqrt(),
+                        expected,
+                        3.0 * f64::EPSILON,
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_elliprd_rounding_edges_f32() {
+        // At this ratio the correction to 3/sqrt(y) is below f32 precision.
+        for scale in [2.0_f32.powi(-20), 1.0, 2.0_f32.powi(20)] {
+            for (x, y) in [(0.0, 1e32_f32), (1e32_f32, 0.0)] {
+                let actual = elliprd(x * scale, y * scale, scale).unwrap();
+                crate::util::assert_close(actual * scale * scale.sqrt(), 3e-16, 3.0 * f32::EPSILON);
+            }
+        }
     }
 
     #[test]

@@ -123,6 +123,62 @@ fn elliprc1p<T: Float>(y: T) -> T {
     }
 }
 
+/// Taylor expansion near RJ(2q, 2q, 3q, -q) = 0, for sorted x, y, z.
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+fn elliprj_pv_near_zero<T: Float>(x: T, y: T, z: T, q: T, epsilon: T) -> Option<T> {
+    // RJ(2q, 2q, 3q, -q) = 0. The reduction subtracts RF and RC
+    // values of order q^(-1/2) here, losing the small result's sign.
+    // Evaluate the third-order Taylor expansion at this zero instead.
+    // The coefficients follow by differentiating the defining integral;
+    // with L = atanh(1/sqrt(3)), S = sqrt(3), the linear coefficients
+    // are (S - 2L)/8 and (3L - S)/8. Rounded constants avoid cancellation
+    // when evaluating the coefficients themselves.
+    // See https://dlmf.nist.gov/19.20.E8 for the repeated-argument identity.
+    // The sqrt(epsilon)/4 neighborhood bounds the omitted fourth-order
+    // terms; the cubic terms also retain accuracy when dx = -dy.
+    // Do this before rescaling, which can erase the small displacements.
+    // Reject distant arguments before the fused differences and divisions.
+    // This wider preliminary radius tolerates rounding of the centers.
+    let radius = q * epsilon.sqrt();
+    if (x - 2.0 * q)
+        .abs()
+        .max((y - 2.0 * q).abs())
+        .max((z - 3.0 * q).abs())
+        > radius
+    {
+        return None;
+    }
+    let dx = (-2.0).mul_add(q, x);
+    let dy = (-2.0).mul_add(q, y);
+    let dz = (-3.0).mul_add(q, z);
+    if dx.abs().max(dy.abs()).max(dz.abs()) <= radius / 4.0 {
+        let raw_sum = dx + dy;
+        // Retain product and coefficient residuals when the linear terms
+        // nearly cancel. The residual constants are the low parts of
+        // (S - 2L)/8 and (3L - S)/8 at f64 precision.
+        let a = 0.05188661383050757;
+        let b = 0.030423254727293472;
+        let bz = b * dz;
+        let linear = a.mul_add(raw_sum, bz);
+        let linear_error =
+            b.mul_add(dz, -bz) + 2.57998712160197e-18 * raw_sum - 1.0674999957272549e-18 * dz;
+        // Divide after cancellation so q need not be a power of two.
+        let sum = raw_sum / q;
+        let product = (dx / q) * (dy / q);
+        let dz = dz / q;
+        let quadratic = -0.024380373980361945 * sum * sum + 0.03250716530714926 * product
+            - 0.010731679551607051 * sum * dz
+            - 0.010479605394661824 * dz * dz;
+        let cubic = 0.0101259759655333 * sum * sum * sum - 0.02430234231727992 * sum * product
+            + 0.004141427326475685 * sum * sum * dz
+            - 0.005521903101967579 * product * dz
+            + 0.0028089569663743764 * sum * dz * dz
+            + 0.0031555894162704945 * dz * dz * dz;
+        return Some(((linear + linear_error) / q + (quadratic + cubic)) / q / q.sqrt());
+    }
+    None
+}
+
 /// Unsafe version of [elliprj](crate::elliprj).
 /// <div class="warning">⚠️ Unstable feature. May subject to changes.</div>
 ///
@@ -135,19 +191,6 @@ fn elliprc1p<T: Float>(y: T) -> T {
 #[inline]
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
-    // Homogeneity keeps products in duplication and special cases in range.
-    // Separate rescaling factors: scale*sqrt(scale) can itself overflow.
-    let scale = x.abs().max(y.abs()).max(z.abs()).max(p.abs());
-    let limit = T::max_value().sqrt().sqrt().sqrt();
-    if scale.is_finite() && scale > 0.0 && (scale > limit || scale < 1.0 / limit)
-        // Do not turn nonzero arguments into singular zeros at extreme ratios.
-        && [x, y, z, p].iter().all(|&v| v == 0.0 || v / scale != 0.0)
-    {
-        return elliprj_unchecked(x / scale, y / scale, z / scale, p / scale)
-            / scale
-            / scale.sqrt();
-    }
-
     let_mut!(x, y, z);
     // for p < 0, the integral is singular, return Cauchy principal value
     if p <= 0.0 {
@@ -164,6 +207,42 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
             swap(&mut x, &mut y);
         }
 
+        // Widen the principal-value calculation before its cancelling reduction.
+        if p < 0.0 && T::epsilon() == T::from(f32::EPSILON).unwrap() {
+            if let (Some(x), Some(y), Some(z), Some(p)) =
+                (x.to_f64(), y.to_f64(), z.to_f64(), p.to_f64())
+            {
+                if [x, y, z, p].iter().all(|v| v.is_finite()) {
+                    let value = elliprj_pv_near_zero(x, y, z, -p, f64::from(f32::EPSILON))
+                        .unwrap_or_else(|| elliprj_unchecked(x, y, z, p));
+                    if let Some(value) = T::from(value) {
+                        return value;
+                    }
+                }
+            }
+        }
+
+        let q = -p;
+        if let Some(value) = elliprj_pv_near_zero(x, y, z, q, T::epsilon()) {
+            return value;
+        }
+    }
+
+    // Homogeneity keeps products in duplication and special cases in range.
+    // Separate rescaling factors: scale*sqrt(scale) can itself overflow.
+    let scale = x.abs().max(y.abs()).max(z.abs()).max(p.abs());
+    let limit = T::max_value().sqrt().sqrt().sqrt();
+    if scale.is_finite() && scale > 0.0 && (scale > limit || scale < 1.0 / limit)
+        // Do not turn nonzero arguments into singular zeros at extreme ratios.
+        && [x, y, z, p].iter().all(|&v| v == 0.0 || v / scale != 0.0)
+    {
+        return elliprj_unchecked(x / scale, y / scale, z / scale, p / scale)
+            / scale
+            / scale.sqrt();
+    }
+
+    // For p < 0, return the Cauchy principal value.
+    if p <= 0.0 {
         let q = -p;
         let z_plus_q = z + q;
         let xy = x * y;
@@ -207,8 +286,9 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
             // RJ(x,y,y,y)
             return elliprd_unchecked(x, y, y);
         }
-        // This prevents division by zero.
-        if p.max(y) / p.min(y) > 1.2 {
+        // Large x makes the RC values nearly equal even when p and y differ.
+        // Use duplication unless both sources of cancellation are excluded.
+        if p.max(y) / p.min(y) > 1.2 && x <= y.max(p) {
             // RJ(x,y,y,p)
             return 3.0 * (elliprc_unchecked(x, y) - elliprc_unchecked(x, p)) / (p - y);
         }
@@ -239,7 +319,16 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
         let rz = zn.sqrt();
         let rp = pn.sqrt();
         let dn = (rp + rx) * (rp + ry) * (rp + rz);
-        let en = delta / (dn * dn);
+        // Preserve the scaled differences during duplication. If dn² is
+        // subnormal, divide each factor separately to avoid underflow.
+        let dn2 = dn * dn;
+        let en = if dn2 >= T::min_positive_value() {
+            delta / dn2
+        } else {
+            ((pn - xn) / (rp + rx) / (rp + rx))
+                * ((pn - yn) / (rp + ry) / (rp + ry))
+                * ((pn - zn) / (rp + rz) / (rp + rz))
+        };
 
         if en < -0.5 && en > -1.5 {
             let b = 2.0 * rp * (pn + rx * (ry + rz) + ry * rz) / dn;
@@ -322,6 +411,209 @@ mod tests {
                 assert_close!(res, __elliprj(&perm), 3e-14);
             });
         res
+    }
+
+    #[test]
+    fn test_elliprj_rounding_edges() {
+        // 120-digit references, including both sides of the shortcut boundary.
+        for (x, expected) in [
+            (2.0, 0.5228004174989865),
+            (2.0 + 2.0 * f64::EPSILON, 0.5228004174989864),
+            (1e4, 0.010391048517489909),
+            (1e12, 1.0397207708199448e-6),
+            (1e100, 1.039720770839918e-50),
+            (1e250, 1.039720770839918e-125),
+        ] {
+            for scale in [2.0_f64.powi(-100), 1.0, 2.0_f64.powi(100)] {
+                let input = [x * scale, scale, scale];
+                for perm in input.iter().permutations(3) {
+                    let actual = elliprj(*perm[0], *perm[1], *perm[2], 2.0 * scale).unwrap();
+                    crate::util::assert_close(
+                        actual * scale * scale.sqrt(),
+                        expected,
+                        8.0 * f64::EPSILON,
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_elliprj_rounding_edges_f32() {
+        // References evaluated at exact f32 inputs, then rounded to f32.
+        for (x, expected) in [(1e12_f32, 1.0397208e-6_f32), (1e30, 1.0397208e-15)] {
+            for input in [[x, 1.0, 1.0], [1.0, x, 1.0], [1.0, 1.0, x]] {
+                let actual = elliprj(input[0], input[1], input[2], 2.0).unwrap();
+                crate::util::assert_close(actual, expected, 3.0 * f32::EPSILON);
+            }
+        }
+    }
+
+    #[test]
+    fn test_elliprj_pv_near_zero() {
+        // 100-digit references at exact floating inputs. Relative checks here
+        // deliberately retain errors smaller than the usual absolute tolerance.
+        for (input, expected) in [
+            ([2.0000000000000004, 2.0, 3.0, -1.0], 2.3042285337785435e-17),
+            (
+                [1.9999999999999996, 2.0, 3.0, -1.0],
+                -2.3042285337785444e-17,
+            ),
+            (
+                [2.0000000000000004, 1.9999999999999996, 3.0, -1.0],
+                -6.410907962591709e-33,
+            ),
+            (
+                [2.0000000037252903, 1.9999999962747097, 3.0, -1.0],
+                -4.511275423661651e-19,
+            ),
+            (
+                [2.0000000009313226, 2.0, 2.999999998411637, -1.0],
+                -4.053879912836731e-18,
+            ),
+            (
+                [0.800000000372529, 0.8, 1.1999999993646548, -0.4],
+                -7.382637188177162e-18,
+            ),
+            (
+                [
+                    0.8000000000000002,
+                    0.8000000000000005,
+                    1.2000000000000008,
+                    -0.4000000000000001,
+                ],
+                3.54361305087397e-16,
+            ),
+            (
+                [
+                    0.8000000000000002,
+                    1.2000000000000006,
+                    0.8000000000000008,
+                    -0.4000000000000001,
+                ],
+                4.583843736444436e-16,
+            ),
+            (
+                [
+                    1.2000000000000002,
+                    0.8000000000000005,
+                    0.8000000000000008,
+                    -0.4000000000000001,
+                ],
+                4.956505791267302e-16,
+            ),
+        ] {
+            for scale in [2.0_f64.powi(-200), 1.0, 2.0_f64.powi(200)] {
+                for perm in input[..3].iter().permutations(3) {
+                    let actual = elliprj(
+                        *perm[0] * scale,
+                        *perm[1] * scale,
+                        *perm[2] * scale,
+                        input[3] * scale,
+                    )
+                    .unwrap()
+                        * scale
+                        * scale.sqrt();
+                    assert!(
+                        (actual / expected - 1.0).abs() <= 8.0 * f64::EPSILON,
+                        "input={input:?}, scale={scale}, actual={actual}, expected={expected}"
+                    );
+                    assert_eq!(actual.is_sign_negative(), expected.is_sign_negative());
+                }
+            }
+        }
+        for scale in [2.0_f64.powi(-200), 1.0, 2.0_f64.powi(200)] {
+            assert_eq!(
+                elliprj(2.0 * scale, 2.0 * scale, 3.0 * scale, -scale),
+                Ok(0.0)
+            );
+        }
+    }
+
+    #[test]
+    fn test_elliprj_pv_expansion_boundary() {
+        // The last point falls just outside the expansion. Bound its absolute
+        // error because the general reduction still cancels close to a zero.
+        for (z, expected, tolerance) in [
+            (
+                3.0 + 2.0_f64.powi(-28),
+                1.1333545553778819e-10,
+                8.0 * f64::EPSILON * 1.1333545553778819e-10,
+            ),
+            (3.0000000037252907, 1.1333546904842731e-10, f64::EPSILON),
+        ] {
+            let actual = elliprj(2.0, 2.0, z, -1.0).unwrap();
+            assert!((actual - expected).abs() <= tolerance);
+            assert!(actual > 0.0);
+        }
+    }
+
+    #[test]
+    fn test_elliprj_pv_rounding_f32() {
+        // References rounded from 100-digit evaluations at exact f32 inputs.
+        for (input, expected) in [
+            (
+                [2.0_f32 + 2.0 * f32::EPSILON, 2.0, 3.0, -1.0],
+                1.2370731e-8_f32,
+            ),
+            ([2.0 - 2.0 * f32::EPSILON, 2.0, 3.0, -1.0], -1.2370734e-8),
+            (
+                [
+                    2.0 + 2.0 * f32::EPSILON,
+                    2.0 - 2.0 * f32::EPSILON,
+                    3.0,
+                    -1.0,
+                ],
+                -1.8478185e-15,
+            ),
+            ([0.8000001, 0.80000025, 1.2000004, -0.4000001], 5.277546e-9),
+            ([0.8000001, 1.2000003, 0.80000037, -0.4000001], 3.0562223e-8),
+            ([1.2, 0.80000025, 0.80000037, -0.4000001], 5.0569344e-8),
+        ] {
+            for scale in [2.0_f32.powi(-20), 1.0, 2.0_f32.powi(20)] {
+                for perm in input[..3].iter().permutations(3) {
+                    let actual = elliprj(
+                        *perm[0] * scale,
+                        *perm[1] * scale,
+                        *perm[2] * scale,
+                        input[3] * scale,
+                    )
+                    .unwrap()
+                        * scale
+                        * scale.sqrt();
+                    assert!(
+                        (actual / expected - 1.0).abs() <= 2.0 * f32::EPSILON,
+                        "input={input:?}, scale={scale}, actual={actual}, expected={expected}"
+                    );
+                    assert_eq!(actual.is_sign_negative(), expected.is_sign_negative());
+                }
+            }
+        }
+        for scale in [2.0_f32.powi(-70), 1.0, 2.0_f32.powi(70)] {
+            let actual = elliprj(scale, 2.0 * scale, 3.0 * scale, -4.0 * scale).unwrap()
+                * scale
+                * scale.sqrt();
+            crate::util::assert_close(actual, -0.2378677, 2.0 * f32::EPSILON);
+            assert_eq!(
+                elliprj(2.0 * scale, 2.0 * scale, 3.0 * scale, -scale),
+                Ok(0.0)
+            );
+        }
+        // Check the complete mu = one epsilon grid without an absolute floor.
+        for case in ellip_dev_utils::parser::read_wolfram_data::<f32>(
+            "tests/data/f32/wolfram/elliprj_pv.csv",
+        )
+        .unwrap()
+        {
+            let actual = elliprj(
+                case.inputs[0],
+                case.inputs[1],
+                case.inputs[2],
+                case.inputs[3],
+            )
+            .unwrap();
+            assert_eq!(actual, case.expected, "input={:?}", case.inputs);
+        }
     }
 
     #[test]

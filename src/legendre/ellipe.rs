@@ -70,6 +70,10 @@ pub fn ellipe<T: Float>(m: T) -> Result<T, StrErr> {
         // Negative m: Abramowitz & Stegun, 1972
         c = c * (1.0 - m).sqrt();
         m = m / (m - 1.0);
+        if m >= 0.9 {
+            // Retain the complementary modulus when the transformed m rounds to 1.
+            return Ok(c * ellipe_agm_from_y0(1.0 / c));
+        }
     }
 
     Ok(c * _ellipe(m)?)
@@ -113,11 +117,28 @@ fn ellipe_precise<T: Float>(m: T) -> Result<T, StrErr> {
         return Err("ellipe: m must not be greater than 1.");
     }
 
+    Ok(ellipe_agm_from_y0((1.0 - m).sqrt()))
+}
+
+/// First correction in <https://dlmf.nist.gov/19.12.E2>, used for y0² <= epsilon.
+/// The omitted O(y0⁴ log(1/y0)) terms are below working precision.
+#[inline]
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+pub(crate) fn ellipe_near_one<T: Float>(y0: T) -> T {
+    1.0 + (y0 * y0 / 2.0) * ((4.0).ln() - y0.ln() - 0.5)
+}
+
+#[inline]
+#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+fn ellipe_agm_from_y0<T: Float>(y0: T) -> T {
+    if y0 <= T::epsilon().sqrt() {
+        return ellipe_near_one(y0);
+    }
     let mut xn = T::one();
-    let mut yn = (1.0 - m).sqrt();
-    let x0 = xn;
-    let y0 = yn;
-    let mut sum = 0.0;
+    let mut yn = y0;
+    let mean = (xn + yn) / 2.0;
+    let mut e = mean * mean;
+    let mut compensation = mean.mul_add(mean, -e);
     let mut sum_pow = 0.25;
 
     while (xn - yn).abs() >= 2.7 * epsilon!() * xn.abs() {
@@ -125,10 +146,13 @@ fn ellipe_precise<T: Float>(m: T) -> Result<T, StrErr> {
         xn = (xn + yn) / 2.0;
         yn = t;
         sum_pow = sum_pow * 2.0;
-        sum = sum + sum_pow * (xn - yn) * (xn - yn);
+        let correction = sum_pow * (xn - yn) * (xn - yn) - compensation;
+        let next = e - correction;
+        compensation = (e - next) - correction;
+        e = next;
     }
     let rf = pi!() / (xn + yn);
-    Ok(((x0 + y0) * (x0 + y0) / 4.0 - sum) * rf)
+    e * rf
 }
 
 #[cfg(not(feature = "test_force_fail"))]
@@ -138,6 +162,35 @@ mod tests {
 
     use super::*;
     use crate::{compare_test_data_boost, compare_test_data_wolfram};
+
+    #[test]
+    fn test_ellipe_rounding_edges() {
+        // 120-digit references at the exact f64 input values.
+        for (m, expected) in [
+            (1.0 - f64::EPSILON, 1.000000000000002),
+            (1.0 - 2.0_f64.powi(-45), 1.0000000000002343),
+            (1.0 - 2.0_f64.powi(-20), 1.0000037278026361),
+            (-1e15, 31622776.601684097),
+            (-1e291, 3.1622776601683795e145),
+        ] {
+            let tolerance = if m < 0.0 { 3.0 } else { 2.0 };
+            crate::util::assert_close(ellipe(m).unwrap(), expected, tolerance * f64::EPSILON);
+        }
+    }
+
+    #[test]
+    fn test_ellipe_rounding_edges_f32() {
+        // References evaluated at exact f32 inputs, then rounded to f32.
+        for (m, expected) in [
+            (1.0 - 2.0_f32.powi(-13), 1.0003291_f32),
+            (1.0 - f32::EPSILON, 1.0000005),
+            (-1e10, 100000.0),
+            (-1e30, 1e15),
+        ] {
+            let tolerance = if m < 0.0 { 2.0 } else { 1.0 };
+            crate::util::assert_close(ellipe(m).unwrap(), expected, tolerance * f32::EPSILON);
+        }
+    }
 
     #[test]
     fn test_ellipe() {
