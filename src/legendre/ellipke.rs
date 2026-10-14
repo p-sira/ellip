@@ -155,10 +155,11 @@ fn _ellipke<T: Float>(m: T) -> Result<(T, T), StrErr> {
 #[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
 #[inline]
 pub(crate) fn ellipke_agm_from_y0<T: Float>(y0: T) -> (T, T) {
-    let x0 = T::one();
-    let mut xn = x0;
+    let mut xn = T::one();
     let mut yn = y0;
-    let mut sum = 0.0;
+    let mean = (xn + yn) / 2.0;
+    let mut e = mean * mean;
+    let mut compensation = mean.mul_add(mean, -e);
     let mut sum_pow = 0.25;
 
     let tol = T::epsilon().sqrt();
@@ -170,7 +171,10 @@ pub(crate) fn ellipke_agm_from_y0<T: Float>(y0: T) -> (T, T) {
             xn = (xn + yn) / 2.0;
             yn = t;
             sum_pow = sum_pow * 2.0;
-            sum = sum + sum_pow * (xn - yn) * (xn - yn);
+            let correction = sum_pow * (xn - yn) * (xn - yn) - compensation;
+            let next = e - correction;
+            compensation = (e - next) - correction;
+            e = next;
             continue;
         }
         break;
@@ -180,7 +184,11 @@ pub(crate) fn ellipke_agm_from_y0<T: Float>(y0: T) -> (T, T) {
     let s = xn + yn;
     let corr = 1.0 - (diff * diff) / (4.0 * s * s);
     let k = pi!() / (s * corr);
-    let e = ((x0 + y0) * (x0 + y0) / 4.0 - sum) * (pi!() / s);
+    let e = if y0 <= tol {
+        super::ellipe::ellipe_near_one(y0)
+    } else {
+        e * (pi!() / s)
+    };
     (k, e)
 }
 
@@ -195,6 +203,47 @@ pub(crate) fn ellipke_agm<T: Float>(m: T) -> (T, T) {
 mod tests {
     use super::*;
     use crate::{ellipe, ellipk, test_util::linspace, util::assert_close};
+
+    #[test]
+    fn test_ellipke_rounding_edges() {
+        // 120-digit references at the exact f64 input values; check both outputs.
+        for (m, expected_k, expected_e) in [
+            (1.0 - f64::EPSILON, 19.40812105567847, 1.000000000000002),
+            (
+                1.0 - 2.0_f64.powi(-45),
+                16.982105923718773,
+                1.0000000000002343,
+            ),
+            (
+                1.0 - 2.0_f64.powi(-20),
+                8.31776791141167,
+                1.0000037278026361,
+            ),
+            (-1e15, 5.899444819017532e-7, 31622776.601684097),
+            (-1e291, 1.063829497419404e-143, 3.1622776601683795e145),
+        ] {
+            let (k, e) = ellipke(m).unwrap();
+            assert_close(k, expected_k, 3.0 * f64::EPSILON);
+            let tolerance = if m < 0.0 { 3.0 } else { 2.0 };
+            assert_close(e, expected_e, tolerance * f64::EPSILON);
+        }
+    }
+
+    #[test]
+    fn test_ellipke_rounding_edges_f32() {
+        // References evaluated at exact f32 inputs, then rounded to f32.
+        for (m, expected_k, expected_e) in [
+            (1.0 - 2.0_f32.powi(-13), 5.8919005_f32, 1.0003291_f32),
+            (1.0 - f32::EPSILON, 9.357487, 1.0000005),
+            (-1e10, 0.00012899219, 100000.0),
+            (-1e30, 3.592507e-14, 1e15),
+        ] {
+            let (k, e) = ellipke(m).unwrap();
+            assert_close(k, expected_k, 2.0 * f32::EPSILON);
+            let tolerance = if m < 0.0 { 2.0 } else { 1.0 };
+            assert_close(e, expected_e, tolerance * f32::EPSILON);
+        }
+    }
 
     #[test]
     fn test_ellipke_special_cases() {

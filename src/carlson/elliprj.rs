@@ -207,8 +207,9 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
             // RJ(x,y,y,y)
             return elliprd_unchecked(x, y, y);
         }
-        // This prevents division by zero.
-        if p.max(y) / p.min(y) > 1.2 {
+        // Large x makes the RC values nearly equal even when p and y differ.
+        // Use duplication unless both sources of cancellation are excluded.
+        if p.max(y) / p.min(y) > 1.2 && x <= y.max(p) {
             // RJ(x,y,y,p)
             return 3.0 * (elliprc_unchecked(x, y) - elliprc_unchecked(x, p)) / (p - y);
         }
@@ -239,7 +240,16 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
         let rz = zn.sqrt();
         let rp = pn.sqrt();
         let dn = (rp + rx) * (rp + ry) * (rp + rz);
-        let en = delta / (dn * dn);
+        // Preserve the scaled differences during duplication. If dn² is
+        // subnormal, divide each factor separately to avoid underflow.
+        let dn2 = dn * dn;
+        let en = if dn2 >= T::min_positive_value() {
+            delta / dn2
+        } else {
+            ((pn - xn) / (rp + rx) / (rp + rx))
+                * ((pn - yn) / (rp + ry) / (rp + ry))
+                * ((pn - zn) / (rp + rz) / (rp + rz))
+        };
 
         if en < -0.5 && en > -1.5 {
             let b = 2.0 * rp * (pn + rx * (ry + rz) + ry * rz) / dn;
@@ -322,6 +332,42 @@ mod tests {
                 assert_close!(res, __elliprj(&perm), 3e-14);
             });
         res
+    }
+
+    #[test]
+    fn test_elliprj_rounding_edges() {
+        // 120-digit references, including both sides of the shortcut boundary.
+        for (x, expected) in [
+            (2.0, 0.5228004174989865),
+            (2.0 + 2.0 * f64::EPSILON, 0.5228004174989864),
+            (1e4, 0.010391048517489909),
+            (1e12, 1.0397207708199448e-6),
+            (1e100, 1.039720770839918e-50),
+            (1e250, 1.039720770839918e-125),
+        ] {
+            for scale in [2.0_f64.powi(-100), 1.0, 2.0_f64.powi(100)] {
+                let input = [x * scale, scale, scale];
+                for perm in input.iter().permutations(3) {
+                    let actual = elliprj(*perm[0], *perm[1], *perm[2], 2.0 * scale).unwrap();
+                    crate::util::assert_close(
+                        actual * scale * scale.sqrt(),
+                        expected,
+                        8.0 * f64::EPSILON,
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_elliprj_rounding_edges_f32() {
+        // References evaluated at exact f32 inputs, then rounded to f32.
+        for (x, expected) in [(1e12_f32, 1.0397208e-6_f32), (1e30, 1.0397208e-15)] {
+            for input in [[x, 1.0, 1.0], [1.0, x, 1.0], [1.0, 1.0, x]] {
+                let actual = elliprj(input[0], input[1], input[2], 2.0).unwrap();
+                crate::util::assert_close(actual, expected, 3.0 * f32::EPSILON);
+            }
+        }
     }
 
     #[test]
