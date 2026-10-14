@@ -34,15 +34,15 @@
 //! # Features
 //! - **[mod@legendre] — Legendre's integrals**
 //!     - **Complete integrals:** the first, second, and third kinds
-//!   ([fn@ellipk], [fn@ellipe], [fn@ellippi]), a combined routine ([fn@ellipke]), and
-//!   Legendre's type ([fn@ellipd])
+//!       ([fn@ellipk], [fn@ellipe], [fn@ellippi]), a combined routine ([fn@ellipke]), and
+//!       Legendre's type ([fn@ellipd])
 //!     - **Incomplete integrals:** the first, second, and third kinds
-//!   ([fn@ellipf], [fn@ellipeinc], [fn@ellippiinc]) and Legendre's type ([fn@ellipdinc])
+//!       ([fn@ellipf], [fn@ellipeinc], [fn@ellippiinc]) and Legendre's type ([fn@ellipdinc])
 //! - **[mod@bulirsch] — Bulirsch's integrals**
 //!     - **Complete integrals:** the general complete integral
-//!   ([fn@cel]), and the first, second, and third kinds ([fn@cel1], [fn@cel2], [fn@cel3])
+//!       ([fn@cel]), and the first, second, and third kinds ([fn@cel1], [fn@cel2], [fn@cel3])
 //!     - **Incomplete integrals:** the first, second, and third kinds
-//!   ([fn@el1], [fn@el2], [fn@el3])
+//!       ([fn@el1], [fn@el2], [fn@el3])
 //! - **[mod@carlson] — Carlson's symmetric integrals:** the first, second, and third kinds
 //!   ([fn@elliprf], [fn@elliprg], [fn@elliprj]), and the degenerate integrals
 //!   ([fn@elliprc], [fn@elliprd])

@@ -15,7 +15,7 @@ Ellip uses three sources of reference values:
 
 The [Boost dataset](https://github.com/boostorg/math/tree/develop/test/) is included in the repository at [tests/data/boost/](https://github.com/p-sira/ellip/blob/main/tests/data/boost/).
 
-The accuracy report shown here uses only the Wolfram dataset, as it provides uniform coverage across the domain of each function. The Wolfram reference values are generated using the scripts in [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/). Each script samples inputs across the valid domain of the corresponding function, excluding exact singularities by stopping short of the branch limit **μ**. A margin of 1ε exercises the branch-adjacent floating-point regime. The larger margin retained for principal-value `elliprj` avoids severe cancellation when its symmetric parameters nearly coincide.
+The accuracy report shown here uses only the Wolfram dataset, as it provides uniform coverage across the domain of each function. The Wolfram reference values are generated using the scripts in [tests/wolfram/](https://github.com/p-sira/ellip/blob/main/tests/wolfram/). Each script samples inputs across the valid domain of the corresponding function, excluding exact singularities by stopping short of the branch limit **μ**. A margin of 1ε exercises the branch-adjacent floating-point regime. Principal-value `elliprj` also uses μ = 1ε; its references preserve exact floating-point inputs.
 
 To generate the Wolfram test data:
 
@@ -85,12 +85,12 @@ Bulirsh's elliptic integrals are not natively implemented in Wolfram Engine. Nev
 | elliprf        | 0.33     | 0.00       | 1.41    | 1.57    | 0.19          | 1     |
 | elliprg        | 0.19     | 0.00       | 1.73    | 1.83    | 0.18          | 1     |
 | elliprj        | 0.71     | 0.59       | 5.01    | 11.60   | 1.17          | 1     |
-| elliprj (p.v.) | 1.08     | 0.51       | 12.05   | 136.97  | 32.85         | 1000  |
+| elliprj (p.v.) | 1.34     | 0.53       | 16.77   | 168.11  | 45.27         | 1     |
 | elliprc        | 0.20     | 0.00       | 1.20    | 1.96    | 0.14          | 1     |
 | elliprc (p.v.) | 0.14     | 0.00       | 1.75    | 2.82    | 0.15          | 1     |
 | elliprd        | 0.41     | 0.00       | 1.87    | 2.68    | 0.27          | 1     |
 
-Principal-value `elliprj` is numerically unstable when the symmetric parameter values are closer than 1,000 epsilons, so that dataset retains μ = 1,000ε.
+The report treats absolute errors below ε as zero. Dedicated principal-value `elliprj` unit tests additionally check signs and relative errors for tiny nonzero results, including cases where the usual absolute tolerance would hide cancellation.
 
 ### Miscellaneous Functions
 
@@ -128,11 +128,11 @@ Generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unk
 | ellipf (Neg m)              | 0.20     | 0.00       | 1.56    | 3.54    | 0.19          | 1     |
 | ellipeinc                   | 0.37     | 0.00       | 4.84    | 24.02   | 1.89          | 1     |
 | ellipeinc (Neg m)           | 0.23     | 0.00       | 1.67    | 2.41    | 0.19          | 1     |
-| ellippiinc                  | 0.54     | 0.00       | 8.72    | 71.78   | 7.85          | 1     |
-| ellippiinc (Neg m)          | 0.64     | 0.00       | 11.93   | 40.74   | 6.08          | 1     |
-| ellippiinc (p.v.)           | 3.04     | 0.00       | 42.49   | 128.05  | 100.02        | 1     |
-| ellippiinc_bulirsch         | 0.75     | 0.00       | 12.14   | 71.78   | 9.14          | 1     |
-| ellippiinc_bulirsch (Neg m) | 0.49     | 0.00       | 4.64    | 40.74   | 4.82          | 1     |
+| ellippiinc                  | 0.56     | 0.00       | 9.99    | 71.78   | 8.12          | 1     |
+| ellippiinc (Neg m)          | 0.59     | 0.00       | 8.80    | 22.98   | 3.24          | 1     |
+| ellippiinc (p.v.)           | 4.60     | 0.79       | 75.45   | 260.48  | 392.36        | 1     |
+| ellippiinc_bulirsch         | 0.77     | 0.00       | 12.51   | 71.78   | 9.41          | 1     |
+| ellippiinc_bulirsch (Neg m) | 0.44     | 0.00       | 5.12    | 22.98   | 1.97          | 1     |
 | ellipdinc                   | 0.21     | 0.00       | 3.59    | 11.97   | 0.69          | 1     |
 | ellipdinc (Neg m)           | 0.10     | 0.00       | 2.13    | 4.44    | 0.21          | 1     |
 
@@ -158,7 +158,7 @@ Generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unk
 | elliprf        | 0.31     | 0.00       | 1.63    | 1.79    | 0.19          | 1     |
 | elliprg        | 0.15     | 0.00       | 1.10    | 1.45    | 0.12          | 1     |
 | elliprj        | 0.65     | 0.57       | 5.61    | 11.02   | 1.01          | 1     |
-| elliprj (p.v.) | 115.48   | 0.53       | 11.34   | 1.54e5  | 1.46e7        | 1000  |
+| elliprj (p.v.) | 0.00     | 0.00       | 0.00    | 0.00    | 0.00          | 1     |
 | elliprc        | 0.19     | 0.00       | 1.14    | 1.73    | 0.13          | 1     |
 | elliprc (p.v.) | 0.17     | 0.00       | 1.83    | 2.15    | 0.17          | 1     |
 | elliprd        | 0.45     | 0.00       | 1.91    | 4.16    | 0.33          | 1     |
