@@ -39,10 +39,10 @@ This report is generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz runn
 | ellipe          | 0.31     | 0.00       | 1.54    | 1.99    | 0.16          | 1     |
 | ellipe (Neg m)  | 0.42     | 0.51       | 1.64    | 1.95    | 0.20          | 1     |
 | ellippi         | 0.47     | 0.00       | 2.08    | 21.08   | 1.69          | 1     |
-| ellippi (Neg m) | 0.33     | 0.00       | 1.82    | 2.96    | 0.23          | 1     |
+| ellippi (Neg m) | 0.33     | 0.00       | 1.83    | 2.96    | 0.23          | 1     |
 | ellippi (p.v.)  | 0.10     | 0.00       | 2.09    | 2.81    | 0.15          | 1     |
 | ellipd          | 0.44     | 0.00       | 1.96    | 2.43    | 0.32          | 1     |
-| ellipd (Neg m)  | 0.06     | 0.00       | 1.73    | 1.91    | 0.09          | 1     |
+| ellipd (Neg m)  | 0.10     | 0.00       | 1.87    | 2.64    | 0.16          | 1     |
 | ellipk (k)      | 0.32     | 0.00       | 1.51    | 20.95   | 0.81          | 1     |
 | ellipe (e)      | 0.31     | 0.00       | 1.54    | 1.99    | 0.16          | 1     |
 
@@ -60,7 +60,7 @@ This report is generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz runn
 | ellippiinc_bulirsch         | 0.99     | 0.00       | 14.58   | 165.83  | 49.42         | 1     |
 | ellippiinc_bulirsch (Neg m) | 0.48     | 0.00       | 5.14    | 15.94   | 1.68          | 1     |
 | ellipdinc                   | 0.21     | 0.00       | 3.62    | 8.38    | 0.56          | 1     |
-| ellipdinc (Neg m)           | 0.10     | 0.00       | 2.81    | 4.17    | 0.25          | 1     |
+| ellipdinc (Neg m)           | 0.12     | 0.00       | 2.98    | 4.20    | 0.29          | 1     |
 
 ### Bulirsch's Elliptic Integrals
 Bulirsh's elliptic integrals are not natively implemented in Wolfram Engine. Nevertheless, some of the integrals can be converted to their Legendre's counterpart, which are available on Wolfram Engine. However, for `cel` and `el2`, their values cannot be mapped simply. Hence, the reference values are generated using the functions submitted by Jan Mangaldan on [Wolfram Function Repository](https://resources.wolframcloud.com/FunctionRepository/). As for `cel2`, it is mapped to `cel` with p=1.
@@ -88,7 +88,7 @@ Bulirsh's elliptic integrals are not natively implemented in Wolfram Engine. Nev
 | elliprj (p.v.) | 1.08     | 0.51       | 12.05   | 136.97  | 32.85         | 1000  |
 | elliprc        | 0.20     | 0.00       | 1.20    | 1.96    | 0.14          | 1     |
 | elliprc (p.v.) | 0.14     | 0.00       | 1.75    | 2.82    | 0.15          | 1     |
-| elliprd        | 0.39     | 0.00       | 1.82    | 2.50    | 0.26          | 1     |
+| elliprd        | 0.41     | 0.00       | 1.87    | 2.68    | 0.27          | 1     |
 
 Principal-value `elliprj` is numerically unstable when the symmetric parameter values are closer than 1,000 epsilons, so that dataset retains μ = 1,000ε.
 
@@ -116,7 +116,7 @@ Generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unk
 | ellippi (Neg m) | 0.48     | 0.56       | 1.98    | 2.92    | 0.26          | 1     |
 | ellippi (p.v.)  | 0.09     | 0.00       | 1.70    | 2.88    | 0.12          | 1     |
 | ellipd          | 0.51     | 0.00       | 2.56    | 15.09   | 0.92          | 1     |
-| ellipd (Neg m)  | 0.02     | 0.00       | 1.44    | 1.93    | 0.04          | 1     |
+| ellipd (Neg m)  | 0.07     | 0.00       | 1.83    | 2.16    | 0.11          | 1     |
 | ellipk (k)      | 0.28     | 0.00       | 1.80    | 12.46   | 0.49          | 1     |
 | ellipe (e)      | 0.20     | 0.00       | 0.99    | 1.91    | 0.13          | 1     |
 
@@ -134,7 +134,7 @@ Generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unk
 | ellippiinc_bulirsch         | 0.75     | 0.00       | 12.14   | 71.78   | 9.14          | 1     |
 | ellippiinc_bulirsch (Neg m) | 0.49     | 0.00       | 4.64    | 40.74   | 4.82          | 1     |
 | ellipdinc                   | 0.21     | 0.00       | 3.59    | 11.97   | 0.69          | 1     |
-| ellipdinc (Neg m)           | 0.09     | 0.00       | 2.04    | 2.56    | 0.15          | 1     |
+| ellipdinc (Neg m)           | 0.10     | 0.00       | 2.13    | 4.44    | 0.21          | 1     |
 
 ### Bulirsch's Elliptic Integrals
 
@@ -161,7 +161,7 @@ Generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unk
 | elliprj (p.v.) | 115.48   | 0.53       | 11.34   | 1.54e5  | 1.46e7        | 1000  |
 | elliprc        | 0.19     | 0.00       | 1.14    | 1.73    | 0.13          | 1     |
 | elliprc (p.v.) | 0.17     | 0.00       | 1.83    | 2.15    | 0.17          | 1     |
-| elliprd        | 0.44     | 0.00       | 1.91    | 4.16    | 0.32          | 1     |
+| elliprd        | 0.45     | 0.00       | 1.91    | 4.16    | 0.33          | 1     |
 
 ### Miscellaneous Functions
 

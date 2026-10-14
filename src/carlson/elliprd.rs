@@ -125,9 +125,9 @@ pub fn elliprd_unchecked<T: Float>(x: T, y: T, z: T) -> T {
         }
     }
 
-    // For y > z, the AGM identity subtracts nearly equal terms as y/z grows.
-    // Use the positive duplication sum there. For y <= z its terms add.
-    if x == 0.0 && y <= z {
+    // Large y/z makes the AGM identity subtract nearly equal terms. Keep its
+    // faster path at moderate ratios and use positive duplication sums otherwise.
+    if x == 0.0 && y <= 16.0 * z {
         let x0 = y.sqrt();
         let y0 = z.sqrt();
         let mut xn = x0;
@@ -226,6 +226,9 @@ mod tests {
             (1.0 - f64::EPSILON, 2.3561944901923453),
             (1.0, 2.356194490192345),
             (1.0 + f64::EPSILON, 2.356194490192345),
+            (16.0 - 16.0 * f64::EPSILON, 0.7177818732824233),
+            (16.0, 0.7177818732824233),
+            (16.0 + 16.0 * f64::EPSILON, 0.7177818732824232),
             (1e8, 0.0002999999863550477),
             (1e32, 3e-16),
             (1e100, 3e-50),
