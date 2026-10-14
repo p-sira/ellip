@@ -28,7 +28,7 @@ The test datasets are not distributed with the crate by default. You may generat
 
 ## f64 Results
 
-This report is generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unknown-linux-gnu rustc 1.98.1` using ellip v1.2.3 with `libm` at `f64` precision (ε≈2.22e-16).
+This report is generated on AMD EPYC 9V45 96-Core Processor running `x86_64-unknown-linux-gnu rustc 1.99.0` using ellip v1.2.3 with `libm` at `f64` precision (ε≈2.22e-16).
 
 ### Legendre's Complete Elliptic Integrals
 
@@ -102,7 +102,7 @@ The report treats absolute errors below ε as zero. Dedicated principal-value `e
 
 ## f32 Results
 
-Generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unknown-linux-gnu rustc 1.98.1` using ellip v1.2.3 with `libm` at `f32` precision (ε≈1.19e-7).
+Generated on AMD EPYC 9V45 96-Core Processor running `x86_64-unknown-linux-gnu rustc 1.99.0` using ellip v1.2.3 with `libm` at `f32` precision (ε≈1.19e-7).
 
 ### Legendre's Complete Elliptic Integrals
 
@@ -129,10 +129,10 @@ Generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unk
 | ellipeinc                   | 0.37     | 0.00       | 4.84    | 24.02   | 1.89          | 1     |
 | ellipeinc (Neg m)           | 0.23     | 0.00       | 1.67    | 2.41    | 0.19          | 1     |
 | ellippiinc                  | 0.56     | 0.00       | 9.99    | 71.78   | 8.12          | 1     |
-| ellippiinc (Neg m)          | 0.59     | 0.00       | 8.80    | 22.98   | 3.24          | 1     |
-| ellippiinc (p.v.)           | 4.60     | 0.79       | 75.45   | 260.48  | 392.36        | 1     |
-| ellippiinc_bulirsch         | 0.77     | 0.00       | 12.51   | 71.78   | 9.41          | 1     |
-| ellippiinc_bulirsch (Neg m) | 0.44     | 0.00       | 5.12    | 22.98   | 1.97          | 1     |
+| ellippiinc (Neg m)          | 0.60     | 0.00       | 8.80    | 22.98   | 3.28          | 1     |
+| ellippiinc (p.v.)           | 4.62     | 0.82       | 75.45   | 260.48  | 392.66        | 1     |
+| ellippiinc_bulirsch         | 0.80     | 0.00       | 12.51   | 71.78   | 9.42          | 1     |
+| ellippiinc_bulirsch (Neg m) | 0.51     | 0.00       | 5.53    | 22.98   | 2.07          | 1     |
 | ellipdinc                   | 0.21     | 0.00       | 3.59    | 11.97   | 0.69          | 1     |
 | ellipdinc (Neg m)           | 0.10     | 0.00       | 2.13    | 4.44    | 0.21          | 1     |
 
@@ -156,11 +156,11 @@ Generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unk
 | Function       | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε) |
 |----------------|----------|------------|---------|---------|---------------|-------|
 | elliprf        | 0.31     | 0.00       | 1.63    | 1.79    | 0.19          | 1     |
-| elliprg        | 0.15     | 0.00       | 1.10    | 1.45    | 0.12          | 1     |
+| elliprg        | 0.15     | 0.00       | 1.10    | 1.45    | 0.13          | 1     |
 | elliprj        | 0.65     | 0.57       | 5.61    | 11.02   | 1.01          | 1     |
 | elliprj (p.v.) | 0.00     | 0.00       | 0.00    | 0.00    | 0.00          | 1     |
 | elliprc        | 0.19     | 0.00       | 1.14    | 1.73    | 0.13          | 1     |
-| elliprc (p.v.) | 0.17     | 0.00       | 1.83    | 2.15    | 0.17          | 1     |
+| elliprc (p.v.) | 0.16     | 0.00       | 1.76    | 2.15    | 0.16          | 1     |
 | elliprd        | 0.45     | 0.00       | 1.91    | 4.16    | 0.33          | 1     |
 
 ### Miscellaneous Functions
