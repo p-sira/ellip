@@ -28,7 +28,7 @@ The test datasets are not distributed with the crate by default. You may generat
 
 ## f64 Results
 
-This report is generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unknown-linux-gnu rustc 1.98.1` using ellip v1.2.0 with `libm` at `f64` precision (ε≈2.22e-16).
+This report is generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unknown-linux-gnu rustc 1.98.1` using ellip v1.2.2 with `libm` at `f64` precision (ε≈2.22e-16).
 
 ### Legendre's Complete Elliptic Integrals
 
@@ -83,7 +83,7 @@ Bulirsh's elliptic integrals are not natively implemented in Wolfram Engine. Nev
 | Function       | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε) |
 |----------------|----------|------------|---------|---------|---------------|-------|
 | elliprf        | 0.33     | 0.00       | 1.41    | 1.57    | 0.19          | 1     |
-| elliprg        | 0.26     | 0.00       | 2.60    | 5.25    | 0.38          | 1     |
+| elliprg        | 0.19     | 0.00       | 1.73    | 1.83    | 0.18          | 1     |
 | elliprj        | 0.81     | 0.60       | 6.66    | 13.54   | 1.85          | 1     |
 | elliprj (p.v.) | 1.08     | 0.51       | 12.05   | 136.97  | 32.85         | 1000  |
 | elliprc        | 0.20     | 0.00       | 1.20    | 1.96    | 0.14          | 1     |
@@ -102,7 +102,7 @@ Principal-value `elliprj` is numerically unstable when the symmetric parameter v
 
 ## f32 Results
 
-Generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unknown-linux-gnu rustc 1.98.1` using ellip v1.2.0 with `libm` at `f32` precision (ε≈1.19e-7).
+Generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unknown-linux-gnu rustc 1.98.1` using ellip v1.2.2 with `libm` at `f32` precision (ε≈1.19e-7).
 
 ### Legendre's Complete Elliptic Integrals
 
@@ -156,7 +156,7 @@ Generated on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unk
 | Function       | Mean (ε) | Median (ε) | P99 (ε) | Max (ε) | Variance (ε²) | μ (ε) |
 |----------------|----------|------------|---------|---------|---------------|-------|
 | elliprf        | 0.31     | 0.00       | 1.63    | 1.79    | 0.19          | 1     |
-| elliprg        | 0.17     | 0.00       | 1.45    | 2.12    | 0.15          | 1     |
+| elliprg        | 0.15     | 0.00       | 1.10    | 1.45    | 0.12          | 1     |
 | elliprj        | 0.73     | 0.60       | 6.95    | 12.31   | 1.47          | 1     |
 | elliprj (p.v.) | 115.48   | 0.53       | 11.34   | 1.54e5  | 1.46e7        | 1000  |
 | elliprc        | 0.19     | 0.00       | 1.14    | 1.73    | 0.13          | 1     |

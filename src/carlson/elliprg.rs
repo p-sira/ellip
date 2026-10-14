@@ -131,9 +131,9 @@ pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
     if y == 0.0 {
         let mut xn = x.sqrt();
         let mut yn = z.sqrt();
-        let x0 = xn;
-        let y0 = yn;
-        let mut sum = 0.0;
+        let mean = (xn + yn) / 2.0;
+        let mut rg = mean * mean;
+        let mut compensation = mean.mul_add(mean, -rg);
         let mut sum_pow = 0.25;
 
         while (xn - yn).abs() >= 2.7 * epsilon!() * xn.abs() {
@@ -141,10 +141,13 @@ pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
             xn = (xn + yn) / 2.0;
             yn = t;
             sum_pow = sum_pow * 2.0;
-            sum = sum + sum_pow * (xn - yn) * (xn - yn);
+            let correction = sum_pow * (xn - yn) * (xn - yn) - compensation;
+            let next = rg - correction;
+            compensation = (rg - next) - correction;
+            rg = next;
         }
         let rf = pi!() / (xn + yn);
-        return ((x0 + y0) * (x0 + y0) / 4.0 - sum) * rf / 2.0;
+        return rg * rf / 2.0;
     }
 
     let (rf, rd) = elliprf_rd_unchecked(x, y, z);
@@ -260,7 +263,7 @@ mod tests {
     use itertools::Itertools;
 
     use super::*;
-    use crate::{assert_close, compare_test_data_boost};
+    use crate::{assert_close, compare_test_data_boost, compare_test_data_wolfram};
 
     fn __elliprg(inp: &[&f64]) -> f64 {
         elliprg(*inp[0], *inp[1], *inp[2]).unwrap()
@@ -277,6 +280,36 @@ mod tests {
     #[test]
     fn test_elliprg() {
         compare_test_data_boost!("elliprg_data.txt", _elliprg, 8.1e-16);
+    }
+
+    #[test]
+    fn test_elliprg_wolfram() {
+        compare_test_data_wolfram!("elliprg_data.csv", elliprg, 3, 1e-15);
+    }
+
+    #[test]
+    fn test_elliprg_zero_unequal_scales() {
+        // 100-digit reference evaluated at the exact f64 input values.
+        let input = [0.0, f64::EPSILON, 16.0 / 9.0];
+        let expected = 0.6666666666666674;
+        for scale in [2.0_f64.powi(-600), 1.0, 2.0_f64.powi(600)] {
+            let scaled = input.map(|x| x * scale);
+            for perm in scaled.iter().permutations(3) {
+                let actual = __elliprg(&perm);
+                assert_close!(actual, expected * scale.sqrt(), 3.0 * f64::EPSILON);
+            }
+        }
+    }
+
+    #[test]
+    fn test_elliprg_zero_unequal_scales_f32() {
+        // 100-digit reference rounded to f32, with exact f32 inputs.
+        let input = [0.0_f32, f32::EPSILON, 16.0 / 9.0];
+        let expected = 0.66666687_f32;
+        for perm in input.iter().permutations(3) {
+            let actual = elliprg(*perm[0], *perm[1], *perm[2]).unwrap();
+            assert_close!(actual, expected, 3.0 * f32::EPSILON);
+        }
     }
 
     #[test]
