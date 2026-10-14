@@ -1,16 +1,13 @@
 # Changelog
 
 ## 1.2
-### Unreleased
+### 1.2.3
 **Bug Fixes**
+- Fix rounding loss in `elliprg`'s zero-argument AGM branch using compensated correction subtraction and the initial square's fused rounding residual.
 - Fix AGM rounding loss in `ellipe` and `ellipke`, retaining complementary moduli for large negative parameters and using a near-one expansion at extreme ratios.
 - Avoid cancellation in `ellipeinc` for small angles and negative parameters, in `elliprd`'s zero-argument branch, and in `elliprj`'s repeated-argument shortcut.
 - Preserve tiny principal values and their signs near `elliprj`'s repeated-argument zero, and widen its f32 principal-value evaluation to f64. Reduce the principal-value reference margin to one epsilon.
 - Avoid intermediate underflow in `elliprj` duplication at extreme argument ratios.
-
-### 1.2.3
-**Bug Fixes**
-- Fix rounding loss in `elliprg`'s zero-argument AGM branch using compensated correction subtraction and the initial square's fused rounding residual.
 
 **Documentation**
 - Moved test summary out of the README to `TESTING.md`.
