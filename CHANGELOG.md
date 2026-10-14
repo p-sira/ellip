@@ -1,5 +1,10 @@
 # Changelog
+
 ## 1.2
+### 1.2.3
+**Bug Fixes**
+- Fix rounding loss in `elliprg`'s zero-argument AGM branch using compensated correction subtraction and the initial square's fused rounding residual.
+
 ### 1.2.2
 **Bug Fixes**
 - Fix `elliprg::elliprf_rd_unchecked` visibility with unstable feature flag.
