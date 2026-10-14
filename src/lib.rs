@@ -32,43 +32,27 @@
 //! ```
 //!
 //! # Features
-//! ## Legendre's complete integrals
-//! - [fn@ellipk]: Complete elliptic integral of the first kind (K).
-//! - [fn@ellipe]: Complete elliptic integral of the second kind (E).
-//! - [fn@ellipke]: Simultaneous computation of the complete elliptic integrals of the first and second kind (K and E).
-//! - [fn@ellippi]: Complete elliptic integral of the third kind (Π).
-//! - [fn@ellipd]: Complete elliptic integral of Legendre's type (D).
-//! ## Legendre's incomplete integrals
-//! - [fn@ellipf]: Incomplete elliptic integral of the first kind (F).
-//! - [fn@ellipeinc]: Incomplete elliptic integral of the second kind (E).
-//! - [fn@ellippiinc]: Incomplete elliptic integral of the third kind (Π).
-//! - [fn@ellippiinc_bulirsch]: Faster implementation of [fn@ellippiinc].
-//! - [fn@ellipdinc]: Incomplete elliptic integral of Legendre's type (D).
-//! ## Bulirsch's integrals
-//! - [fn@cel]: General complete elliptic integral in Bulirsch's form.
-//! - [fn@cel1]: Complete elliptic integral of the first kind in Bulirsch's form.
-//! - [fn@cel2]: Complete elliptic integral of the second kind in Bulirsch's form.
-//! - [fn@cel3]: Complete elliptic integral of the third kind in Bulirsch's form.
-//! - [fn@el1]: Incomplete elliptic integral of the first kind in Bulirsch's form.
-//! - [fn@el2]: Incomplete elliptic integral of the second kind in Bulirsch's form.
-//! - [fn@el3]: Incomplete elliptic integral of the third kind in Bulirsch's form.
-//! ## Carlson's symmetric integrals
-//! - [fn@elliprf]: Symmetric elliptic integral of the first kind (RF).
-//! - [fn@elliprg]: Symmetric elliptic integral of the second kind (RG).
-//! - [fn@elliprj]: Symmetric elliptic integral of the third kind (RJ).
-//! - [fn@elliprc]: Degenerate elliptic integral of RF (RC).
-//! - [fn@elliprd]: Degenerate elliptic integral of the third kind (RD).
-//! ## Miscellaneous functions
-//! - [fn@jacobi_zeta]: Jacobi Zeta function (Z).
-//! - [fn@heuman_lambda]: Heuman Lambda function (Λ0).
-//! ## Feature Flags
-//! - `unstable`: Enable unstable or untested features that might be changed without notice in the future.
-//! - `test_force_fail`: Used for testing only. Force tests to reach code unreachable under normal circumstances.
+//! - **[mod@legendre] — Legendre's integrals**
+//!     - **Complete integrals:** the first, second, and third kinds
+//!   ([fn@ellipk], [fn@ellipe], [fn@ellippi]), a combined routine ([fn@ellipke]), and
+//!   Legendre's type ([fn@ellipd])
+//!     - **Incomplete integrals:** the first, second, and third kinds
+//!   ([fn@ellipf], [fn@ellipeinc], [fn@ellippiinc]) and Legendre's type ([fn@ellipdinc])
+//! - **[mod@bulirsch] — Bulirsch's integrals**
+//!     - **Complete integrals:** the general complete integral
+//!   ([fn@cel]), and the first, second, and third kinds ([fn@cel1], [fn@cel2], [fn@cel3])
+//!     - **Incomplete integrals:** the first, second, and third kinds
+//!   ([fn@el1], [fn@el2], [fn@el3])
+//! - **[mod@carlson] — Carlson's symmetric integrals:** the first, second, and third kinds
+//!   ([fn@elliprf], [fn@elliprg], [fn@elliprj]), and the degenerate integrals
+//!   ([fn@elliprc], [fn@elliprd])
+//! - **[mod@misc] — Miscellaneous functions:** [fn@jacobi_zeta] and [fn@heuman_lambda]
 //!
 //! # Testing
-//! The function results are compared with Boost Math test data and Wolfram Engine test data.
-//! The accuracy report and the test data along with the test generation scripts can
-//! be found [here](https://github.com/p-sira/ellip/blob/main/tests).
+//! The full accuracy report, test datasets, and test generation scripts are available in the
+//! [tests directory](https://github.com/p-sira/ellip/tree/main/tests). The test and benchmark
+//! summary is available in [TESTING.md](https://github.com/p-sira/ellip/blob/main/TESTING.md).
+//! See how to reproduce the results in [REPRODUCIBILITY.md](REPRODUCIBILITY.md).
 //!
 //! # Acknowledgment
 //! Ellip is derived from multiple mathematic libraries. We thank

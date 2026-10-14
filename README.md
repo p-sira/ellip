@@ -41,12 +41,7 @@ Start by installing Ellip.
 >> cargo add ellip
 ```
 
-By default, Ellip installs with `no_std` and uses `libm` as the mathematical backend.
-To use `std`, install Ellip using the following command:
-
-```shell
->> cargo add ellip --no-default-features --features=std
-```
+Ellip is `no_std` by default.
 
 ## Quick Start
 
@@ -66,139 +61,16 @@ println!("{}", ellipse_perimeter(5.0, 3.0).unwrap()); // 25.526998863398124
 Learn more at [doc.rs](https://docs.rs/ellip).
 
 ## Features
-- Legendre's complete integrals
-    - `ellipk`: Complete elliptic integral of the first kind (K).
-    - `ellipe`: Complete elliptic integral of the second kind (E).
-    - `ellippi`: Complete elliptic integral of the third kind (Π).
-    - `ellipd`: Complete elliptic integral of Legendre's type (D).
-- Legendre's incomplete integrals
-    - `ellipf`: Incomplete elliptic integral of the first kind (F).
-    - `ellipeinc`: Incomplete elliptic integral of the second kind (E).
-    - `ellippiinc`: Incomplete elliptic integral of the third kind (Π).
-    - `ellipdinc`: Incomplete elliptic integral of Legendre's type (D).
-- Bulirsch's integrals
-    - `cel`: General complete elliptic integral in Bulirsch's form.
-    - `cel1`: Complete elliptic integral of the first kind in Bulirsch's form.
-    - `cel2`: Complete elliptic integral of the second kind in Bulirsch's form.
-    - `el1`: Incomplete elliptic integral of the first kind in Bulirsch's form.
-    - `el2`: Incomplete elliptic integral of the second kind in Bulirsch's form.
-    - `el3`: Incomplete elliptic integral of the third kind in Bulirsch's form.
-- Carlson's symmetric integrals
-    - `elliprf`: Symmetric elliptic integral of the first kind (RF).
-    - `elliprg`: Symmetric elliptic integral of the second kind (RG).
-    - `elliprj`: Symmetric elliptic integral of the third kind (RJ).
-    - `elliprc`: Degenerate elliptic integral of RF (RC).
-    - `elliprd`: Degenerate elliptic integral of the third kind (RD).
-- Miscellaneous functions
-    - `jacobi_zeta`: Jacobi Zeta function (Z). 
-    - `heuman_lambda`: Heuman Lambda function (Λ0).
+- **Legendre's complete integrals:** the first, second, and third kinds (`ellipk`, `ellipe`, `ellippi`), a combined routine (`ellipke`), and Legendre's type (`ellipd`)
+- **Legendre's incomplete integrals:** the first, second, and third kinds (`ellipf`, `ellipeinc`, `ellippiinc`) and Legendre's type (`ellipdinc`)
+- **Bulirsch's complete integrals:** the general complete integral (`cel`), and the first, second, and third kinds (`cel1`, `cel2`, `cel3`)
+- **Bulirsch's incomplete integrals:** the first, second, and third kinds (`el1`, `el2`, `el3`)
+- **Carlson's symmetric integrals:** the first, second, and third kinds (`elliprf`, `elliprg`, `elliprj`), and the degenerate integrals (`elliprc`, `elliprd`) 
+- **Miscellaneous functions:** `jacobi_zeta` and `heuman_lambda`
 
 ## Testing
 
-In the unit tests, the functions are tested against the Boost Math and Wolfram test data. Since Ellip accepts the argument `m` (parameter) instead of `k` (modulus) to allow larger domain support, the full accuracy report uses exclusively the Wolfram data. **The full accuracy report can be found [here](https://github.com/p-sira/ellip/blob/main/tests)**, along with the test data and test generation scripts. The performance benchmark is presented to provide comparison between functions in Ellip. Comparing performance with other libraries is non-trivial, since they accept different domains of input.
-
-Benchmark on AMD Ryzen 5 4600H with Radeon Graphics @4.0 GHz running `x86_64-unknown-linux-gnu rustc 1.98.1` using ellip v1.2.0 with `libm` at `f64` precision (ε≈2.22e-16).
-
-### Legendre's Elliptic Integrals
-| Function            | Median Error (ε) | Max Error (ε) | Mean Performance |
-|---------------------|------------------|---------------|------------------|
-| ellipk              | 0.00             | 20.95         | 14.0 ns          |
-| ellipe              | 0.00             | 3.00          | 12.2 ns          |
-| ellipf              | 0.00             | 7.47          | 105.8 ns         |
-| ellipeinc           | 0.00             | 24.66         | 145.7 ns         |
-| ellippi             | 0.00             | 21.08         | 134.4 ns         |
-| ellippiinc          | 0.00             | 395.31        | 206.1 ns         |
-| ellippiinc_bulirsch | 0.00             | 395.31        | 162.8 ns         |
-| ellipd              | 0.00             | 2.64          | 32.5 ns          |
-| ellipdinc           | 0.00             | 8.38          | 106.6 ns         |
-| ellipke             | 0.00             | 20.95         | 16.8 ns          |
-
-### Bulirsch's Elliptic Integrals
-| Function | Median Error (ε) | Max Error (ε) | Mean Performance |
-|----------|------------------|---------------|------------------|
-| cel      | 0.63             | 36.94         | 31.0 ns          |
-| cel1     | 0.00             | 8.68          | 11.9 ns          |
-| cel2     | 0.00             | 3.47          | 21.8 ns          |
-| cel3     | 0.00             | 6.88          | 26.4 ns          |
-| el1      | 0.00             | 1.70          | 36.4 ns          |
-| el2      | 0.00             | 74.60         | 52.4 ns          |
-| el3      | 0.00             | 18.65         | 82.6 ns          |
-
-### Carlson's Symmetric Integrals
-| Function | Median Error (ε) | Max Error (ε) | Mean Performance |
-|----------|------------------|---------------|------------------|
-| elliprf  | 0.00             | 1.57          | 51.9 ns          |
-| elliprg  | 0.00             | 5.25          | 82.8 ns          |
-| elliprj  | 0.57             | 136.97        | 156.5 ns         |
-| elliprc  | 0.00             | 2.82          | 23.8 ns          |
-| elliprd  | 0.00             | 3.56          | 75.6 ns          |
-
-### Miscellaneous Functions
-| Function      | Median Error (ε) | Max Error (ε) | Mean Performance |
-|---------------|------------------|---------------|------------------|
-| jacobi_zeta   | 0.00             | 8.66          | 140.8 ns         |
-| heuman_lambda | 0.00             | 2.77          | 270.8 ns         |
-
-## Reproducibility
-
-This section describes how to reproduce the accuracy reports, test datasets, benchmarks, figures, and tables.
-
-### Setup the project
-
-First, clone the repository:
-
-```sh
-git clone https://github.com/p-sira/ellip.git
-cd ellip
-```
-
-Then, build the project:
-
-```sh
-cargo build --workspace
-```
-
-### Run tests
-
-For detailed information on tests, see [tests/README.md](https://github.com/p-sira/ellip/blob/main/tests/README.md).
-
-### Benchmark
-
-Ellip's benchmark collects the test files associated with each function and reports the total execution time:
-
-```sh
-cargo bench
-```
-
-This produces raw benchmark output under `target/criterion/`. Note that the results shown in the README are normalized to per-function call averages. See the [Generate tables](#generate-tables) section for details on generating the summary tables.
-
-### Generate tables
-
-To generate the accuracy table in the [test report](https://github.com/p-sira/ellip/blob/main/tests):
-
-```sh
-cargo run --example generate_error_report
-```
-
-This compares Ellip's results against Wolfram test data and generates the accuracy report.
-
-To generate the test and benchmark summary table as shown in the README, first run `cargo bench` to collect benchmark data. Then run:
-
-```sh
-cargo run --example generate_test_summary
-```
-
-This script compares results against Wolfram data, extracts benchmark results from `target/criterion/`, normalizes them to average time per function call, and summarizes everything in a single table.
-
-### Generate figures
-
-To generate function plots:
-
-```sh
-cargo run -p ellip-plot-graph --bin [function-name]
-```
-
-See available plots in [ellip-plot-graph/src/bin](https://github.com/p-sira/ellip/blob/main/ellip-plot-graph/src/bin/)
+The full accuracy report, test datasets, and test generation scripts are available in the [tests directory](https://github.com/p-sira/ellip/tree/main/tests). The test and benchmark summary is available in [TESTING.md](https://github.com/p-sira/ellip/blob/main/TESTING.md). See how to reproduce the results in [REPRODUCIBILITY.md](REPRODUCIBILITY.md).
 
 ## Citation
 

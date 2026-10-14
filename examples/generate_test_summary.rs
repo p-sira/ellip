@@ -12,8 +12,6 @@ use ellip_dev_utils::{
 
 fn main() {
     let env = get_env();
-    let template = std::fs::read_to_string("examples/README_template.md")
-        .expect("Cannot read README template");
 
     fn ellipke<T: num_traits::Float>(m: T) -> Option<T> {
         ellip::ellipke(m).map(|(k, _)| k).ok()
@@ -65,13 +63,13 @@ fn main() {
         ]),
     ];
 
-    let output = template.replace("{{TESTSUMMARY}}", &summary_section.join("\n"));
+    let output = format!("# Test Summary\n\n{}\n", summary_section.join("\n"));
 
     use std::fs::File;
     use std::io::Write;
-    let path = "README.md";
+    let path = "TESTING.md";
     let mut file = File::create(path).unwrap();
     file.write_all(output.as_bytes()).unwrap();
 
-    println!("README generated: {path}");
+    println!("Test summary generated: {path}");
 }
