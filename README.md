@@ -33,17 +33,13 @@ Ellip is a pure-Rust implementation of [elliptic integrals](https://dlmf.nist.go
 
 Use [Ellip-Rayon](https://github.com/p-sira/ellip/tree/main/ellip-rayon) to parallelize and improve performance for large inputs. Ellip is also available for Python via [EllipPy](https://github.com/p-sira/ellippy).
 
-## Installation
+## Quick Start
 
-Start by installing Ellip.
+Start by installing Ellip, which is `no_std` by default.
 
 ```shell
 >> cargo add ellip
 ```
-
-Ellip is `no_std` by default.
-
-## Quick Start
 
 Let's compute the perimeter of an ellipse.
 
