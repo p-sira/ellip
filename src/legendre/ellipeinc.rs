@@ -154,8 +154,15 @@ pub fn ellipeinc_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         let c2p = c_phi * c_phi;
         let c = 1.0 / s2p;
         let cm1 = c2p / s2p;
-        let (rf, rd) = elliprf_rd_unchecked(cm1, c, c - m);
-        s * ((1.0 - m) * rf + m * (1.0 - m) * rd / 3.0 + m * (cm1 / (c * (c - m))).sqrt())
+        if m < 0.0 {
+            // Both terms are positive; the alternative identity below cancels
+            // severely for small angles and large negative parameters.
+            let (rf, rd) = elliprf_rd_unchecked(cm1, c - m, c);
+            s * (rf - m * rd / 3.0)
+        } else {
+            let (rf, rd) = elliprf_rd_unchecked(cm1, c, c - m);
+            s * ((1.0 - m) * rf + m * (1.0 - m) * rd / 3.0 + m * (cm1 / (c * (c - m))).sqrt())
+        }
     };
 
     if mm != 0.0 {
@@ -177,6 +184,37 @@ mod tests {
     use crate::compare_test_data_boost;
 
     use super::*;
+
+    #[test]
+    fn test_ellipeinc_rounding_edges() {
+        // 120-digit references independently checked by 180-digit quadrature.
+        for (phi, m, expected) in [
+            (1e-8, -1e16, 1.147793574696319e-8),
+            (1e-8, -1e20, 5.002899164933118e-7),
+            (1e-8, -1e50, 500000000.00000006),
+            (0.1, -1e12, 4995.834728327688),
+        ] {
+            for sign in [-1.0, 1.0] {
+                let actual = ellipeinc(sign * phi, m).unwrap();
+                crate::util::assert_close(actual, sign * expected, 3.0 * f64::EPSILON);
+            }
+        }
+    }
+
+    #[test]
+    fn test_ellipeinc_rounding_edges_f32() {
+        // References evaluated at exact f32 inputs, then rounded to f32.
+        for (m, expected) in [
+            (-1e8_f32, 0.00011477935_f32),
+            (-1e12, 0.005002899),
+            (-1e20, 49.999996),
+        ] {
+            for sign in [-1.0, 1.0] {
+                let actual = ellipeinc(sign * 1e-4_f32, m).unwrap();
+                crate::util::assert_close(actual, sign * expected, 3.0 * f32::EPSILON);
+            }
+        }
+    }
 
     #[test]
     fn test_ellipeinc() {

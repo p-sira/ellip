@@ -1,5 +1,17 @@
 # Changelog
+
 ## 1.2
+### 1.2.3
+**Bug Fixes**
+- Fix rounding loss in `elliprg`'s zero-argument AGM branch using compensated correction subtraction and the initial square's fused rounding residual.  ([#155](https://github.com/p-sira/ellip/pull/155))
+- Fix AGM rounding loss in `ellipe` and `ellipke`, retaining complementary moduli for large negative parameters and using a near-one expansion at extreme ratios. ([#156](https://github.com/p-sira/ellip/pull/156))
+- Avoid cancellation in `ellipeinc` for small angles and negative parameters, in `elliprd`'s zero-argument branch, and in `elliprj`'s repeated-argument shortcut. ([#156](https://github.com/p-sira/ellip/pull/156))
+- Preserve tiny principal values and their signs near `elliprj`'s repeated-argument zero, and widen its f32 principal-value evaluation to f64. Reduce the principal-value reference margin to one epsilon. ([#156](https://github.com/p-sira/ellip/pull/156))
+- Avoid intermediate underflow in `elliprj` duplication at extreme argument ratios. ([#156](https://github.com/p-sira/ellip/pull/156))
+
+**Documentation**
+- Moved test summary out of the README to `TESTING.md`.
+
 ### 1.2.2
 **Bug Fixes**
 - Fix `elliprg::elliprf_rd_unchecked` visibility with unstable feature flag.

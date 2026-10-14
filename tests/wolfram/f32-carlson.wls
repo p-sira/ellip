@@ -17,7 +17,7 @@ muRF = epsilon;
 
 muRJ = epsilon;
 
-muRJPV = 1000 * epsilon;
+muRJPV = epsilon;
 
 muRJPVSmall = 50 * epsilon;
 
@@ -211,6 +211,9 @@ Export["../data/f32/wolfram/elliprj_data.csv", N[rjNormal], "CSV"];
 
 (* PV domain: x >= 0, y >= 0, z >= 0, p < 0, at most one of x,y,z can be zero *)
 
+(* Preserve the exact binary input; Rationalize can choose a nearby fraction. *)
+exactPV[x_] := N[SetPrecision[First[Normal[NumericArray[{x}, "Real32"]]], Infinity], 80];
+
 xRangeRJPV = Union[Subdivide[muRJPV, 2, 5], {0}];
 
 yRangeRJPV = Union[Subdivide[2 * muRJPV, 2 + 2 * muRJPV, 5], {0}];
@@ -238,8 +241,7 @@ rjPV =
         Table[
             With[{x = data[[1]], y = data[[2]], z = data[[3]], p = data
                 [[4]]},
-                {x, y, z, p, CarlsonRJ[SetPrecision[x, 40], SetPrecision[
-                    y, 40], SetPrecision[z, 40], SetPrecision[p, 40]]}
+                {x, y, z, p, CarlsonRJ[exactPV[x], exactPV[y], exactPV[z], exactPV[p]]}
             ]
             ,
             {data, validRJPV}
@@ -248,7 +250,10 @@ rjPV =
         Element[#[[5]], Reals]&
     ];
 
-Export["../data/f32/wolfram/elliprj_pv.csv", N[rjPV], "CSV"];
+(* Preserve round-trip machine inputs and high-precision reference values. *)
+csvReal[x_] := StringReplace[ToString[InputForm[x]],
+    {RegularExpression["`[0-9.]*"] -> "", "*^" -> "e"}];
+Export["../data/f32/wolfram/elliprj_pv.csv", Map[csvReal, rjPV, {2}], "CSV"];
 
 xyzRJPV = Subdivide[muRJPVSmall, muRJPV, 3];
 
