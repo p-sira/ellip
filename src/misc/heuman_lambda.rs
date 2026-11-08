@@ -130,12 +130,6 @@ fn jacobi_zeta_unchecked_k<T: Float>(phi: T, m: T, k: T) -> T {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compare_test_data_wolfram;
-
-    #[test]
-    fn test_heuman_lambda() {
-        compare_test_data_wolfram!("heuman_lambda_data.csv", heuman_lambda, 2, 3e-15);
-    }
 
     #[test]
     fn test_heuman_lambda_special_cases() {

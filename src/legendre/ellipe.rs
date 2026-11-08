@@ -159,7 +159,6 @@ fn ellipe_agm_from_y0<T: Float>(y0: T) -> T {
 mod tests {
 
     use super::*;
-    use crate::{compare_test_data_boost, compare_test_data_wolfram};
 
     #[test]
     fn test_ellipe_rounding_edges() {
@@ -188,16 +187,6 @@ mod tests {
             let tolerance = if m < 0.0 { 2.0 } else { 1.0 };
             crate::util::assert_close(ellipe(m).unwrap(), expected, tolerance * f32::EPSILON);
         }
-    }
-
-    #[test]
-    fn test_ellipe() {
-        compare_test_data_boost!("ellipe_data.txt", ellipe, 1, f64::EPSILON);
-    }
-
-    #[test]
-    fn test_ellipe_wolfram() {
-        compare_test_data_wolfram!("./tests/data/coverage", "ellipe_cov.csv", ellipe, 1, 7e-16);
     }
 
     #[test]

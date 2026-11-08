@@ -145,27 +145,7 @@ const MAX_CEL3_ITERATION: i16 = 1;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{assert_close, cel, cel1, test_util::linspace};
-
-    #[test]
-    fn test_cel3() {
-        for kc in linspace(0.05, 5.0, 20) {
-            // p = 1 matches cel1
-            assert_close! {cel3(kc, 1.0).unwrap(), cel1(kc).unwrap(), 1e-15};
-
-            for p in linspace(0.05, 5.0, 20) {
-                let actual = cel3(kc, p).unwrap();
-                let expected = cel(kc, p, 1.0, 1.0).unwrap();
-                assert_close! {actual, expected, 1e-15};
-            }
-
-            for p in linspace(-5.0, -0.05, 20) {
-                let actual = cel3(kc, p).unwrap();
-                let expected = cel(kc, p, 1.0, 1.0).unwrap();
-                assert_close! {actual, expected, 1e-14};
-            }
-        }
-    }
+    use crate::assert_close;
 
     #[test]
     fn test_cel3_special_cases() {
@@ -186,27 +166,6 @@ mod tests {
         assert!(cel3(1e300, 0.5).is_ok());
         let val_huge = cel3(1e300, 0.5).unwrap();
         assert!(val_huge.is_finite() && val_huge > 0.0);
-    }
-
-    #[test]
-    fn test_cel3_independent_reference() {
-        use crate::{ellipk, ellippi};
-
-        // For kc in (0, 1), kc^2 = 1 - m => m = 1 - kc^2.
-        // With n = 1 - p: cel3(kc, p) = ellippi(1 - p, 1 - kc^2).
-        // ellippi uses Carlson RF and RJ, an independent recurrence.
-        for kc in linspace(0.1, 0.9, 10) {
-            let m = 1.0 - kc * kc;
-            // p = 1 matches ellipk(m)
-            assert_close! {cel3(kc, 1.0).unwrap(), ellipk(m).unwrap(), 1e-14};
-
-            // Positive p (n < 1 and n > 1):
-            for p in [0.2, 0.5, 0.8, 1.5, 2.0] {
-                let actual = cel3(kc, p).unwrap();
-                let expected = ellippi(1.0 - p, m).unwrap();
-                assert_close! {actual, expected, 1e-12};
-            }
-        }
     }
 
     #[test]

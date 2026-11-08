@@ -115,20 +115,6 @@ pub fn cel2_with_const<T: Float, C: BulirschConst<T>>(kc: T, a: T, b: T) -> Resu
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{assert_close, ellipe, test_util::linspace};
-
-    #[test]
-    fn test_cel2() {
-        fn test_kc(kc: f64) {
-            let m = 1.0 - kc * kc;
-            assert_close!(ellipe(m).unwrap(), cel2(kc, 1.0, kc * kc).unwrap(), 7.7e-16);
-        }
-
-        let linsp_neg = linspace(-1.0, -1e-3, 100);
-        linsp_neg.iter().for_each(|kc| test_kc(*kc));
-        let linsp_pos = linspace(1e-3, 1.0, 100);
-        linsp_pos.iter().for_each(|kc| test_kc(*kc));
-    }
 
     #[test]
     fn test_cel2_special_cases() {

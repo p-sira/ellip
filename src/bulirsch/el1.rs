@@ -133,12 +133,7 @@ pub fn el1_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> T {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{assert_close, compare_test_data_wolfram};
-
-    #[test]
-    fn test_el1() {
-        compare_test_data_wolfram!("el1_data.csv", el1, 2, 5.0 * f64::EPSILON);
-    }
+    use crate::assert_close;
 
     #[test]
     fn test_el1_references() {

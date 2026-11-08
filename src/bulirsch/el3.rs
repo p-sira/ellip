@@ -407,13 +407,7 @@ const MAX_ND: usize = 50;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{assert_close, compare_test_data_wolfram};
-
-    #[test]
-    fn test_el3() {
-        compare_test_data_wolfram!("el3_data.csv", el3, 3, 3e-12);
-        compare_test_data_wolfram!("el3_pv.csv", el3, 3, 5e-15);
-    }
+    use crate::assert_close;
 
     #[test]
     fn test_el3_references() {

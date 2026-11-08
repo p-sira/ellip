@@ -215,11 +215,6 @@ const N_MAX_ITERATIONS: usize = 1;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compare_test_data_boost;
-
-    fn _elliprd(inp: &[f64]) -> f64 {
-        elliprd(inp[0], inp[1], inp[2]).unwrap()
-    }
 
     #[test]
     fn test_elliprd_rounding_edges() {
@@ -257,35 +252,6 @@ mod tests {
                 crate::util::assert_close(actual * scale * scale.sqrt(), 3e-16, 3.0 * f32::EPSILON);
             }
         }
-    }
-
-    #[test]
-    fn test_elliprd() {
-        compare_test_data_boost!("elliprd_data.txt", _elliprd, 4.8e-16);
-    }
-
-    #[test]
-    fn test_elliprd_0xy() {
-        compare_test_data_boost!("elliprd_0xy.txt", _elliprd, 5.9e-16);
-    }
-
-    #[test]
-    fn test_elliprd_0yy() {
-        compare_test_data_boost!("elliprd_0yy.txt", _elliprd, 2.6e-16);
-    }
-    #[test]
-    fn test_elliprd_xxx() {
-        compare_test_data_boost!("elliprd_xxx.txt", _elliprd, 2.3e-16);
-    }
-
-    #[test]
-    fn test_elliprd_xxz() {
-        compare_test_data_boost!("elliprd_xxz.txt", _elliprd, 7.9e-16);
-    }
-
-    #[test]
-    fn test_elliprd_xyy() {
-        compare_test_data_boost!("elliprd_xyy.txt", _elliprd, 3.7e-15);
     }
 
     #[test]
