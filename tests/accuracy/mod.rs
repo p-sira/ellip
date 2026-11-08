@@ -81,14 +81,11 @@ mod elliprf {
     use ellip::*;
     use itertools::Itertools;
 
-    fn __elliprf(inp: &[&f64]) -> f64 {
-        elliprf(*inp[0], *inp[1], *inp[2]).unwrap()
-    }
-
     fn _elliprf(inp: &[f64]) -> f64 {
         let res = elliprf(inp[0], inp[1], inp[2]).unwrap();
         inp.iter().permutations(inp.len()).skip(1).for_each(|perm| {
-            assert_close!(res, __elliprf(&perm), 6.5e-16);
+            let actual = elliprf(*perm[0], *perm[1], *perm[2]).unwrap();
+            assert_close!(res, actual, 6.5e-16);
         });
         res
     }
@@ -123,14 +120,11 @@ mod elliprg {
     use ellip::*;
     use itertools::Itertools;
 
-    fn __elliprg(inp: &[&f64]) -> f64 {
-        elliprg(*inp[0], *inp[1], *inp[2]).unwrap()
-    }
-
     fn _elliprg(inp: &[f64]) -> f64 {
         let res = elliprg(inp[0], inp[1], inp[2]).unwrap();
         inp.iter().permutations(inp.len()).skip(1).for_each(|perm| {
-            assert_close!(res, __elliprg(&perm), 6.5e-16);
+            let actual = elliprg(*perm[0], *perm[1], *perm[2]).unwrap();
+            assert_close!(res, actual, 6.5e-16);
         });
         res
     }
@@ -170,10 +164,6 @@ mod elliprj {
     use ellip::*;
     use itertools::Itertools;
 
-    fn __elliprj(inp: &[&f64]) -> f64 {
-        elliprj(*inp[0], *inp[1], *inp[2], *inp[3]).unwrap()
-    }
-
     fn _elliprj(inp: &[f64]) -> f64 {
         let res = elliprj(inp[0], inp[1], inp[2], inp[3]).unwrap();
         let (p, sym_params) = inp.split_last().unwrap();
@@ -181,9 +171,9 @@ mod elliprj {
             .iter()
             .permutations(sym_params.len())
             .skip(1)
-            .for_each(|mut perm| {
-                perm.push(p);
-                assert_close!(res, __elliprj(&perm), 3e-14);
+            .for_each(|perm| {
+                let actual = elliprj(*perm[0], *perm[1], *perm[2], *p).unwrap();
+                assert_close!(res, actual, 3e-14);
             });
         res
     }

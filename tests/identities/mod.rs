@@ -229,31 +229,16 @@ mod ellipke {
 
     #[test]
     fn test_ellipke_matches_individual() {
-        // Test positive range [0, 0.999]
-        for m in linspace(0.0, 0.999, 100) {
-            let (k, e) = ellipke(m).unwrap();
-            let k_ref = ellipk(m).unwrap();
-            let e_ref = ellipe(m).unwrap();
-            assert_close(k, k_ref, 1e-14);
-            assert_close(e, e_ref, 1e-14);
-        }
-
-        // Test negative range [-10.0, 0.0]
-        for m in linspace(-10.0, -0.001, 100) {
-            let (k, e) = ellipke(m).unwrap();
-            let k_ref = ellipk(m).unwrap();
-            let e_ref = ellipe(m).unwrap();
-            assert_close(k, k_ref, 1e-14);
-            assert_close(e, e_ref, 1e-14);
-        }
-
-        // Test extreme negative range
-        for &m in &[-1e4, -1e8, -1e12, -1e16, -1e50] {
-            let (k, e) = ellipke(m).unwrap();
-            let k_ref = ellipk(m).unwrap();
-            let e_ref = ellipe(m).unwrap();
-            assert_close(k, k_ref, 1e-13);
-            assert_close(e, e_ref, 1e-13);
+        for (inputs, tolerance) in [
+            (linspace(0.0, 0.999, 100), 1e-14),
+            (linspace(-10.0, -0.001, 100), 1e-14),
+            (vec![-1e4, -1e8, -1e12, -1e16, -1e50], 1e-13),
+        ] {
+            for m in inputs {
+                let (k, e) = ellipke(m).unwrap();
+                assert_close(k, ellipk(m).unwrap(), tolerance);
+                assert_close(e, ellipe(m).unwrap(), tolerance);
+            }
         }
     }
 }

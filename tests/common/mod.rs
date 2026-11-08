@@ -104,16 +104,10 @@ macro_rules! compare_test_data_boost {
         let path = Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("tests/data/boost")
             .join($filename);
-        match parser::read_boost_data(&path.to_str().unwrap()) {
-            Ok(cases) => {
-                $crate::compare_test_data!($func, cases, $t, $rtol, $atol);
-            }
-            Err(err) => panic!(
-                "Failed to read reference dataset {}: {}",
-                path.display(),
-                err
-            ),
-        };
+        let cases = parser::read_boost_data(&path.to_str().unwrap()).unwrap_or_else(|err| {
+            panic!("Failed to read reference dataset {}: {err}", path.display())
+        });
+        $crate::compare_test_data!($func, cases, $t, $rtol, $atol);
     }};
 }
 
@@ -131,42 +125,25 @@ macro_rules! compare_test_data_wolfram {
             $atol
         )
     }};
-    ($filename:expr, $func:expr, $n_args:tt, $rtol:expr) => {{
-        use ellip_dev_utils::func_wrapper;
-        func_wrapper!($func, $n_args);
-        compare_test_data_wolfram!(
-            "./tests/data/wolfram",
-            $filename,
-            wrapped_func,
-            f64,
-            $rtol,
-            0.0
-        )
-    }};
+    ($filename:expr, $func:expr, $n_args:tt, $rtol:expr) => {
+        compare_test_data_wolfram!($filename, $func, $n_args, $rtol, atol: 0.0)
+    };
     ($path:expr, $filename:expr, $func:expr, $n_args:tt, $rtol:expr) => {{
         use ellip_dev_utils::func_wrapper;
         func_wrapper!($func, $n_args);
         compare_test_data_wolfram!($path, $filename, wrapped_func, f64, $rtol, 0.0)
     }};
     ($path:expr, $filename:expr, $func:expr, $t:ident, $rtol:expr, $atol:expr) => {{
-        {
-            use ellip_dev_utils::parser;
-            use std::path::Path;
+        use ellip_dev_utils::parser;
+        use std::path::Path;
 
-            let path = Path::new(env!("CARGO_MANIFEST_DIR"))
-                .join($path)
-                .join($filename);
-            match parser::read_wolfram_data(&path.to_str().unwrap()) {
-                Ok(cases) => {
-                    $crate::compare_test_data!($func, cases, $t, $rtol, $atol);
-                }
-                Err(err) => panic!(
-                    "Failed to read reference dataset {}: {}",
-                    path.display(),
-                    err
-                ),
-            };
-        }
+        let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join($path)
+            .join($filename);
+        let cases = parser::read_wolfram_data(&path.to_str().unwrap()).unwrap_or_else(|err| {
+            panic!("Failed to read reference dataset {}: {err}", path.display())
+        });
+        $crate::compare_test_data!($func, cases, $t, $rtol, $atol);
     }};
 }
 
@@ -176,13 +153,7 @@ pub fn linspace(start: f64, end: f64, num: usize) -> Vec<f64> {
     }
 
     let step = (end - start) / (num - 1) as f64;
-    let mut result = Vec::with_capacity(num);
-
-    for i in 0..num {
-        result.push(start + step * i as f64);
-    }
-
-    result
+    (0..num).map(|i| start + step * i as f64).collect()
 }
 
 mod dataset_regression_tests {
