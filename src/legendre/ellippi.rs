@@ -94,14 +94,6 @@ pub fn ellippi<T: Float>(n: T, m: T) -> Result<T, StrErr> {
         return Ok(ans);
     }
     check!(@nan, ellippi, [n, m]);
-    if m >= 1.0 {
-        if m > 1.0 {
-            return Err("ellippi: m must not be greater than 1.");
-        }
-        // m -> 1-
-        let sign = (1.0 - n).signum();
-        return Ok(sign * INF);
-    }
     let lim_min = 1e-2 * MIN_VAL;
     if n < lim_min || m < lim_min {
         // n = -inf: Π(-inf, m) = 0

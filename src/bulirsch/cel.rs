@@ -214,6 +214,9 @@ mod tests {
         assert_eq!(cel(0.5, 1.0, f64::INFINITY, 1.0).unwrap(), f64::INFINITY);
         // b = inf: cel(kc, p, a, inf) = inf
         assert_eq!(cel(0.5, 1.0, 1.0, f64::INFINITY).unwrap(), f64::INFINITY);
+        // p != 1 exercises CEL's own infinite-numerator handling.
+        assert_eq!(cel(0.5, 0.5, f64::INFINITY, 1.0).unwrap(), f64::INFINITY);
+        assert_eq!(cel(0.5, 0.5, 1.0, f64::INFINITY).unwrap(), f64::INFINITY);
         // a = inf: cel(kc, p, -inf, b) = -inf
         assert_eq!(
             cel(0.5, 1.0, f64::NEG_INFINITY, 1.0).unwrap(),
