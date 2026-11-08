@@ -393,25 +393,6 @@ mod tests {
     use itertools::Itertools;
 
     use super::*;
-    use crate::{assert_close, compare_test_data_boost, compare_test_data_wolfram};
-
-    fn __elliprj(inp: &[&f64]) -> f64 {
-        elliprj(*inp[0], *inp[1], *inp[2], *inp[3]).unwrap()
-    }
-
-    fn _elliprj(inp: &[f64]) -> f64 {
-        let res = elliprj(inp[0], inp[1], inp[2], inp[3]).unwrap();
-        let (p, sym_params) = inp.split_last().unwrap();
-        sym_params
-            .iter()
-            .permutations(sym_params.len())
-            .skip(1)
-            .for_each(|mut perm| {
-                perm.push(p);
-                assert_close!(res, __elliprj(&perm), 3e-14);
-            });
-        res
-    }
 
     #[test]
     fn test_elliprj_rounding_edges() {
@@ -546,89 +527,6 @@ mod tests {
             assert!((actual - expected).abs() <= tolerance);
             assert!(actual > 0.0);
         }
-    }
-
-    #[test]
-    fn test_elliprj_pv_rounding_f32() {
-        // References rounded from 100-digit evaluations at exact f32 inputs.
-        for (input, expected) in [
-            (
-                [2.0_f32 + 2.0 * f32::EPSILON, 2.0, 3.0, -1.0],
-                1.2370731e-8_f32,
-            ),
-            ([2.0 - 2.0 * f32::EPSILON, 2.0, 3.0, -1.0], -1.2370734e-8),
-            (
-                [
-                    2.0 + 2.0 * f32::EPSILON,
-                    2.0 - 2.0 * f32::EPSILON,
-                    3.0,
-                    -1.0,
-                ],
-                -1.8478185e-15,
-            ),
-            ([0.8000001, 0.80000025, 1.2000004, -0.4000001], 5.277546e-9),
-            ([0.8000001, 1.2000003, 0.80000037, -0.4000001], 3.0562223e-8),
-            ([1.2, 0.80000025, 0.80000037, -0.4000001], 5.0569344e-8),
-        ] {
-            for scale in [2.0_f32.powi(-20), 1.0, 2.0_f32.powi(20)] {
-                for perm in input[..3].iter().permutations(3) {
-                    let actual = elliprj(
-                        *perm[0] * scale,
-                        *perm[1] * scale,
-                        *perm[2] * scale,
-                        input[3] * scale,
-                    )
-                    .unwrap()
-                        * scale
-                        * scale.sqrt();
-                    assert!(
-                        (actual / expected - 1.0).abs() <= 2.0 * f32::EPSILON,
-                        "input={input:?}, scale={scale}, actual={actual}, expected={expected}"
-                    );
-                    assert_eq!(actual.is_sign_negative(), expected.is_sign_negative());
-                }
-            }
-        }
-        for scale in [2.0_f32.powi(-70), 1.0, 2.0_f32.powi(70)] {
-            let actual = elliprj(scale, 2.0 * scale, 3.0 * scale, -4.0 * scale).unwrap()
-                * scale
-                * scale.sqrt();
-            crate::util::assert_close(actual, -0.2378677, 2.0 * f32::EPSILON);
-            assert_eq!(
-                elliprj(2.0 * scale, 2.0 * scale, 3.0 * scale, -scale),
-                Ok(0.0)
-            );
-        }
-        // Check the complete mu = one epsilon grid without an absolute floor.
-        for case in ellip_dev_utils::parser::read_wolfram_data::<f32>(
-            "tests/data/f32/wolfram/elliprj_pv.csv",
-        )
-        .unwrap()
-        {
-            let actual = elliprj(
-                case.inputs[0],
-                case.inputs[1],
-                case.inputs[2],
-                case.inputs[3],
-            )
-            .unwrap();
-            assert_eq!(actual, case.expected, "input={:?}", case.inputs);
-        }
-    }
-
-    #[test]
-    fn test_elliprj() {
-        compare_test_data_boost!("elliprj_data.txt", _elliprj, 2.7e-14, atol: 5e-25);
-        compare_test_data_boost!("elliprj_e2.txt", _elliprj, 4.8e-14, atol: 5e-25);
-        compare_test_data_boost!("elliprj_e3.txt", _elliprj, 3.1e-15, atol: 5e-25);
-        compare_test_data_boost!("elliprj_e4.txt", _elliprj, 2.2e-16, atol: 5e-25);
-        compare_test_data_boost!("elliprj_zp.txt", _elliprj, 3.5e-15, atol: 5e-25);
-    }
-
-    #[test]
-    fn test_elliprj_wolfram() {
-        compare_test_data_wolfram!("elliprj_data.csv", elliprj, 4, 3.1e-15);
-        compare_test_data_wolfram!("elliprj_pv.csv", elliprj, 4, 5e-14, atol: f64::EPSILON);
     }
 
     #[test]

@@ -100,17 +100,6 @@ pub fn jacobi_zeta_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compare_test_data_wolfram;
-
-    #[test]
-    fn test_jacobi_zeta() {
-        compare_test_data_wolfram!("jacobi_zeta_data.csv", jacobi_zeta, 2, 3e-15);
-    }
-
-    #[test]
-    fn test_jacobi_neg() {
-        compare_test_data_wolfram!("jacobi_zeta_neg.csv", jacobi_zeta, 2, 3e-15);
-    }
 
     #[test]
     fn test_jacobi_zeta_special_cases() {

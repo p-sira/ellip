@@ -215,47 +215,7 @@ const N_MAX_ITERATIONS: usize = 1;
 #[cfg(test)]
 mod tests {
 
-    use itertools::Itertools;
-
     use super::*;
-    use crate::{assert_close, compare_test_data_boost};
-
-    fn __elliprf(inp: &[&f64]) -> f64 {
-        elliprf(*inp[0], *inp[1], *inp[2]).unwrap()
-    }
-
-    fn _elliprf(inp: &[f64]) -> f64 {
-        let res = elliprf(inp[0], inp[1], inp[2]).unwrap();
-        inp.iter().permutations(inp.len()).skip(1).for_each(|perm| {
-            assert_close!(res, __elliprf(&perm), 6.5e-16);
-        });
-        res
-    }
-
-    #[test]
-    fn test_elliprf() {
-        compare_test_data_boost!("elliprf_data.txt", _elliprf, 4.5e-16);
-    }
-
-    #[test]
-    fn test_elliprf_xxx() {
-        compare_test_data_boost!("elliprf_xxx.txt", _elliprf, 2.3e-16);
-    }
-
-    #[test]
-    fn test_elliprf_xy0() {
-        compare_test_data_boost!("elliprf_xy0.txt", _elliprf, 4.2e-16);
-    }
-
-    #[test]
-    fn test_elliprf_xyy() {
-        compare_test_data_boost!("elliprf_xyy.txt", _elliprf, 5.3e-16);
-    }
-
-    #[test]
-    fn test_elliprf_0yy() {
-        compare_test_data_boost!("elliprf_0yy.txt", _elliprf, f64::EPSILON);
-    }
 
     #[test]
     fn test_elliprf_special_cases() {

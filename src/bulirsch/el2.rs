@@ -151,12 +151,6 @@ pub fn el2_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compare_test_data_wolfram;
-
-    #[test]
-    fn test_el2() {
-        compare_test_data_wolfram!("el2_data.csv", el2, 4, 100.0 * f64::EPSILON);
-    }
 
     #[test]
     fn test_el2_special_cases() {

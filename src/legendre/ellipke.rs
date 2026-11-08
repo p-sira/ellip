@@ -202,7 +202,7 @@ pub(crate) fn ellipke_agm<T: Float>(m: T) -> (T, T) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{ellipe, ellipk, test_util::linspace, util::assert_close};
+    use crate::{ellipe, ellipk, util::assert_close};
 
     #[test]
     fn test_ellipke_rounding_edges() {
@@ -278,53 +278,6 @@ mod tests {
             ellipke(f64::INFINITY).unwrap_err(),
             "ellipke: m must not be greater than 1."
         );
-    }
-
-    #[test]
-    fn test_ellipke_matches_individual() {
-        // Test positive range [0, 0.999]
-        for m in linspace(0.0, 0.999, 100) {
-            let (k, e) = ellipke(m).unwrap();
-            let k_ref = ellipk(m).unwrap();
-            let e_ref = ellipe(m).unwrap();
-            assert_close(k, k_ref, 1e-14);
-            assert_close(e, e_ref, 1e-14);
-        }
-
-        // Test negative range [-10.0, 0.0]
-        for m in linspace(-10.0, -0.001, 100) {
-            let (k, e) = ellipke(m).unwrap();
-            let k_ref = ellipk(m).unwrap();
-            let e_ref = ellipe(m).unwrap();
-            assert_close(k, k_ref, 1e-14);
-            assert_close(e, e_ref, 1e-14);
-        }
-
-        // Test extreme negative range
-        for &m in &[-1e4, -1e8, -1e12, -1e16, -1e50] {
-            let (k, e) = ellipke(m).unwrap();
-            let k_ref = ellipk(m).unwrap();
-            let e_ref = ellipe(m).unwrap();
-            assert_close(k, k_ref, 1e-13);
-            assert_close(e, e_ref, 1e-13);
-        }
-    }
-
-    #[test]
-    fn test_ellipke_wolfram() {
-        use crate::compare_test_data_wolfram;
-
-        fn ellipke_k(m: f64) -> Result<f64, StrErr> {
-            Ok(ellipke(m)?.0)
-        }
-        fn ellipke_e(m: f64) -> Result<f64, StrErr> {
-            Ok(ellipke(m)?.1)
-        }
-
-        compare_test_data_wolfram!("ellipk_data.csv", ellipke_k, 1, 5e-15);
-        compare_test_data_wolfram!("ellipe_data.csv", ellipke_e, 1, 5e-15);
-        compare_test_data_wolfram!("ellipk_neg.csv", ellipke_k, 1, 5e-15);
-        compare_test_data_wolfram!("ellipe_neg.csv", ellipke_e, 1, 5e-15);
     }
 
     #[test]

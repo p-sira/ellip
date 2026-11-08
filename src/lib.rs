@@ -140,5 +140,5 @@ mod polyeval;
 use polyeval::polyeval;
 pub mod util;
 
-#[cfg(test)]
+#[cfg(any(test, feature = "test_force_fail"))]
 mod test_util;

@@ -141,16 +141,6 @@ pub fn elliprc_unchecked<T: Float>(x: T, y: T) -> T {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compare_test_data_boost;
-
-    fn _elliprc(inp: &[f64]) -> f64 {
-        elliprc(inp[0], inp[1]).unwrap()
-    }
-
-    #[test]
-    fn test_elliprc() {
-        compare_test_data_boost!("elliprc_data.txt", _elliprc, f64::EPSILON);
-    }
 
     #[test]
     fn test_elliprc_special_cases() {

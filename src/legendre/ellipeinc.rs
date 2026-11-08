@@ -181,7 +181,6 @@ fn ellipe_wrapper<T: Float>(m: T) -> Result<T, StrErr> {
 #[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
-    use crate::compare_test_data_boost;
 
     use super::*;
 
@@ -214,11 +213,6 @@ mod tests {
                 crate::util::assert_close(actual, sign * expected, 3.0 * f32::EPSILON);
             }
         }
-    }
-
-    #[test]
-    fn test_ellipeinc() {
-        compare_test_data_boost!("ellipeinc_data.txt", ellipeinc, 2, 5e-16);
     }
 
     #[test]

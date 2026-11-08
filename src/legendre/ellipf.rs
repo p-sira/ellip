@@ -172,12 +172,6 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compare_test_data_boost;
-
-    #[test]
-    fn test_ellipf() {
-        compare_test_data_boost!("ellipf_data.txt", ellipf, 2, 5.1e-16);
-    }
 
     #[test]
     fn test_ellipf_special_cases() {

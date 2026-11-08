@@ -266,29 +266,7 @@ mod tests {
     use itertools::Itertools;
 
     use super::*;
-    use crate::{assert_close, compare_test_data_boost, compare_test_data_wolfram};
-
-    fn __elliprg(inp: &[&f64]) -> f64 {
-        elliprg(*inp[0], *inp[1], *inp[2]).unwrap()
-    }
-
-    fn _elliprg(inp: &[f64]) -> f64 {
-        let res = elliprg(inp[0], inp[1], inp[2]).unwrap();
-        inp.iter().permutations(inp.len()).skip(1).for_each(|perm| {
-            assert_close!(res, __elliprg(&perm), 6.5e-16);
-        });
-        res
-    }
-
-    #[test]
-    fn test_elliprg() {
-        compare_test_data_boost!("elliprg_data.txt", _elliprg, 8.1e-16);
-    }
-
-    #[test]
-    fn test_elliprg_wolfram() {
-        compare_test_data_wolfram!("elliprg_data.csv", elliprg, 3, 1e-15);
-    }
+    use crate::assert_close;
 
     #[test]
     fn test_elliprg_zero_unequal_scales() {
@@ -298,7 +276,7 @@ mod tests {
         for scale in [2.0_f64.powi(-600), 1.0, 2.0_f64.powi(600)] {
             let scaled = input.map(|x| x * scale);
             for perm in scaled.iter().permutations(3) {
-                let actual = __elliprg(&perm);
+                let actual = elliprg(*perm[0], *perm[1], *perm[2]).unwrap();
                 assert_close!(actual, expected * scale.sqrt(), 3.0 * f64::EPSILON);
             }
         }
@@ -313,26 +291,6 @@ mod tests {
             let actual = elliprg(*perm[0], *perm[1], *perm[2]).unwrap();
             assert_close!(actual, expected, 3.0 * f32::EPSILON);
         }
-    }
-
-    #[test]
-    fn test_elliprg_xxx() {
-        compare_test_data_boost!("elliprg_xxx.txt", _elliprg, 2.4e-16);
-    }
-
-    #[test]
-    fn test_elliprg_xy0() {
-        compare_test_data_boost!("elliprg_xy0.txt", _elliprg, 4.4e-16);
-    }
-
-    #[test]
-    fn test_elliprg_xyy() {
-        compare_test_data_boost!("elliprg_xyy.txt", _elliprg, 5.4e-16);
-    }
-
-    #[test]
-    fn test_elliprg_00x() {
-        compare_test_data_boost!("elliprg_00x.txt", _elliprg, f64::EPSILON);
     }
 
     #[test]

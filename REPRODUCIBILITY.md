@@ -19,7 +19,15 @@ cargo build --workspace
 
 ## Run tests
 
-For detailed information on tests, see [tests/README.md](tests/README.md).
+Run all unit, integration, and documentation tests with `cargo test -p ellip`. The `public_api` integration target contains reference dataset tests in `tests/accuracy/` and function consistency tests in `tests/identities/`. Run it separately with:
+
+```sh
+cargo test -p ellip --test public_api
+```
+
+Unit tests beside the implementation cover special cases, numerical regressions, private helpers, and forced convergence failures.
+
+For detailed information on test datasets and accuracy reports, see [tests/README.md](tests/README.md).
 
 ## Benchmark
 

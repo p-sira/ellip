@@ -139,18 +139,6 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 mod tests {
 
     use super::*;
-    use crate::{compare_test_data_boost, compare_test_data_wolfram};
-
-    #[test]
-    fn test_ellipdinc() {
-        compare_test_data_boost!("ellipdinc_data.txt", ellipdinc, 2, 6.4e-16);
-    }
-
-    #[test]
-    fn test_ellipdinc_wolfram() {
-        compare_test_data_wolfram!("ellipdinc_data.csv", ellipdinc, 2, 2e-15);
-        compare_test_data_wolfram!("ellipdinc_neg.csv", ellipdinc, 2, 1e-15);
-    }
 
     #[test]
     fn test_ellipdinc_special_cases() {

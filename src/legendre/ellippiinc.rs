@@ -397,32 +397,7 @@ pub fn ellippiinc_bulirsch_with_const<T: Float, C: BulirschConst<T>>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{compare_test_data_boost, compare_test_data_wolfram, ellipeinc, ellippi};
-
-    fn ellippiinc_k(inp: &[f64]) -> f64 {
-        ellippiinc(inp[1], inp[0], inp[2] * inp[2]).unwrap()
-    }
-
-    #[test]
-    fn test_ellippiinc() {
-        compare_test_data_boost!("ellippiinc_data.txt", ellippiinc_k, 2.1e-15);
-        compare_test_data_boost!("ellippi3_large_data.txt", ellippiinc_k, 6e-15);
-    }
-
-    #[test]
-    fn test_ellippiinc_wolfram() {
-        compare_test_data_wolfram!("ellippiinc_data.csv", ellippiinc, 3, 5e-14);
-    }
-
-    #[test]
-    fn test_ellippiinc_wolfram_neg() {
-        compare_test_data_wolfram!("ellippiinc_neg.csv", ellippiinc, 3, 5e-14);
-    }
-
-    #[test]
-    fn test_ellippiinc_wolfram_pv() {
-        compare_test_data_wolfram!("ellippiinc_pv.csv", ellippiinc, 3, 3e-13);
-    }
+    use crate::{ellipeinc, ellippi};
 
     #[test]
     fn test_ellippiinc_special_cases() {
@@ -607,21 +582,6 @@ mod tests {
                 1e-13,
             );
         }
-    }
-
-    #[test]
-    fn test_ellippiinc_bulirsch_wolfram() {
-        compare_test_data_wolfram!("ellippiinc_data.csv", ellippiinc_bulirsch, 3, 5e-14);
-    }
-
-    #[test]
-    fn test_ellippiinc_bulirsch_wolfram_neg() {
-        compare_test_data_wolfram!("ellippiinc_neg.csv", ellippiinc_bulirsch, 3, 5e-14);
-    }
-
-    #[test]
-    fn test_ellippiinc_bulirsch_wolfram_pv() {
-        compare_test_data_wolfram!("ellippiinc_pv.csv", ellippiinc_bulirsch, 3, 3e-13);
     }
 
     #[test]

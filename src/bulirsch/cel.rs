@@ -151,48 +151,8 @@ pub fn cel_with_const<T: Float, C: BulirschConst<T>>(kc: T, p: T, a: T, b: T) ->
 #[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
-    use itertools::iproduct;
 
     use super::*;
-    use crate::{assert_close, ellipe, ellipk, ellippi, test_util::linspace};
-
-    /// Test using relationship with Legendre form.
-    /// Reference: https://dlmf.nist.gov/19.2#iii
-    #[test]
-    fn test_cel() {
-        fn _test(kc: f64, p: f64) {
-            let m = 1.0 - kc * kc;
-            let ellipk = ellipk(m).unwrap();
-            let ellipe = ellipe(m).unwrap();
-
-            // cel precision is low for K cases
-            assert_close! {ellipk, cel(kc, 1.0, 1.0, 1.0).unwrap(), 2e-12};
-            assert_close! {ellipe, cel(kc, 1.0, 1.0, kc * kc).unwrap(), 1e-15};
-            assert_close! {(ellipe - kc * kc * ellipk) / m, cel(kc, 1.0, 1.0, 0.0).unwrap(), 8.5e-14};
-
-            // Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions III”
-            let n = 1.0 - p;
-            let ellippi = ellippi(n, m).unwrap();
-
-            assert_close! {(ellipk - ellipe) / m, cel(kc, 1.0, 0.0, 1.0).unwrap(), 6e-12};
-            // cel precision is very low for PI cases
-            assert_close! {ellippi, cel(kc, p, 1.0, 1.0).unwrap(), 3.5e-12};
-            assert_close! {(ellippi - ellipk) / (1.0 - p), cel(kc, p, 0.0, 1.0).unwrap(), 3.5e-12};
-        }
-
-        let linsp_kc = [
-            linspace(-1.0 + 1e-3, -1e-3, 100),
-            linspace(1e-3, 1.0 - 1e-3, 100),
-        ]
-        .concat();
-        let linsp_p = linspace(1e-3, 1.0 - 1e-3, 10);
-
-        iproduct!(linsp_kc, linsp_p).for_each(|(kc, p)| _test(kc, p));
-
-        // Data from Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions III”
-        assert_close! {cel(1e-1, 4.1, 1.2, 1.1).unwrap(), 1.5464442694017956, 5e-16};
-        assert_close! {cel(1e-1, -4.1, 1.2, 1.1).unwrap(), -6.7687378198360556e-1, 5e-16};
-    }
 
     #[test]
     fn test_cel_special_cases() {
