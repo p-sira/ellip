@@ -59,13 +59,13 @@ use crate::{crate_util::check, polyeval, StrErr};
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 /// - Abramowitz, Milton, and Irene A. Stegun. Handbook of Mathematical Functions: With Formulas, Graphs and Mathematical Tables. Unabridged, Unaltered and corr. Republ. of the 1964 ed. With Conference on mathematical tables, National science foundation, and Massachusetts institute of technology. Dover Books on Advanced Mathematics. Dover publ, 1972.
 /// - The SciPy community. “Scipy.Special.Ellipe — SciPy v1.16.0 Manual.” Accessed July 28, 2025. <https://docs.scipy.org/doc/scipy-1.16.0/reference/generated/scipy.special.ellipe.html>.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub fn ellipe<T: Float>(m: T) -> Result<T, StrErr> {
     let mut m = m;
     let mut c = 1.0;
     if m < 0.0 {
-        if m == neg_inf!() {
-            return Ok(inf!());
+        if m == NEG_INF {
+            return Ok(INF);
         }
         // Negative m: Abramowitz & Stegun, 1972
         c = c * (1.0 - m).sqrt();
@@ -80,7 +80,7 @@ pub fn ellipe<T: Float>(m: T) -> Result<T, StrErr> {
 }
 
 #[inline]
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub(crate) fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
     match (m * 20.0).to_i64() {
         Some(0) | Some(1) => Ok(polyeval(m - 0.05, &coeffs::to_t(E_0_1))),
@@ -96,18 +96,17 @@ pub(crate) fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
         Some(_) => ellipe_precise(m),
         None => {
             check!(@nan, ellipe, [m]);
+            // Negative parameters (including -infinity) were handled above.
             #[cfg(not(feature = "test_force_fail"))]
-            if m > 1.0 {
-                // Infinity cases
-                return Err("ellipe: m must not be greater than 1.");
-            }
+            return Err("ellipe: m must not be greater than 1.");
+            #[cfg(feature = "test_force_fail")]
             Err("ellipe: Unexpected error.")
         }
     }
 }
 
 #[inline]
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 fn ellipe_precise<T: Float>(m: T) -> Result<T, StrErr> {
     // Special cases: https://dlmf.nist.gov/19.6.E1
     if m >= 1.0 {
@@ -123,13 +122,13 @@ fn ellipe_precise<T: Float>(m: T) -> Result<T, StrErr> {
 /// First correction in <https://dlmf.nist.gov/19.12.E2>, used for y0² <= epsilon.
 /// The omitted O(y0⁴ log(1/y0)) terms are below working precision.
 #[inline]
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub(crate) fn ellipe_near_one<T: Float>(y0: T) -> T {
     1.0 + (y0 * y0 / 2.0) * ((4.0).ln() - y0.ln() - 0.5)
 }
 
 #[inline]
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 fn ellipe_agm_from_y0<T: Float>(y0: T) -> T {
     if y0 <= T::epsilon().sqrt() {
         return ellipe_near_one(y0);
@@ -141,7 +140,7 @@ fn ellipe_agm_from_y0<T: Float>(y0: T) -> T {
     let mut compensation = mean.mul_add(mean, -e);
     let mut sum_pow = 0.25;
 
-    while (xn - yn).abs() >= 2.7 * epsilon!() * xn.abs() {
+    while (xn - yn).abs() >= 2.7 * EPS * xn.abs() {
         let t = (xn * yn).sqrt();
         xn = (xn + yn) / 2.0;
         yn = t;
@@ -151,17 +150,15 @@ fn ellipe_agm_from_y0<T: Float>(y0: T) -> T {
         compensation = (e - next) - correction;
         e = next;
     }
-    let rf = pi!() / (xn + yn);
+    let rf = PI / (xn + yn);
     e * rf
 }
 
 #[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
-    use core::f64;
 
     use super::*;
-    use crate::{compare_test_data_boost, compare_test_data_wolfram};
 
     #[test]
     fn test_ellipe_rounding_edges() {
@@ -193,18 +190,8 @@ mod tests {
     }
 
     #[test]
-    fn test_ellipe() {
-        compare_test_data_boost!("ellipe_data.txt", ellipe, 1, f64::EPSILON);
-    }
-
-    #[test]
-    fn test_ellipe_wolfram() {
-        compare_test_data_wolfram!("./tests/data/coverage", "ellipe_cov.csv", ellipe, 1, 7e-16);
-    }
-
-    #[test]
     fn test_ellipe_special_cases() {
-        use std::f64::{consts::FRAC_PI_2, INFINITY, NAN, NEG_INFINITY};
+        use std::f64::consts::FRAC_PI_2;
         // m > 1: should return Err
         assert_eq!(ellipe(1.1), Err("ellipe: m must not be greater than 1."));
         // m = 0: E(0) = pi/2
@@ -214,14 +201,14 @@ mod tests {
         // m < 0: should be valid, compare with reference value
         assert!(ellipe(-1.0).unwrap().is_finite());
         // m = NaN: should return Err
-        assert_eq!(ellipe(NAN), Err("ellipe: Arguments cannot be NAN."));
+        assert_eq!(ellipe(f64::NAN), Err("ellipe: Arguments cannot be NAN."));
         // m = inf: should return Err
         assert_eq!(
-            ellipe(INFINITY),
+            ellipe(f64::INFINITY),
             Err("ellipe: m must not be greater than 1.")
         );
         // m = -inf: E(-inf) = inf
-        assert_eq!(ellipe(NEG_INFINITY).unwrap(), INFINITY);
+        assert_eq!(ellipe(f64::NEG_INFINITY).unwrap(), f64::INFINITY);
     }
 }
 

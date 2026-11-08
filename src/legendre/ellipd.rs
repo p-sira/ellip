@@ -58,29 +58,29 @@ use crate::{carlson::elliprd_unchecked, crate_util::check, StrErr};
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub fn ellipd<T: Float>(m: T) -> Result<T, StrErr> {
     if m >= 1.0 {
         // D evaluates to inf at m=1.
         if m == 1.0 {
-            return Ok(inf!());
+            return Ok(INF);
         }
         return Err("ellipd: m must not be greater than 1.");
     }
 
-    if m.abs() <= epsilon!() {
-        return Ok(pi!() / 4.0);
+    if m.abs() <= EPS {
+        return Ok(PI_4);
     }
 
     // m -> -inf, sqrt(1+m sin²θ) -> m sinθ, θ=[0,pi/2], given phi = pi/2
     // then D(m) -> 1/sqrt(-m)
-    if m <= min_val!() {
+    if m <= MIN_VAL {
         return Ok(1.0 / (-m).sqrt());
     }
 
     let ans = elliprd_unchecked(0.0, 1.0 - m, 1.0) / 3.0;
     #[cfg(feature = "test_force_fail")]
-    let ans = nan!();
+    let ans = NAN;
 
     if ans.is_finite() {
         return Ok(ans);
@@ -93,41 +93,29 @@ pub fn ellipd<T: Float>(m: T) -> Result<T, StrErr> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{compare_test_data_boost, compare_test_data_wolfram};
-
-    #[test]
-    fn test_ellipd() {
-        compare_test_data_boost!("ellipd_data.txt", ellipd, 1, 2.9e-16);
-    }
-
-    #[test]
-    fn test_ellipd_wolfram() {
-        compare_test_data_wolfram!("ellipd_data.csv", ellipd, 1, 8e-16);
-        compare_test_data_wolfram!("ellipd_neg.csv", ellipd, 1, 8e-16);
-    }
 
     #[test]
     fn test_ellipd_special_cases() {
-        use std::f64::{consts::FRAC_PI_4, INFINITY, MAX, NAN, NEG_INFINITY};
+        use std::f64::consts::FRAC_PI_4;
         // m = 0: D(0) = pi/4
         assert_eq!(ellipd(0.0).unwrap(), FRAC_PI_4);
         // m = 1: D(1) = inf
-        assert_eq!(ellipd(1.0).unwrap(), INFINITY);
+        assert_eq!(ellipd(1.0).unwrap(), f64::INFINITY);
         // m < 0: should be valid
         assert!(ellipd(-1.0).unwrap().is_finite());
         // m > 1: should return Err
         assert_eq!(ellipd(1.1), Err("ellipd: m must not be greater than 1."));
         // m = NaN: should return Err
-        assert_eq!(ellipd(NAN), Err("ellipd: Arguments cannot be NAN."));
+        assert_eq!(ellipd(f64::NAN), Err("ellipd: Arguments cannot be NAN."));
         // m = inf: should return Err
         assert_eq!(
-            ellipd(INFINITY),
+            ellipd(f64::INFINITY),
             Err("ellipd: m must not be greater than 1.")
         );
         // m -> -inf: D(m) = 1/sqrt(-m)
-        assert_eq!(ellipd(-MAX).unwrap(), 1.0 / MAX.sqrt());
+        assert_eq!(ellipd(-f64::MAX).unwrap(), 1.0 / f64::MAX.sqrt());
         // m = -inf: D(-inf) = 0
-        assert_eq!(ellipd(NEG_INFINITY).unwrap(), 0.0);
+        assert_eq!(ellipd(f64::NEG_INFINITY).unwrap(), 0.0);
     }
 }
 

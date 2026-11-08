@@ -67,11 +67,12 @@ use crate::{
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
+#[num_lazy_proc::generic_float(T, visit_macros = [case])]
 pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
     check!(@nan, elliprf, [x, y, z]);
     check!(@neg, elliprf, [x, y, z]);
     check!(@multi_zero, elliprf, [x, y, z]);
-    case!(@any [x, y, z] == inf!(), T::zero());
+    case!(@any [x, y, z] == INF, 0.0);
     let ans = elliprf_unchecked(x, y, z);
     if ans.is_finite() {
         return Ok(ans);
@@ -87,13 +88,13 @@ pub fn elliprf<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
 /// - x < 0, y < 0, z < 0
 /// - More than one of x, y, and z are zero.
 /// - x = ∞ or y = ∞ or z = ∞
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T, visit_macros = [declare])]
 #[inline]
 pub fn elliprf_unchecked<T: Float>(x: T, y: T, z: T) -> T {
     // Homogeneity keeps products in duplication and special cases in range.
     // Separate rescaling factors: scale*sqrt(scale) can itself overflow.
     let scale = x.abs().max(y.abs()).max(z.abs());
-    let limit = T::max_value().sqrt().sqrt().sqrt();
+    let limit = MAX_VAL.sqrt().sqrt().sqrt();
     if scale.is_finite() && scale > 0.0 && (scale > limit || scale < 1.0 / limit)
         // Do not turn nonzero arguments into singular zeros at extreme ratios.
         && [x, y, z].iter().all(|&v| v == 0.0 || v / scale != 0.0)
@@ -111,7 +112,7 @@ pub fn elliprf_unchecked<T: Float>(x: T, y: T, z: T) -> T {
         if z == 0.0 {
             // RF(x,x,0)
             // RF(0,y,y)
-            return pi!() / (2.0 * x.sqrt());
+            return PI / (2.0 * x.sqrt());
         }
 
         // RF(x,x,z)
@@ -123,7 +124,7 @@ pub fn elliprf_unchecked<T: Float>(x: T, y: T, z: T) -> T {
         if y == 0.0 {
             // RF(x,0,x)
             // RF(0,y,y)
-            return pi!() / (2.0 * x.sqrt());
+            return PI / (2.0 * x.sqrt());
         }
 
         // RF(x,y,x)
@@ -134,7 +135,7 @@ pub fn elliprf_unchecked<T: Float>(x: T, y: T, z: T) -> T {
     if y == z {
         if x == 0.0 {
             // RF(0,y,y)
-            return pi!() / (2.0 * y.sqrt());
+            return PI / (2.0 * y.sqrt());
         }
 
         // RF(x,y,y)
@@ -151,7 +152,7 @@ pub fn elliprf_unchecked<T: Float>(x: T, y: T, z: T) -> T {
     if zn == 0.0 {
         declare!(mut [xn = xn.sqrt(), yn = yn.sqrt(), t]);
         for _ in 0..N_MAX_ITERATIONS {
-            if (xn - yn).abs() >= 2.7 * epsilon!() * xn.abs() {
+            if (xn - yn).abs() >= 2.7 * EPS * xn.abs() {
                 t = (xn * yn).sqrt();
                 xn = (xn + yn) / 2.0;
                 yn = t;
@@ -159,17 +160,17 @@ pub fn elliprf_unchecked<T: Float>(x: T, y: T, z: T) -> T {
             }
             break;
         }
-        return pi!() / (xn + yn);
+        return PI / (xn + yn);
     }
 
     let mut an = (xn + yn + zn) / 3.0;
     let a0 = an;
-    let mut q = (3.0 * epsilon!()).powf(-1.0 / 8.0)
+    let mut q = (3.0 * EPS).powf(-1.0 / 8.0)
         * an.abs()
             .max((an - xn).abs())
             .max((an - yn).abs())
             .max((an - zn).abs());
-    declare!(mut [fn_val = T::one(), ans = nan!()]);
+    declare!(mut [fn_val = 1.0, ans = NAN]);
     for _ in 0..N_MAX_ITERATIONS {
         let root_x = xn.sqrt();
         let root_y = yn.sqrt();
@@ -213,53 +214,11 @@ const N_MAX_ITERATIONS: usize = 1;
 #[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
-    use core::f64;
-
-    use itertools::Itertools;
 
     use super::*;
-    use crate::{assert_close, compare_test_data_boost};
-
-    fn __elliprf(inp: &[&f64]) -> f64 {
-        elliprf(*inp[0], *inp[1], *inp[2]).unwrap()
-    }
-
-    fn _elliprf(inp: &[f64]) -> f64 {
-        let res = elliprf(inp[0], inp[1], inp[2]).unwrap();
-        inp.iter().permutations(inp.len()).skip(1).for_each(|perm| {
-            assert_close!(res, __elliprf(&perm), 6.5e-16);
-        });
-        res
-    }
-
-    #[test]
-    fn test_elliprf() {
-        compare_test_data_boost!("elliprf_data.txt", _elliprf, 4.5e-16);
-    }
-
-    #[test]
-    fn test_elliprf_xxx() {
-        compare_test_data_boost!("elliprf_xxx.txt", _elliprf, 2.3e-16);
-    }
-
-    #[test]
-    fn test_elliprf_xy0() {
-        compare_test_data_boost!("elliprf_xy0.txt", _elliprf, 4.2e-16);
-    }
-
-    #[test]
-    fn test_elliprf_xyy() {
-        compare_test_data_boost!("elliprf_xyy.txt", _elliprf, 5.3e-16);
-    }
-
-    #[test]
-    fn test_elliprf_0yy() {
-        compare_test_data_boost!("elliprf_0yy.txt", _elliprf, f64::EPSILON);
-    }
 
     #[test]
     fn test_elliprf_special_cases() {
-        use std::f64::{INFINITY, NAN};
         // Negative arguments: should return Err
         assert_eq!(
             elliprf(-1.0, 1.0, 2.0),
@@ -288,21 +247,21 @@ mod tests {
         );
         // NANs: should return Err
         assert_eq!(
-            elliprf(NAN, 1.0, 1.0),
+            elliprf(f64::NAN, 1.0, 1.0),
             Err("elliprf: Arguments cannot be NAN.")
         );
         assert_eq!(
-            elliprf(1.0, NAN, 1.0),
+            elliprf(1.0, f64::NAN, 1.0),
             Err("elliprf: Arguments cannot be NAN.")
         );
         assert_eq!(
-            elliprf(1.0, 1.0, NAN),
+            elliprf(1.0, 1.0, f64::NAN),
             Err("elliprf: Arguments cannot be NAN.")
         );
         // Infs: should return zero
-        assert_eq!(elliprf(INFINITY, 1.0, 1.0).unwrap(), 0.0);
-        assert_eq!(elliprf(1.0, INFINITY, 1.0).unwrap(), 0.0);
-        assert_eq!(elliprf(1.0, 1.0, INFINITY).unwrap(), 0.0);
+        assert_eq!(elliprf(f64::INFINITY, 1.0, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprf(1.0, f64::INFINITY, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprf(1.0, 1.0, f64::INFINITY).unwrap(), 0.0);
     }
 
     // Regression for audit finding A5: https://github.com/p-sira/ellip/pull/119

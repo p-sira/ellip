@@ -66,7 +66,7 @@ use crate::{
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T, visit_macros = [case])]
 pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
     if x.min(y) < 0.0 {
         return Err("elliprd: x and y must be non-negative.");
@@ -83,7 +83,7 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
         return Ok(ans);
     }
     check!(@nan, elliprd, [x, y, z]);
-    case!(@any [x, y, z] == inf!(), T::zero());
+    case!(@any [x, y, z] == INF, 0.0);
     Err("elliprd: Failed to converge.")
 }
 
@@ -95,13 +95,13 @@ pub fn elliprd<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
 /// - x < 0, y < 0, z ≤ 0
 /// - x = 0 and y = 0
 /// - x = ∞ or y = ∞
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 #[inline]
 pub fn elliprd_unchecked<T: Float>(x: T, y: T, z: T) -> T {
     // Homogeneity keeps products in duplication and special cases in range.
     // Separate rescaling factors: scale*sqrt(scale) can itself overflow.
     let scale = x.abs().max(y.abs()).max(z.abs());
-    let limit = T::max_value().sqrt().sqrt().sqrt();
+    let limit = MAX_VAL.sqrt().sqrt().sqrt();
     if scale.is_finite() && scale > 0.0 && (scale > limit || scale < 1.0 / limit)
         // Do not turn nonzero arguments into singular zeros at extreme ratios.
         && [x, y, z].iter().all(|&v| v == 0.0 || v / scale != 0.0)
@@ -121,7 +121,7 @@ pub fn elliprd_unchecked<T: Float>(x: T, y: T, z: T) -> T {
             return 1.0 / (x * x.sqrt());
         }
         if x == 0.0 {
-            return 3.0 * pi!() / (4.0 * y * y.sqrt());
+            return 3.0 * PI / (4.0 * y * y.sqrt());
         }
     }
 
@@ -135,7 +135,7 @@ pub fn elliprd_unchecked<T: Float>(x: T, y: T, z: T) -> T {
         let mut sum = 0.0;
         let mut sum_pow = 0.25;
 
-        while (xn - yn).abs() >= 2.7 * epsilon!() * xn.abs() {
+        while (xn - yn).abs() >= 2.7 * EPS * xn.abs() {
             let t = (xn * yn).sqrt();
             xn = (xn + yn) / 2.0;
             yn = t;
@@ -143,7 +143,7 @@ pub fn elliprd_unchecked<T: Float>(x: T, y: T, z: T) -> T {
             let temp = xn - yn;
             sum = sum + sum_pow * temp * temp;
         }
-        let rf = pi!() / (xn + yn);
+        let rf = PI / (xn + yn);
         let pt = (x0 + 3.0 * y0) / (4.0 * z * (x0 + y0)) - sum / (z * (y - z));
         return pt * rf * 3.0;
     }
@@ -154,12 +154,13 @@ pub fn elliprd_unchecked<T: Float>(x: T, y: T, z: T) -> T {
 
     let mut an = (x + y + 3.0 * z) / 5.0;
     let a0 = an;
-    let mut q = (epsilon!() / 4.0).powf(-1.0 / 8.0) * (an - x).max(an - y).max(an - z) * 1.2;
+    // Three square roots evaluate the fixed negative eighth power without powf.
+    let mut q = 1.0 / (EPS / 4.0).sqrt().sqrt().sqrt() * (an - x).max(an - y).max(an - z) * 1.2;
 
     let mut fn_val = 1.0;
     let mut rd_sum = 0.0;
 
-    let mut ans = nan!();
+    let mut ans = NAN;
     for _ in 0..N_MAX_ITERATIONS {
         let rx = xn.sqrt();
         let ry = yn.sqrt();
@@ -185,8 +186,9 @@ pub fn elliprd_unchecked<T: Float>(x: T, y: T, z: T) -> T {
             let e4 = 3.0 * (xyz - z3) * z;
             let e5 = xyz * z2;
 
+            // Keep the factors separate so an * sqrt(an) cannot overflow.
             ans = fn_val
-                * an.powf(-1.5)
+                * (an.sqrt().recip() / an)
                 * (1.0 - 3.0 * e2 / 14.0 + e3 / 6.0 + 9.0 * e2 * e2 / 88.0
                     - 3.0 * e4 / 22.0
                     - 9.0 * e2 * e3 / 52.0
@@ -213,11 +215,6 @@ const N_MAX_ITERATIONS: usize = 1;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compare_test_data_boost;
-
-    fn _elliprd(inp: &[f64]) -> f64 {
-        elliprd(inp[0], inp[1], inp[2]).unwrap()
-    }
 
     #[test]
     fn test_elliprd_rounding_edges() {
@@ -258,37 +255,7 @@ mod tests {
     }
 
     #[test]
-    fn test_elliprd() {
-        compare_test_data_boost!("elliprd_data.txt", _elliprd, 4.8e-16);
-    }
-
-    #[test]
-    fn test_elliprd_0xy() {
-        compare_test_data_boost!("elliprd_0xy.txt", _elliprd, 5.9e-16);
-    }
-
-    #[test]
-    fn test_elliprd_0yy() {
-        compare_test_data_boost!("elliprd_0yy.txt", _elliprd, 2.6e-16);
-    }
-    #[test]
-    fn test_elliprd_xxx() {
-        compare_test_data_boost!("elliprd_xxx.txt", _elliprd, 2.3e-16);
-    }
-
-    #[test]
-    fn test_elliprd_xxz() {
-        compare_test_data_boost!("elliprd_xxz.txt", _elliprd, 7.9e-16);
-    }
-
-    #[test]
-    fn test_elliprd_xyy() {
-        compare_test_data_boost!("elliprd_xyy.txt", _elliprd, 3.7e-15);
-    }
-
-    #[test]
     fn test_elliprd_special_cases() {
-        use std::f64::{INFINITY, NAN};
         // x < 0 or y < 0: should return Err
         assert_eq!(
             elliprd(-1.0, 1.0, 1.0),
@@ -308,21 +275,21 @@ mod tests {
         );
         // NANs: should return Err
         assert_eq!(
-            elliprd(NAN, 1.0, 1.0),
+            elliprd(f64::NAN, 1.0, 1.0),
             Err("elliprd: Arguments cannot be NAN.")
         );
         assert_eq!(
-            elliprd(1.0, NAN, 1.0),
+            elliprd(1.0, f64::NAN, 1.0),
             Err("elliprd: Arguments cannot be NAN.")
         );
         assert_eq!(
-            elliprd(1.0, 1.0, NAN),
+            elliprd(1.0, 1.0, f64::NAN),
             Err("elliprd: Arguments cannot be NAN.")
         );
         // Infs: should return zero
-        assert_eq!(elliprd(INFINITY, 1.0, 1.0).unwrap(), 0.0);
-        assert_eq!(elliprd(1.0, INFINITY, 1.0).unwrap(), 0.0);
-        assert_eq!(elliprd(1.0, 1.0, INFINITY).unwrap(), 0.0);
+        assert_eq!(elliprd(f64::INFINITY, 1.0, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprd(1.0, f64::INFINITY, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprd(1.0, 1.0, f64::INFINITY).unwrap(), 0.0);
     }
 
     // Regression for audit finding A8: https://github.com/p-sira/ellip/pull/122

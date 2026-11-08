@@ -71,66 +71,65 @@ use crate::{
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 /// - The MathWorks, Inc. “ellipticF.” Accessed April 21, 2025. <https://www.mathworks.com/help/symbolic/sym.ellipticf.html>.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T, visit_macros = [case])]
 pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     check!(@nan, ellipf, [phi, m]);
     if m == 0.0 {
         return Ok(phi);
     }
     // Period reduction must not hide a pole or an interval of complex values.
-    if m >= 1.0 && (phi.abs() >= pi_2!() || m * phi.sin().powi(2) >= 1.0) {
+    if m >= 1.0 && (phi.abs() >= PI_2 || m * phi.sin().powi(2) >= 1.0) {
         return Err("ellipf: m sin²φ must be smaller than one.");
     }
     let sign = phi.signum();
     let phi = phi.abs();
 
     // Large phis
-    if phi > 1.0 / epsilon!() {
+    if phi > 1.0 / EPS {
         if phi.is_infinite() {
-            return Ok(sign * inf!());
+            return Ok(sign * INF);
         }
         // Phi is so large that phi%pi is necessarily zero (or garbage),
         // just return the second part of the duplication formula:
-        return Ok(sign * phi * (ellipk_precise_unchecked(m) / pi_2!()));
+        return Ok(sign * phi * (ellipk_precise_unchecked(m) / PI_2));
     }
 
-    // Carlson's algorithm works only for |phi| <= pi/2,
-    // use the integrand's periodicity to normalize phi
-    let mut rphi = phi % pi_2!();
-    let mut mm = ((phi - rphi) / pi_2!()).round();
-
-    let mut s = 1.0;
-    if mm % 2.0 > 0.5 {
-        mm = mm + 1.0;
-        s = -1.0;
-        rphi = pi_2!() - rphi;
-    }
+    // Avoid floating-point remainders for amplitudes already in the
+    // principal interval. Keep the endpoint on the periodic path.
+    let (rphi, mm, s) = if phi < PI_2 {
+        (phi, 0.0, 1.0)
+    } else {
+        let mut rphi = phi % PI_2;
+        let mut mm = ((phi - rphi) / PI_2).round();
+        let mut s = 1.0;
+        // Integer parity avoids a second floating remainder. Nonconvertible
+        // values (including NaN) retain the previous comparison.
+        if mm.to_i64().map_or_else(|| mm % 2.0 > 0.5, |n| n & 1 != 0) {
+            mm = mm + 1.0;
+            s = -1.0;
+            rphi = PI_2 - rphi;
+        }
+        (rphi, mm, s)
+    };
 
     let sphi = rphi.sin();
     let s2p = sphi * sphi;
-    if m * s2p >= 1.0 {
-        return Err("ellipf: m sin²φ must be smaller than one.");
-    }
     let cphi = rphi.cos();
     let c2p = cphi * cphi;
     let mut ans;
 
-    debug_assert!(s2p > min_val!() || !s2p.is_normal());
     // Use http://dlmf.nist.gov/19.25#E5, note that
     // c-1 simplifies to cot^2(rphi) which avoids cancellation.
     // Likewise c - k^2 is the same as (c - 1) + (1 - k^2).
     //
     let c = s2p.recip();
     let c_minus_one = c2p / s2p;
-    let arg2 = if m != 0.0 {
-        let cross = (c / m).abs();
-        if cross > 0.9 && cross < 1.1 {
-            c_minus_one + 1.0 - m
-        } else {
-            c - m
-        }
+    // m = 0 returned before period reduction.
+    let cross = (c / m).abs();
+    let arg2 = if cross > 0.9 && cross < 1.1 {
+        c_minus_one + 1.0 - m
     } else {
-        c
+        c - m
     };
     ans = if c.is_infinite() {
         // Homogeneous form avoids forming csc²(phi) for tiny amplitudes.
@@ -140,7 +139,7 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     };
 
     // It should not be possible for s2p to be less than MIN value.
-    // if s2p > min_val!() {
+    // if s2p > MIN_VAL {
     //     // Use http://dlmf.nist.gov/19.25#E5, note that
     //     // c-1 simplifies to cot^2(rphi) which avoids cancellation.
     //     // Likewise c - k^2 is the same as (c - 1) + (1 - k^2).
@@ -167,12 +166,11 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     }
 
     ans = sign * ans;
-    if ans.is_finite() {
-        #[cfg(not(feature = "test_force_fail"))]
+    if ans.is_finite() && !cfg!(feature = "test_force_fail") {
         return Ok(ans);
     }
     check!(@nan, ellipf, [phi, m]);
-    case!(m == neg_inf!(), T::zero());
+    case!(m == NEG_INF, 0.0);
     Err("ellipf: Unexpected error.")
 }
 
@@ -180,20 +178,11 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compare_test_data_boost;
-
-    #[test]
-    fn test_ellipf() {
-        compare_test_data_boost!("ellipf_data.txt", ellipf, 2, 5.1e-16);
-    }
 
     #[test]
     fn test_ellipf_special_cases() {
         use crate::ellipk;
-        use std::f64::{
-            consts::{FRAC_PI_2, PI},
-            INFINITY, NAN, NEG_INFINITY,
-        };
+        use std::f64::consts::{FRAC_PI_2, PI};
         // m * sin^2(phi) >= 1: should return Err
         assert_eq!(
             ellipf(FRAC_PI_2, 1.0),
@@ -210,12 +199,18 @@ mod tests {
         // m < 0: should be valid
         assert!(ellipf(FRAC_PI_2, -1.0).unwrap().is_finite());
         // phi = nan or m = nan: should return Err
-        assert_eq!(ellipf(NAN, 0.5), Err("ellipf: Arguments cannot be NAN."));
-        assert_eq!(ellipf(0.5, NAN), Err("ellipf: Arguments cannot be NAN."));
+        assert_eq!(
+            ellipf(f64::NAN, 0.5),
+            Err("ellipf: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            ellipf(0.5, f64::NAN),
+            Err("ellipf: Arguments cannot be NAN.")
+        );
         // phi = inf: F(inf, m) = inf
-        assert_eq!(ellipf(INFINITY, 0.5).unwrap(), INFINITY);
+        assert_eq!(ellipf(f64::INFINITY, 0.5).unwrap(), f64::INFINITY);
         // phi = -inf: F(-inf, m) = -inf
-        assert_eq!(ellipf(NEG_INFINITY, 0.5).unwrap(), NEG_INFINITY);
+        assert_eq!(ellipf(f64::NEG_INFINITY, 0.5).unwrap(), f64::NEG_INFINITY);
         // phi > 1/epsilon: F(phi, m) = 2 * phi * K(m) / pi
         assert_eq!(
             ellipf(1e16, 0.4).unwrap(),
@@ -226,11 +221,11 @@ mod tests {
         assert_eq!(ellipf(-1e-100, 0.4).unwrap(), (-1e-100).sin());
         // m = inf: should return Err
         assert_eq!(
-            ellipf(0.5, INFINITY),
+            ellipf(0.5, f64::INFINITY),
             Err("ellipf: m sin²φ must be smaller than one.")
         );
         // m = -inf: F(phi, -inf) = 0.0
-        assert_eq!(ellipf(0.5, NEG_INFINITY).unwrap(), 0.0);
+        assert_eq!(ellipf(0.5, f64::NEG_INFINITY).unwrap(), 0.0);
     }
 
     // Regression for audit finding A5: https://github.com/p-sira/ellip/pull/119

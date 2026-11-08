@@ -48,10 +48,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 m.iter()
                     .map(|&mj| {
                         let phi = s2pi.sqrt().asin();
-                        match ellippiinc(phi, 2.0, mj) {
-                            Ok(ans) => ans,
-                            Err(_) => f64::NAN,
-                        }
+                        ellippiinc(phi, 2.0, mj).unwrap_or(f64::NAN)
                     })
                     .collect()
             })
@@ -97,10 +94,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 m.iter()
                     .map(|&mj| {
                         let phi = s2pi.sqrt().asin();
-                        match ellippiinc(phi, 2.0, mj) {
-                            Ok(ans) => ans,
-                            Err(_) => f64::NAN,
-                        }
+                        ellippiinc(phi, 2.0, mj).unwrap_or(f64::NAN)
                     })
                     .collect()
             })

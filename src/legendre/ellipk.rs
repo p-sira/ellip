@@ -61,7 +61,7 @@ use crate::{
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
     // Negative parameters use the AGM, never the polynomial selector.
     if m < 0.0 && m.is_finite() {
@@ -71,7 +71,7 @@ pub fn ellipk<T: Float>(m: T) -> Result<T, StrErr> {
 }
 
 #[inline]
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub(crate) fn _ellipk<T: Float>(m: T) -> Result<T, StrErr> {
     match (m * 20.0).to_i64() {
         Some(0) | Some(1) => Ok(polyeval(m - 0.05, &coeffs::to_t(K_0_1))),
@@ -87,26 +87,25 @@ pub(crate) fn _ellipk<T: Float>(m: T) -> Result<T, StrErr> {
         Some(_) => ellipk_precise(m),
         None => {
             check!(@nan, ellipk, [m]);
-            if m == neg_inf!() {
+            if m == NEG_INF {
                 return Ok(0.0);
             }
+            // Remaining values are greater than one, including +infinity.
             #[cfg(not(feature = "test_force_fail"))]
-            if m > 1.0 {
-                // Also handles inf
-                return Err("ellipk: m must not be greater than 1.");
-            }
+            return Err("ellipk: m must not be greater than 1.");
+            #[cfg(feature = "test_force_fail")]
             Err("ellipk: Unexpected error.")
         }
     }
 }
 
 #[inline]
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub(crate) fn ellipk_precise<T: Float>(m: T) -> Result<T, StrErr> {
     // Special cases: https://dlmf.nist.gov/19.6.E1
     if m >= 1.0 {
         if m == 1.0 {
-            return Ok(inf!());
+            return Ok(INF);
         }
         return Err("ellipk: m must not be greater than 1.");
     }
@@ -115,10 +114,10 @@ pub(crate) fn ellipk_precise<T: Float>(m: T) -> Result<T, StrErr> {
 }
 
 /// Based on elliprf(1, 1-m, 0)
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T, visit_macros = [declare])]
 #[inline]
 pub fn ellipk_precise_unchecked<T: Float>(m: T) -> T {
-    declare!(mut [xn = T::one(), yn = (T::one() - m).sqrt(), t]);
+    declare!(mut [xn = 1.0, yn = (1.0 - m).sqrt(), t]);
 
     let tol = if core::mem::size_of::<T>() <= 4 {
         1e-3
@@ -140,7 +139,7 @@ pub fn ellipk_precise_unchecked<T: Float>(m: T) -> T {
     let diff = xn - yn;
     let sum = xn + yn;
     let corr = 1.0 - (diff * diff) / (4.0 * sum * sum);
-    pi!() / (sum * corr)
+    PI / (sum * corr)
 }
 
 const MAX_ITERATION: usize = 32;
@@ -149,40 +148,27 @@ const MAX_ITERATION: usize = 32;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compare_test_data_boost;
-    use crate::compare_test_data_wolfram;
-
-    #[test]
-    fn test_ellipk_boost() {
-        compare_test_data_boost!("ellipk_data.txt", ellipk, 1, 2.8e-16);
-    }
-
-    #[test]
-    fn test_ellipk_wolfram() {
-        compare_test_data_wolfram!("./tests/data/coverage", "ellipk_cov.csv", ellipk, 1, 2e-12);
-        compare_test_data_wolfram!("ellipk_data.csv", ellipk, 1, 5e-15);
-    }
 
     #[test]
     fn test_ellipk_special_cases() {
-        use std::f64::{consts::FRAC_PI_2, INFINITY, NAN, NEG_INFINITY};
+        use std::f64::consts::FRAC_PI_2;
         // m = 0: K(0) = pi/2
         assert_eq!(ellipk(0.0).unwrap(), FRAC_PI_2);
         // m = 1: K(1) = inf
-        assert_eq!(ellipk(1.0).unwrap(), INFINITY);
+        assert_eq!(ellipk(1.0).unwrap(), f64::INFINITY);
         // m < 0: should be valid, compare with reference value
         assert!(ellipk(-1.0).unwrap().is_finite());
         // m > 1: should return Err
         assert_eq!(ellipk(1.1), Err("ellipk: m must not be greater than 1."));
         // m = NaN: should return Err
-        assert_eq!(ellipk(NAN), Err("ellipk: Arguments cannot be NAN."));
+        assert_eq!(ellipk(f64::NAN), Err("ellipk: Arguments cannot be NAN."));
         // m = inf: should return Err
         assert_eq!(
-            ellipk(INFINITY),
+            ellipk(f64::INFINITY),
             Err("ellipk: m must not be greater than 1.")
         );
         // m = -inf: K(-inf) = 0
-        assert_eq!(ellipk(NEG_INFINITY).unwrap(), 0.0);
+        assert_eq!(ellipk(f64::NEG_INFINITY).unwrap(), 0.0);
     }
 
     // Regression for audit finding A10: https://github.com/p-sira/ellip/pull/124

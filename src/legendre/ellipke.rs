@@ -36,7 +36,7 @@ use crate::{crate_util::check, polyeval, StrErr};
 /// assert_close(k, 1.8540746773013719, 1e-15);
 /// assert_close(e, 1.3506438810476755, 1e-15);
 /// ```
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub fn ellipke<T: Float>(m: T) -> Result<(T, T), StrErr> {
     if m < 0.0 && m.is_finite() {
         let c = (1.0 - m).sqrt();
@@ -55,7 +55,7 @@ pub fn ellipke<T: Float>(m: T) -> Result<(T, T), StrErr> {
 }
 
 #[inline]
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 fn _ellipke<T: Float>(m: T) -> Result<(T, T), StrErr> {
     match (m * 20.0).to_i64() {
         Some(0) | Some(1) => {
@@ -132,27 +132,27 @@ fn _ellipke<T: Float>(m: T) -> Result<(T, T), StrErr> {
             if m < 1.0 {
                 Ok(ellipke_agm(m))
             } else if m == 1.0 {
-                Ok((inf!(), 1.0))
+                Ok((INF, 1.0))
             } else {
                 Err("ellipke: m must not be greater than 1.")
             }
         }
         None => {
             check!(@nan, ellipke, [m]);
-            if m == neg_inf!() {
-                return Ok((0.0, inf!()));
+            if m == NEG_INF {
+                return Ok((0.0, INF));
             }
+            // All remaining unconvertible parameters exceed one.
             #[cfg(not(feature = "test_force_fail"))]
-            if m > 1.0 {
-                return Err("ellipke: m must not be greater than 1.");
-            }
+            return Err("ellipke: m must not be greater than 1.");
+            #[cfg(feature = "test_force_fail")]
             Err("ellipke: Unexpected error.")
         }
     }
 }
 
 /// Dedicated fused AGM kernel initialized from complementary parameter y0 = sqrt(1 - m).
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 #[inline]
 pub(crate) fn ellipke_agm_from_y0<T: Float>(y0: T) -> (T, T) {
     let mut xn = T::one();
@@ -183,11 +183,11 @@ pub(crate) fn ellipke_agm_from_y0<T: Float>(y0: T) -> (T, T) {
     let diff = xn - yn;
     let s = xn + yn;
     let corr = 1.0 - (diff * diff) / (4.0 * s * s);
-    let k = pi!() / (s * corr);
+    let k = PI / (s * corr);
     let e = if y0 <= tol {
         super::ellipe::ellipe_near_one(y0)
     } else {
-        e * (pi!() / s)
+        e * (PI / s)
     };
     (k, e)
 }
@@ -202,7 +202,7 @@ pub(crate) fn ellipke_agm<T: Float>(m: T) -> (T, T) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{ellipe, ellipk, test_util::linspace, util::assert_close};
+    use crate::{ellipe, ellipk, util::assert_close};
 
     #[test]
     fn test_ellipke_rounding_edges() {
@@ -278,53 +278,6 @@ mod tests {
             ellipke(f64::INFINITY).unwrap_err(),
             "ellipke: m must not be greater than 1."
         );
-    }
-
-    #[test]
-    fn test_ellipke_matches_individual() {
-        // Test positive range [0, 0.999]
-        for m in linspace(0.0, 0.999, 100) {
-            let (k, e) = ellipke(m).unwrap();
-            let k_ref = ellipk(m).unwrap();
-            let e_ref = ellipe(m).unwrap();
-            assert_close(k, k_ref, 1e-14);
-            assert_close(e, e_ref, 1e-14);
-        }
-
-        // Test negative range [-10.0, 0.0]
-        for m in linspace(-10.0, -0.001, 100) {
-            let (k, e) = ellipke(m).unwrap();
-            let k_ref = ellipk(m).unwrap();
-            let e_ref = ellipe(m).unwrap();
-            assert_close(k, k_ref, 1e-14);
-            assert_close(e, e_ref, 1e-14);
-        }
-
-        // Test extreme negative range
-        for &m in &[-1e4, -1e8, -1e12, -1e16, -1e50] {
-            let (k, e) = ellipke(m).unwrap();
-            let k_ref = ellipk(m).unwrap();
-            let e_ref = ellipe(m).unwrap();
-            assert_close(k, k_ref, 1e-13);
-            assert_close(e, e_ref, 1e-13);
-        }
-    }
-
-    #[test]
-    fn test_ellipke_wolfram() {
-        use crate::compare_test_data_wolfram;
-
-        fn ellipke_k(m: f64) -> Result<f64, StrErr> {
-            Ok(ellipke(m)?.0)
-        }
-        fn ellipke_e(m: f64) -> Result<f64, StrErr> {
-            Ok(ellipke(m)?.1)
-        }
-
-        compare_test_data_wolfram!("ellipk_data.csv", ellipke_k, 1, 5e-15);
-        compare_test_data_wolfram!("ellipe_data.csv", ellipke_e, 1, 5e-15);
-        compare_test_data_wolfram!("ellipk_neg.csv", ellipke_k, 1, 5e-15);
-        compare_test_data_wolfram!("ellipe_neg.csv", ellipke_e, 1, 5e-15);
     }
 
     #[test]

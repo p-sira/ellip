@@ -79,15 +79,15 @@ enum ExitCond {
     MaxThres,
 }
 
-impl ExitCond {
-    fn to_string(&self) -> String {
-        match self {
-            Self::None => "-".to_string(),
-            Self::Converged => "Converged".to_string(),
-            Self::MinStep => "Min step size".to_string(),
-            Self::MaxIter => "Max iteration".to_string(),
-            Self::MaxThres => "Max threshold".to_string(),
-        }
+impl std::fmt::Display for ExitCond {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Self::None => "-",
+            Self::Converged => "Converged",
+            Self::MinStep => "Min step size",
+            Self::MaxIter => "Max iteration",
+            Self::MaxThres => "Max threshold",
+        })
     }
 }
 

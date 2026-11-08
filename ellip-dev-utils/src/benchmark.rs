@@ -3,9 +3,48 @@
  * Copyright 2025 Sira Pornsiriprasert <code@psira.me>
  */
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::sync::LazyLock;
 
 use crate::StrErr;
+
+/// Resolves Criterion's output directory once, using the same precedence as Criterion.
+pub fn criterion_output_directory() -> &'static Path {
+    static DIRECTORY: LazyLock<PathBuf> = LazyLock::new(|| {
+        if let Some(path) = std::env::var_os("CRITERION_HOME") {
+            return PathBuf::from(path);
+        }
+        if let Some(path) = std::env::var_os("CARGO_TARGET_DIR") {
+            return PathBuf::from(path).join("criterion");
+        }
+
+        #[derive(serde::Deserialize)]
+        struct Metadata {
+            target_directory: PathBuf,
+        }
+
+        let target_directory = (|| -> Result<PathBuf, Box<dyn std::error::Error>> {
+            let output = std::process::Command::new(
+                std::env::var_os("CARGO").unwrap_or_else(|| "cargo".into()),
+            )
+            .args(["metadata", "--no-deps", "--format-version", "1"])
+            .output()?;
+            if !output.status.success() {
+                return Err(String::from_utf8_lossy(&output.stderr).into_owned().into());
+            }
+            Ok(serde_json::from_slice::<Metadata>(&output.stdout)?.target_directory)
+        })();
+
+        match target_directory {
+            Ok(path) => path.join("criterion"),
+            Err(error) => {
+                eprintln!("Cannot resolve Cargo target directory: {error}; using target/criterion");
+                PathBuf::from("target/criterion")
+            }
+        }
+    });
+    &DIRECTORY
+}
 
 /// Criterion benchmark estimates structure
 #[derive(Debug, serde::Deserialize)]

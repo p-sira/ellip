@@ -31,7 +31,7 @@ pub struct Case<T: Float> {
 }
 
 pub fn compute_errors_from_cases<T: Float + Debug>(
-    func: &dyn Fn(&Vec<T>) -> T,
+    func: &dyn Fn(&[T]) -> T,
     cases: Vec<Case<T>>,
 ) -> Vec<f64> {
     cases
@@ -92,7 +92,7 @@ pub struct ErrorEntry<'a> {
 
 pub fn generate_error_entry_from_file<T: Float + Debug>(
     file_path: &str,
-    func: &dyn Fn(&Vec<T>) -> T,
+    func: &dyn Fn(&[T]) -> T,
 ) -> Stats {
     let result = crate::parser::read_wolfram_data(file_path);
     match result {
@@ -203,8 +203,6 @@ macro_rules! get_summary_entry {
             benchmark, file, parser, stats,
             test_report::{self, Case},
         };
-        use std::path::Path;
-
         ellip_dev_utils::func_wrapper!($func, f64, $arg_count);
 
         let test_paths = file::find_test_files($test_file_name, "wolfram");
@@ -217,13 +215,15 @@ macro_rules! get_summary_entry {
             cases,
         ));
 
-        // Criterion directory structure: target/criterion/<group>/<func>/new/estimates.json
-        let estimates_path_buf = Path::new("target/criterion")
+        let estimates_path_buf = benchmark::criterion_output_directory()
             .join($group)
             .join(stringify!($func))
             .join("new")
             .join("estimates.json");
-        let perf = benchmark::extract_criterion_mean(&estimates_path_buf).unwrap_or(f64::NAN);
+        let perf = benchmark::extract_criterion_mean(&estimates_path_buf).unwrap_or_else(|error| {
+            eprintln!("{}: {error}", estimates_path_buf.display());
+            f64::NAN
+        });
 
         ($name, stats, perf)
     }};

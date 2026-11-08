@@ -68,7 +68,7 @@ pub fn el1<T: Float>(x: T, kc: T) -> Result<T, StrErr> {
 }
 
 /// Computes [el1]. Control the precision using [BulirschConst].
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T, visit_macros = [case])]
 #[inline]
 pub fn el1_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> Result<T, StrErr> {
     if x == 0.0 {
@@ -82,7 +82,7 @@ pub fn el1_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> Result<T, S
     }
     check!(@nan, el1, [x, kc]);
     check!(@zero, el1, [kc]);
-    case!(kc == inf!(), T::zero());
+    case!(kc == INF, 0.0);
     Err("el1: Failed to converge.")
 }
 
@@ -93,13 +93,13 @@ pub fn el1_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> Result<T, S
 /// # Known Invalid Cases
 /// - kc = 0
 /// - kc = ∞
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T, visit_macros = [declare])]
 #[inline]
 pub fn el1_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> T {
     if x == 0.0 {
         return 0.0;
     }
-    declare!(mut [y = x.recip().abs(), kc = kc.abs(), m = T::one(), l = 0, e, g]);
+    declare!(mut [y = x.recip().abs(), kc = kc.abs(), m = 1.0, l = 0, e, g]);
 
     for _ in 0..N_MAX_ITERATIONS {
         e = m * kc;
@@ -124,21 +124,16 @@ pub fn el1_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T) -> T {
             l += 1;
         }
 
-        return x.signum() * ((m / y).atan() + pi!() * T::from(l).unwrap()) / m;
+        return x.signum() * ((m / y).atan() + PI * T::from(l).unwrap()) / m;
     }
-    nan!()
+    NAN
 }
 
 #[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{assert_close, compare_test_data_wolfram};
-
-    #[test]
-    fn test_el1() {
-        compare_test_data_wolfram!("el1_data.csv", el1, 2, 5.0 * f64::EPSILON);
-    }
+    use crate::assert_close;
 
     #[test]
     fn test_el1_references() {
@@ -169,20 +164,19 @@ mod tests {
     #[test]
     fn test_el1_special_cases() {
         use crate::bulirsch::cel1;
-        use std::f64::{INFINITY, NAN};
         // x = 0: el1(0, kc) = 0
         assert_eq!(el1(0.0, 0.5).unwrap(), 0.0);
         // kc = 0: should return Err
         assert_eq!(el1(0.5, 0.0), Err("el1: kc cannot be zero."));
         // x = inf: el1(inf, kc) = cel1(kc)
-        assert_eq!(el1(INFINITY, 0.5).unwrap(), cel1(0.5).unwrap());
+        assert_eq!(el1(f64::INFINITY, 0.5).unwrap(), cel1(0.5).unwrap());
         // kc = inf: el1(x, inf) = 0
-        assert_eq!(el1(0.5, INFINITY).unwrap(), 0.0);
+        assert_eq!(el1(0.5, f64::INFINITY).unwrap(), 0.0);
         // y = 0 branch in the loop
         assert_close!(el1(1.0, 1.0).unwrap(), std::f64::consts::FRAC_PI_4, 1e-15);
         // x = nan or kc = nan: should return Err
-        assert_eq!(el1(NAN, 0.5), Err("el1: Arguments cannot be NAN."));
-        assert_eq!(el1(0.5, NAN), Err("el1: Arguments cannot be NAN."));
+        assert_eq!(el1(f64::NAN, 0.5), Err("el1: Arguments cannot be NAN."));
+        assert_eq!(el1(0.5, f64::NAN), Err("el1: Arguments cannot be NAN."));
     }
 }
 

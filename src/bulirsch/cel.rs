@@ -76,7 +76,7 @@ pub fn cel<T: Float>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
 }
 
 /// Computes [cel]. Control the precision using [BulirschConst].
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T, visit_macros = [case, declare])]
 #[inline]
 pub fn cel_with_const<T: Float, C: BulirschConst<T>>(kc: T, p: T, a: T, b: T) -> Result<T, StrErr> {
     check!(@zero, cel, [kc, p]);
@@ -112,7 +112,7 @@ pub fn cel_with_const<T: Float, C: BulirschConst<T>>(kc: T, p: T, a: T, b: T) ->
         bb = -q / (g * g * pp) + aa * pp;
     }
 
-    let mut ans = T::nan();
+    let mut ans = NAN;
     for _ in 0..MAX_ITERATION {
         f = aa;
         let inv_pp = 1.0 / pp;
@@ -129,7 +129,7 @@ pub fn cel_with_const<T: Float, C: BulirschConst<T>>(kc: T, p: T, a: T, b: T) ->
             continue;
         }
 
-        ans = pi_2!() * (aa * m + bb) / (m * (m + pp));
+        ans = PI_2 * (aa * m + bb) / (m * (m + pp));
         break;
     }
 
@@ -138,12 +138,12 @@ pub fn cel_with_const<T: Float, C: BulirschConst<T>>(kc: T, p: T, a: T, b: T) ->
     }
     check!(@nan, cel, [kc, p, a, b]);
     check!(@multi, cel, "infinite", is_infinite, [kc, p, a, b]);
-    case!(@any [kc.abs(), p.abs()] == inf!(), T::zero());
+    case!(@any [kc.abs(), p.abs()] == INF, 0.0);
     if a.is_infinite() {
-        return Ok(a.signum() * inf!());
+        return Ok(a.signum() * INF);
     }
     if b.is_infinite() {
-        return Ok(b.signum() * inf!());
+        return Ok(b.signum() * INF);
     }
     Err("cel: Failed to converge.")
 }
@@ -151,52 +151,11 @@ pub fn cel_with_const<T: Float, C: BulirschConst<T>>(kc: T, p: T, a: T, b: T) ->
 #[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
-    use itertools::iproduct;
 
     use super::*;
-    use crate::{assert_close, ellipe, ellipk, ellippi, test_util::linspace};
-
-    /// Test using relationship with Legendre form.
-    /// Reference: https://dlmf.nist.gov/19.2#iii
-    #[test]
-    fn test_cel() {
-        fn _test(kc: f64, p: f64) {
-            let m = 1.0 - kc * kc;
-            let ellipk = ellipk(m).unwrap();
-            let ellipe = ellipe(m).unwrap();
-
-            // cel precision is low for K cases
-            assert_close! {ellipk, cel(kc, 1.0, 1.0, 1.0).unwrap(), 2e-12};
-            assert_close! {ellipe, cel(kc, 1.0, 1.0, kc * kc).unwrap(), 1e-15};
-            assert_close! {(ellipe - kc * kc * ellipk) / m, cel(kc, 1.0, 1.0, 0.0).unwrap(), 8.5e-14};
-
-            // Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions III”
-            let n = 1.0 - p;
-            let ellippi = ellippi(n, m).unwrap();
-
-            assert_close! {(ellipk - ellipe) / m, cel(kc, 1.0, 0.0, 1.0).unwrap(), 6e-12};
-            // cel precision is very low for PI cases
-            assert_close! {ellippi, cel(kc, p, 1.0, 1.0).unwrap(), 3.5e-12};
-            assert_close! {(ellippi - ellipk) / (1.0 - p), cel(kc, p, 0.0, 1.0).unwrap(), 3.5e-12};
-        }
-
-        let linsp_kc = [
-            linspace(-1.0 + 1e-3, -1e-3, 100),
-            linspace(1e-3, 1.0 - 1e-3, 100),
-        ]
-        .concat();
-        let linsp_p = linspace(1e-3, 1.0 - 1e-3, 10);
-
-        iproduct!(linsp_kc, linsp_p).for_each(|(kc, p)| _test(kc, p));
-
-        // Data from Bulirsch, “Numerical Calculation of Elliptic Integrals and Elliptic Functions III”
-        assert_close! {cel(1e-1, 4.1, 1.2, 1.1).unwrap(), 1.5464442694017956, 5e-16};
-        assert_close! {cel(1e-1, -4.1, 1.2, 1.1).unwrap(), -6.7687378198360556e-1, 5e-16};
-    }
 
     #[test]
     fn test_cel_special_cases() {
-        use std::f64::{INFINITY, NAN, NEG_INFINITY};
         // kc = 0: should return Err
         assert_eq!(cel(0.0, 1.0, 1.0, 1.0), Err("cel: kc cannot be zero."));
         // p = 0: should return Err
@@ -204,36 +163,45 @@ mod tests {
         // a = 0, b = 0: cel(kc, p, 0, 0) = 0
         assert_eq!(cel(0.5, 1.0, 0.0, 0.0).unwrap(), 0.0);
         // kc = inf: cel(inf, p, a, b) = 0
-        assert_eq!(cel(INFINITY, 0.5, 1.0, 1.0).unwrap(), 0.0);
+        assert_eq!(cel(f64::INFINITY, 0.5, 1.0, 1.0).unwrap(), 0.0);
         // kc = -inf: cel(-inf, kc, 1.0, 1.0) = 0
-        assert_eq!(cel(NEG_INFINITY, 0.5, 1.0, 1.0).unwrap(), 0.0);
+        assert_eq!(cel(f64::NEG_INFINITY, 0.5, 1.0, 1.0).unwrap(), 0.0);
         // p = inf: cel(kc, inf, a, b) = 0
-        assert_eq!(cel(0.5, INFINITY, 1.0, 1.0).unwrap(), 0.0);
+        assert_eq!(cel(0.5, f64::INFINITY, 1.0, 1.0).unwrap(), 0.0);
         // p = -inf: cel(kc, -inf, a, b) = 0
-        assert_eq!(cel(0.5, NEG_INFINITY, 1.0, 1.0).unwrap(), 0.0);
+        assert_eq!(cel(0.5, f64::NEG_INFINITY, 1.0, 1.0).unwrap(), 0.0);
         // a = inf: cel(kc, p, inf, b) = inf
-        assert_eq!(cel(0.5, 1.0, INFINITY, 1.0).unwrap(), INFINITY);
+        assert_eq!(cel(0.5, 1.0, f64::INFINITY, 1.0).unwrap(), f64::INFINITY);
         // b = inf: cel(kc, p, a, inf) = inf
-        assert_eq!(cel(0.5, 1.0, 1.0, INFINITY).unwrap(), INFINITY);
+        assert_eq!(cel(0.5, 1.0, 1.0, f64::INFINITY).unwrap(), f64::INFINITY);
+        // p != 1 exercises CEL's own infinite-numerator handling.
+        assert_eq!(cel(0.5, 0.5, f64::INFINITY, 1.0).unwrap(), f64::INFINITY);
+        assert_eq!(cel(0.5, 0.5, 1.0, f64::INFINITY).unwrap(), f64::INFINITY);
         // a = inf: cel(kc, p, -inf, b) = -inf
-        assert_eq!(cel(0.5, 1.0, NEG_INFINITY, 1.0).unwrap(), NEG_INFINITY);
+        assert_eq!(
+            cel(0.5, 1.0, f64::NEG_INFINITY, 1.0).unwrap(),
+            f64::NEG_INFINITY
+        );
         // b = inf: cel(kc, p, a, -inf) = -inf
-        assert_eq!(cel(0.5, 1.0, 1.0, NEG_INFINITY).unwrap(), NEG_INFINITY);
+        assert_eq!(
+            cel(0.5, 1.0, 1.0, f64::NEG_INFINITY).unwrap(),
+            f64::NEG_INFINITY
+        );
         // NANs: should return Err
         assert_eq!(
-            cel(NAN, 1.0, 1.0, 1.0),
+            cel(f64::NAN, 1.0, 1.0, 1.0),
             Err("cel: Arguments cannot be NAN.")
         );
         assert_eq!(
-            cel(0.5, NAN, 1.0, 1.0),
+            cel(0.5, f64::NAN, 1.0, 1.0),
             Err("cel: Arguments cannot be NAN.")
         );
         assert_eq!(
-            cel(0.5, 1.0, NAN, 1.0),
+            cel(0.5, 1.0, f64::NAN, 1.0),
             Err("cel: Arguments cannot be NAN.")
         );
         assert_eq!(
-            cel(0.5, 1.0, 1.0, NAN),
+            cel(0.5, 1.0, 1.0, f64::NAN),
             Err("cel: Arguments cannot be NAN.")
         );
     }

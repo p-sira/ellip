@@ -34,7 +34,7 @@ mod parser {
             let inputs = row
                 .iter()
                 .take(len - 1)
-                .map(|s| parse_wolfram_str(s).expect(&format!("Cannot parse data {s}")))
+                .map(|s| parse_wolfram_str(s).unwrap_or_else(|_| panic!("Cannot parse data {s}")))
                 .collect();
 
             results.push(inputs);

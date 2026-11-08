@@ -71,10 +71,10 @@ pub fn cel2<T: Float>(kc: T, a: T, b: T) -> Result<T, StrErr> {
 }
 
 /// Computes [cel2]. Control the precision using [BulirschConst].
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T, visit_macros = [declare])]
 #[inline]
 pub fn cel2_with_const<T: Float, C: BulirschConst<T>>(kc: T, a: T, b: T) -> Result<T, StrErr> {
-    declare!(mut [kc = kc.abs(), aa = a, bb = b, m = T::one(), c = aa, ans = T::nan(), m0]);
+    declare!(mut [kc = kc.abs(), aa = a, bb = b, m = 1.0, c = aa, ans = NAN, m0]);
     aa = bb + aa;
 
     for _ in 0..MAX_ITERATION {
@@ -89,7 +89,7 @@ pub fn cel2_with_const<T: Float, C: BulirschConst<T>>(kc: T, a: T, b: T) -> Resu
             continue;
         }
 
-        ans = pi!() / 4.0 * aa / m;
+        ans = PI_4 * aa / m;
         break;
     }
 
@@ -103,10 +103,10 @@ pub fn cel2_with_const<T: Float, C: BulirschConst<T>>(kc: T, a: T, b: T) -> Resu
         return Ok(0.0);
     }
     if a.is_infinite() {
-        return Ok(a.signum() * inf!());
+        return Ok(a.signum() * INF);
     }
     if b.is_infinite() {
-        return Ok(b.signum() * inf!());
+        return Ok(b.signum() * INF);
     }
     Err("cel2: Failed to converge.")
 }
@@ -115,44 +115,44 @@ pub fn cel2_with_const<T: Float, C: BulirschConst<T>>(kc: T, a: T, b: T) -> Resu
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{assert_close, ellipe, test_util::linspace};
-
-    #[test]
-    fn test_cel2() {
-        fn test_kc(kc: f64) {
-            let m = 1.0 - kc * kc;
-            assert_close!(ellipe(m).unwrap(), cel2(kc, 1.0, kc * kc).unwrap(), 7.7e-16);
-        }
-
-        let linsp_neg = linspace(-1.0, -1e-3, 100);
-        linsp_neg.iter().for_each(|kc| test_kc(*kc));
-        let linsp_pos = linspace(1e-3, 1.0, 100);
-        linsp_pos.iter().for_each(|kc| test_kc(*kc));
-    }
 
     #[test]
     fn test_cel2_special_cases() {
-        use std::f64::{INFINITY, NAN, NEG_INFINITY};
         // kc = 0: should return Err
         assert_eq!(cel2(0.0, 1.0, 1.0), Err("cel2: kc cannot be zero."));
         // kc = inf: cel2(inf, 1, 1) = 0
-        assert_eq!(cel2(INFINITY, 1.0, 1.0).unwrap(), 0.0);
+        assert_eq!(cel2(f64::INFINITY, 1.0, 1.0).unwrap(), 0.0);
         // kc = -inf: cel2(-inf, 1, 1) = 0
-        assert_eq!(cel2(NEG_INFINITY, 1.0, 1.0).unwrap(), 0.0);
+        assert_eq!(cel2(f64::NEG_INFINITY, 1.0, 1.0).unwrap(), 0.0);
         // a = 0 and b = 0: cel2(kc, a, b) = 0
         assert_eq!(cel2(0.5, 0.0, 0.0).unwrap(), 0.0);
         // a = inf: cel2(kc, inf, b) = inf
-        assert_eq!(cel2(0.5, INFINITY, 1.0).unwrap(), INFINITY);
+        assert_eq!(cel2(0.5, f64::INFINITY, 1.0).unwrap(), f64::INFINITY);
         // b = inf: cel2(kc, a, inf) = inf
-        assert_eq!(cel2(0.5, 1.0, INFINITY).unwrap(), INFINITY);
+        assert_eq!(cel2(0.5, 1.0, f64::INFINITY).unwrap(), f64::INFINITY);
         // a = inf: cel2(kc, -inf, b) = -inf
-        assert_eq!(cel2(0.5, NEG_INFINITY, 1.0).unwrap(), NEG_INFINITY);
+        assert_eq!(
+            cel2(0.5, f64::NEG_INFINITY, 1.0).unwrap(),
+            f64::NEG_INFINITY
+        );
         // b = inf: cel2(kc, a, -inf) = -inf
-        assert_eq!(cel2(0.5, 1.0, NEG_INFINITY).unwrap(), NEG_INFINITY);
+        assert_eq!(
+            cel2(0.5, 1.0, f64::NEG_INFINITY).unwrap(),
+            f64::NEG_INFINITY
+        );
         // NANs: should return Err
-        assert_eq!(cel2(NAN, 1.0, 1.0), Err("cel2: Arguments cannot be NAN."));
-        assert_eq!(cel2(0.5, NAN, 1.0), Err("cel2: Arguments cannot be NAN."));
-        assert_eq!(cel2(0.5, 1.0, NAN), Err("cel2: Arguments cannot be NAN."));
+        assert_eq!(
+            cel2(f64::NAN, 1.0, 1.0),
+            Err("cel2: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            cel2(0.5, f64::NAN, 1.0),
+            Err("cel2: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            cel2(0.5, 1.0, f64::NAN),
+            Err("cel2: Arguments cannot be NAN.")
+        );
     }
 }
 

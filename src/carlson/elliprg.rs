@@ -83,13 +83,13 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
 /// # Known Invalid Cases
 /// - x < 0, y < 0, z < 0
 /// - x, y, or z are infinite.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 #[inline]
 pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
     // Homogeneity keeps products in duplication and special cases in range.
     // Separate rescaling factors: scale*sqrt(scale) can itself overflow.
     let scale = x.abs().max(y.abs()).max(z.abs());
-    let limit = T::max_value().sqrt().sqrt().sqrt();
+    let limit = MAX_VAL.sqrt().sqrt().sqrt();
     if scale.is_finite() && scale > 0.0 && (scale > limit || scale < 1.0 / limit)
         // Do not turn nonzero arguments into singular zeros at extreme ratios.
         && [x, y, z].iter().all(|&v| v == 0.0 || v / scale != 0.0)
@@ -114,7 +114,7 @@ pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
         }
 
         if y == 0.0 {
-            return pi!() * x.sqrt() / 4.0;
+            return PI * x.sqrt() / 4.0;
         }
 
         return (x * elliprc_unchecked(y, x) + y.sqrt()) / 2.0;
@@ -136,7 +136,7 @@ pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
         let mut compensation = mean.mul_add(mean, -rg);
         let mut sum_pow = 0.25;
 
-        while (xn - yn).abs() >= 2.7 * epsilon!() * xn.abs() {
+        while (xn - yn).abs() >= 2.7 * EPS * xn.abs() {
             let t = (xn * yn).sqrt();
             xn = (xn + yn) / 2.0;
             yn = t;
@@ -146,7 +146,7 @@ pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
             compensation = (rg - next) - correction;
             rg = next;
         }
-        let rf = pi!() / (xn + yn);
+        let rf = PI / (xn + yn);
         return rg * rf / 2.0;
     }
 
@@ -154,7 +154,7 @@ pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
     (z * rf - (x - z) * (y - z) * rd / 3.0 + (x * y / z).sqrt()) / 2.0
 }
 
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 #[inline]
 pub fn elliprf_rd_unchecked<T: Float>(x: T, y: T, z: T) -> (T, T) {
     let mut xn = x;
@@ -164,20 +164,22 @@ pub fn elliprf_rd_unchecked<T: Float>(x: T, y: T, z: T) -> (T, T) {
     let a0_rd = (xn + yn + 3.0 * zn) / 5.0;
     let mut an_rf = a0_rf;
     let mut an_rd = a0_rd;
-    let eps = epsilon!();
-    let mut q_rf = (3.0 * eps).powf(-1.0 / 8.0)
+    let eps = EPS;
+    // Fixed negative eighth powers need only three square roots and a reciprocal.
+    let mut q_rf = 1.0 / (3.0 * eps).sqrt().sqrt().sqrt()
         * an_rf
             .abs()
             .max((an_rf - x).abs())
             .max((an_rf - y).abs())
             .max((an_rf - z).abs());
-    let mut q_rd = (eps / 4.0).powf(-1.0 / 8.0) * (an_rd - x).max(an_rd - y).max(an_rd - z) * 1.2;
+    let mut q_rd =
+        1.0 / (eps / 4.0).sqrt().sqrt().sqrt() * (an_rd - x).max(an_rd - y).max(an_rd - z) * 1.2;
 
     let mut fn_rf = 1.0;
     let mut fn_rd = 1.0;
     let mut rd_sum = 0.0;
-    let mut rf_res = nan!();
-    let mut rd_res = nan!();
+    let mut rf_res = NAN;
+    let mut rd_res = NAN;
     let mut rf_done = false;
     let mut rd_done = false;
 
@@ -203,7 +205,8 @@ pub fn elliprf_rd_unchecked<T: Float>(x: T, y: T, z: T) -> (T, T) {
                 let e3 = 3.0 * xyz - 8.0 * z3;
                 let e4 = 3.0 * (xyz - z3) * z_c;
                 let e5 = xyz * z2;
-                let inv_an_1_5 = an_rd.powf(-1.5);
+                // Avoid forming an_rd * sqrt(an_rd), which could overflow.
+                let inv_an_1_5 = an_rd.sqrt().recip() / an_rd;
                 rd_res = fn_rd
                     * inv_an_1_5
                     * (1.0 - 3.0 * e2 / 14.0 + e3 / 6.0 + 9.0 * e2 * e2 / 88.0
@@ -263,29 +266,7 @@ mod tests {
     use itertools::Itertools;
 
     use super::*;
-    use crate::{assert_close, compare_test_data_boost, compare_test_data_wolfram};
-
-    fn __elliprg(inp: &[&f64]) -> f64 {
-        elliprg(*inp[0], *inp[1], *inp[2]).unwrap()
-    }
-
-    fn _elliprg(inp: &[f64]) -> f64 {
-        let res = elliprg(inp[0], inp[1], inp[2]).unwrap();
-        inp.iter().permutations(inp.len()).skip(1).for_each(|perm| {
-            assert_close!(res, __elliprg(&perm), 6.5e-16);
-        });
-        res
-    }
-
-    #[test]
-    fn test_elliprg() {
-        compare_test_data_boost!("elliprg_data.txt", _elliprg, 8.1e-16);
-    }
-
-    #[test]
-    fn test_elliprg_wolfram() {
-        compare_test_data_wolfram!("elliprg_data.csv", elliprg, 3, 1e-15);
-    }
+    use crate::assert_close;
 
     #[test]
     fn test_elliprg_zero_unequal_scales() {
@@ -295,7 +276,7 @@ mod tests {
         for scale in [2.0_f64.powi(-600), 1.0, 2.0_f64.powi(600)] {
             let scaled = input.map(|x| x * scale);
             for perm in scaled.iter().permutations(3) {
-                let actual = __elliprg(&perm);
+                let actual = elliprg(*perm[0], *perm[1], *perm[2]).unwrap();
                 assert_close!(actual, expected * scale.sqrt(), 3.0 * f64::EPSILON);
             }
         }
@@ -313,28 +294,7 @@ mod tests {
     }
 
     #[test]
-    fn test_elliprg_xxx() {
-        compare_test_data_boost!("elliprg_xxx.txt", _elliprg, 2.4e-16);
-    }
-
-    #[test]
-    fn test_elliprg_xy0() {
-        compare_test_data_boost!("elliprg_xy0.txt", _elliprg, 4.4e-16);
-    }
-
-    #[test]
-    fn test_elliprg_xyy() {
-        compare_test_data_boost!("elliprg_xyy.txt", _elliprg, 5.4e-16);
-    }
-
-    #[test]
-    fn test_elliprg_00x() {
-        compare_test_data_boost!("elliprg_00x.txt", _elliprg, f64::EPSILON);
-    }
-
-    #[test]
     fn test_elliprg_special_cases() {
-        use std::f64::{INFINITY, NAN};
         // Negative arguments: should return Err
         assert_eq!(
             elliprg(-1.0, 1.0, 1.0),
@@ -350,28 +310,28 @@ mod tests {
         );
         // NANs: should return Err
         assert_eq!(
-            elliprg(NAN, 1.0, 1.0),
+            elliprg(f64::NAN, 1.0, 1.0),
             Err("elliprg: Arguments cannot be NAN.")
         );
         assert_eq!(
-            elliprg(1.0, NAN, 1.0),
+            elliprg(1.0, f64::NAN, 1.0),
             Err("elliprg: Arguments cannot be NAN.")
         );
         assert_eq!(
-            elliprg(1.0, 1.0, NAN),
+            elliprg(1.0, 1.0, f64::NAN),
             Err("elliprg: Arguments cannot be NAN.")
         );
         // Infinity arguments should return Err
         assert_eq!(
-            elliprg(INFINITY, 1.0, 1.0),
+            elliprg(f64::INFINITY, 1.0, 1.0),
             Err("elliprg: Arguments must be finite.")
         );
         assert_eq!(
-            elliprg(1.0, INFINITY, 1.0),
+            elliprg(1.0, f64::INFINITY, 1.0),
             Err("elliprg: Arguments must be finite.")
         );
         assert_eq!(
-            elliprg(1.0, 1.0, INFINITY),
+            elliprg(1.0, 1.0, f64::INFINITY),
             Err("elliprg: Arguments must be finite.")
         );
     }

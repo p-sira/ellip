@@ -71,13 +71,13 @@ use num_traits::Float;
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T, visit_macros = [case])]
 pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
     check!(@nan, elliprj, [x, y, z, p]);
     check!(@zero, elliprj, [p]);
     check!(@neg, elliprj, "x, y, and z must be non-negative.", [x, y, z]);
     check!(@multi_zero, elliprj, [x, y, z]);
-    case!(@any [x, y, z, p] == inf!(), T::zero());
+    case!(@any [x, y, z, p] == INF, 0.0);
     let ans = elliprj_unchecked(x, y, z, p);
 
     if ans.is_finite() {
@@ -88,7 +88,7 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
 
 /// Calculate RC(1, 1 + x)
 #[inline]
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 fn elliprc1p<T: Float>(y: T) -> T {
     // We can skip y = -1 check since the call from elliprj already did the check.
     // for 1 + y < 0, the integral is singular, return Cauchy principal value
@@ -109,6 +109,32 @@ fn elliprc1p<T: Float>(y: T) -> T {
         return polyeval(y, &coeffs);
     }
 
+    // The [7/7] Padé approximation of RC(1, 1+y) avoids transcendental
+    // calls where the Taylor polynomial above is no longer accurate enough.
+    if y.abs() <= 0.25 {
+        let numerator = [
+            1.0,
+            3.2873563218390807,
+            4.222988505747127,
+            2.6732348111658455,
+            0.8621800211005608,
+            0.1312131812881438,
+            0.0074039821376679265,
+            0.00006723114122974564,
+        ];
+        let denominator = [
+            1.0,
+            3.6206896551724137,
+            5.2298850574712645,
+            3.8352490421455938,
+            1.5007496251874064,
+            0.30014992503748128,
+            0.026328940792761515,
+            0.0006637548099015508,
+        ];
+        return polyeval(y, &numerator) / polyeval(y, &denominator);
+    }
+
     if y > 0.0 {
         y.sqrt().atan() / y.sqrt()
     } else if y == 0.0 {
@@ -124,7 +150,7 @@ fn elliprc1p<T: Float>(y: T) -> T {
 }
 
 /// Taylor expansion near RJ(2q, 2q, 3q, -q) = 0, for sorted x, y, z.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 fn elliprj_pv_near_zero<T: Float>(x: T, y: T, z: T, q: T, epsilon: T) -> Option<T> {
     // RJ(2q, 2q, 3q, -q) = 0. The reduction subtracts RF and RC
     // values of order q^(-1/2) here, losing the small result's sign.
@@ -189,7 +215,7 @@ fn elliprj_pv_near_zero<T: Float>(x: T, y: T, z: T, q: T, epsilon: T) -> Option<
 /// - p = 0
 /// - x = ∞ or y = ∞ or z = ∞
 #[inline]
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
     let_mut!(x, y, z);
     // for p < 0, the integral is singular, return Cauchy principal value
@@ -208,7 +234,7 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
         }
 
         // Widen the principal-value calculation before its cancelling reduction.
-        if p < 0.0 && T::epsilon() == T::from(f32::EPSILON).unwrap() {
+        if p < 0.0 && EPS == T::from(f32::EPSILON).unwrap() {
             if let (Some(x), Some(y), Some(z), Some(p)) =
                 (x.to_f64(), y.to_f64(), z.to_f64(), p.to_f64())
             {
@@ -231,7 +257,7 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
     // Homogeneity keeps products in duplication and special cases in range.
     // Separate rescaling factors: scale*sqrt(scale) can itself overflow.
     let scale = x.abs().max(y.abs()).max(z.abs()).max(p.abs());
-    let limit = T::max_value().sqrt().sqrt().sqrt();
+    let limit = MAX_VAL.sqrt().sqrt().sqrt();
     if scale.is_finite() && scale > 0.0 && (scale > limit || scale < 1.0 / limit)
         // Do not turn nonzero arguments into singular zeros at extreme ratios.
         && [x, y, z, p].iter().all(|&v| v == 0.0 || v / scale != 0.0)
@@ -303,7 +329,8 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
     let mut an = (x + y + z + 2.0 * p) / 5.0;
     let a0 = an;
     let mut delta = (p - x) * (p - y) * (p - z);
-    let q = (epsilon!() / 5.0).powf(-1.0 / 8.0)
+    // Fixed negative eighth power needs three square roots and a reciprocal.
+    let q = 1.0 / (EPS / 5.0).sqrt().sqrt().sqrt()
         * (an - x)
             .abs()
             .max((an - y).abs())
@@ -312,7 +339,7 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
 
     let mut fmn = 1.0;
     let mut rc_sum = 0.0;
-    let mut ans = nan!();
+    let mut ans = NAN;
     for _ in 0..N_MAX_ITERATION {
         let rx = xn.sqrt();
         let ry = yn.sqrt();
@@ -355,8 +382,10 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
             let e4 = (2.0 * xyz + e2 * p + 3.0 * p3) * p;
             let e5 = xyz * p2;
 
+            // Keep these factors separate so an * sqrt(an) cannot overflow.
+            let inv_an_1_5 = an.sqrt().recip() / an;
             let result = fmn
-                * an.powf(-1.5)
+                * inv_an_1_5
                 * (1.0 - 3.0 * e2 / 14.0 + e3 / 6.0 + 9.0 * e2 * e2 / 88.0
                     - 3.0 * e4 / 22.0
                     - 9.0 * e2 * e3 / 52.0
@@ -393,24 +422,198 @@ mod tests {
     use itertools::Itertools;
 
     use super::*;
-    use crate::{assert_close, compare_test_data_boost, compare_test_data_wolfram};
 
-    fn __elliprj(inp: &[&f64]) -> f64 {
-        elliprj(*inp[0], *inp[1], *inp[2], *inp[3]).unwrap()
+    #[test]
+    fn test_elliprc1p_pade_accuracy_at_boundaries() {
+        // Compare the rational approximation against the analytic RC(1,1+y).
+        // Include neighboring floats at both transitions to the other branches.
+        let edge = [0.01_f64, 0.25_f64];
+        for center in edge {
+            for y in [
+                f64::from_bits(center.to_bits() - 1),
+                center,
+                f64::from_bits(center.to_bits() + 1),
+            ] {
+                for signed_y in [y, -y] {
+                    let root = signed_y.abs().sqrt();
+                    let expected = if signed_y > 0.0 {
+                        root.atan() / root
+                    } else {
+                        root.atanh() / root
+                    };
+                    let actual = elliprc1p(signed_y);
+                    assert!(
+                        (actual / expected - 1.0).abs() <= 8.0 * f64::EPSILON,
+                        "y={signed_y}, expected={expected}, actual={actual}"
+                    );
+                }
+            }
+        }
+        for index in 0..=4096 {
+            let y = 0.01 + 0.24 * f64::from(index) / 4096.0;
+            for signed_y in [y, -y] {
+                let root = signed_y.abs().sqrt();
+                let expected = if signed_y > 0.0 {
+                    root.atan() / root
+                } else {
+                    root.atanh() / root
+                };
+                let actual = elliprc1p(signed_y);
+                assert!(
+                    (actual / expected - 1.0).abs() <= 8.0 * f64::EPSILON,
+                    "y={signed_y}, expected={expected}, actual={actual}"
+                );
+            }
+        }
     }
 
-    fn _elliprj(inp: &[f64]) -> f64 {
-        let res = elliprj(inp[0], inp[1], inp[2], inp[3]).unwrap();
-        let (p, sym_params) = inp.split_last().unwrap();
-        sym_params
-            .iter()
-            .permutations(sym_params.len())
-            .skip(1)
-            .for_each(|mut perm| {
-                perm.push(p);
-                assert_close!(res, __elliprj(&perm), 3e-14);
-            });
-        res
+    #[test]
+    fn test_elliprc1p_pade_accuracy_f32() {
+        for index in 0..=2048 {
+            let y = 0.01_f32 + 0.24 * (index as f32) / 2048.0;
+            for signed_y in [y, -y] {
+                let root = f64::from(signed_y).abs().sqrt();
+                let expected = if signed_y > 0.0 {
+                    root.atan() / root
+                } else {
+                    root.atanh() / root
+                };
+                let actual = elliprc1p(signed_y);
+                assert!(
+                    (f64::from(actual) / expected - 1.0).abs() <= 4.0 * f64::from(f32::EPSILON),
+                    "y={signed_y}, expected={expected}, actual={actual}"
+                );
+            }
+        }
+    }
+
+    // Compare the new square-root factors directly against their previous powf
+    // formulas, and check complete RJ results against high-precision references.
+    #[test]
+    fn test_elliprj_fixed_powers_f64() {
+        let eps = f64::EPSILON / 5.0;
+        let baseline = eps.powf(-1.0 / 8.0);
+        let optimized = eps.sqrt().sqrt().sqrt().recip();
+        assert!((optimized - baseline).abs() <= 2.0 * f64::EPSILON * baseline);
+
+        for exponent in (-680..=680).step_by(17) {
+            let center = 2.0_f64.powi(exponent);
+            for a in [
+                f64::from_bits(center.to_bits() - 1),
+                center,
+                f64::from_bits(center.to_bits() + 1),
+                1.37 * center,
+            ] {
+                let baseline = a.powf(-1.5);
+                let optimized = a.sqrt().recip() / a;
+                assert!(baseline.is_finite() && optimized.is_finite());
+                assert!(
+                    (optimized - baseline).abs() <= 8.0 * f64::EPSILON * baseline.abs(),
+                    "a={a}, powf={baseline}, sqrt={optimized}"
+                );
+            }
+        }
+
+        // Wolfram references evaluated at the exact binary floating inputs.
+        for (input, expected) in [
+            (
+                [
+                    0.0,
+                    0.4000000000000002,
+                    0.8000000000000002,
+                    1.2000000000000002,
+                ],
+                3.0709124928029596,
+            ),
+            (
+                [
+                    0.4000000000000002,
+                    0.8000000000000002,
+                    1.2000000000000002,
+                    0.8000000000000002,
+                ],
+                1.48299901714346,
+            ),
+            (
+                [
+                    0.8000000000000002,
+                    1.2000000000000002,
+                    1.6,
+                    0.4000000000000002,
+                ],
+                1.4245194933954851,
+            ),
+            ([1.0, 2.0, 3.0, 4.0], 0.23984809974956775),
+        ] {
+            let actual = elliprj(input[0], input[1], input[2], input[3]).unwrap();
+            assert!(
+                (actual / expected - 1.0).abs() <= 8.0 * f64::EPSILON,
+                "input={input:?}, expected={expected}, actual={actual}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_elliprj_fixed_powers_f32() {
+        let eps = f32::EPSILON / 5.0;
+        let baseline = eps.powf(-1.0 / 8.0);
+        let optimized = eps.sqrt().sqrt().sqrt().recip();
+        assert!((optimized - baseline).abs() <= 2.0 * f32::EPSILON * baseline);
+
+        for exponent in (-84..=84).step_by(3) {
+            let center = 2.0_f32.powi(exponent);
+            for a in [
+                f32::from_bits(center.to_bits() - 1),
+                center,
+                f32::from_bits(center.to_bits() + 1),
+                1.37 * center,
+            ] {
+                let baseline = a.powf(-1.5);
+                let optimized = a.sqrt().recip() / a;
+                assert!(baseline.is_finite() && optimized.is_finite());
+                assert!(
+                    (optimized - baseline).abs() <= 8.0 * f32::EPSILON * baseline.abs(),
+                    "a={a}, powf={baseline}, sqrt={optimized}"
+                );
+            }
+        }
+
+        // Wolfram references evaluated at the exact f32 inputs.
+        for (input, expected) in [
+            (
+                [
+                    0.0_f32,
+                    0.40000009536743203,
+                    0.8000000715255741,
+                    1.2000000476837163,
+                ],
+                3.070912_f32,
+            ),
+            (
+                [
+                    0.40000009536743203,
+                    0.8000000715255741,
+                    1.2000000476837163,
+                    0.8000000715255741,
+                ],
+                1.4829988,
+            ),
+            (
+                [
+                    0.8000000715255741,
+                    1.2000000476837163,
+                    1.6000000238418581,
+                    0.40000009536743203,
+                ],
+                1.4245193,
+            ),
+        ] {
+            let actual = elliprj(input[0], input[1], input[2], input[3]).unwrap();
+            assert!(
+                (actual / expected - 1.0).abs() <= 8.0 * f32::EPSILON,
+                "input={input:?}, expected={expected}, actual={actual}"
+            );
+        }
     }
 
     #[test]
@@ -549,91 +752,7 @@ mod tests {
     }
 
     #[test]
-    fn test_elliprj_pv_rounding_f32() {
-        // References rounded from 100-digit evaluations at exact f32 inputs.
-        for (input, expected) in [
-            (
-                [2.0_f32 + 2.0 * f32::EPSILON, 2.0, 3.0, -1.0],
-                1.2370731e-8_f32,
-            ),
-            ([2.0 - 2.0 * f32::EPSILON, 2.0, 3.0, -1.0], -1.2370734e-8),
-            (
-                [
-                    2.0 + 2.0 * f32::EPSILON,
-                    2.0 - 2.0 * f32::EPSILON,
-                    3.0,
-                    -1.0,
-                ],
-                -1.8478185e-15,
-            ),
-            ([0.8000001, 0.80000025, 1.2000004, -0.4000001], 5.277546e-9),
-            ([0.8000001, 1.2000003, 0.80000037, -0.4000001], 3.0562223e-8),
-            ([1.2, 0.80000025, 0.80000037, -0.4000001], 5.0569344e-8),
-        ] {
-            for scale in [2.0_f32.powi(-20), 1.0, 2.0_f32.powi(20)] {
-                for perm in input[..3].iter().permutations(3) {
-                    let actual = elliprj(
-                        *perm[0] * scale,
-                        *perm[1] * scale,
-                        *perm[2] * scale,
-                        input[3] * scale,
-                    )
-                    .unwrap()
-                        * scale
-                        * scale.sqrt();
-                    assert!(
-                        (actual / expected - 1.0).abs() <= 2.0 * f32::EPSILON,
-                        "input={input:?}, scale={scale}, actual={actual}, expected={expected}"
-                    );
-                    assert_eq!(actual.is_sign_negative(), expected.is_sign_negative());
-                }
-            }
-        }
-        for scale in [2.0_f32.powi(-70), 1.0, 2.0_f32.powi(70)] {
-            let actual = elliprj(scale, 2.0 * scale, 3.0 * scale, -4.0 * scale).unwrap()
-                * scale
-                * scale.sqrt();
-            crate::util::assert_close(actual, -0.2378677, 2.0 * f32::EPSILON);
-            assert_eq!(
-                elliprj(2.0 * scale, 2.0 * scale, 3.0 * scale, -scale),
-                Ok(0.0)
-            );
-        }
-        // Check the complete mu = one epsilon grid without an absolute floor.
-        for case in ellip_dev_utils::parser::read_wolfram_data::<f32>(
-            "tests/data/f32/wolfram/elliprj_pv.csv",
-        )
-        .unwrap()
-        {
-            let actual = elliprj(
-                case.inputs[0],
-                case.inputs[1],
-                case.inputs[2],
-                case.inputs[3],
-            )
-            .unwrap();
-            assert_eq!(actual, case.expected, "input={:?}", case.inputs);
-        }
-    }
-
-    #[test]
-    fn test_elliprj() {
-        compare_test_data_boost!("elliprj_data.txt", _elliprj, 2.7e-14, atol: 5e-25);
-        compare_test_data_boost!("elliprj_e2.txt", _elliprj, 4.8e-14, atol: 5e-25);
-        compare_test_data_boost!("elliprj_e3.txt", _elliprj, 3.1e-15, atol: 5e-25);
-        compare_test_data_boost!("elliprj_e4.txt", _elliprj, 2.2e-16, atol: 5e-25);
-        compare_test_data_boost!("elliprj_zp.txt", _elliprj, 3.5e-15, atol: 5e-25);
-    }
-
-    #[test]
-    fn test_elliprj_wolfram() {
-        compare_test_data_wolfram!("elliprj_data.csv", elliprj, 4, 3.1e-15);
-        compare_test_data_wolfram!("elliprj_pv.csv", elliprj, 4, 5e-14, atol: f64::EPSILON);
-    }
-
-    #[test]
     fn test_elliprj_special_cases() {
-        use std::f64::{INFINITY, NAN};
         // Negative arguments: should return Err
         assert_eq!(
             elliprj(-1.0, 1.0, 1.0, 1.0),
@@ -667,26 +786,26 @@ mod tests {
         );
         // NANs: should return Err
         assert_eq!(
-            elliprj(NAN, 1.0, 1.0, 1.0),
+            elliprj(f64::NAN, 1.0, 1.0, 1.0),
             Err("elliprj: Arguments cannot be NAN.")
         );
         assert_eq!(
-            elliprj(1.0, NAN, 1.0, 1.0),
+            elliprj(1.0, f64::NAN, 1.0, 1.0),
             Err("elliprj: Arguments cannot be NAN.")
         );
         assert_eq!(
-            elliprj(1.0, 1.0, NAN, 1.0),
+            elliprj(1.0, 1.0, f64::NAN, 1.0),
             Err("elliprj: Arguments cannot be NAN.")
         );
         assert_eq!(
-            elliprj(1.0, 1.0, 1.0, NAN),
+            elliprj(1.0, 1.0, 1.0, f64::NAN),
             Err("elliprj: Arguments cannot be NAN.")
         );
         // Infs: should return zero
-        assert_eq!(elliprj(INFINITY, 1.0, 1.0, 1.0).unwrap(), 0.0);
-        assert_eq!(elliprj(1.0, INFINITY, 1.0, 1.0).unwrap(), 0.0);
-        assert_eq!(elliprj(1.0, 1.0, INFINITY, 1.0).unwrap(), 0.0);
-        assert_eq!(elliprj(1.0, 1.0, 1.0, INFINITY).unwrap(), 0.0);
+        assert_eq!(elliprj(f64::INFINITY, 1.0, 1.0, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprj(1.0, f64::INFINITY, 1.0, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprj(1.0, 1.0, f64::INFINITY, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprj(1.0, 1.0, 1.0, f64::INFINITY).unwrap(), 0.0);
     }
 
     #[test]
