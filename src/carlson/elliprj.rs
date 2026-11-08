@@ -303,7 +303,8 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
     let mut an = (x + y + z + 2.0 * p) / 5.0;
     let a0 = an;
     let mut delta = (p - x) * (p - y) * (p - z);
-    let q = (EPS / 5.0).powf(-1.0 / 8.0)
+    // Fixed negative eighth power needs three square roots and a reciprocal.
+    let q = 1.0 / (EPS / 5.0).sqrt().sqrt().sqrt()
         * (an - x)
             .abs()
             .max((an - y).abs())
@@ -355,8 +356,10 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
             let e4 = (2.0 * xyz + e2 * p + 3.0 * p3) * p;
             let e5 = xyz * p2;
 
+            // Keep these factors separate so an * sqrt(an) cannot overflow.
+            let inv_an_1_5 = an.sqrt().recip() / an;
             let result = fmn
-                * an.powf(-1.5)
+                * inv_an_1_5
                 * (1.0 - 3.0 * e2 / 14.0 + e3 / 6.0 + 9.0 * e2 * e2 / 88.0
                     - 3.0 * e4 / 22.0
                     - 9.0 * e2 * e3 / 52.0
@@ -393,6 +396,135 @@ mod tests {
     use itertools::Itertools;
 
     use super::*;
+
+    // Compare the new square-root factors directly against their previous powf
+    // formulas, and check complete RJ results against high-precision references.
+    #[test]
+    fn test_elliprj_fixed_powers_f64() {
+        let eps = f64::EPSILON / 5.0;
+        let baseline = eps.powf(-1.0 / 8.0);
+        let optimized = eps.sqrt().sqrt().sqrt().recip();
+        assert!((optimized - baseline).abs() <= 2.0 * f64::EPSILON * baseline);
+
+        for exponent in (-680..=680).step_by(17) {
+            let center = 2.0_f64.powi(exponent);
+            for a in [
+                f64::from_bits(center.to_bits() - 1),
+                center,
+                f64::from_bits(center.to_bits() + 1),
+                1.37 * center,
+            ] {
+                let baseline = a.powf(-1.5);
+                let optimized = a.sqrt().recip() / a;
+                assert!(baseline.is_finite() && optimized.is_finite());
+                assert!(
+                    (optimized - baseline).abs() <= 8.0 * f64::EPSILON * baseline.abs(),
+                    "a={a}, powf={baseline}, sqrt={optimized}"
+                );
+            }
+        }
+
+        // Wolfram references evaluated at the exact binary floating inputs.
+        for (input, expected) in [
+            (
+                [
+                    0.0,
+                    0.4000000000000002,
+                    0.8000000000000002,
+                    1.2000000000000002,
+                ],
+                3.0709124928029596,
+            ),
+            (
+                [
+                    0.4000000000000002,
+                    0.8000000000000002,
+                    1.2000000000000002,
+                    0.8000000000000002,
+                ],
+                1.48299901714346,
+            ),
+            (
+                [
+                    0.8000000000000002,
+                    1.2000000000000002,
+                    1.6,
+                    0.4000000000000002,
+                ],
+                1.4245194933954851,
+            ),
+            ([1.0, 2.0, 3.0, 4.0], 0.23984809974956775),
+        ] {
+            let actual = elliprj(input[0], input[1], input[2], input[3]).unwrap();
+            assert!(
+                (actual / expected - 1.0).abs() <= 8.0 * f64::EPSILON,
+                "input={input:?}, expected={expected}, actual={actual}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_elliprj_fixed_powers_f32() {
+        let eps = f32::EPSILON / 5.0;
+        let baseline = eps.powf(-1.0 / 8.0);
+        let optimized = eps.sqrt().sqrt().sqrt().recip();
+        assert!((optimized - baseline).abs() <= 2.0 * f32::EPSILON * baseline);
+
+        for exponent in (-84..=84).step_by(3) {
+            let center = 2.0_f32.powi(exponent);
+            for a in [
+                f32::from_bits(center.to_bits() - 1),
+                center,
+                f32::from_bits(center.to_bits() + 1),
+                1.37 * center,
+            ] {
+                let baseline = a.powf(-1.5);
+                let optimized = a.sqrt().recip() / a;
+                assert!(baseline.is_finite() && optimized.is_finite());
+                assert!(
+                    (optimized - baseline).abs() <= 8.0 * f32::EPSILON * baseline.abs(),
+                    "a={a}, powf={baseline}, sqrt={optimized}"
+                );
+            }
+        }
+
+        // Wolfram references evaluated at the exact f32 inputs.
+        for (input, expected) in [
+            (
+                [
+                    0.0_f32,
+                    0.40000009536743203,
+                    0.8000000715255741,
+                    1.2000000476837163,
+                ],
+                3.070912_f32,
+            ),
+            (
+                [
+                    0.40000009536743203,
+                    0.8000000715255741,
+                    1.2000000476837163,
+                    0.8000000715255741,
+                ],
+                1.4829988,
+            ),
+            (
+                [
+                    0.8000000715255741,
+                    1.2000000476837163,
+                    1.6000000238418581,
+                    0.40000009536743203,
+                ],
+                1.4245193,
+            ),
+        ] {
+            let actual = elliprj(input[0], input[1], input[2], input[3]).unwrap();
+            assert!(
+                (actual / expected - 1.0).abs() <= 8.0 * f32::EPSILON,
+                "input={input:?}, expected={expected}, actual={actual}"
+            );
+        }
+    }
 
     #[test]
     fn test_elliprj_rounding_edges() {
