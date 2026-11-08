@@ -94,17 +94,23 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         return Ok(sign * phi * (ellipk_precise_unchecked(m) / PI_2));
     }
 
-    // Carlson's algorithm works only for |phi| <= pi/2,
-    // use the integrand's periodicity to normalize phi
-    let mut rphi = phi % PI_2;
-    let mut mm = ((phi - rphi) / PI_2).round();
-
-    let mut s = 1.0;
-    if mm % 2.0 > 0.5 {
-        mm = mm + 1.0;
-        s = -1.0;
-        rphi = PI_2 - rphi;
-    }
+    // Avoid floating-point remainders for amplitudes already in the
+    // principal interval. Keep the endpoint on the periodic path.
+    let (rphi, mm, s) = if phi < PI_2 {
+        (phi, 0.0, 1.0)
+    } else {
+        let mut rphi = phi % PI_2;
+        let mut mm = ((phi - rphi) / PI_2).round();
+        let mut s = 1.0;
+        // Integer parity avoids a second floating remainder. Nonconvertible
+        // values (including NaN) retain the previous comparison.
+        if mm.to_i64().map_or_else(|| mm % 2.0 > 0.5, |n| n & 1 != 0) {
+            mm = mm + 1.0;
+            s = -1.0;
+            rphi = PI_2 - rphi;
+        }
+        (rphi, mm, s)
+    };
 
     let sphi = rphi.sin();
     let s2p = sphi * sphi;

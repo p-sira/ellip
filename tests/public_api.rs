@@ -12,3 +12,4 @@ macro_rules! assert_close {
 
 mod accuracy;
 mod identities;
+mod optimization_regression;
