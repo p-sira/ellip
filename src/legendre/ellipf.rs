@@ -108,29 +108,22 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 
     let sphi = rphi.sin();
     let s2p = sphi * sphi;
-    if m * s2p >= 1.0 {
-        return Err("ellipf: m sin²φ must be smaller than one.");
-    }
     let cphi = rphi.cos();
     let c2p = cphi * cphi;
     let mut ans;
 
-    debug_assert!(s2p > MIN_VAL || !s2p.is_normal());
     // Use http://dlmf.nist.gov/19.25#E5, note that
     // c-1 simplifies to cot^2(rphi) which avoids cancellation.
     // Likewise c - k^2 is the same as (c - 1) + (1 - k^2).
     //
     let c = s2p.recip();
     let c_minus_one = c2p / s2p;
-    let arg2 = if m != 0.0 {
-        let cross = (c / m).abs();
-        if cross > 0.9 && cross < 1.1 {
-            c_minus_one + 1.0 - m
-        } else {
-            c - m
-        }
+    // m = 0 returned before period reduction.
+    let cross = (c / m).abs();
+    let arg2 = if cross > 0.9 && cross < 1.1 {
+        c_minus_one + 1.0 - m
     } else {
-        c
+        c - m
     };
     ans = if c.is_infinite() {
         // Homogeneous form avoids forming csc²(phi) for tiny amplitudes.
@@ -167,8 +160,7 @@ pub fn ellipf<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     }
 
     ans = sign * ans;
-    if ans.is_finite() {
-        #[cfg(not(feature = "test_force_fail"))]
+    if ans.is_finite() && !cfg!(feature = "test_force_fail") {
         return Ok(ans);
     }
     check!(@nan, ellipf, [phi, m]);

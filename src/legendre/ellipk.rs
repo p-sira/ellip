@@ -90,11 +90,10 @@ pub(crate) fn _ellipk<T: Float>(m: T) -> Result<T, StrErr> {
             if m == NEG_INF {
                 return Ok(0.0);
             }
+            // Remaining values are greater than one, including +infinity.
             #[cfg(not(feature = "test_force_fail"))]
-            if m > 1.0 {
-                // Also handles inf
-                return Err("ellipk: m must not be greater than 1.");
-            }
+            return Err("ellipk: m must not be greater than 1.");
+            #[cfg(feature = "test_force_fail")]
             Err("ellipk: Unexpected error.")
         }
     }

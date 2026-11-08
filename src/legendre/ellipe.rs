@@ -96,11 +96,10 @@ pub(crate) fn _ellipe<T: Float>(m: T) -> Result<T, StrErr> {
         Some(_) => ellipe_precise(m),
         None => {
             check!(@nan, ellipe, [m]);
+            // Negative parameters (including -infinity) were handled above.
             #[cfg(not(feature = "test_force_fail"))]
-            if m > 1.0 {
-                // Infinity cases
-                return Err("ellipe: m must not be greater than 1.");
-            }
+            return Err("ellipe: m must not be greater than 1.");
+            #[cfg(feature = "test_force_fail")]
             Err("ellipe: Unexpected error.")
         }
     }

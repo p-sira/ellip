@@ -142,10 +142,10 @@ fn _ellipke<T: Float>(m: T) -> Result<(T, T), StrErr> {
             if m == NEG_INF {
                 return Ok((0.0, INF));
             }
+            // All remaining unconvertible parameters exceed one.
             #[cfg(not(feature = "test_force_fail"))]
-            if m > 1.0 {
-                return Err("ellipke: m must not be greater than 1.");
-            }
+            return Err("ellipke: m must not be greater than 1.");
+            #[cfg(feature = "test_force_fail")]
             Err("ellipke: Unexpected error.")
         }
     }
