@@ -101,6 +101,18 @@ pub fn ellippiinc<T: Float>(phi: T, n: T, m: T) -> Result<T, StrErr> {
 
 #[inline]
 #[num_lazy_proc::generic_float(T)]
+fn sqrt_negative_characteristic_product<T: Float>(n: T, nn: T) -> T {
+    let product = -n * nn;
+    if product <= MIN_POSITIVE {
+        // Compute the factors separately when multiplication underflows.
+        (-n).sqrt() * nn.sqrt()
+    } else {
+        product.sqrt()
+    }
+}
+
+#[inline]
+#[num_lazy_proc::generic_float(T)]
 fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
     // Note vc = 1-v presumably without cancellation error
     let sphi = phi.abs().sin();
@@ -250,12 +262,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
             t = t * m / (m - n);
             result = result + t;
 
-            let mut p2 = -n * nn;
-            if p2 <= MIN_POSITIVE {
-                p2 = (-n).sqrt() * nn.sqrt();
-            } else {
-                p2 = p2.sqrt();
-            }
+            let p2 = sqrt_negative_characteristic_product(n, nn);
 
             let delta = (1.0 - m * sp2).sqrt();
             let t = n / ((m - n) * (n - 1.0));
@@ -525,6 +532,25 @@ mod tests {
             ellipf(phi, m).unwrap(),
             5e-6
         );
+    }
+
+    #[test]
+    fn test_negative_characteristic_sqrt_product_underflow() {
+        // The direct product rounds to zero, but its mathematical square
+        // root remains representable. A MIN_VAL guard returns zero instead.
+        let n = -f64::from_bits(1);
+        let nn = 0.5_f64;
+        assert_eq!(-n * nn, 0.0);
+        let expected = (-n).sqrt() * nn.sqrt();
+        assert!(expected > 0.0);
+        assert_eq!(sqrt_negative_characteristic_product(n, nn), expected);
+
+        let n = -f32::from_bits(1);
+        let nn = 0.5_f32;
+        assert_eq!(-n * nn, 0.0);
+        let expected = (-n).sqrt() * nn.sqrt();
+        assert!(expected > 0.0);
+        assert_eq!(sqrt_negative_characteristic_product(n, nn), expected);
     }
 
     #[test]
