@@ -63,7 +63,10 @@ fn main() {
         ]),
     ];
 
-    let output = format!("# Test Summary\n\n{}\n", summary_section.join("\n"));
+    let output = format!(
+        "# Test Summary\n\nSee the [full error report](tests/README.md) for detailed accuracy results and test reproducibility information.\n\n{}\n",
+        summary_section.join("\n")
+    );
 
     use std::fs::File;
     use std::io::Write;

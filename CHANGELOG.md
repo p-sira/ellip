@@ -13,6 +13,7 @@
 **Maintenance**
 - Replace deprecated floating-point constants in tests with `f64` associated constants and resolve Clippy warnings across the test, benchmark, reporting, and plotting utilities. ([#159](https://github.com/p-sira/ellip/pull/159))
 - Move reference dataset and cross-function consistency tests into the `public_api` integration test target, preserving existing coverage and sharing helpers under `tests/common/`. Update dataset path regression checks and keep forced-failure coverage tests compatible with integration builds. ([#162](https://github.com/p-sira/ellip/pull/162))
+- Fix missing performance values in generated test summaries when using a custom Cargo target directory. Affects development tooling only.
 
 ### 1.2.3
 **Bug Fixes**
