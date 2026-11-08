@@ -165,13 +165,15 @@ pub fn elliprf_rd_unchecked<T: Float>(x: T, y: T, z: T) -> (T, T) {
     let mut an_rf = a0_rf;
     let mut an_rd = a0_rd;
     let eps = EPS;
-    let mut q_rf = (3.0 * eps).powf(-1.0 / 8.0)
+    // Fixed negative eighth powers need only three square roots and a reciprocal.
+    let mut q_rf = 1.0 / (3.0 * eps).sqrt().sqrt().sqrt()
         * an_rf
             .abs()
             .max((an_rf - x).abs())
             .max((an_rf - y).abs())
             .max((an_rf - z).abs());
-    let mut q_rd = (eps / 4.0).powf(-1.0 / 8.0) * (an_rd - x).max(an_rd - y).max(an_rd - z) * 1.2;
+    let mut q_rd =
+        1.0 / (eps / 4.0).sqrt().sqrt().sqrt() * (an_rd - x).max(an_rd - y).max(an_rd - z) * 1.2;
 
     let mut fn_rf = 1.0;
     let mut fn_rd = 1.0;
@@ -203,7 +205,8 @@ pub fn elliprf_rd_unchecked<T: Float>(x: T, y: T, z: T) -> (T, T) {
                 let e3 = 3.0 * xyz - 8.0 * z3;
                 let e4 = 3.0 * (xyz - z3) * z_c;
                 let e5 = xyz * z2;
-                let inv_an_1_5 = an_rd.powf(-1.5);
+                // Avoid forming an_rd * sqrt(an_rd), which could overflow.
+                let inv_an_1_5 = an_rd.sqrt().recip() / an_rd;
                 rd_res = fn_rd
                     * inv_an_1_5
                     * (1.0 - 3.0 * e2 / 14.0 + e3 / 6.0 + 9.0 * e2 * e2 / 88.0

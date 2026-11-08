@@ -154,7 +154,8 @@ pub fn elliprd_unchecked<T: Float>(x: T, y: T, z: T) -> T {
 
     let mut an = (x + y + 3.0 * z) / 5.0;
     let a0 = an;
-    let mut q = (EPS / 4.0).powf(-1.0 / 8.0) * (an - x).max(an - y).max(an - z) * 1.2;
+    // Three square roots evaluate the fixed negative eighth power without powf.
+    let mut q = 1.0 / (EPS / 4.0).sqrt().sqrt().sqrt() * (an - x).max(an - y).max(an - z) * 1.2;
 
     let mut fn_val = 1.0;
     let mut rd_sum = 0.0;
@@ -185,8 +186,9 @@ pub fn elliprd_unchecked<T: Float>(x: T, y: T, z: T) -> T {
             let e4 = 3.0 * (xyz - z3) * z;
             let e5 = xyz * z2;
 
+            // Keep the factors separate so an * sqrt(an) cannot overflow.
             ans = fn_val
-                * an.powf(-1.5)
+                * (an.sqrt().recip() / an)
                 * (1.0 - 3.0 * e2 / 14.0 + e3 / 6.0 + 9.0 * e2 * e2 / 88.0
                     - 3.0 * e4 / 22.0
                     - 9.0 * e2 * e3 / 52.0
