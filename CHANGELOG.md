@@ -4,6 +4,8 @@
 ### 1.2.4
 **Performance Improvements**
 - `elliprd` and `elliprg`: Replace fixed fractional `powf` calculations with square roots and reciprocals in Carlson duplication kernels. ([#161](https://github.com/p-sira/ellip/pull/161))
+- `elliprj`: Replace fractional `powf` calculations and use a Padé approximation for moderate Carlson RC corrections. ([#163](https://github.com/p-sira/ellip/pull/163))
+- `ellipf`, `ellipeinc`, `ellipdinc`: Skip period reduction on principal amplitudes and use integer parity for larger periods. ([#163](https://github.com/p-sira/ellip/pull/163))
 
 **Dependencies**
 - Replace `num-lazy` and `numeric_literals` with `num-lazy-proc` for generic floating-point literals and constants. ([#159](https://github.com/p-sira/ellip/pull/159))

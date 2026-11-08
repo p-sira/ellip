@@ -91,16 +91,22 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         return Ok(sign * 2.0 * phi * ellipd(m)? / PI);
     }
 
-    // Carlson's algorithm works only for |phi| <= pi/2,
-    // use the integrand's periodicity to normalize phi
-    let mut rphi = phi % PI_2;
-    let mut mm = ((phi - rphi) / PI_2).round();
-    let mut s = 1.0;
-    if mm % 2.0 > 0.5 {
-        mm = mm + 1.0;
-        s = -1.0;
-        rphi = PI_2 - rphi;
-    }
+    // Skip floating-point remainders on the principal interval;
+    // retain the periodic path at and beyond pi/2.
+    let (rphi, mm, s) = if phi < PI_2 {
+        (phi, 0.0, 1.0)
+    } else {
+        let mut rphi = phi % PI_2;
+        let mut mm = ((phi - rphi) / PI_2).round();
+        let mut s = 1.0;
+        // Use integer parity when the rounded period count is representable.
+        if mm.to_i64().map_or_else(|| mm % 2.0 > 0.5, |n| n & 1 != 0) {
+            mm = mm + 1.0;
+            s = -1.0;
+            rphi = PI_2 - rphi;
+        }
+        (rphi, mm, s)
+    };
 
     let sinp = rphi.sin();
     let cosp = rphi.cos();

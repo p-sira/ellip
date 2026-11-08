@@ -109,6 +109,32 @@ fn elliprc1p<T: Float>(y: T) -> T {
         return polyeval(y, &coeffs);
     }
 
+    // The [7/7] Padé approximation of RC(1, 1+y) avoids transcendental
+    // calls where the Taylor polynomial above is no longer accurate enough.
+    if y.abs() <= 0.25 {
+        let numerator = [
+            1.0,
+            3.2873563218390807,
+            4.222988505747127,
+            2.6732348111658455,
+            0.8621800211005608,
+            0.1312131812881438,
+            0.0074039821376679265,
+            0.00006723114122974564,
+        ];
+        let denominator = [
+            1.0,
+            3.6206896551724137,
+            5.2298850574712645,
+            3.8352490421455938,
+            1.5007496251874064,
+            0.30014992503748128,
+            0.026328940792761515,
+            0.0006637548099015508,
+        ];
+        return polyeval(y, &numerator) / polyeval(y, &denominator);
+    }
+
     if y > 0.0 {
         y.sqrt().atan() / y.sqrt()
     } else if y == 0.0 {
@@ -396,6 +422,70 @@ mod tests {
     use itertools::Itertools;
 
     use super::*;
+
+    #[test]
+    fn test_elliprc1p_pade_accuracy_at_boundaries() {
+        // Compare the rational approximation against the analytic RC(1,1+y).
+        // Include neighboring floats at both transitions to the other branches.
+        let edge = [0.01_f64, 0.25_f64];
+        for center in edge {
+            for y in [
+                f64::from_bits(center.to_bits() - 1),
+                center,
+                f64::from_bits(center.to_bits() + 1),
+            ] {
+                for signed_y in [y, -y] {
+                    let root = signed_y.abs().sqrt();
+                    let expected = if signed_y > 0.0 {
+                        root.atan() / root
+                    } else {
+                        root.atanh() / root
+                    };
+                    let actual = elliprc1p(signed_y);
+                    assert!(
+                        (actual / expected - 1.0).abs() <= 8.0 * f64::EPSILON,
+                        "y={signed_y}, expected={expected}, actual={actual}"
+                    );
+                }
+            }
+        }
+        for index in 0..=4096 {
+            let y = 0.01 + 0.24 * f64::from(index) / 4096.0;
+            for signed_y in [y, -y] {
+                let root = signed_y.abs().sqrt();
+                let expected = if signed_y > 0.0 {
+                    root.atan() / root
+                } else {
+                    root.atanh() / root
+                };
+                let actual = elliprc1p(signed_y);
+                assert!(
+                    (actual / expected - 1.0).abs() <= 8.0 * f64::EPSILON,
+                    "y={signed_y}, expected={expected}, actual={actual}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_elliprc1p_pade_accuracy_f32() {
+        for index in 0..=2048 {
+            let y = 0.01_f32 + 0.24 * (index as f32) / 2048.0;
+            for signed_y in [y, -y] {
+                let root = f64::from(signed_y).abs().sqrt();
+                let expected = if signed_y > 0.0 {
+                    root.atan() / root
+                } else {
+                    root.atanh() / root
+                };
+                let actual = elliprc1p(signed_y);
+                assert!(
+                    (f64::from(actual) / expected - 1.0).abs() <= 4.0 * f64::from(f32::EPSILON),
+                    "y={signed_y}, expected={expected}, actual={actual}"
+                );
+            }
+        }
+    }
 
     // Compare the new square-root factors directly against their previous powf
     // formulas, and check complete RJ results against high-precision references.

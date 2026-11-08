@@ -128,16 +128,22 @@ pub fn ellipeinc_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         return Ok(invert * (2.0 * mm + remains.sin()));
     }
 
-    // Carlson's algorithm works only for |phi| <= pi/2,
-    // use the integrand's periodicity to normalize phi
-    let mut rphi = phi % PI_2;
-    let mut mm = ((phi - rphi) / PI_2).round();
-    let mut s = 1.0;
-    if mm % 2.0 > 0.5 {
-        mm = mm + 1.0;
-        s = -1.0;
-        rphi = PI_2 - rphi;
-    }
+    // Skip period reduction when the amplitude is already in range.
+    // The endpoint remains on the original periodic path.
+    let (rphi, mm, s) = if phi < PI_2 {
+        (phi, 0.0, 1.0)
+    } else {
+        let mut rphi = phi % PI_2;
+        let mut mm = ((phi - rphi) / PI_2).round();
+        let mut s = 1.0;
+        // Use integer parity when the rounded period count is representable.
+        if mm.to_i64().map_or_else(|| mm % 2.0 > 0.5, |n| n & 1 != 0) {
+            mm = mm + 1.0;
+            s = -1.0;
+            rphi = PI_2 - rphi;
+        }
+        (rphi, mm, s)
+    };
 
     let mut result = if rphi == 0.0 || (m.is_finite() && (m.abs() * rphi) * rphi < EPS) {
         // rphi == 0 at phi = k*pi: the reduced-angle part is 0, so skip the Carlson block
