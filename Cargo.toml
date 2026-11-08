@@ -44,7 +44,7 @@ num-traits = { version = "0.2.19", default-features = false }
 num-lazy-proc = "0.3.0"
 
 [dev-dependencies]
-criterion = { version = "5", package = "codspeed-criterion-compat" }
+criterion = { version = "6", package = "codspeed-criterion-compat" }
 csv = "1.3.1"
 ellip-dev-utils = { workspace = true }
 itertools = "0.15"
@@ -58,7 +58,7 @@ default = ["libm"]
 libm = ["num-traits/libm"]
 std = ["num-traits/std"]
 unstable = []
-# Deprecated. Has no effect. The feature flag kept for legacy compatibility. Ellip supports no_std by default. 
+# Deprecated. Has no effect. The feature flag kept for legacy compatibility. Ellip supports no_std by default.
 no_std = []
 # Used for generating code coverage report only
 test_force_fail = []
