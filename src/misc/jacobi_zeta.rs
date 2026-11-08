@@ -84,10 +84,7 @@ pub fn jacobi_zeta_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     Ok(if phi.is_finite() && phi == nphi * PI_2 {
         // Z(nπ/2, m) when n is an integer.
         0.0
-    } else if m >= 1.0 {
-        if m != 1.0 {
-            return Err("jacobi_zeta: m must not be greater than 1.");
-        }
+    } else if m == 1.0 {
         sign * sinp * cosp.signum()
     } else {
         let mc = 1.0 - m;
@@ -135,6 +132,12 @@ mod tests {
         assert_eq!(jacobi_zeta(FRAC_PI_3, 1.0).unwrap(), FRAC_PI_3.sin());
         assert_eq!(jacobi_zeta(FRAC_PI_4, 1.0).unwrap(), FRAC_PI_4.sin());
         assert_eq!(jacobi_zeta(FRAC_PI_6, 1.0).unwrap(), FRAC_PI_6.sin());
+        // The sign changes across successive quadrants, and Z is odd in phi.
+        let phi = 3.0 * FRAC_PI_4;
+        assert_eq!(jacobi_zeta(phi, 1.0).unwrap(), -phi.sin());
+        assert_eq!(jacobi_zeta(-phi, 1.0).unwrap(), phi.sin());
+        let phi = 5.0 * FRAC_PI_4;
+        assert_eq!(jacobi_zeta(phi, 1.0).unwrap(), -phi.sin());
         // m > 1: should return Err
         assert_eq!(
             jacobi_zeta(1.0, 1.5),
