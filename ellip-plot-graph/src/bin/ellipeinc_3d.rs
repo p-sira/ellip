@@ -45,10 +45,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             m.iter()
                 .map(|&mj| {
                     let phi = s2pi.sqrt().asin();
-                    match ellipeinc(phi, mj) {
-                        Ok(ans) => ans,
-                        Err(_) => f64::NAN,
-                    }
+                    ellipeinc(phi, mj).unwrap_or(f64::NAN)
                 })
                 .collect()
         })

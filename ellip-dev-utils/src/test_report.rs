@@ -31,7 +31,7 @@ pub struct Case<T: Float> {
 }
 
 pub fn compute_errors_from_cases<T: Float + Debug>(
-    func: &dyn Fn(&Vec<T>) -> T,
+    func: &dyn Fn(&[T]) -> T,
     cases: Vec<Case<T>>,
 ) -> Vec<f64> {
     cases
@@ -92,7 +92,7 @@ pub struct ErrorEntry<'a> {
 
 pub fn generate_error_entry_from_file<T: Float + Debug>(
     file_path: &str,
-    func: &dyn Fn(&Vec<T>) -> T,
+    func: &dyn Fn(&[T]) -> T,
 ) -> Stats {
     let result = crate::parser::read_wolfram_data(file_path);
     match result {

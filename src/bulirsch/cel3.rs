@@ -58,13 +58,13 @@ pub fn cel3<T: Float>(kc: T, p: T) -> Result<T, StrErr> {
 }
 
 /// Computes [cel3]. Control the precision using [BulirschConst].
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T, visit_macros = [case, declare])]
 #[inline]
 pub fn cel3_with_const<T: Float, C: BulirschConst<T>>(kc: T, p: T) -> Result<T, StrErr> {
     check!(@nan, cel3, [kc, p]);
     check!(@zero, cel3, [kc, p]);
     check!(@multi, cel3, "infinite", is_infinite, [kc, p]);
-    case!(@any [kc.abs(), p.abs()] == inf!(), T::zero());
+    case!(@any [kc.abs(), p.abs()] == INF, 0.0);
 
     if p == 1.0 {
         return cel1_with_const::<T, C>(kc);
@@ -100,7 +100,7 @@ pub fn cel3_with_const<T: Float, C: BulirschConst<T>>(kc: T, p: T) -> Result<T, 
         }
     }
 
-    let mut ans = T::nan();
+    let mut ans = NAN;
     for _ in 0..MAX_CEL3_ITERATION {
         f = aa;
         let inv_pp = 1.0 / pp;
@@ -126,7 +126,7 @@ pub fn cel3_with_const<T: Float, C: BulirschConst<T>>(kc: T, p: T) -> Result<T, 
             continue;
         }
 
-        ans = pi_2!() * ((aa * m + bb) / m) / (m + pp);
+        ans = PI_2 * ((aa * m + bb) / m) / (m + pp);
         break;
     }
 
@@ -169,15 +169,14 @@ mod tests {
 
     #[test]
     fn test_cel3_special_cases() {
-        use std::f64::{INFINITY, NAN, NEG_INFINITY};
         assert_eq!(cel3(0.0, 1.0), Err("cel3: kc cannot be zero."));
         assert_eq!(cel3(1.0, 0.0), Err("cel3: p cannot be zero."));
-        assert_eq!(cel3(INFINITY, 1.0).unwrap(), 0.0);
-        assert_eq!(cel3(NEG_INFINITY, 1.0).unwrap(), 0.0);
-        assert_eq!(cel3(NAN, 1.0), Err("cel3: Arguments cannot be NAN."));
+        assert_eq!(cel3(f64::INFINITY, 1.0).unwrap(), 0.0);
+        assert_eq!(cel3(f64::NEG_INFINITY, 1.0).unwrap(), 0.0);
+        assert_eq!(cel3(f64::NAN, 1.0), Err("cel3: Arguments cannot be NAN."));
 
         // Both infinite: returns Err
-        assert!(cel3(INFINITY, INFINITY).is_err());
+        assert!(cel3(f64::INFINITY, f64::INFINITY).is_err());
 
         // Extreme logarithmically spaced values:
         assert!(cel3(1e-300, 0.5).is_ok());

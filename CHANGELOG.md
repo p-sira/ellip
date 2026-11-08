@@ -1,6 +1,13 @@
 # Changelog
 
 ## 1.2
+### 1.2.4
+**Dependencies**
+- Replace `num-lazy` and `numeric_literals` with `num-lazy-proc` for generic floating-point literals and constants. ([#159](https://github.com/p-sira/ellip/pull/159))
+
+**Maintenance**
+- Replace deprecated floating-point constants in tests with `f64` associated constants and resolve Clippy warnings across the test, benchmark, reporting, and plotting utilities. ([#159](https://github.com/p-sira/ellip/pull/159))
+
 ### 1.2.3
 **Bug Fixes**
 - Fix rounding loss in `elliprg`'s zero-argument AGM branch using compensated correction subtraction and the initial square's fused rounding residual.  ([#155](https://github.com/p-sira/ellip/pull/155))

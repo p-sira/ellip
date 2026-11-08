@@ -64,7 +64,7 @@ use crate::{
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 /// - The SciPy Community. “SciPy: Special Functions - Elliprc.” Accessed April 17, 2025. <https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.elliprc.html>.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T, visit_macros = [case])]
 pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, StrErr> {
     if x < 0.0 {
         return Err("elliprc: x must be non-negative.");
@@ -79,7 +79,7 @@ pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, StrErr> {
         return Ok(ans);
     }
     check!(@nan, elliprc, [x, y]);
-    case!(@any [x, y] == inf!(), T::zero());
+    case!(@any [x, y] == INF, 0.0);
     Err("elliprc: Unexpected error.")
 }
 
@@ -92,12 +92,12 @@ pub fn elliprc<T: Float>(x: T, y: T) -> Result<T, StrErr> {
 /// - y = 0
 /// - x = ∞ or y = ∞
 #[inline]
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub fn elliprc_unchecked<T: Float>(x: T, y: T) -> T {
     // Homogeneity keeps products in duplication and special cases in range.
     // Separate rescaling factors: scale*sqrt(scale) can itself overflow.
     let scale = x.abs().max(y.abs());
-    let limit = T::max_value().sqrt().sqrt().sqrt();
+    let limit = MAX_VAL.sqrt().sqrt().sqrt();
     if scale.is_finite() && scale > 0.0 && (scale > limit || scale < 1.0 / limit)
         // Do not turn nonzero arguments into singular zeros at extreme ratios.
         && [x, y].iter().all(|&v| v == 0.0 || v / scale != 0.0)
@@ -115,7 +115,7 @@ pub fn elliprc_unchecked<T: Float>(x: T, y: T) -> T {
     }
 
     if x == 0.0 {
-        return prefix * pi_2!() / y.sqrt();
+        return prefix * PI_2 / y.sqrt();
     }
 
     if x == y {
@@ -127,7 +127,7 @@ pub fn elliprc_unchecked<T: Float>(x: T, y: T) -> T {
     }
 
     #[cfg(feature = "test_force_fail")]
-    return nan!();
+    return NAN;
 
     if y / x > 0.5 {
         let arg = ((x - y) / x).sqrt();
@@ -154,7 +154,7 @@ mod tests {
 
     #[test]
     fn test_elliprc_special_cases() {
-        use std::f64::{consts::PI, INFINITY, NAN};
+        use std::f64::consts::PI;
         // x < 0: should return Err
         assert_eq!(elliprc(-1.0, 1.0), Err("elliprc: x must be non-negative."));
         // y == 0: should return Err
@@ -178,11 +178,17 @@ mod tests {
             ((3.0 + 8.0.sqrt()).ln() / 8.0.sqrt())
         );
         // NANs: should return Err
-        assert_eq!(elliprc(NAN, 1.0), Err("elliprc: Arguments cannot be NAN."));
-        assert_eq!(elliprc(1.0, NAN), Err("elliprc: Arguments cannot be NAN."));
+        assert_eq!(
+            elliprc(f64::NAN, 1.0),
+            Err("elliprc: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            elliprc(1.0, f64::NAN),
+            Err("elliprc: Arguments cannot be NAN.")
+        );
         // Infs: should return 0
-        assert_eq!(elliprc(INFINITY, 1.0).unwrap(), 0.0);
-        assert_eq!(elliprc(1.0, INFINITY).unwrap(), 0.0);
+        assert_eq!(elliprc(f64::INFINITY, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprc(1.0, f64::INFINITY).unwrap(), 0.0);
     }
 
     // Regression for audit finding A8: https://github.com/p-sira/ellip/pull/122

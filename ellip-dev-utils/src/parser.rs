@@ -41,11 +41,11 @@ pub fn read_wolfram_data<T: Float>(file_path: &str) -> Result<Vec<Case<T>>, StrE
         let inputs = row
             .iter()
             .take(len - 1)
-            .map(|s| parse_wolfram_str(s).expect(&format!("Cannot parse data {s}")))
+            .map(|s| parse_wolfram_str(s).unwrap_or_else(|_| panic!("Cannot parse data {s}")))
             .collect();
         let expected = {
             let s = &row[len - 1];
-            parse_wolfram_str(s).expect(&format!("Cannot parse data {s}"))
+            parse_wolfram_str(s).unwrap_or_else(|_| panic!("Cannot parse data {s}"))
         };
         results.push(Case { inputs, expected });
     }

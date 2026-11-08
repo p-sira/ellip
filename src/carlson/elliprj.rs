@@ -71,13 +71,13 @@ use num_traits::Float;
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T, visit_macros = [case])]
 pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
     check!(@nan, elliprj, [x, y, z, p]);
     check!(@zero, elliprj, [p]);
     check!(@neg, elliprj, "x, y, and z must be non-negative.", [x, y, z]);
     check!(@multi_zero, elliprj, [x, y, z]);
-    case!(@any [x, y, z, p] == inf!(), T::zero());
+    case!(@any [x, y, z, p] == INF, 0.0);
     let ans = elliprj_unchecked(x, y, z, p);
 
     if ans.is_finite() {
@@ -88,7 +88,7 @@ pub fn elliprj<T: Float>(x: T, y: T, z: T, p: T) -> Result<T, StrErr> {
 
 /// Calculate RC(1, 1 + x)
 #[inline]
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 fn elliprc1p<T: Float>(y: T) -> T {
     // We can skip y = -1 check since the call from elliprj already did the check.
     // for 1 + y < 0, the integral is singular, return Cauchy principal value
@@ -124,7 +124,7 @@ fn elliprc1p<T: Float>(y: T) -> T {
 }
 
 /// Taylor expansion near RJ(2q, 2q, 3q, -q) = 0, for sorted x, y, z.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 fn elliprj_pv_near_zero<T: Float>(x: T, y: T, z: T, q: T, epsilon: T) -> Option<T> {
     // RJ(2q, 2q, 3q, -q) = 0. The reduction subtracts RF and RC
     // values of order q^(-1/2) here, losing the small result's sign.
@@ -189,7 +189,7 @@ fn elliprj_pv_near_zero<T: Float>(x: T, y: T, z: T, q: T, epsilon: T) -> Option<
 /// - p = 0
 /// - x = ∞ or y = ∞ or z = ∞
 #[inline]
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
     let_mut!(x, y, z);
     // for p < 0, the integral is singular, return Cauchy principal value
@@ -208,7 +208,7 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
         }
 
         // Widen the principal-value calculation before its cancelling reduction.
-        if p < 0.0 && T::epsilon() == T::from(f32::EPSILON).unwrap() {
+        if p < 0.0 && EPS == T::from(f32::EPSILON).unwrap() {
             if let (Some(x), Some(y), Some(z), Some(p)) =
                 (x.to_f64(), y.to_f64(), z.to_f64(), p.to_f64())
             {
@@ -231,7 +231,7 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
     // Homogeneity keeps products in duplication and special cases in range.
     // Separate rescaling factors: scale*sqrt(scale) can itself overflow.
     let scale = x.abs().max(y.abs()).max(z.abs()).max(p.abs());
-    let limit = T::max_value().sqrt().sqrt().sqrt();
+    let limit = MAX_VAL.sqrt().sqrt().sqrt();
     if scale.is_finite() && scale > 0.0 && (scale > limit || scale < 1.0 / limit)
         // Do not turn nonzero arguments into singular zeros at extreme ratios.
         && [x, y, z, p].iter().all(|&v| v == 0.0 || v / scale != 0.0)
@@ -303,7 +303,7 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
     let mut an = (x + y + z + 2.0 * p) / 5.0;
     let a0 = an;
     let mut delta = (p - x) * (p - y) * (p - z);
-    let q = (epsilon!() / 5.0).powf(-1.0 / 8.0)
+    let q = (EPS / 5.0).powf(-1.0 / 8.0)
         * (an - x)
             .abs()
             .max((an - y).abs())
@@ -312,7 +312,7 @@ pub fn elliprj_unchecked<T: Float>(x: T, y: T, z: T, p: T) -> T {
 
     let mut fmn = 1.0;
     let mut rc_sum = 0.0;
-    let mut ans = nan!();
+    let mut ans = NAN;
     for _ in 0..N_MAX_ITERATION {
         let rx = xn.sqrt();
         let ry = yn.sqrt();
@@ -633,7 +633,6 @@ mod tests {
 
     #[test]
     fn test_elliprj_special_cases() {
-        use std::f64::{INFINITY, NAN};
         // Negative arguments: should return Err
         assert_eq!(
             elliprj(-1.0, 1.0, 1.0, 1.0),
@@ -667,26 +666,26 @@ mod tests {
         );
         // NANs: should return Err
         assert_eq!(
-            elliprj(NAN, 1.0, 1.0, 1.0),
+            elliprj(f64::NAN, 1.0, 1.0, 1.0),
             Err("elliprj: Arguments cannot be NAN.")
         );
         assert_eq!(
-            elliprj(1.0, NAN, 1.0, 1.0),
+            elliprj(1.0, f64::NAN, 1.0, 1.0),
             Err("elliprj: Arguments cannot be NAN.")
         );
         assert_eq!(
-            elliprj(1.0, 1.0, NAN, 1.0),
+            elliprj(1.0, 1.0, f64::NAN, 1.0),
             Err("elliprj: Arguments cannot be NAN.")
         );
         assert_eq!(
-            elliprj(1.0, 1.0, 1.0, NAN),
+            elliprj(1.0, 1.0, 1.0, f64::NAN),
             Err("elliprj: Arguments cannot be NAN.")
         );
         // Infs: should return zero
-        assert_eq!(elliprj(INFINITY, 1.0, 1.0, 1.0).unwrap(), 0.0);
-        assert_eq!(elliprj(1.0, INFINITY, 1.0, 1.0).unwrap(), 0.0);
-        assert_eq!(elliprj(1.0, 1.0, INFINITY, 1.0).unwrap(), 0.0);
-        assert_eq!(elliprj(1.0, 1.0, 1.0, INFINITY).unwrap(), 0.0);
+        assert_eq!(elliprj(f64::INFINITY, 1.0, 1.0, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprj(1.0, f64::INFINITY, 1.0, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprj(1.0, 1.0, f64::INFINITY, 1.0).unwrap(), 0.0);
+        assert_eq!(elliprj(1.0, 1.0, 1.0, f64::INFINITY).unwrap(), 0.0);
     }
 
     #[test]

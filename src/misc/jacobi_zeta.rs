@@ -50,7 +50,7 @@ use crate::{carlson::elliprj_unchecked, crate_util::check, ellipk, StrErr};
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed August 30, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Reinhardt, W. P., and P. L. Walker. “DLMF: Chapter 22 Jacobian Elliptic Functions.” Accessed August 31, 2025. <https://dlmf.nist.gov/22>.
 /// - Weisstein, Eric W. “Jacobi Zeta Function.” Wolfram Research, Inc. Accessed August 31, 2025. <https://mathworld.wolfram.com/JacobiZetaFunction.html>.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub fn jacobi_zeta<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     let ans = jacobi_zeta_unchecked(phi, m)?;
     if ans.is_finite() {
@@ -69,7 +69,7 @@ pub fn jacobi_zeta<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 /// - |φ| = ∞
 /// - m = -∞
 #[inline]
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub fn jacobi_zeta_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     if m > 1.0 {
         return Err("jacobi_zeta: m must not be greater than 1.");
@@ -80,8 +80,8 @@ pub fn jacobi_zeta_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     let sinp = phi.sin();
     let cosp = phi.cos();
 
-    let nphi = (phi / (pi_2!())).round();
-    Ok(if phi.is_finite() && phi == nphi * pi_2!() {
+    let nphi = (phi / (PI_2)).round();
+    Ok(if phi.is_finite() && phi == nphi * PI_2 {
         // Z(nπ/2, m) when n is an integer.
         0.0
     } else if m >= 1.0 {
@@ -95,7 +95,7 @@ pub fn jacobi_zeta_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         let one_m_ms2p = mc + m * c2p;
 
         sign * m * sinp * cosp * one_m_ms2p.sqrt() * elliprj_unchecked(0.0, mc, 1.0, one_m_ms2p)
-            / (3.0 * ellipk(m).unwrap_or(nan!()))
+            / (3.0 * ellipk(m).unwrap_or(NAN))
     })
 }
 
@@ -117,10 +117,7 @@ mod tests {
 
     #[test]
     fn test_jacobi_zeta_special_cases() {
-        use std::f64::{
-            consts::{FRAC_PI_2, FRAC_PI_3, FRAC_PI_4, FRAC_PI_6, PI},
-            INFINITY, NAN,
-        };
+        use std::f64::consts::{FRAC_PI_2, FRAC_PI_3, FRAC_PI_4, FRAC_PI_6, PI};
 
         // Z(0, m) = 0
         assert_eq!(jacobi_zeta(0.0, 0.5).unwrap(), 0.0);
@@ -145,24 +142,24 @@ mod tests {
         );
         // NANs: should return Err
         assert_eq!(
-            jacobi_zeta(NAN, 1.0),
+            jacobi_zeta(f64::NAN, 1.0),
             Err("jacobi_zeta: Arguments cannot be NAN.")
         );
         assert_eq!(
-            jacobi_zeta(1.0, NAN),
+            jacobi_zeta(1.0, f64::NAN),
             Err("jacobi_zeta: Arguments cannot be NAN.")
         );
         // inf: should return Err
         assert_eq!(
-            jacobi_zeta(INFINITY, 1.0),
+            jacobi_zeta(f64::INFINITY, 1.0),
             Err("jacobi_zeta: phi cannot be infinite.")
         );
         assert_eq!(
-            jacobi_zeta(-INFINITY, 1.0),
+            jacobi_zeta(-f64::INFINITY, 1.0),
             Err("jacobi_zeta: phi cannot be infinite.")
         );
         assert_eq!(
-            jacobi_zeta(1.0, -INFINITY),
+            jacobi_zeta(1.0, -f64::INFINITY),
             Err("jacobi_zeta: m cannot be infinite.")
         );
     }

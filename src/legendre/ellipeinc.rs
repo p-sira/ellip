@@ -74,7 +74,7 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         return Ok(ans);
     }
     #[cfg(feature = "test_force_fail")]
-    let ans = nan!();
+    let ans = NAN;
     check!(@nan, ellipeinc, [phi, m]);
     Err("ellipeinc: Unexpected error.")
 }
@@ -86,7 +86,7 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 /// # Known Invalid Cases
 /// - NAN arguments
 #[inline]
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub fn ellipeinc_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     if phi == 0.0 {
         return Ok(0.0);
@@ -98,20 +98,20 @@ pub fn ellipeinc_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 
     let (phi, invert) = if phi < 0.0 { (-phi, -1.0) } else { (phi, 1.0) };
 
-    if phi > 1.0 / epsilon!() {
-        if phi >= max_val!() {
-            return Ok(invert * inf!());
+    if phi > 1.0 / EPS {
+        if phi >= MAX_VAL {
+            return Ok(invert * INF);
         }
-        return Ok(invert * 2.0 * phi * ellipe_wrapper(m)? / pi!());
+        return Ok(invert * 2.0 * phi * ellipe_wrapper(m)? / PI);
     }
 
     // m -> -inf, sqrt(1+m sin²θ) -> m sinθ
     // E(phi, m) -> sqrt(-m) int(sin(theta)) d(theta), theta=[0,phi]
     // E(phi, m) -> sqrt(-m) (1-cos(phi))
-    if m <= -max_val!() {
+    if m <= -MAX_VAL {
         // Integrate |sin(theta)|, retaining the full periods and oddness.
-        let periods = (phi / pi!()).floor();
-        let rphi = phi % pi!();
+        let periods = (phi / PI).floor();
+        let rphi = phi % PI;
         let half_sin = (rphi / 2.0).sin();
         let area = 2.0 * (periods + half_sin * half_sin);
         return Ok(invert * area * (-m).sqrt());
@@ -123,23 +123,23 @@ pub fn ellipeinc_unchecked<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         // 2 - sin(pi- phi) = 2 + sin(phi - pi) for pi/2 <= phi <= pi, so general form is:
         //
         // 2n + sin(phi - n * pi) ; |phi - n * pi| <= pi / 2
-        let mm = (phi / pi!()).round();
-        let remains = phi - mm * pi!();
+        let mm = (phi / PI).round();
+        let remains = phi - mm * PI;
         return Ok(invert * (2.0 * mm + remains.sin()));
     }
 
     // Carlson's algorithm works only for |phi| <= pi/2,
     // use the integrand's periodicity to normalize phi
-    let mut rphi = phi % pi_2!();
-    let mut mm = ((phi - rphi) / pi_2!()).round();
+    let mut rphi = phi % PI_2;
+    let mut mm = ((phi - rphi) / PI_2).round();
     let mut s = 1.0;
     if mm % 2.0 > 0.5 {
         mm = mm + 1.0;
         s = -1.0;
-        rphi = pi_2!() - rphi;
+        rphi = PI_2 - rphi;
     }
 
-    let mut result = if rphi == 0.0 || (m.is_finite() && (m.abs() * rphi) * rphi < epsilon!()) {
+    let mut result = if rphi == 0.0 || (m.is_finite() && (m.abs() * rphi) * rphi < EPS) {
         // rphi == 0 at phi = k*pi: the reduced-angle part is 0, so skip the Carlson block
         // (which would divide by sin²(rphi) = 0) and keep only the m*mm*E(m) period term.
         // See http://functions.wolfram.com/EllipticIntegrals/EllipticE2/06/01/03/0001/
@@ -242,10 +242,7 @@ mod tests {
 
     #[test]
     fn test_ellipeinc_special_cases() {
-        use std::f64::{
-            consts::{FRAC_PI_2, PI},
-            INFINITY, MAX, MIN_POSITIVE, NAN, NEG_INFINITY,
-        };
+        use std::f64::consts::{FRAC_PI_2, PI};
         // phi = pi/2, m=1: E(pi/2, 1) = 1
         assert_eq!(ellipeinc(FRAC_PI_2, 1.0).unwrap(), 1.0);
         // m = 1: E(phi, 1) = sin(phi)
@@ -258,18 +255,21 @@ mod tests {
         // phi = 0: E(0, m) = 0
         assert_eq!(ellipeinc(0.0, 0.5).unwrap(), 0.0);
         // phi -> 0, m > 0: E(phi, m) = phi
-        assert_eq!(ellipeinc(MIN_POSITIVE, 0.5).unwrap(), MIN_POSITIVE);
+        assert_eq!(
+            ellipeinc(f64::MIN_POSITIVE, 0.5).unwrap(),
+            f64::MIN_POSITIVE
+        );
         // phi = pi/2, m = 0: E(pi/2, 0) = pi/2
         assert_eq!(ellipeinc(FRAC_PI_2, 0.0).unwrap(), FRAC_PI_2);
         // m < 0: should be valid
         assert!(ellipeinc(FRAC_PI_2, -1.0).unwrap().is_finite());
         // phi = nan or m = nan: should return Err
         assert_eq!(
-            ellipeinc(NAN, 0.5),
+            ellipeinc(f64::NAN, 0.5),
             Err("ellipeinc: Arguments cannot be NAN.")
         );
         assert_eq!(
-            ellipeinc(0.5, NAN),
+            ellipeinc(0.5, f64::NAN),
             Err("ellipeinc: Arguments cannot be NAN.")
         );
         // phi > 1/epsilon: E(phi, m) = 2 * phi * E(m) / pi
@@ -278,22 +278,25 @@ mod tests {
             2.0 * 1e16 * ellipe(0.5).unwrap() / PI
         );
         // phi = inf: E(inf, m) = inf
-        assert_eq!(ellipeinc(INFINITY, 0.5).unwrap(), INFINITY);
+        assert_eq!(ellipeinc(f64::INFINITY, 0.5).unwrap(), f64::INFINITY);
         // phi = -inf: E(-inf, m) = -inf
-        assert_eq!(ellipeinc(NEG_INFINITY, 0.5).unwrap(), NEG_INFINITY);
+        assert_eq!(
+            ellipeinc(f64::NEG_INFINITY, 0.5).unwrap(),
+            f64::NEG_INFINITY
+        );
         // m = inf: should return Err
         assert_eq!(
-            ellipeinc(0.5, INFINITY),
+            ellipeinc(0.5, f64::INFINITY),
             Err("ellipeinc: m sin²φ must be smaller than one.")
         );
         // m -> -inf: E(phi, m) = (1-cos(phi)) sqrt(-m)
         crate::util::assert_close(
-            ellipeinc(0.5, -MAX).unwrap(),
-            (1.0 - 0.5.cos()) * MAX.sqrt(),
+            ellipeinc(0.5, -f64::MAX).unwrap(),
+            (1.0 - 0.5.cos()) * f64::MAX.sqrt(),
             1e-15,
         );
         // m = -inf: E(phi, -inf) = inf
-        assert_eq!(ellipeinc(0.5, NEG_INFINITY).unwrap(), INFINITY);
+        assert_eq!(ellipeinc(0.5, f64::NEG_INFINITY).unwrap(), f64::INFINITY);
     }
 
     // Regression for audit finding A9: https://github.com/p-sira/ellip/pull/123
