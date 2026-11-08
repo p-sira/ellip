@@ -2,6 +2,9 @@
 
 ## 1.2
 ### 1.2.4
+**Performance Improvements**
+- `elliprd` and `elliprg`: Replace fixed fractional `powf` calculations with square roots and reciprocals in Carlson duplication kernels. ([#161](https://github.com/p-sira/ellip/pull/161))
+
 **Dependencies**
 - Replace `num-lazy` and `numeric_literals` with `num-lazy-proc` for generic floating-point literals and constants. ([#159](https://github.com/p-sira/ellip/pull/159))
 
