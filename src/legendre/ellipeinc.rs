@@ -74,7 +74,7 @@ pub fn ellipeinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
         return Ok(ans);
     }
     #[cfg(feature = "test_force_fail")]
-    let ans = NAN;
+    let ans = T::nan();
     check!(@nan, ellipeinc, [phi, m]);
     Err("ellipeinc: Unexpected error.")
 }
