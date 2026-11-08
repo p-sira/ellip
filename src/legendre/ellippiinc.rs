@@ -85,7 +85,7 @@ use crate::{
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
 /// - Wolfram Research. “EllipticPi,” 2022. <https://reference.wolfram.com/language/ref/EllipticPi.html>.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub fn ellippiinc<T: Float>(phi: T, n: T, m: T) -> Result<T, StrErr> {
     let ans = ellippiinc_vc(phi, n, m, 1.0 - n)?;
     if ans.is_finite() {
@@ -94,13 +94,13 @@ pub fn ellippiinc<T: Float>(phi: T, n: T, m: T) -> Result<T, StrErr> {
 
     check!(@nan, ellippiinc, [phi, n, m]);
     if phi.is_infinite() {
-        return Ok(phi.signum() * inf!());
+        return Ok(phi.signum() * INF);
     }
     Err("ellippiinc: Unexpected error.")
 }
 
 #[inline]
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
     // Note vc = 1-v presumably without cancellation error
     let sphi = phi.abs().sin();
@@ -123,7 +123,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
 
     if n == 1.0 {
         if m == 1.0 {
-            if phi.abs() >= pi_2!() {
+            if phi.abs() >= PI_2 {
                 return Err("ellippiinc: The result is complex.");
             }
             // Integral of sec³(theta), with asinh(tan(phi)) stable at zero.
@@ -141,8 +141,8 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
         return Ok(result);
     }
 
-    if phi >= pi_2!() || phi <= 0.0 {
-        if phi == pi_2!() {
+    if phi >= PI_2 || phi <= 0.0 {
+        if phi == PI_2 {
             return Ok(ellippi_vc(n, m, nc));
         }
 
@@ -153,16 +153,16 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
 
         // Carlson's algorithm works only for |phi| <= pi/2,
         // use the integrand's periodicity to normalize phi
-        if phi.abs() > 1.0 / epsilon!() {
+        if phi.abs() > 1.0 / EPS {
             // Invalid for v > 1, this case is caught above since v > 1 implies 1/v < sin^2(phi)
             debug_assert!(n <= 1.0);
 
             // Phi is so large that phi%pi is necessarily zero (or garbage),
             // just return the second part of the duplication formula:
-            result = 2.0 * phi.abs() * ellippi_vc(n, m, nc) / pi!();
+            result = 2.0 * phi.abs() * ellippi_vc(n, m, nc) / PI;
         } else {
-            let mut rphi = phi.abs() % pi_2!();
-            let mut mm = ((phi.abs() - rphi) / pi_2!()).round();
+            let mut rphi = phi.abs() % PI_2;
+            let mut mm = ((phi.abs() - rphi) / PI_2).round();
             let mut sign = 1.0;
 
             if mm != 0.0 && m >= 1.0 {
@@ -172,7 +172,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
             if mm % 2.0 > 0.5 {
                 mm = mm + 1.0;
                 sign = -1.0;
-                rphi = pi_2!() - rphi;
+                rphi = PI_2 - rphi;
             }
 
             result = sign * ellippiinc_vc(rphi, n, m, nc)?;
@@ -220,7 +220,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
         // FullSimplify[EllipticPi[m, phi, m], Assumptions -> m < 0]
         // > (-EllipticE[phi, m] + (m*Cos[phi]*Sin[phi])/Sqrt[1 - m*Sin[phi]^2])/(-1 + m)
         // > (EllipticE[phi, m] - (m*Cos[phi]*Sin[phi])/Sqrt[1 - m*Sin[phi]^2])/(1 - m)
-        if (n - m).abs() < epsilon!() {
+        if (n - m).abs() < EPS {
             return Ok((ellipeinc_unchecked(phi, m)?
                 - (m * phi.abs().cos() * sphi) / (1.0 - m * sp2).sqrt())
                 / (1.0 - m));
@@ -252,7 +252,7 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
             }
 
             let mut p2 = -n * nn;
-            if p2 <= min_val!() {
+            if p2 <= MIN_VAL {
                 p2 = (-n).sqrt() * nn.sqrt();
             } else {
                 p2 = p2.sqrt();
@@ -261,11 +261,11 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
             let delta = (1.0 - m * sp2).sqrt();
             let t = n / ((m - n) * (n - 1.0));
 
-            debug_assert!(t > min_val!());
+            debug_assert!(t > MIN_VAL);
             result = result + ((p2 / 2.0) * (2.0 * phi).sin() / delta).atan() * t.sqrt();
 
             // It should not be possible for t to be less than MIN value.
-            // if t > min_val!() {
+            // if t > MIN_VAL {
             //     result = result + ((p2 / 2.0) * (2.0 * phi).sin() / delta).atan() * t.sqrt();
             // } else {
             //     result = result
@@ -349,13 +349,13 @@ fn ellippiinc_vc<T: Float>(phi: T, n: T, m: T, nc: T) -> Result<T, StrErr> {
 ///
 /// # References
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub fn ellippiinc_bulirsch<T: Float + BulirschConst<T>>(phi: T, n: T, m: T) -> Result<T, StrErr> {
     ellippiinc_bulirsch_with_const::<T, T>(phi, n, m)
 }
 
 /// Computes [ellippiinc_bulirsch]. Control the precision using [BulirschConst].
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 #[inline]
 pub fn ellippiinc_bulirsch_with_const<T: Float, C: BulirschConst<T>>(
     phi: T,
@@ -372,7 +372,7 @@ pub fn ellippiinc_bulirsch_with_const<T: Float, C: BulirschConst<T>>(
 
     // el3 cannot handle complex kc and PV domain
     let sphi = phi.sin();
-    if phi.abs() >= pi_2!() || m >= 1.0 || n * sphi * sphi >= 1.0 {
+    if phi.abs() >= PI_2 || m >= 1.0 || n * sphi * sphi >= 1.0 {
         return ellippiinc(phi, n, m);
     }
 
@@ -431,10 +431,7 @@ mod tests {
 
     #[test]
     fn test_ellippiinc_special_cases() {
-        use std::f64::{
-            consts::{FRAC_PI_2, PI},
-            INFINITY, NAN, NEG_INFINITY,
-        };
+        use std::f64::consts::{FRAC_PI_2, PI};
         // m * sin^2(phi) >= 1: should return Err
         assert_eq!(
             ellippiinc(FRAC_PI_2, 0.5, 1.1),
@@ -475,9 +472,12 @@ mod tests {
         assert_eq!(ellippiinc(1e16, 0.2, 0.5).unwrap(), large_phi_ans);
         assert_eq!(ellippiinc(-1e16, 0.2, 0.5).unwrap(), -large_phi_ans);
         // phi = inf: Π(φ, n, m) = inf
-        assert_eq!(ellippiinc(INFINITY, 0.2, 0.5).unwrap(), INFINITY);
+        assert_eq!(ellippiinc(f64::INFINITY, 0.2, 0.5).unwrap(), f64::INFINITY);
         // phi = -inf: Π(φ, n, m) = -inf
-        assert_eq!(ellippiinc(NEG_INFINITY, 0.2, 0.5).unwrap(), -INFINITY);
+        assert_eq!(
+            ellippiinc(f64::NEG_INFINITY, 0.2, 0.5).unwrap(),
+            -f64::INFINITY
+        );
         // phi % pi/2 !=0, m >= 1: should return Err
         assert_eq!(
             ellippiinc(4.14159, 0.5, 1.0),
@@ -485,15 +485,15 @@ mod tests {
         );
         // phi = nan or n = nan or m = nan: should return Err
         assert_eq!(
-            ellippiinc(NAN, 0.5, 0.5),
+            ellippiinc(f64::NAN, 0.5, 0.5),
             Err("ellippiinc: Arguments cannot be NAN.")
         );
         assert_eq!(
-            ellippiinc(0.5, NAN, 0.5),
+            ellippiinc(0.5, f64::NAN, 0.5),
             Err("ellippiinc: Arguments cannot be NAN.")
         );
         assert_eq!(
-            ellippiinc(0.5, 0.5, NAN),
+            ellippiinc(0.5, 0.5, f64::NAN),
             Err("ellippiinc: Arguments cannot be NAN.")
         );
     }
@@ -571,7 +571,7 @@ mod tests {
 
     #[test]
     fn test_ellippiinc_bulirsch_special_cases() {
-        use std::f64::{consts::FRAC_PI_2, INFINITY, NAN, NEG_INFINITY};
+        use std::f64::consts::FRAC_PI_2;
         // m * sin^2(phi) >= 1: should return Err
         assert_eq!(
             ellippiinc_bulirsch(FRAC_PI_2, 0.5, 1.1),
@@ -608,11 +608,14 @@ mod tests {
                 / (1.5 - 1.0))
         );
         // phi = inf: Π(φ, n, m) = inf
-        assert_eq!(ellippiinc_bulirsch(INFINITY, 0.2, 0.5).unwrap(), INFINITY);
+        assert_eq!(
+            ellippiinc_bulirsch(f64::INFINITY, 0.2, 0.5).unwrap(),
+            f64::INFINITY
+        );
         // phi = -inf: Π(φ, n, m) = -inf
         assert_eq!(
-            ellippiinc_bulirsch(NEG_INFINITY, 0.2, 0.5).unwrap(),
-            -INFINITY
+            ellippiinc_bulirsch(f64::NEG_INFINITY, 0.2, 0.5).unwrap(),
+            -f64::INFINITY
         );
         // phi % pi/2 !=0, m >= 1: should return Err
         assert_eq!(
@@ -622,15 +625,15 @@ mod tests {
 
         // Arguments cannot be NAN
         assert_eq!(
-            ellippiinc_bulirsch(NAN, 0.5, 0.5),
+            ellippiinc_bulirsch(f64::NAN, 0.5, 0.5),
             Err("ellippiinc: Arguments cannot be NAN.")
         );
         assert_eq!(
-            ellippiinc_bulirsch(0.5, NAN, 0.5),
+            ellippiinc_bulirsch(0.5, f64::NAN, 0.5),
             Err("ellippiinc: Arguments cannot be NAN.")
         );
         assert_eq!(
-            ellippiinc_bulirsch(0.5, 0.5, NAN),
+            ellippiinc_bulirsch(0.5, 0.5, f64::NAN),
             Err("ellippiinc: Arguments cannot be NAN.")
         );
     }

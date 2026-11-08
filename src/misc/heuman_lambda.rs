@@ -48,7 +48,7 @@ use crate::{carlson::elliprj_unchecked, crate_util::check, ellipf, ellipk, StrEr
 ///
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed August 30, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub fn heuman_lambda<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
     let ans = heuman_lambda_unchecked(phi, m);
     #[cfg(not(feature = "test_force_fail"))]
@@ -70,17 +70,17 @@ pub fn heuman_lambda<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 /// # Known Invalid Cases
 /// - m >= 1
 /// - m < 0
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub fn heuman_lambda_unchecked<T: Float>(phi: T, m: T) -> T {
     if m <= 0.0 {
         if m == 0.0 {
-            return crate::ellipeinc(phi, T::one()).unwrap_or(nan!());
+            return crate::ellipeinc(phi, T::one()).unwrap_or(NAN);
         }
-        return nan!();
+        return NAN;
     }
 
-    let n = (phi / pi_2!()).round();
-    if (phi - n * pi_2!()).abs() < epsilon!() {
+    let n = (phi / PI_2).round();
+    if (phi - n * PI_2).abs() < EPS {
         return n;
     }
 
@@ -88,30 +88,30 @@ pub fn heuman_lambda_unchecked<T: Float>(phi: T, m: T) -> T {
     if mc == 1.0 {
         // Preserve m as the complementary parameter: 1 - mc has rounded to zero.
         // Reduce periods before evaluating the principal Carlson forms.
-        let periods = (phi / pi!()).round();
-        let rphi = phi - periods * pi!();
+        let periods = (phi / PI).round();
+        let rphi = phi - periods * PI;
         let sinp = rphi.sin();
         let cosp = rphi.cos();
         let p = m + mc * cosp * cosp;
         let k_mc = crate::carlson::elliprf_unchecked(0.0, m, 1.0);
         let f = sinp * crate::carlson::elliprf_unchecked(cosp * cosp, p, 1.0);
         let zeta = mc * sinp * cosp * p.sqrt() * elliprj_unchecked(0.0, m, 1.0, p) / (3.0 * k_mc);
-        return 2.0 * periods + f / k_mc + ellipk(m).unwrap_or(nan!()) * zeta / pi_2!();
+        return 2.0 * periods + f / k_mc + ellipk(m).unwrap_or(NAN) * zeta / PI_2;
     }
 
-    let f = ellipf(phi, mc).unwrap_or(nan!());
-    let k_m = ellipk(m).unwrap_or(nan!());
-    let k_mc = ellipk(mc).unwrap_or(nan!());
+    let f = ellipf(phi, mc).unwrap_or(NAN);
+    let k_m = ellipk(m).unwrap_or(NAN);
+    let k_mc = ellipk(mc).unwrap_or(NAN);
     let zeta = jacobi_zeta_unchecked_k(phi, mc, k_mc);
 
-    f / k_mc + k_m * zeta / pi_2!()
+    f / k_mc + k_m * zeta / PI_2
 }
 
 /// jacobi_zeta_unchecked with K(m) as an argument
 ///
 /// Assume m < 1 and valid K.
 #[inline]
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 fn jacobi_zeta_unchecked_k<T: Float>(phi: T, m: T, k: T) -> T {
     let sign = phi.signum();
     let phi = phi.abs();
@@ -139,10 +139,7 @@ mod tests {
 
     #[test]
     fn test_heuman_lambda_special_cases() {
-        use std::f64::{
-            consts::{FRAC_PI_2, PI},
-            INFINITY, NAN,
-        };
+        use std::f64::consts::{FRAC_PI_2, PI};
 
         // lambda(nπ/2, m) = n for any integer n
         assert_eq!(heuman_lambda(FRAC_PI_2, 0.5).unwrap(), 1.0);
@@ -162,20 +159,20 @@ mod tests {
         );
         // NANs: should return Err
         assert_eq!(
-            heuman_lambda(NAN, 1.0),
+            heuman_lambda(f64::NAN, 1.0),
             Err("heuman_lambda: Arguments cannot be NAN.")
         );
         assert_eq!(
-            heuman_lambda(1.0, NAN),
+            heuman_lambda(1.0, f64::NAN),
             Err("heuman_lambda: Arguments cannot be NAN.")
         );
         // inf: should return Err
         assert_eq!(
-            heuman_lambda(INFINITY, 0.5),
+            heuman_lambda(f64::INFINITY, 0.5),
             Err("heuman_lambda: phi cannot be infinite.")
         );
         assert_eq!(
-            heuman_lambda(-INFINITY, 0.5),
+            heuman_lambda(-f64::INFINITY, 0.5),
             Err("heuman_lambda: phi cannot be infinite.")
         );
     }

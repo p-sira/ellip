@@ -16,10 +16,7 @@ macro_rules! get_trace {
     ($x: expr, $y: expr, $name: expr) => {{
         let value = $x
             .iter()
-            .map(|&xi| match elliprg(xi, $y, 1.0) {
-                Ok(ans) => ans,
-                Err(_) => f64::NAN,
-            })
+            .map(|&xi| elliprg(xi, $y, 1.0).unwrap_or(f64::NAN))
             .collect();
 
         Scatter::new($x.clone(), value)

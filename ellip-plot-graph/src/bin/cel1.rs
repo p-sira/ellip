@@ -22,10 +22,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let cel1_values: Vec<f64> = kc
         .iter()
-        .map(|&kci| match cel1(kci) {
-            Ok(ans) => ans,
-            Err(_) => f64::NAN,
-        })
+        .map(|&kci| cel1(kci).unwrap_or(f64::NAN))
         .collect();
 
     let trace = Scatter::new(kc, cel1_values)

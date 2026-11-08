@@ -65,41 +65,41 @@ use num_traits::Float;
 /// # References
 /// - Maddock, John, Paul Bristow, Hubert Holin, and Xiaogang Zhang. “Boost Math Library: Special Functions - Elliptic Integrals.” Accessed April 17, 2025. <https://www.boost.org/doc/libs/1_88_0/libs/math/doc/html/math_toolkit/ellint.html>.
 /// - Carlson, B. C. “DLMF: Chapter 19 Elliptic Integrals.” Accessed February 19, 2025. <https://dlmf.nist.gov/19>.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
-    if m == neg_inf!() {
+    if m == NEG_INF {
         return Ok(0.0);
     }
-    if m < 1e-2 * min_val!() && phi.is_finite() {
+    if m < 1e-2 * MIN_VAL && phi.is_finite() {
         // D(phi,-a) tends to integral |sin(theta)| / sqrt(a).
         // The omitted absolute term is O(log(a)/(a*sqrt(a))) per period,
         // below the smallest subnormal at this cutoff for f32 and f64.
         let amplitude = phi.abs();
-        let periods = (amplitude / pi!()).floor();
-        let half_sin = ((amplitude % pi!()) / 2.0).sin();
+        let periods = (amplitude / PI).floor();
+        let half_sin = ((amplitude % PI) / 2.0).sin();
         return Ok(phi.signum() * (2.0 * (periods + half_sin * half_sin) / (-m).sqrt()));
     }
 
     let sign = phi.signum();
     let phi = phi.abs();
-    if phi > 1.0 / epsilon!() {
-        if phi >= max_val!() {
-            return Ok(sign * inf!());
+    if phi > 1.0 / EPS {
+        if phi >= MAX_VAL {
+            return Ok(sign * INF);
         }
         // Phi is so large that phi%pi is necessarily zero (or garbage),
         // just return the second part of the duplication formula:
-        return Ok(sign * 2.0 * phi * ellipd(m)? / pi!());
+        return Ok(sign * 2.0 * phi * ellipd(m)? / PI);
     }
 
     // Carlson's algorithm works only for |phi| <= pi/2,
     // use the integrand's periodicity to normalize phi
-    let mut rphi = phi % pi_2!();
-    let mut mm = ((phi - rphi) / pi_2!()).round();
+    let mut rphi = phi % PI_2;
+    let mut mm = ((phi - rphi) / PI_2).round();
     let mut s = 1.0;
     if mm % 2.0 > 0.5 {
         mm = mm + 1.0;
         s = -1.0;
-        rphi = pi_2!() - rphi;
+        rphi = PI_2 - rphi;
     }
 
     let sinp = rphi.sin();
@@ -124,7 +124,7 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 
     let ans = sign * result;
     #[cfg(feature = "test_force_fail")]
-    let ans = nan!();
+    let ans = NAN;
 
     if !ans.is_nan() {
         // Infinites should be handled properly by ellipd
@@ -137,7 +137,6 @@ pub fn ellipdinc<T: Float>(phi: T, m: T) -> Result<T, StrErr> {
 #[cfg(not(feature = "test_force_fail"))]
 #[cfg(test)]
 mod tests {
-    use core::f64;
 
     use super::*;
     use crate::{compare_test_data_boost, compare_test_data_wolfram};
@@ -155,12 +154,9 @@ mod tests {
 
     #[test]
     fn test_ellipdinc_special_cases() {
-        use std::f64::{
-            consts::{FRAC_PI_2, FRAC_PI_4, PI},
-            INFINITY, NAN, NEG_INFINITY,
-        };
+        use std::f64::consts::{FRAC_PI_2, FRAC_PI_4, PI};
         // phi = pi/2, m = 1: D(pi/2, 1) = inf
-        assert_eq!(ellipdinc(FRAC_PI_2, 1.0).unwrap(), INFINITY);
+        assert_eq!(ellipdinc(FRAC_PI_2, 1.0).unwrap(), f64::INFINITY);
         // m * sin^2(phi) >= 1: should return Err
         assert_eq!(
             ellipdinc(FRAC_PI_2, 2.0),
@@ -179,24 +175,27 @@ mod tests {
         );
         // phi = nan or m = nan: should return Err
         assert_eq!(
-            ellipdinc(NAN, 0.5),
+            ellipdinc(f64::NAN, 0.5),
             Err("ellipdinc: Arguments cannot be NAN.")
         );
         assert_eq!(
-            ellipdinc(0.5, NAN),
+            ellipdinc(0.5, f64::NAN),
             Err("ellipdinc: Arguments cannot be NAN.")
         );
         // phi = inf: D(inf, m) = inf
-        assert_eq!(ellipdinc(INFINITY, 0.5).unwrap(), INFINITY);
+        assert_eq!(ellipdinc(f64::INFINITY, 0.5).unwrap(), f64::INFINITY);
         // phi = -inf: D(-inf, m) = -inf
-        assert_eq!(ellipdinc(NEG_INFINITY, 0.5).unwrap(), NEG_INFINITY);
+        assert_eq!(
+            ellipdinc(f64::NEG_INFINITY, 0.5).unwrap(),
+            f64::NEG_INFINITY
+        );
         // m = inf: should return Err
         assert_eq!(
-            ellipdinc(0.5, INFINITY),
+            ellipdinc(0.5, f64::INFINITY),
             Err("ellipdinc: m sin²φ must be smaller than one.")
         );
         // m = -inf: D(phi, -inf) = 0.0
-        assert_eq!(ellipdinc(0.5, NEG_INFINITY).unwrap(), 0.0);
+        assert_eq!(ellipdinc(0.5, f64::NEG_INFINITY).unwrap(), 0.0);
     }
 
     // Regression for audit finding A13: https://github.com/p-sira/ellip/pull/127

@@ -2,7 +2,7 @@
 members = ["ellip-rayon", "ellip-dev-utils", "ellip-plot-graph"]
 
 [workspace.package]
-version = "1.2.3"
+version = "1.2.4"
 authors = ["Sira Pornsiriprasert <code@psira.me>"]
 categories = ["mathematics", "science", "no-std"]
 keywords = ["special", "elliptic", "integral"]
@@ -40,9 +40,8 @@ edition = "2021"
 include = ["/src", "/LICENSE"]
 
 [dependencies]
-num-lazy = "0.4.1"
 num-traits = { version = "0.2.19", default-features = false }
-numeric_literals = "0.2.0"
+num-lazy-proc = "0.3.0"
 
 [dev-dependencies]
 criterion = { version = "5", package = "codspeed-criterion-compat" }

@@ -83,13 +83,13 @@ pub fn elliprg<T: Float>(x: T, y: T, z: T) -> Result<T, StrErr> {
 /// # Known Invalid Cases
 /// - x < 0, y < 0, z < 0
 /// - x, y, or z are infinite.
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 #[inline]
 pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
     // Homogeneity keeps products in duplication and special cases in range.
     // Separate rescaling factors: scale*sqrt(scale) can itself overflow.
     let scale = x.abs().max(y.abs()).max(z.abs());
-    let limit = T::max_value().sqrt().sqrt().sqrt();
+    let limit = MAX_VAL.sqrt().sqrt().sqrt();
     if scale.is_finite() && scale > 0.0 && (scale > limit || scale < 1.0 / limit)
         // Do not turn nonzero arguments into singular zeros at extreme ratios.
         && [x, y, z].iter().all(|&v| v == 0.0 || v / scale != 0.0)
@@ -114,7 +114,7 @@ pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
         }
 
         if y == 0.0 {
-            return pi!() * x.sqrt() / 4.0;
+            return PI * x.sqrt() / 4.0;
         }
 
         return (x * elliprc_unchecked(y, x) + y.sqrt()) / 2.0;
@@ -136,7 +136,7 @@ pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
         let mut compensation = mean.mul_add(mean, -rg);
         let mut sum_pow = 0.25;
 
-        while (xn - yn).abs() >= 2.7 * epsilon!() * xn.abs() {
+        while (xn - yn).abs() >= 2.7 * EPS * xn.abs() {
             let t = (xn * yn).sqrt();
             xn = (xn + yn) / 2.0;
             yn = t;
@@ -146,7 +146,7 @@ pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
             compensation = (rg - next) - correction;
             rg = next;
         }
-        let rf = pi!() / (xn + yn);
+        let rf = PI / (xn + yn);
         return rg * rf / 2.0;
     }
 
@@ -154,7 +154,7 @@ pub fn elliprg_unchecked<T: Float>(x: T, y: T, z: T) -> T {
     (z * rf - (x - z) * (y - z) * rd / 3.0 + (x * y / z).sqrt()) / 2.0
 }
 
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 #[inline]
 pub fn elliprf_rd_unchecked<T: Float>(x: T, y: T, z: T) -> (T, T) {
     let mut xn = x;
@@ -164,7 +164,7 @@ pub fn elliprf_rd_unchecked<T: Float>(x: T, y: T, z: T) -> (T, T) {
     let a0_rd = (xn + yn + 3.0 * zn) / 5.0;
     let mut an_rf = a0_rf;
     let mut an_rd = a0_rd;
-    let eps = epsilon!();
+    let eps = EPS;
     let mut q_rf = (3.0 * eps).powf(-1.0 / 8.0)
         * an_rf
             .abs()
@@ -176,8 +176,8 @@ pub fn elliprf_rd_unchecked<T: Float>(x: T, y: T, z: T) -> (T, T) {
     let mut fn_rf = 1.0;
     let mut fn_rd = 1.0;
     let mut rd_sum = 0.0;
-    let mut rf_res = nan!();
-    let mut rd_res = nan!();
+    let mut rf_res = NAN;
+    let mut rd_res = NAN;
     let mut rf_done = false;
     let mut rd_done = false;
 
@@ -334,7 +334,6 @@ mod tests {
 
     #[test]
     fn test_elliprg_special_cases() {
-        use std::f64::{INFINITY, NAN};
         // Negative arguments: should return Err
         assert_eq!(
             elliprg(-1.0, 1.0, 1.0),
@@ -350,28 +349,28 @@ mod tests {
         );
         // NANs: should return Err
         assert_eq!(
-            elliprg(NAN, 1.0, 1.0),
+            elliprg(f64::NAN, 1.0, 1.0),
             Err("elliprg: Arguments cannot be NAN.")
         );
         assert_eq!(
-            elliprg(1.0, NAN, 1.0),
+            elliprg(1.0, f64::NAN, 1.0),
             Err("elliprg: Arguments cannot be NAN.")
         );
         assert_eq!(
-            elliprg(1.0, 1.0, NAN),
+            elliprg(1.0, 1.0, f64::NAN),
             Err("elliprg: Arguments cannot be NAN.")
         );
         // Infinity arguments should return Err
         assert_eq!(
-            elliprg(INFINITY, 1.0, 1.0),
+            elliprg(f64::INFINITY, 1.0, 1.0),
             Err("elliprg: Arguments must be finite.")
         );
         assert_eq!(
-            elliprg(1.0, INFINITY, 1.0),
+            elliprg(1.0, f64::INFINITY, 1.0),
             Err("elliprg: Arguments must be finite.")
         );
         assert_eq!(
-            elliprg(1.0, 1.0, INFINITY),
+            elliprg(1.0, 1.0, f64::INFINITY),
             Err("elliprg: Arguments must be finite.")
         );
     }

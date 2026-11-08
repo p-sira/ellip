@@ -16,10 +16,7 @@ macro_rules! get_trace {
     ($kc: expr, $a: expr, $b: expr, $name: expr) => {{
         let value = $kc
             .iter()
-            .map(|&kci| match cel2(kci, $a, $b) {
-                Ok(ans) => ans,
-                Err(_) => f64::NAN,
-            })
+            .map(|&kci| cel2(kci, $a, $b).unwrap_or(f64::NAN))
             .collect();
 
         Scatter::new($kc.clone(), value)

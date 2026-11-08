@@ -18,10 +18,7 @@ macro_rules! get_trace {
     ($phi: expr, $m: expr, $name: expr) => {{
         let value = $m
             .iter()
-            .map(|&mi| match ellipeinc($phi, mi) {
-                Ok(ans) => ans,
-                Err(_) => f64::NAN,
-            })
+            .map(|&mi| ellipeinc($phi, mi).unwrap_or(f64::NAN))
             .collect();
 
         Scatter::new($m.clone(), value)

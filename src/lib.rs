@@ -92,9 +92,6 @@
 //!    journal = {Journal of Open Source Software} }
 //! ```
 
-num_lazy::declare_nums! {@constant T}
-num_lazy::declare_nums! {@special T}
-
 mod crate_util;
 
 /// Static error str

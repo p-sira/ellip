@@ -72,13 +72,13 @@ pub fn el3<T: Float>(x: T, kc: T, p: T) -> Result<T, StrErr> {
 }
 
 /// Computes [el3]. Control the precision using [BulirschConst].
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T)]
 #[inline]
 pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Result<T, StrErr> {
     let m = 1.0 - kc * kc;
     let n = 1.0 - p;
 
-    if kc.abs() < epsilon!() {
+    if kc.abs() < EPS {
         return Err("el3: kc must not be zero.");
     }
 
@@ -87,7 +87,7 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
     }
 
     // Handle special cases
-    if x == inf!() {
+    if x == INF {
         return ellippi(n, m);
     }
 
@@ -362,7 +362,7 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
         if y < 0.0 {
             l += 1;
         }
-        e = (t / y).atan() + pi!() * T::from(l).unwrap();
+        e = (t / y).atan() + PI * T::from(l).unwrap();
         e = e * (c * t + d) / (t * (t + q));
 
         if bo {
@@ -375,12 +375,12 @@ pub fn el3_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, p: T) -> Resul
             // if z < 0.0 {
             //     mm += if h < 0.0 { -1 } else { 1 };
             // }
-            s = (h / z).atan() + T::from(mm).unwrap() * pi!();
+            s = (h / z).atan() + T::from(mm).unwrap() * PI;
         } else {
             s = if bk {
                 ye.asinh()
             } else {
-                z.ln() + T::from(mm).unwrap() * ln_2!()
+                z.ln() + T::from(mm).unwrap() * LN_2
             };
             s = s * 0.5;
         }
@@ -451,13 +451,12 @@ mod tests {
     #[test]
     fn test_el3_special_cases() {
         use crate::cel;
-        use std::f64::{INFINITY, NAN};
         // x = 0: el3(0, kc, p) = 0
         assert_eq!(el3(0.0, 0.5, 0.5).unwrap(), 0.0);
         // kc = 0: should return Err
         assert_eq!(el3(0.5, 0.0, 0.5), Err("el3: kc must not be zero."));
 
-        let complete_el3 = el3(INFINITY, 0.5, 0.5).unwrap();
+        let complete_el3 = el3(f64::INFINITY, 0.5, 0.5).unwrap();
         // x = inf: el3(inf, kc, p) = cel(kc, p, 1, 1)
         assert_close!(complete_el3, cel(0.5, 0.5, 1.0, 1.0).unwrap(), 1e-15);
         // x = inf: el3(inf, kc, p) = Π(n, m)
@@ -475,9 +474,18 @@ mod tests {
         // 1 + px² = 0: should return Err
         assert_eq!(el3(1.0, 0.5, -1.0), Err("el3: 1 + px² cannot be zero."));
         // x = nan, kc = nan, or p = nan: should return Err
-        assert_eq!(el3(NAN, 0.5, 0.5), Err("el3: Arguments cannot be NAN."));
-        assert_eq!(el3(0.5, NAN, 0.5), Err("el3: Arguments cannot be NAN."));
-        assert_eq!(el3(0.5, 0.5, NAN), Err("el3: Arguments cannot be NAN."));
+        assert_eq!(
+            el3(f64::NAN, 0.5, 0.5),
+            Err("el3: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            el3(0.5, f64::NAN, 0.5),
+            Err("el3: Arguments cannot be NAN.")
+        );
+        assert_eq!(
+            el3(0.5, 0.5, f64::NAN),
+            Err("el3: Arguments cannot be NAN.")
+        );
     }
 
     // Regression for audit finding A3: https://github.com/p-sira/ellip/pull/117

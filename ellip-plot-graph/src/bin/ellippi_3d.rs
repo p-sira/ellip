@@ -37,10 +37,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .iter()
         .map(|&mi| {
             n.iter()
-                .map(|&nj| match ellippi(nj, mi) {
-                    Ok(ans) => ans,
-                    Err(_) => f64::NAN,
-                })
+                .map(|&nj| ellippi(nj, mi).unwrap_or(f64::NAN))
                 .collect()
         })
         .collect();
@@ -58,10 +55,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .map(|&mi| {
             n_cauchy
                 .iter()
-                .map(|&nj| match ellippi(nj, mi) {
-                    Ok(ans) => ans,
-                    Err(_) => f64::NAN,
-                })
+                .map(|&nj| ellippi(nj, mi).unwrap_or(f64::NAN))
                 .collect()
         })
         .collect();

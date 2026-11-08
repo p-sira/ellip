@@ -71,7 +71,7 @@ pub fn el2<T: Float>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
 }
 
 /// Computes [el2]. Control the precision using [BulirschConst].
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T, visit_macros = [case])]
 #[inline]
 pub fn el2_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> Result<T, StrErr> {
     let ans = el2_unchecked::<T, C>(x, kc, a, b);
@@ -80,8 +80,8 @@ pub fn el2_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) ->
     }
     check!(@nan, el2, [x, kc, a, b]);
     check!(@zero, el2, [kc]);
-    case!(x == T::zero(), T::zero());
-    if x == inf!() {
+    case!(x == 0.0, 0.0);
+    if x == INF {
         // phi = π/2
         return cel2_with_const::<T, C>(kc, a, b);
     }
@@ -97,18 +97,18 @@ pub fn el2_with_const<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) ->
 /// - kc = 0
 /// - x = 0
 /// - x = ∞
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T, visit_macros = [declare])]
 #[inline]
 pub fn el2_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> T {
     let_mut!(b);
-    declare!(mut [c = x * x, d = T::one() + c, p = ((T::one() + kc * kc * c) / d).sqrt()]);
+    declare!(mut [c = x * x, d = 1.0 + c, p = ((1.0 + kc * kc * c) / d).sqrt()]);
 
     d = x / d;
     c = d / (p * 2.0);
     let z = a - b;
     let mut i = a;
     let mut a = (b + a) / 2.0;
-    declare!(mut [y = x.recip().abs(), f = T::zero(), l = 0, m = T::one(), kc = kc.abs(), e, g]);
+    declare!(mut [y = x.recip().abs(), f = 0.0, l = 0, m = 1.0, kc = kc.abs(), e, g]);
 
     for _ in 0..N_MAX_ITERATIONS {
         b = i * kc + b;
@@ -141,10 +141,10 @@ pub fn el2_unchecked<T: Float, C: BulirschConst<T>>(x: T, kc: T, a: T, b: T) -> 
             l += 1;
         }
 
-        let e = x.signum() * ((m / y).atan() + pi!() * T::from(l).unwrap()) * a / m;
+        let e = x.signum() * ((m / y).atan() + PI * T::from(l).unwrap()) * a / m;
         return e + c * z;
     }
-    nan!()
+    NAN
 }
 
 #[cfg(not(feature = "test_force_fail"))]
@@ -161,7 +161,6 @@ mod tests {
     #[test]
     fn test_el2_special_cases() {
         use crate::bulirsch::cel2;
-        use std::f64::{INFINITY, NAN};
         // x = 0: el2(0, kc, a, b) = 0
         assert_eq!(el2(0.0, 0.5, 1.0, 1.0).unwrap(), 0.0);
         // kc = 0: should return Err
@@ -170,16 +169,16 @@ mod tests {
         assert_eq!(el2(0.5, 0.5, 0.0, 0.0).unwrap(), 0.0);
         // x = inf: el2(inf, kc, a, b) = cel2(kc, a, b)
         assert_eq!(
-            el2(INFINITY, 0.5, 1.0, 1.0).unwrap(),
+            el2(f64::INFINITY, 0.5, 1.0, 1.0).unwrap(),
             cel2(0.5, 1.0, 1.0).unwrap()
         );
         // x = nan or kc = nan: should return Err
         assert_eq!(
-            el2(NAN, 0.5, 1.0, 1.0),
+            el2(f64::NAN, 0.5, 1.0, 1.0),
             Err("el2: Arguments cannot be NAN.")
         );
         assert_eq!(
-            el2(0.5, NAN, 1.0, 1.0),
+            el2(0.5, f64::NAN, 1.0, 1.0),
             Err("el2: Arguments cannot be NAN.")
         );
     }

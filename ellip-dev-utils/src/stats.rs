@@ -14,17 +14,17 @@ pub struct Stats {
 
 impl Stats {
     pub fn nan() -> Self {
-        return Stats {
+        Stats {
             mean: f64::NAN,
             median: f64::NAN,
             variance: f64::NAN,
             max: f64::NAN,
             p99: f64::NAN,
             n: 0,
-        };
+        }
     }
 
-    pub fn from_vec(v: &Vec<f64>) -> Self {
+    pub fn from_vec(v: &[f64]) -> Self {
         let mut valids: Vec<f64> = v
             .iter()
             .filter(|x| !x.is_nan() && x.is_finite())
@@ -42,7 +42,7 @@ impl Stats {
         let mean = sum / n as f64;
 
         // Calculate median
-        let median = if n % 2 == 0 {
+        let median = if n.is_multiple_of(2) {
             (valids[n / 2 - 1] + valids[n / 2]) / 2.0
         } else {
             valids[n / 2]

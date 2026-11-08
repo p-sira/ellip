@@ -62,10 +62,10 @@ pub fn cel1<T: Float>(kc: T) -> Result<T, StrErr> {
 }
 
 /// Computes [cel1]. Control the precision using [BulirschConst].
-#[numeric_literals::replace_float_literals(T::from(literal).unwrap())]
+#[num_lazy_proc::generic_float(T, visit_macros = [declare])]
 #[inline]
 pub fn cel1_with_const<T: Float, C: BulirschConst<T>>(kc: T) -> Result<T, StrErr> {
-    declare!(mut [kc = kc.abs(), m = T::one(), ans = T::nan(), h]);
+    declare!(mut [kc = kc.abs(), m = 1.0, ans = NAN, h]);
     for _ in 0..MAX_ITERATION {
         h = m;
         m = kc + m;
@@ -76,7 +76,7 @@ pub fn cel1_with_const<T: Float, C: BulirschConst<T>>(kc: T) -> Result<T, StrErr
             continue;
         }
 
-        ans = pi!() / m;
+        ans = PI / m;
         break;
     }
 
@@ -109,15 +109,14 @@ mod tests {
 
     #[test]
     fn test_cel1_special_cases() {
-        use std::f64::{INFINITY, NAN, NEG_INFINITY};
         // kc = 0: should return Err
         assert_eq!(cel1(0.0), Err("cel1: kc cannot be zero."));
         // kc = inf: cel1(inf) = 0
-        assert_eq!(cel1(INFINITY).unwrap(), 0.0);
+        assert_eq!(cel1(f64::INFINITY).unwrap(), 0.0);
         // kc = -inf: cel1(-inf) = 0
-        assert_eq!(cel1(NEG_INFINITY).unwrap(), 0.0);
+        assert_eq!(cel1(f64::NEG_INFINITY).unwrap(), 0.0);
         // kc = NaN: should return Err
-        assert_eq!(cel1(NAN), Err("cel1: Arguments cannot be NAN."));
+        assert_eq!(cel1(f64::NAN), Err("cel1: Arguments cannot be NAN."));
     }
 }
 

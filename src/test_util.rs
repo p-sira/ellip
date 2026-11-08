@@ -106,7 +106,7 @@ macro_rules! compare_test_data_boost {
             .join($filename);
         match parser::read_boost_data(&path.to_str().unwrap()) {
             Ok(cases) => {
-                crate::compare_test_data!($func, cases, $t, $rtol, $atol);
+                $crate::compare_test_data!($func, cases, $t, $rtol, $atol);
             }
             Err(err) => panic!(
                 "Failed to read reference dataset {}: {}",
@@ -158,7 +158,7 @@ macro_rules! compare_test_data_wolfram {
                 .join($filename);
             match parser::read_wolfram_data(&path.to_str().unwrap()) {
                 Ok(cases) => {
-                    crate::compare_test_data!($func, cases, $t, $rtol, $atol);
+                    $crate::compare_test_data!($func, cases, $t, $rtol, $atol);
                 }
                 Err(err) => panic!(
                     "Failed to read reference dataset {}: {}",
